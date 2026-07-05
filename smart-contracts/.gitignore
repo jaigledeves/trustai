@@ -1,0 +1,10 @@
+# Foundry build artifacts
+out/
+cache/
+
+# Broadcast logs (may contain sensitive tx data on live networks)
+broadcast/*/31337/
+broadcast/*/dry-run/
+
+# Environment
+.env
