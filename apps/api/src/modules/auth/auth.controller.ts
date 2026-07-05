@@ -6,13 +6,17 @@ import {
   HttpStatus,
   Post,
   Query,
+  Request,
+  UseGuards,
 } from "@nestjs/common";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { LoginResult } from "../../application/auth/login.use-case";
 import { LoginUseCase } from "../../application/auth/login.use-case";
+import type { JwtPayload } from "../../application/auth/login.use-case";
 import type { RegisterResult } from "../../application/auth/register.use-case";
 import { RegisterUseCase } from "../../application/auth/register.use-case";
 import { VerifyEmailUseCase } from "../../application/auth/verify-email.use-case";
+import { JwtAuthGuard } from "./jwt-auth.guard";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 
@@ -49,5 +53,14 @@ export class AuthController {
   @ApiOperation({ summary: "Log in with email and password, receive a JWT" })
   async login(@Body() dto: LoginDto): Promise<LoginResult> {
     return this.loginUseCase.execute(dto.email, dto.password);
+  }
+
+  /** GET /auth/me — returns current user profile. Requires valid JWT. */
+  @Get("me")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get current authenticated user profile" })
+  me(@Request() req: { user: JwtPayload }): JwtPayload {
+    return req.user;
   }
 }
