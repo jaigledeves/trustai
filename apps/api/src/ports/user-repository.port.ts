@@ -1,5 +1,5 @@
-import type { Organization } from "../domain/organization.entity.js";
-import type { User } from "../domain/user.entity.js";
+import type { Organization } from "../domain/organization.entity";
+import type { User } from "../domain/user.entity";
 
 export const USER_REPOSITORY_PORT = Symbol("UserRepositoryPort");
 

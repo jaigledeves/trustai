@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import type { User as PrismaUser } from "@prisma/client";
-import { Organization } from "../../domain/organization.entity.js";
-import { User, UserRole } from "../../domain/user.entity.js";
-import type { UserRepositoryPort } from "../../ports/user-repository.port.js";
-import { PrismaService } from "./prisma.service.js";
+import { Organization } from "../../domain/organization.entity";
+import { User, UserRole } from "../../domain/user.entity";
+import type { UserRepositoryPort } from "../../ports/user-repository.port";
+import { PrismaService } from "./prisma.service";
 
 @Injectable()
 export class PrismaUserRepository implements UserRepositoryPort {
