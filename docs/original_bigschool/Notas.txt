@@ -1,0 +1,20 @@
+Mi propuesta para el resto del proyecto
+
+A partir de ahora, me gustaría que tratemos este trabajo como un proyecto de ingeniería profesional y no como una conversación aislada. Mi propuesta es construir una documentación completa que termine siendo el equivalente a la documentación interna de una startup.
+
+Mi objetivo es que al finalizar dispongas de:
+
+📚 Un TDD (Technical Design Document) completo.
+📄 Una memoria de TFM prácticamente terminada.
+💻 Un repositorio GitHub con estructura profesional.
+🧪 Un MVP funcional.
+📈 Un Business Model Canvas y una estrategia de monetización.
+🏗️ Diagramas de arquitectura (C4, Mermaid, UML).
+📋 Especificaciones de API (OpenAPI).
+🔐 Diseño de Smart Contracts.
+🤖 Arquitectura de IA.
+🚀 Un roadmap de evolución del producto durante los próximos años.
+
+Mi idea es que, cuando alguien entre en tu GitHub, no vea únicamente un proyecto universitario, sino un producto que parezca desarrollado por una empresa de software con documentación de nivel profesional.
+
+Creo sinceramente que, si mantenemos este nivel de exigencia durante todo el proceso, TrustAI puede convertirse en el proyecto más sólido de tu portfolio y en una base real para lanzar un producto comercial una vez finalizado el máster. Estoy deseando empezar a construirlo contigo. 
