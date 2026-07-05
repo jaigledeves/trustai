@@ -59,3 +59,40 @@ Use `pnpm --filter @trustai/api run start:dev` (backed by `ts-node-dev`). Do not
 `tsx`/esbuild-based tooling for this package without also solving decorator-metadata emission
 (e.g. via an esbuild plugin that walks the TS AST, or SWC's native `decoratorMetadata` support) —
 otherwise DI silently breaks at runtime instead of failing at boot.
+
+### Related finding: Vitest has the same decorator-metadata gap (fixed via `unplugin-swc`)
+
+Vitest also transforms TypeScript via esbuild by default (through Vite), so any test that boots a
+real Nest module (`NestFactory.create`, `Test.createTestingModule(...).compile()`) hits the exact
+same silent-DI-failure bug described above — confirmed with a throwaway spike test before writing
+the real e2e suite. Both `vitest.config.ts` and `vitest.e2e.config.ts` load the `unplugin-swc`
+Vite plugin (`swc.vite({ module: { type: "es6" } })`), which compiles test files through SWC
+instead, restoring correct `design:paramtypes` emission. `module: { type: "commonjs" }` must NOT
+be used here — it makes SWC rewrite the test file's own `import ... from "vitest"` into a
+`require()`, which Vitest's ESM-only package rejects at runtime.
+
+### Testing
+
+```bash
+pnpm --filter @trustai/api run test      # unit tests, no DB required
+pnpm --filter @trustai/api run test:e2e  # e2e tests, requires PostgreSQL
+```
+
+`test/auth.e2e-spec.ts` needs a real PostgreSQL reachable via `DATABASE_URL` (D7 — real ephemeral
+Postgres, not a mock/SQLite substitute) with the schema applied (`prisma db push` or, once a real
+migration exists, `prisma migrate deploy`). If `DATABASE_URL` is unset or the database is
+unreachable, `test/utils/db-availability.ts` detects this and the whole `describe` block is
+skipped via `describe.skipIf(...)` rather than failing the run. `test/health.e2e-spec.ts` never
+needs a database — it overrides `PrismaService` with a no-op stub, since a liveness check
+shouldn't depend on DB connectivity in the first place.
+
+Verified locally against a disposable `postgres:16-alpine` Docker container (`prisma db push`,
+no migration files yet — see Open Questions in design.md): all 12 e2e assertions pass, including
+the two that initially caught a real bug — see "Gotcha" below.
+
+**Gotcha — `Test.createTestingModule(...)` does not run `main.ts`'s `bootstrap()`.** The global
+`ValidationPipe` (and any other `app.use*` call in `main.ts`) is NOT applied automatically to an
+app built via Nest's testing utilities; it must be re-registered explicitly in the e2e spec's
+`beforeAll`. Missing this made `S-AUTH-3`/`S-AUTH-4` (malformed email / weak password) silently
+return `201` instead of `400` during development of this suite, because `class-validator`
+decorators on `RegisterDto`/`LoginDto` were never being enforced.
