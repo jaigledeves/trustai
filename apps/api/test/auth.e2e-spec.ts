@@ -15,7 +15,7 @@ const dbAvailable = await isDatabaseAvailable();
 // (e.g. this sandbox has no running Docker Postgres container), the whole
 // suite is skipped rather than failing the run — see README.md and
 // apply-progress notes for the rationale.
-describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..10)", () => {
+describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..13 + GET /auth/me)", () => {
   let app: INestApplication;
   let prisma: PrismaService;
   const sentEmails = new Map<string, string>();
@@ -197,5 +197,45 @@ describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..10)", () => {
     expect(Object.keys(unknownEmailResponse.body).sort()).toEqual(
       Object.keys(wrongPasswordResponse.body).sort(),
     );
+  });
+
+  // ─── S-AUTH-11..13: JWT guard on GET /auth/me ──────────────────────────
+
+  it("S-AUTH-11: protected endpoint without token → 401", async () => {
+    const res = await request(app.getHttpServer()).get("/auth/me");
+    expect(res.status).toBe(401);
+  });
+
+  it("S-AUTH-12: protected endpoint with expired token → 401", async () => {
+    // Sign a token that expired 1 second ago using the same secret.
+    const { JwtService } = await import("@nestjs/jwt");
+    const jwtService = app.get(JwtService);
+    const expired = jwtService.sign(
+      { sub: "test", organizationId: "org", role: "ADMIN", email: "x@x.com" },
+      { expiresIn: "-1s" },
+    );
+    const res = await request(app.getHttpServer())
+      .get("/auth/me")
+      .set("Authorization", `Bearer ${expired}`);
+    expect(res.status).toBe(401);
+  });
+
+  it("S-AUTH-13: protected endpoint with valid token → request passes through", async () => {
+    // Register + verify + login to get a real token.
+    const email = uniqueEmail("guard-test");
+    const password = "Guard123";
+    await request(app.getHttpServer()).post("/auth/register").send({ email, password });
+    const rawToken = sentEmails.get(email);
+    await request(app.getHttpServer()).get(`/auth/verify-email?token=${rawToken}`);
+    const loginRes = await request(app.getHttpServer())
+      .post("/auth/login")
+      .send({ email, password });
+    const { accessToken } = loginRes.body as { accessToken: string };
+
+    const meRes = await request(app.getHttpServer())
+      .get("/auth/me")
+      .set("Authorization", `Bearer ${accessToken}`);
+    expect(meRes.status).toBe(200);
+    expect(meRes.body).toMatchObject({ email, role: "ADMIN" });
   });
 });
