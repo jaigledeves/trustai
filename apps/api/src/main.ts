@@ -1,15 +1,35 @@
 import "reflect-metadata";
+import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 
-// TASK-0 spike bootstrap: minimal, no ValidationPipe/Swagger/CORS yet.
-// Replaced by the final bootstrap in TASK-7.
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-  const port = process.env.PORT ?? 3000;
+
+  // Permissive CORS for dev; tighten per environment before production use.
+  app.enableCors();
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle("TrustAI API")
+    .setDescription("TrustAI API — auth and health endpoints")
+    .setVersion(process.env["npm_package_version"] ?? "0.1.0")
+    .addBearerAuth()
+    .build();
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup("api-docs", app, swaggerDocument);
+
+  const port = process.env["PORT"] ?? 3000;
   await app.listen(port);
   // eslint-disable-next-line no-console
-  console.log(`[spike] NestJS bootstrapped OK on port ${port}`);
+  console.log(`TrustAI API listening on port ${port}`);
 }
 
 void bootstrap();
