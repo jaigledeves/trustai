@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MEMBER
+}
+
+enum AssetStatus {
+  PENDING
+  READY
+  DELETED
+}
+
+enum TrustRecordState {
+  DRAFT
+  READY
+  ANCHORING
+  CERTIFIED
+  FAILED
+  DISCARDED
+}
+
+enum AnchorStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+enum VerificationType {
+  FULL
+  HASH_ONLY
+}
+
+enum VerificationVerdict {
+  VALID
+  ASSET_MISMATCH
+  INVALID_RECORD
+  PENDING_ANCHOR
+}
+
+enum VerificationChannel {
+  QR
+  URL
+  HASH
+}
+
+model Organization {
+  id           String        @id @default(uuid())
+  name         String
+  plan         String        @default("starter")
+  createdAt    DateTime      @default(now())
+  users        User[]
+  digitalAssets DigitalAsset[]
+  @@map("organizations")
+}
+
+model User {
+  id                          String    @id @default(uuid())
+  email                       String    @unique
+  passwordHash                String
+  role                        UserRole  @default(MEMBER)
+  emailVerified               Boolean   @default(false)
+  emailVerificationToken      String?
+  emailVerificationExpiresAt  DateTime?
+  organizationId              String
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+  organization                Organization @relation(fields: [organizationId], references: [id])
+  createdAssets               DigitalAsset[] @relation("AssetCreatedBy")
+  reviewedRecords             TrustRecord[]  @relation("DtrReviewedBy")
+  @@index([organizationId])
+  @@map("users")
+}
+
+model DigitalAsset {
+  id              String      @id @default(uuid())
+  sha256          String
+  mimeType        String
+  sizeBytes       Int
+  filename        String?
+  storageRef      String
+  status          AssetStatus @default(PENDING)
+  organizationId  String
+  createdByUserId String
+  createdAt       DateTime    @default(now())
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  createdBy       User        @relation("AssetCreatedBy", fields: [createdByUserId], references: [id])
+  trustRecords    TrustRecord[]
+  @@unique([organizationId, sha256])
+  @@index([organizationId])
+  @@map("digital_assets")
+}
+
+model TrustRecord {
+  id               String           @id @default(uuid())
+  schemaVersion    String
+  assetId          String
+  assetHash        String
+  canonicalHash    String?
+  state            TrustRecordState @default(DRAFT)
+  versionNumber    Int              @default(1)
+  previousDtrId    String?
+  issuedAt         DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  aiSummary        String?          @db.Text
+  aiClassification String?
+  aiLanguage       String?
+  aiProvider       String?
+  aiModel          String?
+  aiModelVersion   String?
+  aiPromptVersion  String?
+  aiTaxonomyVersion String?
+  aiAnalyzedAt     DateTime?
+  reviewedByUserId String?
+  anchorId         String?
+  merkleProof      Json?
+  asset            DigitalAsset     @relation(fields: [assetId], references: [id])
+  reviewedBy       User?            @relation("DtrReviewedBy", fields: [reviewedByUserId], references: [id])
+  anchor           Anchor?          @relation(fields: [anchorId], references: [id])
+  previousDtr      TrustRecord?     @relation("DtrVersionChain", fields: [previousDtrId], references: [id])
+  nextVersions     TrustRecord[]    @relation("DtrVersionChain")
+  verificationAttempts VerificationAttempt[]
+  @@index([assetId])
+  @@index([anchorId])
+  @@map("trust_records")
+}
+
+model Anchor {
+  id             String       @id @default(uuid())
+  chain          String
+  network        String
+  txHash         String?
+  merkleRoot     String?
+  blockTimestamp DateTime?
+  status         AnchorStatus @default(PENDING)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  trustRecords   TrustRecord[]
+  @@map("anchors")
+}
+
+model VerificationAttempt {
+  id            String              @id @default(uuid())
+  trustRecordId String
+  type          VerificationType
+  verdict       VerificationVerdict
+  channel       VerificationChannel
+  occurredAt    DateTime            @default(now())
+  trustRecord   TrustRecord         @relation(fields: [trustRecordId], references: [id])
+  @@index([trustRecordId])
+  @@map("verification_attempts")
+}
