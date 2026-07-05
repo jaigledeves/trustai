@@ -1,66 +1,84 @@
-## Foundry
+# smart-contracts — AnchorRegistry
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Permissionless on-chain evidence registry for TrustAI. See `docs/09-Smart-Contract-Design.md`
+for the full design rationale (ADR-003).
 
-Foundry consists of:
+## Toolchain
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+Built with [Foundry](https://book.getfoundry.sh/) (Forge/Cast/Anvil).
 
-## Documentation
+> **Windows note**: `foundryup` targets Linux/macOS. On Windows, install and run Foundry
+> through WSL (Git Bash's `bash.exe` on this machine is backed by WSL2):
+>
+> ```powershell
+> (Invoke-WebRequest -Uri https://foundry.paradigm.xyz -UseBasicParsing).Content | bash
+> # then, in a new shell (or after sourcing ~/.bashrc):
+> foundryup
+> ```
+>
+> Run all `forge`/`cast` commands from a `bash` shell (or `wsl`), from this directory's
+> WSL-mounted path (`/mnt/c/...`). Native Windows binaries are not produced by `foundryup`.
 
-https://book.getfoundry.sh/
+## Setup
 
-## Usage
+```bash
+cp .env.example .env
+# fill in BASE_SEPOLIA_RPC_URL, PRIVATE_KEY, BASESCAN_API_KEY
+```
+
+## Commands
 
 ### Build
 
-```shell
-$ forge build
+```bash
+forge build
 ```
 
-### Test
+### Test (unit + fuzz + invariant)
 
-```shell
-$ forge test
+```bash
+forge test -vv
 ```
 
-### Format
+### Coverage
 
-```shell
-$ forge fmt
+```bash
+forge coverage --report summary
 ```
 
-### Gas Snapshots
+### Gas snapshot
 
-```shell
-$ forge snapshot
+Regenerate `.gas-snapshot` after any change that affects gas cost, and commit the diff:
+
+```bash
+forge snapshot
 ```
 
-### Anvil
+## Deploy (Base Sepolia)
 
-```shell
-$ anvil
+```bash
+forge script script/Deploy.s.sol \
+  --rpc-url $BASE_SEPOLIA_RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  --verify
 ```
 
-### Deploy
+`--verify` publishes the source to Basescan using `BASESCAN_API_KEY` (set in `.env`).
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+## Independently verify an anchor
+
+Anyone can confirm a hash was anchored, without trusting TrustAI's infrastructure, using a
+public RPC and the deployed contract address:
+
+```bash
+cast call <contract_address> "anchoredAt(bytes32)(uint256)" <hash> --rpc-url https://sepolia.base.org
 ```
 
-### Cast
+A non-zero result is the block timestamp at which `<hash>` was anchored. `0` means it was
+never anchored.
 
-```shell
-$ cast <subcommand>
-```
+## Contract
 
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+`src/AnchorRegistry.sol` — permissionless, immutable, no owner, no proxy. A `bytes32` may be
+either the hash of an individual DTR or the Merkle root of a batch of DTRs (ADR-003).
