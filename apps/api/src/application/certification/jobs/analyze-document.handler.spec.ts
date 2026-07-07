@@ -59,7 +59,11 @@ function buildTrustRecordRepository(
 ): TrustRecordRepositoryPort {
   return {
     findById: vi.fn().mockResolvedValue(buildTrustRecord()),
+    findByIdForOrganization: vi.fn().mockResolvedValue(buildTrustRecord()),
     updateAiAnalysis: vi.fn().mockResolvedValue(undefined),
+    updateReviewFields: vi.fn().mockResolvedValue(undefined),
+    confirmToReady: vi.fn().mockResolvedValue(undefined),
+    discard: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
