@@ -96,3 +96,55 @@ app built via Nest's testing utilities; it must be re-registered explicitly in t
 `beforeAll`. Missing this made `S-AUTH-3`/`S-AUTH-4` (malformed email / weak password) silently
 return `201` instead of `400` during development of this suite, because `class-validator`
 decorators on `RegisterDto`/`LoginDto` were never being enforced.
+
+### Spike findings (Phase 0 / task 0.1 — certification-flow): transactional pg-boss enqueue
+
+design.md's open question: does making pg-boss's `send()` atomic with a DTR row write (so the
+job never gets enqueued if the surrounding write rolls back, and vice versa) require bumping
+Prisma from v6 to v7 (to use pg-boss's built-in `fromPrisma()` adapter with
+`@prisma/adapter-pg`), or can a hand-rolled wrapper avoid the bump?
+
+**Decision: hand-rolled `IDatabase` wrapper over Prisma v6's `$transaction` callback. No Prisma
+version bump.**
+
+- pg-boss's transactional `db` option (accepted by `send`, `sendAfter`, `insert`, `flow`, ...)
+  only requires an object implementing `IDatabase`: `executeSql(text, values) => Promise<{ rows }>`.
+  This is the entire contract — see `pg-boss`'s own `fromKnex`/`fromKysely`/`fromDrizzle`/`fromPrisma`
+  adapters, which are all ~10-line wrappers around this one method.
+- pg-boss ships a `fromPrisma()` helper, but its docs state it "Requires Prisma v7+ with
+  `@prisma/adapter-pg`". Inspecting its actual implementation
+  (`node_modules/pg-boss/dist/adapters/prisma.js`) shows it only calls
+  `tx.$queryRawUnsafe(text, ...values)` on the object passed to `prisma.$transaction(async (tx) => ...)`.
+  `$queryRawUnsafe` on the transaction client has been available since early Prisma versions —
+  including the v6.19.3 already used by this project — so the "v7+" requirement in pg-boss's docs
+  is a documentation/support-scope choice by its maintainer, not a technical necessity of what the
+  function does.
+- **Verified empirically** with a throwaway spike script (`prisma db push` against a local
+  `postgres:16-alpine` container, `pg-boss@12.25.1`): a ~10-line wrapper —
+  `{ executeSql: (text, values) => tx.$queryRawUnsafe(text, ...values).then(rows => ({ rows })) }` —
+  passed to `boss.send(queue, data, { db: wrapper })` inside `prisma.$transaction(async (tx) => {...})`:
+  - **Commit path**: an `Organization` row write + `boss.send(...)` in the same transaction both
+    persisted together.
+  - **Rollback path**: throwing inside the same transaction (after both the row write and the
+    `boss.send(...)` call) rolled back *both* — the organization row was never persisted and no
+    job row appeared in the pg-boss job table. Confirmed atomicity in both directions.
+- **Risk comparison**:
+  - Prisma v6→v7 bump: major-version upgrade mid-change, touches every existing repository/adapter
+    in `apps/api` (`PrismaService`, `UserRepository`, all future Prisma repositories in this
+    change), requires adding `@prisma/adapter-pg` and switching `PrismaClient` construction to the
+    driver-adapter pattern, and risks subtle behavior differences across the entire auth vertical
+    slice this change does not otherwise need to touch. High risk, high blast radius, for a
+    capability (`fromPrisma()`) that a 10-line hand-rolled function fully replicates on the current
+    Prisma version.
+  - Hand-rolled `IDatabase` wrapper: ~10 lines, zero new production dependencies beyond `pg-boss`
+    itself, zero changes to existing Prisma usage, isolated to the one call site
+    (`UploadAssetUseCase`'s `analyze-document` enqueue in Phase 2/3) that needs the transactional
+    guarantee. Low risk, low blast radius.
+  - Per this change's own guidance ("prefer the lower-risk option if both work"), and since both
+    options work, **the hand-rolled wrapper is the chosen approach.** It will be implemented as
+    `src/adapters/queue/prisma-pgboss-db.adapter.ts` in task 1.4 and reused wherever a job must be
+    enqueued atomically with a DTR write.
+- **Residual risk carried forward**: this wrapper depends on pg-boss's `db` option contract
+  remaining a plain `{ executeSql }` interface. If a future pg-boss major version changes that
+  contract, revisit — but the same risk would apply equally to the `fromPrisma()` adapter, so this
+  is not a risk specific to choosing the hand-rolled path.
