@@ -32,5 +32,10 @@ import { AssetsController } from "./assets.controller";
         }),
     },
   ],
+  // STORAGE_PORT/ENCRYPTION_PORT/DIGITAL_ASSET_REPOSITORY_PORT are exported
+  // so WorkerModule can reuse the exact same adapters (one place constructs
+  // S3StorageAdapter from env vars) for job handlers that need to read the
+  // same encrypted assets (e.g. AnalyzeDocumentHandler, Phase 3).
+  exports: [STORAGE_PORT, ENCRYPTION_PORT, DIGITAL_ASSET_REPOSITORY_PORT],
 })
 export class AssetsModule {}
