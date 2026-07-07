@@ -1,4 +1,5 @@
 import type { DigitalAsset } from "../domain/digital-asset.entity";
+import type { TransactionHandle } from "./queue.port";
 
 export const DIGITAL_ASSET_REPOSITORY_PORT = Symbol("DigitalAssetRepositoryPort");
 
@@ -35,14 +36,30 @@ export interface DigitalAssetRepositoryPort {
    * asset and draft record") — mirrors `UserRepositoryPort.createOrgWithAdmin`'s
    * pattern of a repository method spanning two tables that are always
    * created together.
+   *
+   * `onCreatedWithinTransaction`, when provided, is invoked INSIDE the same
+   * database transaction, right after both rows are created — this is how
+   * `UploadAssetUseCase` enqueues the `analyze-document` job atomically
+   * with the DTR write (design.md "Transactional enqueue" decision):
+   * `(tx) => queuePort.send(ANALYZE_DOCUMENT_QUEUE, payload, tx)`. If the
+   * callback throws, the whole transaction (asset + trust record + any
+   * enqueue) rolls back together. The repository still owns the physical
+   * transaction — `TransactionHandle` is the minimal structural type
+   * needed for that, nothing Prisma-specific leaks past it.
    */
-  createWithDraftRecord(params: {
-    sha256: string;
-    mimeType: string;
-    sizeBytes: number;
-    filename: string | null;
-    storageRef: string;
-    organizationId: string;
-    createdByUserId: string;
-  }): Promise<AssetWithDraftRecord>;
+  createWithDraftRecord(
+    params: {
+      sha256: string;
+      mimeType: string;
+      sizeBytes: number;
+      filename: string | null;
+      storageRef: string;
+      organizationId: string;
+      createdByUserId: string;
+    },
+    onCreatedWithinTransaction?: (
+      tx: TransactionHandle,
+      ids: { assetId: string; trustRecordId: string },
+    ) => Promise<void>,
+  ): Promise<AssetWithDraftRecord>;
 }

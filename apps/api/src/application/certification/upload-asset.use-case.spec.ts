@@ -1,33 +1,58 @@
 import { createHash } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ANALYZE_DOCUMENT_QUEUE } from "./jobs/analyze-document.handler";
 import { AssetStatus, DigitalAsset } from "../../domain/digital-asset.entity";
 import type {
   AssetWithDraftRecord,
   DigitalAssetRepositoryPort,
 } from "../../ports/digital-asset-repository.port";
 import type { EncryptionPort } from "../../ports/encryption.port";
+import type { QueuePort, TransactionHandle } from "../../ports/queue.port";
 import type { StoragePort } from "../../ports/storage.port";
 import { UploadAssetUseCase } from "./upload-asset.use-case";
+
+/** A fake `TransactionHandle` — never actually queried in these unit tests. */
+const FAKE_TX: TransactionHandle = { $queryRawUnsafe: vi.fn() };
 
 function buildRepository(overrides: Partial<DigitalAssetRepositoryPort> = {}): DigitalAssetRepositoryPort {
   return {
     findById: vi.fn().mockResolvedValue(null),
     findBySha256: vi.fn().mockResolvedValue(null),
-    createWithDraftRecord: vi.fn().mockResolvedValue({
-      asset: new DigitalAsset(
-        "asset-1",
-        "sha-placeholder",
-        "application/pdf",
-        1024,
-        "contract.pdf",
-        "org-1/sha-placeholder",
-        AssetStatus.READY,
-        "org-1",
-        "user-1",
-        new Date(),
-      ),
-      trustRecordId: "trust-record-1",
-    } satisfies AssetWithDraftRecord),
+    // Simulates the real PrismaDigitalAssetRepository: invokes the caller's
+    // callback INSIDE its (fake) transaction, right after "creating" both
+    // rows — this is what lets the use-case-level test exercise real
+    // enqueue-inside-transaction wiring against a fake queue port.
+    createWithDraftRecord: vi.fn().mockImplementation(async (_params, onCreatedWithinTransaction) => {
+      const result: AssetWithDraftRecord = {
+        asset: new DigitalAsset(
+          "asset-1",
+          "sha-placeholder",
+          "application/pdf",
+          1024,
+          "contract.pdf",
+          "org-1/sha-placeholder",
+          AssetStatus.READY,
+          "org-1",
+          "user-1",
+          new Date(),
+        ),
+        trustRecordId: "trust-record-1",
+      };
+      if (onCreatedWithinTransaction) {
+        await onCreatedWithinTransaction(FAKE_TX, {
+          assetId: result.asset.id,
+          trustRecordId: result.trustRecordId,
+        });
+      }
+      return result;
+    }),
+    ...overrides,
+  };
+}
+
+function buildQueue(overrides: Partial<QueuePort> = {}): QueuePort {
+  return {
+    send: vi.fn().mockResolvedValue("job-1"),
     ...overrides,
   };
 }
@@ -57,13 +82,15 @@ describe("UploadAssetUseCase", () => {
   let repository: DigitalAssetRepositoryPort;
   let storage: StoragePort;
   let encryption: EncryptionPort;
+  let queue: QueuePort;
   let useCase: UploadAssetUseCase;
 
   beforeEach(() => {
     repository = buildRepository();
     storage = buildStorage();
     encryption = buildEncryption();
-    useCase = new UploadAssetUseCase(repository, storage, encryption);
+    queue = buildQueue();
+    useCase = new UploadAssetUseCase(repository, storage, encryption, queue);
   });
 
   it("computes the SHA-256 of the raw bytes exactly once and passes it through unchanged (INV-10)", async () => {
@@ -146,7 +173,7 @@ describe("UploadAssetUseCase", () => {
         trustRecordId: "existing-trust-record",
       }),
     });
-    useCase = new UploadAssetUseCase(repository, storage, encryption);
+    useCase = new UploadAssetUseCase(repository, storage, encryption, queue);
 
     const result = await useCase.execute({
       organizationId: "org-1",
@@ -164,12 +191,14 @@ describe("UploadAssetUseCase", () => {
     expect(encryption.encrypt).not.toHaveBeenCalled();
     expect(storage.putObject).not.toHaveBeenCalled();
     expect(repository.createWithDraftRecord).not.toHaveBeenCalled();
+    // A duplicate upload must not re-trigger analysis for the existing DTR.
+    expect(queue.send).not.toHaveBeenCalled();
   });
 
   it("cross-org same-hash independence: dedup lookup is scoped per organizationId (RF-012)", async () => {
     const findBySha256 = vi.fn().mockResolvedValue(null);
     repository = buildRepository({ findBySha256 });
-    useCase = new UploadAssetUseCase(repository, storage, encryption);
+    useCase = new UploadAssetUseCase(repository, storage, encryption, queue);
 
     await useCase.execute({
       organizationId: "org-b",
@@ -184,5 +213,62 @@ describe("UploadAssetUseCase", () => {
     const createArgs = (repository.createWithDraftRecord as ReturnType<typeof vi.fn>).mock
       .calls[0]?.[0];
     expect(createArgs.organizationId).toBe("org-b");
+  });
+
+  describe("analyze-document enqueue (producer side of the AI analysis pipeline)", () => {
+    it("enqueues an analyze-document job atomically (inside the same tx) on a successful upload", async () => {
+      const result = await useCase.execute({
+        organizationId: "org-1",
+        createdByUserId: "user-1",
+        buffer: PDF_BYTES,
+        mimeType: "application/pdf",
+        filename: "contract.pdf",
+      });
+
+      expect(queue.send).toHaveBeenCalledTimes(1);
+      expect(queue.send).toHaveBeenCalledWith(
+        ANALYZE_DOCUMENT_QUEUE,
+        {
+          trustRecordId: result.trustRecordId,
+          assetId: result.assetId,
+          organizationId: "org-1",
+        },
+        FAKE_TX,
+      );
+    });
+
+    it("does NOT enqueue when the transaction rolls back (createWithDraftRecord rejects)", async () => {
+      repository = buildRepository({
+        createWithDraftRecord: vi.fn().mockRejectedValue(new Error("simulated rollback")),
+      });
+      useCase = new UploadAssetUseCase(repository, storage, encryption, queue);
+
+      await expect(
+        useCase.execute({
+          organizationId: "org-1",
+          createdByUserId: "user-1",
+          buffer: PDF_BYTES,
+          mimeType: "application/pdf",
+          filename: "contract.pdf",
+        }),
+      ).rejects.toThrow("simulated rollback");
+
+      expect(queue.send).not.toHaveBeenCalled();
+    });
+
+    it("propagates the error (and never resolves the upload) if the enqueue itself fails inside the transaction", async () => {
+      queue = buildQueue({ send: vi.fn().mockRejectedValue(new Error("queue unavailable")) });
+      useCase = new UploadAssetUseCase(repository, storage, encryption, queue);
+
+      await expect(
+        useCase.execute({
+          organizationId: "org-1",
+          createdByUserId: "user-1",
+          buffer: PDF_BYTES,
+          mimeType: "application/pdf",
+          filename: "contract.pdf",
+        }),
+      ).rejects.toThrow("queue unavailable");
+    });
   });
 });

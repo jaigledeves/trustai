@@ -8,10 +8,13 @@ import { UploadAssetUseCase } from "../../application/certification/upload-asset
 import { DIGITAL_ASSET_REPOSITORY_PORT } from "../../ports/digital-asset-repository.port";
 import { ENCRYPTION_PORT } from "../../ports/encryption.port";
 import { STORAGE_PORT } from "../../ports/storage.port";
+import { QueueModule } from "../queue/queue.module";
 import { AssetsController } from "./assets.controller";
 
 @Module({
-  imports: [ConfigModule],
+  // QueueModule provides QUEUE_PORT — UploadAssetUseCase enqueues
+  // analyze-document atomically with the DTR write through it.
+  imports: [ConfigModule, QueueModule],
   controllers: [AssetsController],
   providers: [
     PrismaService,
