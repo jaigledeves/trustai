@@ -1,10 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { createHash } from "node:crypto";
+import { ANALYZE_DOCUMENT_QUEUE } from "./jobs/analyze-document.handler";
 import {
   DIGITAL_ASSET_REPOSITORY_PORT,
   type DigitalAssetRepositoryPort,
 } from "../../ports/digital-asset-repository.port";
 import { ENCRYPTION_PORT, type EncryptionPort } from "../../ports/encryption.port";
+import { QUEUE_PORT, type QueuePort } from "../../ports/queue.port";
 import { STORAGE_PORT, type StoragePort } from "../../ports/storage.port";
 
 export interface UploadAssetParams {
@@ -30,6 +32,8 @@ export class UploadAssetUseCase {
     private readonly storage: StoragePort,
     @Inject(ENCRYPTION_PORT)
     private readonly encryption: EncryptionPort,
+    @Inject(QUEUE_PORT)
+    private readonly queue: QueuePort,
   ) {}
 
   async execute(params: UploadAssetParams): Promise<UploadAssetResult> {
@@ -59,15 +63,33 @@ export class UploadAssetUseCase {
       contentType: "application/octet-stream",
     });
 
-    const { asset, trustRecordId } = await this.repository.createWithDraftRecord({
-      sha256,
-      mimeType: params.mimeType,
-      sizeBytes: params.buffer.byteLength,
-      filename: params.filename,
-      storageRef: storageKey,
-      organizationId: params.organizationId,
-      createdByUserId: params.createdByUserId,
-    });
+    const { asset, trustRecordId } = await this.repository.createWithDraftRecord(
+      {
+        sha256,
+        mimeType: params.mimeType,
+        sizeBytes: params.buffer.byteLength,
+        filename: params.filename,
+        storageRef: storageKey,
+        organizationId: params.organizationId,
+        createdByUserId: params.createdByUserId,
+      },
+      // Runs inside the repository's own DB transaction — the enqueue
+      // commits/rolls back together with the DigitalAsset+TrustRecord write
+      // (design.md "Transactional enqueue" decision; README.md Phase 0
+      // spike). If this throws, the whole transaction rolls back and the
+      // upload fails — no orphaned DRAFT record with no analysis coming.
+      async (tx, ids) => {
+        await this.queue.send(
+          ANALYZE_DOCUMENT_QUEUE,
+          {
+            trustRecordId: ids.trustRecordId,
+            assetId: ids.assetId,
+            organizationId: params.organizationId,
+          },
+          tx,
+        );
+      },
+    );
 
     return { assetId: asset.id, trustRecordId, duplicate: false };
   }

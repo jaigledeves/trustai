@@ -6,6 +6,7 @@ import type {
   AssetWithDraftRecord,
   DigitalAssetRepositoryPort,
 } from "../../ports/digital-asset-repository.port";
+import type { TransactionHandle } from "../../ports/queue.port";
 import { PrismaService } from "./prisma.service";
 
 @Injectable()
@@ -40,15 +41,21 @@ export class PrismaDigitalAssetRepository implements DigitalAssetRepositoryPort 
     };
   }
 
-  async createWithDraftRecord(params: {
-    sha256: string;
-    mimeType: string;
-    sizeBytes: number;
-    filename: string | null;
-    storageRef: string;
-    organizationId: string;
-    createdByUserId: string;
-  }): Promise<AssetWithDraftRecord> {
+  async createWithDraftRecord(
+    params: {
+      sha256: string;
+      mimeType: string;
+      sizeBytes: number;
+      filename: string | null;
+      storageRef: string;
+      organizationId: string;
+      createdByUserId: string;
+    },
+    onCreatedWithinTransaction?: (
+      tx: TransactionHandle,
+      ids: { assetId: string; trustRecordId: string },
+    ) => Promise<void>,
+  ): Promise<AssetWithDraftRecord> {
     const [assetRecord, trustRecord] = await this.prisma.$transaction(async (tx) => {
       // Bytes are already hashed, encrypted, and durably stored by the time
       // this runs (UploadAssetUseCase), so the asset is created directly as
@@ -74,6 +81,17 @@ export class PrismaDigitalAssetRepository implements DigitalAssetRepositoryPort 
           state: "DRAFT",
         },
       });
+
+      // Runs inside this same transaction — if it throws, the asset+trust
+      // record creation above rolls back too (design.md "Transactional
+      // enqueue" decision). `tx` satisfies `TransactionHandle` structurally
+      // (Prisma's TransactionClient has `$queryRawUnsafe`).
+      if (onCreatedWithinTransaction) {
+        await onCreatedWithinTransaction(tx, {
+          assetId: asset.id,
+          trustRecordId: draftTrustRecord.id,
+        });
+      }
 
       return [asset, draftTrustRecord] as const;
     });

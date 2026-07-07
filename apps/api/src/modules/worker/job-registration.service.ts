@@ -1,9 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import { AnalyzeDocumentHandler } from "../../application/certification/jobs/analyze-document.handler";
+import {
+  ANALYZE_DOCUMENT_QUEUE,
+  AnalyzeDocumentHandler,
+} from "../../application/certification/jobs/analyze-document.handler";
 import { PgBossService } from "./pgboss.service";
-
-/** design.md "pg-boss Jobs" table. */
-export const ANALYZE_DOCUMENT_QUEUE = "analyze-document";
 
 /**
  * Registers every pg-boss job handler against the started `PgBoss`
