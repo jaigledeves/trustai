@@ -1,4 +1,5 @@
 import type { TrustRecord } from "../domain/trust-record.entity";
+import type { TransactionHandle } from "./queue.port";
 
 export const TRUST_RECORD_REPOSITORY_PORT = Symbol("TrustRecordRepositoryPort");
 
@@ -84,4 +85,21 @@ export interface TrustRecordRepositoryPort {
    * implementation yet, so this is simply the state transition itself).
    */
   discard(id: string): Promise<void>;
+
+  /**
+   * Phase 6: the READY->ANCHORING transition's persistence — sets `state`
+   * to ANCHORING and links `anchorId`, atomically with
+   * `onSubmittedWithinTransaction` (design.md "Transactional enqueue"
+   * decision, same pattern as `DigitalAssetRepositoryPort.createWithDraftRecord`):
+   * `SubmitForAnchoringUseCase` passes a closure that enqueues the
+   * `anchor-dtr` job inside this same DB transaction, so the job can never
+   * be lost if the state-write fails (or vice versa). The caller is
+   * responsible for creating the `Anchor` row first (via
+   * `AnchorRepositoryPort.create`) and for the state-machine guard.
+   */
+  submitForAnchoring(
+    id: string,
+    anchorId: string,
+    onSubmittedWithinTransaction?: (tx: TransactionHandle) => Promise<void>,
+  ): Promise<void>;
 }

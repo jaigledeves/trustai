@@ -7,13 +7,15 @@ import type {
   ReviewFieldsUpdate,
   TrustRecordRepositoryPort,
 } from "../../ports/trust-record-repository.port";
+import type { TransactionHandle } from "../../ports/queue.port";
 import { PrismaService } from "./prisma.service";
 
 /**
  * Phase 3 (task 3.5) introduced the minimal surface: `findById` (unscoped
  * — see TrustRecordRepositoryPort) + `updateAiAnalysis`. Phase 5 (task
- * 5.3) EXTENDS this same file with org-scoped read/write methods for the
- * HTTP-facing trust-records controller.
+ * 5.3) EXTENDED this with org-scoped read/write methods for the
+ * HTTP-facing trust-records controller. Phase 6 (task 6.3) adds
+ * `submitForAnchoring`.
  */
 @Injectable()
 export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
@@ -82,6 +84,26 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
     await this.prisma.trustRecord.update({
       where: { id },
       data: { state: "DISCARDED" },
+    });
+  }
+
+  async submitForAnchoring(
+    id: string,
+    anchorId: string,
+    onSubmittedWithinTransaction?: (tx: TransactionHandle) => Promise<void>,
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.trustRecord.update({
+        where: { id },
+        data: { state: "ANCHORING", anchorId },
+      });
+
+      // Runs inside this same transaction — if it throws, the state write
+      // above rolls back too (design.md "Transactional enqueue" decision,
+      // same pattern as PrismaDigitalAssetRepository.createWithDraftRecord).
+      if (onSubmittedWithinTransaction) {
+        await onSubmittedWithinTransaction(tx);
+      }
     });
   }
 
