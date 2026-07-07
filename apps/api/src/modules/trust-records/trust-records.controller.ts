@@ -3,7 +3,9 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import type { JwtPayload } from "../../application/auth/login.use-case";
 import { ConfirmReviewUseCase } from "../../application/certification/confirm-review.use-case";
 import { DiscardDraftUseCase } from "../../application/certification/discard-draft.use-case";
+import { SubmitForAnchoringUseCase } from "../../application/certification/submit-for-anchoring.use-case";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { AnchorTrustRecordResponseDto } from "./dto/anchor-trust-record-response.dto";
 import { ConfirmTrustRecordResponseDto } from "./dto/confirm-trust-record-response.dto";
 import { ReviewTrustRecordDto } from "./dto/review-trust-record.dto";
 
@@ -15,6 +17,7 @@ export class TrustRecordsController {
   constructor(
     private readonly confirmReviewUseCase: ConfirmReviewUseCase,
     private readonly discardDraftUseCase: DiscardDraftUseCase,
+    private readonly submitForAnchoringUseCase: SubmitForAnchoringUseCase,
   ) {}
 
   @Patch(":id/review")
@@ -71,6 +74,25 @@ export class TrustRecordsController {
   })
   async discard(@Param("id") id: string, @Request() req: { user: JwtPayload }): Promise<void> {
     await this.discardDraftUseCase.execute({
+      organizationId: req.user.organizationId,
+      trustRecordId: id,
+    });
+  }
+
+  @Post(":id/anchor")
+  @ApiOperation({
+    summary: "Submit for anchoring: READY -> ANCHORING (non-blocking)",
+    description:
+      "Enqueues the anchor-dtr job and responds immediately with state ANCHORING — the on-chain " +
+      "transaction submission happens asynchronously in the background worker (blockchain-anchoring " +
+      "spec: 'Submission is non-blocking'; RF-032, RNF-022). Rejected with 409 if the record isn't " +
+      "READY or canonicalHash is missing.",
+  })
+  async anchor(
+    @Param("id") id: string,
+    @Request() req: { user: JwtPayload },
+  ): Promise<AnchorTrustRecordResponseDto> {
+    return this.submitForAnchoringUseCase.execute({
       organizationId: req.user.organizationId,
       trustRecordId: id,
     });
