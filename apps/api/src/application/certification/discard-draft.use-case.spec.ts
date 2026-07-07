@@ -40,6 +40,7 @@ function buildTrustRecordRepository(
     updateReviewFields: vi.fn(),
     confirmToReady: vi.fn(),
     discard: vi.fn().mockResolvedValue(undefined),
+    submitForAnchoring: vi.fn(),
     ...overrides,
   };
 }
