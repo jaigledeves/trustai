@@ -148,3 +148,49 @@ version bump.**
   remaining a plain `{ executeSql }` interface. If a future pg-boss major version changes that
   contract, revisit — but the same risk would apply equally to the `fromPrisma()` adapter, so this
   is not a risk specific to choosing the hand-rolled path.
+
+### AI analysis adapter configuration (Phase 4 — certification-flow)
+
+The `analyze-document` worker job (`AnalyzeDocumentHandler`) calls an `AiAnalysisPort`
+implementation, selected via the `AI_ADAPTER` env var:
+
+| `AI_ADAPTER` | Adapter | Requires |
+|---|---|---|
+| `stub` (default) | `StubAiAnalysisAdapter` — deterministic canned output, no network call | nothing |
+| `openai` | `OpenAiAnalysisAdapter` — real OpenAI structured-outputs call | `OPENAI_API_KEY` |
+
+```bash
+AI_ADAPTER="openai"
+OPENAI_API_KEY="sk-..."
+OPENAI_MODEL="gpt-5.4-mini"   # optional, this is the default
+```
+
+If `AI_ADAPTER=openai` and `OPENAI_API_KEY` is missing, `OpenAiAnalysisAdapter`'s constructor
+throws `MissingOpenAiApiKeyError` immediately at boot (fail-fast, same principle as
+`AesGcmAdapter`'s key validation) rather than failing lazily on the first job.
+
+**Contract parity**: both adapters return `{ analysis, provenance }`, where `analysis` MUST
+validate against `AiAnalysisOutputSchema` (dtr-core's `TrustRecordV1Schema.shape.analysis`) —
+`AnalyzeDocumentHandler` re-validates this itself regardless of adapter, so the two are guaranteed
+interchangeable. Verified in `src/adapters/ai/analysis-contract-parity.spec.ts`: the stub leg
+always runs; the OpenAI leg is gated on `OPENAI_API_KEY` being present in the environment
+(`describe.skipIf`, same D7-style service-gating pattern as `isDatabaseAvailable`) and is skipped
+gracefully — not failed — in environments without a real API key (e.g. this sandbox).
+
+**Why the OpenAI adapter hand-writes its JSON Schema instead of using `zodResponseFormat`**: the
+`openai` SDK's `zodResponseFormat` helper (from `openai/helpers/zod`) requires a `ZodType` from
+either the `zod/v3` or `zod/v4` subpath. This project's installed `zod` (3.25.x) is a transitional
+release that bundles both a top-level classic-v3 API *and* a separate `zod/v3`/`zod/v4`
+compat-subpath implementation — passing dtr-core's schema (built against the top-level import)
+into `zodResponseFormat` hits a genuine TypeScript structural mismatch between those two
+internally-distinct `ZodObject`/`ZodEffects` shapes (`error TS2589: Type instantiation is
+excessively deep and possibly infinite`, reproduced and confirmed, not assumed). The correct long-term
+fix is bumping `zod` to a stable v4 release across both `apps/api` and `@trustai/dtr-core` — out of
+scope for this phase and a real risk to `dtr-core`'s canonicalization/hashing code (ADR-001 schema
+discipline: schemas are append-only, frozen forever). Per this change's "prefer the lower-risk
+option" principle, `src/adapters/ai/openai.adapter.ts` instead hand-writes a ~10-line JSON Schema
+mirroring `AiAnalysisOutputSchema`'s three fields — safe because `AnalyzeDocumentHandler` always
+re-validates the response against the real Zod schema on the way back in, so any drift between the
+hand-written mirror and dtr-core's schema surfaces immediately as a validation failure rather than
+silently diverging. `src/adapters/ai/analysis-contract-parity.spec.ts` also has a tripwire test
+asserting `AiAnalysisOutputSchema`'s field names haven't changed.
