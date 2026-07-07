@@ -1,0 +1,98 @@
+# @trustai/api
+
+NestJS API for TrustAI — hexagonal architecture (domain / ports / adapters / application / modules).
+
+## Dev runtime
+
+```bash
+pnpm --filter @trustai/api run start:dev
+```
+
+### Spike findings (TASK-0 / task 2.1)
+
+Design decision D6 flagged `ts-node`/`tsx` + decorators + DI as a risk area to validate before
+building the real auth vertical slice. This package uses `module: CommonJS` /
+`moduleResolution: Node` (not `NodeNext`), so the risk was scoped to plain CommonJS decorator
+metadata support, not ESM interop.
+
+**`tsx` (esbuild-based) does NOT work — constructor-based DI silently breaks.**
+
+- `tsx` transpiles TypeScript via esbuild, which does not implement TypeScript's
+  `emitDecoratorMetadata` transform (tracked upstream: evanw/esbuild#1713). `Reflect.getMetadata("design:paramtypes", SomeClass)`
+  returns `undefined` for every class compiled by esbuild.
+- NestJS's constructor injection reads `design:paramtypes` to resolve providers. With `tsx`,
+  every injected constructor parameter comes through as `undefined` at runtime — Nest boots and
+  maps routes successfully (no error!), but any handler that touches an injected dependency
+  throws `Cannot read properties of undefined (...)`. This is a *silent* failure mode, not a
+  boot-time error, which makes it especially dangerous to miss.
+
+**`ts-node` (and `ts-node-dev` for watch mode) work correctly.**
+
+- `ts-node`'s TypeScript-compiler-based transform emits `design:paramtypes` correctly, including
+  in `--transpile-only` (single-file, no type-checking) mode — the decorator metadata transform is
+  syntactic (it re-emits the type's identifier reference), not dependent on full program-wide type
+  checking, so the fast/isolated transpile path is safe to use for dev.
+- Verified end-to-end: booted a minimal `AppModule` (a throwaway `SpikeController` +
+  `SpikeService` in `app.module.ts`, replaced by the real feature modules in PR2) via
+  `ts-node-dev --respawn --transpile-only`, and `GET /spike` correctly returned a value produced
+  through DI-injected `SpikeService`.
+- `start:dev` uses `ts-node-dev`; `tsx` was removed from devDependencies.
+
+**Secondary finding: `.js`-suffixed relative imports break under `ts-node`.**
+
+- PR1 wrote relative imports with an explicit `.js` extension (e.g.
+  `from "../domain/user.entity.js"`), following the `NodeNext` convention from
+  `tsconfig.base.json`. `apps/api/tsconfig.json` overrides this to `module: CommonJS` /
+  `moduleResolution: Node`, so `.js` extensions are unnecessary for this package.
+- `tsc` silently tolerates `.js` extensions pointing at `.ts` files at *type-check* time, and after
+  a real `tsc` build the extension is valid again (the emitted `.js` files really do exist as
+  siblings). But `ts-node` (and plain `node` before any build step exists) resolve `require()`
+  calls directly against the filesystem — there is no `app.module.js` file, only `app.module.ts` —
+  so the process crashes with `MODULE_NOT_FOUND`.
+- Fix: all relative imports in `apps/api/src` are extension-less (e.g.
+  `from "../domain/user.entity"`), matching plain CommonJS/Node resolution. Convention for this
+  package going forward: **no extensions on relative imports**.
+
+### Convention: dev runner
+
+Use `pnpm --filter @trustai/api run start:dev` (backed by `ts-node-dev`). Do not switch back to
+`tsx`/esbuild-based tooling for this package without also solving decorator-metadata emission
+(e.g. via an esbuild plugin that walks the TS AST, or SWC's native `decoratorMetadata` support) —
+otherwise DI silently breaks at runtime instead of failing at boot.
+
+### Related finding: Vitest has the same decorator-metadata gap (fixed via `unplugin-swc`)
+
+Vitest also transforms TypeScript via esbuild by default (through Vite), so any test that boots a
+real Nest module (`NestFactory.create`, `Test.createTestingModule(...).compile()`) hits the exact
+same silent-DI-failure bug described above — confirmed with a throwaway spike test before writing
+the real e2e suite. Both `vitest.config.ts` and `vitest.e2e.config.ts` load the `unplugin-swc`
+Vite plugin (`swc.vite({ module: { type: "es6" } })`), which compiles test files through SWC
+instead, restoring correct `design:paramtypes` emission. `module: { type: "commonjs" }` must NOT
+be used here — it makes SWC rewrite the test file's own `import ... from "vitest"` into a
+`require()`, which Vitest's ESM-only package rejects at runtime.
+
+### Testing
+
+```bash
+pnpm --filter @trustai/api run test      # unit tests, no DB required
+pnpm --filter @trustai/api run test:e2e  # e2e tests, requires PostgreSQL
+```
+
+`test/auth.e2e-spec.ts` needs a real PostgreSQL reachable via `DATABASE_URL` (D7 — real ephemeral
+Postgres, not a mock/SQLite substitute) with the schema applied (`prisma db push` or, once a real
+migration exists, `prisma migrate deploy`). If `DATABASE_URL` is unset or the database is
+unreachable, `test/utils/db-availability.ts` detects this and the whole `describe` block is
+skipped via `describe.skipIf(...)` rather than failing the run. `test/health.e2e-spec.ts` never
+needs a database — it overrides `PrismaService` with a no-op stub, since a liveness check
+shouldn't depend on DB connectivity in the first place.
+
+Verified locally against a disposable `postgres:16-alpine` Docker container (`prisma db push`,
+no migration files yet — see Open Questions in design.md): all 12 e2e assertions pass, including
+the two that initially caught a real bug — see "Gotcha" below.
+
+**Gotcha — `Test.createTestingModule(...)` does not run `main.ts`'s `bootstrap()`.** The global
+`ValidationPipe` (and any other `app.use*` call in `main.ts`) is NOT applied automatically to an
+app built via Nest's testing utilities; it must be re-registered explicitly in the e2e spec's
+`beforeAll`. Missing this made `S-AUTH-3`/`S-AUTH-4` (malformed email / weak password) silently
+return `201` instead of `400` during development of this suite, because `class-validator`
+decorators on `RegisterDto`/`LoginDto` were never being enforced.
