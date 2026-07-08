@@ -75,6 +75,7 @@ function buildAnchorPort(overrides: Partial<AnchorPort> = {}): AnchorPort {
     getConfirmationStatus: vi
       .fn()
       .mockResolvedValue({ confirmations: 0, blockTimestamp: null } satisfies ConfirmationStatus),
+    isAnchored: vi.fn(),
     ...overrides,
   };
 }
