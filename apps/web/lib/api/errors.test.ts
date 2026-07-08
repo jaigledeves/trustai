@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { authDictionary } from "../../dictionaries/es/auth";
+import { certifyDictionary } from "../../dictionaries/es/certify";
 import { ApiError, mapApiError } from "./errors";
 
 describe("mapApiError (pure — spec: no enumeration on login, distinct unverified/duplicate copy)", () => {
@@ -25,6 +26,18 @@ describe("mapApiError (pure — spec: no enumeration on login, distinct unverifi
     expect(mapApiError(500, "login")).toBe(
       "Ocurrió un error inesperado. Probá de nuevo en unos minutos.",
     );
+  });
+
+  it("maps 409 in the review context to the edit-conflict message (INV-21 — refresh, never show the edit as applied)", () => {
+    expect(mapApiError(409, "review")).toBe(certifyDictionary.review.editConflict);
+  });
+
+  it("maps 409 in the confirm context to the certify-blocked message", () => {
+    expect(mapApiError(409, "confirm")).toBe(certifyDictionary.confirm.errorGeneric);
+  });
+
+  it("maps 409 in the anchor context to the anchor-blocked message", () => {
+    expect(mapApiError(409, "anchor")).toBe(certifyDictionary.anchor.errorGeneric);
   });
 });
 
