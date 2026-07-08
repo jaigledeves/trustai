@@ -42,6 +42,7 @@ function buildTrustRecordRepository(
   return {
     findById: vi.fn().mockResolvedValue(buildTrustRecord()),
     findByIdForOrganization: vi.fn(),
+    findByIdWithAssetAndAnchor: vi.fn(),
     updateAiAnalysis: vi.fn(),
     updateReviewFields: vi.fn(),
     confirmToReady: vi.fn(),
@@ -75,6 +76,7 @@ function buildAnchorPort(overrides: Partial<AnchorPort> = {}): AnchorPort {
     getConfirmationStatus: vi
       .fn()
       .mockResolvedValue({ confirmations: 0, blockTimestamp: null } satisfies ConfirmationStatus),
+    isAnchored: vi.fn(),
     ...overrides,
   };
 }

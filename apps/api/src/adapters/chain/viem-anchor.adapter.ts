@@ -8,6 +8,7 @@ import {
   type WalletClient,
 } from "viem";
 import type {
+  AnchorExistenceStatus,
   AnchorPort,
   AnchorSubmitResult,
   ConfirmationStatus,
@@ -16,7 +17,13 @@ import { ANCHOR_REGISTRY_ABI } from "./anchor-registry.abi";
 
 export interface ViemAnchorAdapterConfig {
   publicClient: PublicClient;
-  walletClient: WalletClient;
+  /**
+   * design.md "ViemAnchorAdapterConfig.walletClient" decision: optional —
+   * least privilege. A read-only consumer (public verification's
+   * `isAnchored`/`getConfirmationStatus`) must not require the worker's
+   * private key. `submitAnchor` throws a clear error if called without it.
+   */
+  walletClient?: WalletClient;
   contractAddress: Address;
 }
 
@@ -37,6 +44,13 @@ export class ViemAnchorAdapter implements AnchorPort {
   constructor(private readonly config: ViemAnchorAdapterConfig) {}
 
   async submitAnchor(canonicalHash: string): Promise<AnchorSubmitResult> {
+    if (!this.config.walletClient) {
+      throw new Error(
+        "ViemAnchorAdapter.submitAnchor requires a configured walletClient — this instance was " +
+          "constructed read-only (no wallet), only isAnchored/getConfirmationStatus are available",
+      );
+    }
+    const walletClient = this.config.walletClient;
     const hashBytes32 = this.toBytes32(canonicalHash);
 
     try {
@@ -45,10 +59,10 @@ export class ViemAnchorAdapter implements AnchorPort {
         abi: ANCHOR_REGISTRY_ABI,
         functionName: "anchor",
         args: [hashBytes32],
-        account: this.config.walletClient.account,
+        account: walletClient.account,
       });
 
-      const txHash = await this.config.walletClient.writeContract(request);
+      const txHash = await walletClient.writeContract(request);
       return { txHash, alreadyAnchored: false, anchoredAtBlockTimestamp: null };
     } catch (err) {
       if (this.isAlreadyAnchoredRevert(err)) {
@@ -88,6 +102,32 @@ export class ViemAnchorAdapter implements AnchorPort {
       }
       throw err;
     }
+  }
+
+  async isAnchored(canonicalHash: string): Promise<AnchorExistenceStatus> {
+    const hashBytes32 = this.toBytes32(canonicalHash);
+
+    const anchored = await this.config.publicClient.readContract({
+      address: this.config.contractAddress,
+      abi: ANCHOR_REGISTRY_ABI,
+      functionName: "isAnchored",
+      args: [hashBytes32],
+    });
+
+    if (!anchored) {
+      return { anchored: false, blockTimestamp: null };
+    }
+
+    const anchoredAtSeconds = await this.config.publicClient.readContract({
+      address: this.config.contractAddress,
+      abi: ANCHOR_REGISTRY_ABI,
+      functionName: "anchoredAt",
+      args: [hashBytes32],
+    });
+    const blockTimestamp =
+      anchoredAtSeconds > 0n ? new Date(Number(anchoredAtSeconds) * 1000) : null;
+
+    return { anchored: true, blockTimestamp };
   }
 
   private isAlreadyAnchoredRevert(err: unknown): boolean {

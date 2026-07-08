@@ -18,6 +18,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.4.0",
     "@nestjs/swagger": "^7.4.0",
+    "@nestjs/throttler": "^6.5.0",
     "@prisma/client": "^6.0.0",
     "@trustai/dtr-core": "workspace:*",
     "argon2": "^0.41.0",
