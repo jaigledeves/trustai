@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
-import { middleware } from "./middleware";
+import { proxy } from "./proxy";
 
-describe("middleware (spec: Guarded Route Session Enforcement — /dtrs/*)", () => {
+describe("proxy (spec: Guarded Route Session Enforcement — /dtrs/*)", () => {
   it("redirects an unauthenticated request for a guarded route to /login", () => {
     const request = new NextRequest("http://localhost:3000/dtrs");
 
-    const response = middleware(request);
+    const response = proxy(request);
 
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("http://localhost:3000/login");
@@ -17,7 +17,7 @@ describe("middleware (spec: Guarded Route Session Enforcement — /dtrs/*)", () 
       headers: { cookie: "trustai_session=some-jwt" },
     });
 
-    const response = middleware(request);
+    const response = proxy(request);
 
     expect(response.headers.get("location")).toBeNull();
   });
@@ -27,7 +27,7 @@ describe("middleware (spec: Guarded Route Session Enforcement — /dtrs/*)", () 
       headers: { cookie: "trustai_session=not-a-real-jwt-at-all" },
     });
 
-    const response = middleware(request);
+    const response = proxy(request);
 
     expect(response.headers.get("location")).toBeNull();
   });

@@ -7,8 +7,12 @@ import { config as appConfig } from "./lib/config";
  * edge, before any org-scoped data would be fetched; the actual JWT is
  * still validated on every proxied API call (401s are handled client-side
  * by the proxy/client-fetch, never trusted here).
+ *
+ * Named `proxy` (not `middleware`) — Next 16 renamed the `middleware.ts`
+ * file convention to `proxy.ts`; `middleware.ts` still works but is
+ * deprecated and warns on every build.
  */
-export function middleware(request: NextRequest): NextResponse {
+export function proxy(request: NextRequest): NextResponse {
   const hasSession = request.cookies.has(appConfig.sessionCookieName);
 
   if (!hasSession) {
