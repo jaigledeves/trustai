@@ -13,11 +13,13 @@ import { PgBoss } from "pg-boss";
 export class PgBossService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PgBossService.name);
   private readonly boss: PgBoss;
+  private readonly schema: string;
 
   constructor(private readonly configService: ConfigService) {
+    this.schema = this.configService.get<string>("PGBOSS_SCHEMA", "pgboss");
     this.boss = new PgBoss({
       connectionString: this.configService.get<string>("DATABASE_URL", ""),
-      schema: this.configService.get<string>("PGBOSS_SCHEMA", "pgboss"),
+      schema: this.schema,
     });
   }
 
@@ -32,5 +34,10 @@ export class PgBossService implements OnModuleInit, OnModuleDestroy {
 
   getBoss(): PgBoss {
     return this.boss;
+  }
+
+  /** The configured `PGBOSS_SCHEMA` — needed by `PgBossQueueAdapter` to build schema-qualified raw SQL (job-state lookups). */
+  getSchema(): string {
+    return this.schema;
   }
 }

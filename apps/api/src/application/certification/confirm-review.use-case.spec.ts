@@ -60,6 +60,9 @@ function buildTrustRecordRepository(
     confirmToReady: vi.fn().mockResolvedValue(undefined),
     discard: vi.fn(),
     submitForAnchoring: vi.fn().mockResolvedValue(undefined),
+    certify: vi.fn(),
+    markAnchoringFailed: vi.fn(),
+    retryAnchoring: vi.fn(),
     ...overrides,
   };
 }

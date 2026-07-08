@@ -3,8 +3,10 @@ import { Anchor, AnchorStatus } from "../../../domain/anchor.entity";
 import { TrustRecord, TrustRecordState } from "../../../domain/trust-record.entity";
 import type { AnchorRepositoryPort } from "../../../ports/anchor-repository.port";
 import type { AnchorPort, AnchorSubmitResult } from "../../../ports/anchor.port";
+import type { QueuePort } from "../../../ports/queue.port";
 import type { TrustRecordRepositoryPort } from "../../../ports/trust-record-repository.port";
 import { AnchorDtrHandler } from "./anchor-dtr.handler";
+import { CONFIRM_ANCHOR_QUEUE } from "./queue-names";
 
 function buildTrustRecord(overrides: Partial<TrustRecord> = {}): TrustRecord {
   const base = new TrustRecord(
@@ -43,6 +45,9 @@ function buildTrustRecordRepository(
     confirmToReady: vi.fn(),
     discard: vi.fn(),
     submitForAnchoring: vi.fn(),
+    certify: vi.fn().mockResolvedValue(undefined),
+    markAnchoringFailed: vi.fn(),
+    retryAnchoring: vi.fn(),
     ...overrides,
   };
 }
@@ -58,11 +63,25 @@ function buildAnchorRepository(overrides: Partial<AnchorRepositoryPort> = {}): A
   };
 }
 
+const VALID_SUBMIT_RESULT: AnchorSubmitResult = {
+  txHash: "0xtxhash",
+  alreadyAnchored: false,
+  anchoredAtBlockTimestamp: null,
+};
+
 function buildAnchorPort(overrides: Partial<AnchorPort> = {}): AnchorPort {
   return {
-    submitAnchor: vi
-      .fn()
-      .mockResolvedValue({ txHash: "0xtxhash", alreadyAnchored: false } satisfies AnchorSubmitResult),
+    submitAnchor: vi.fn().mockResolvedValue(VALID_SUBMIT_RESULT),
+    getConfirmationStatus: vi.fn(),
+    ...overrides,
+  };
+}
+
+function buildQueue(overrides: Partial<QueuePort> = {}): QueuePort {
+  return {
+    send: vi.fn().mockResolvedValue("job-1"),
+    sendAfter: vi.fn().mockResolvedValue("job-1"),
+    findLatestJobByTrustRecordId: vi.fn().mockResolvedValue(null),
     ...overrides,
   };
 }
@@ -71,6 +90,7 @@ describe("AnchorDtrHandler", () => {
   let trustRecordRepository: TrustRecordRepositoryPort;
   let anchorRepository: AnchorRepositoryPort;
   let anchorPort: AnchorPort;
+  let queue: QueuePort;
   let handler: AnchorDtrHandler;
 
   const payload = { trustRecordId: "trust-record-1", canonicalHash: "a".repeat(64) };
@@ -79,10 +99,11 @@ describe("AnchorDtrHandler", () => {
     trustRecordRepository = buildTrustRecordRepository();
     anchorRepository = buildAnchorRepository();
     anchorPort = buildAnchorPort();
-    handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository);
+    queue = buildQueue();
+    handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository, queue);
   });
 
-  it("success: submits the anchor and persists the txHash as PENDING", async () => {
+  it("success: submits the anchor, persists the txHash as PENDING, and enqueues confirm-anchor", async () => {
     await handler.handle(payload);
 
     expect(anchorPort.submitAnchor).toHaveBeenCalledWith(payload.canonicalHash);
@@ -90,25 +111,42 @@ describe("AnchorDtrHandler", () => {
       txHash: "0xtxhash",
       status: AnchorStatus.PENDING,
     });
+    expect(queue.send).toHaveBeenCalledWith(
+      CONFIRM_ANCHOR_QUEUE,
+      expect.objectContaining({
+        trustRecordId: "trust-record-1",
+        txHash: "0xtxhash",
+        anchorId: "anchor-1",
+        attemptStartedAt: expect.any(String),
+      }),
+    );
+    expect(trustRecordRepository.certify).not.toHaveBeenCalled();
   });
 
-  it("CRITICAL: AlreadyAnchored is treated as success — persists CONFIRMED with a null txHash, does not throw", async () => {
+  it("CRITICAL: AlreadyAnchored certifies the record IMMEDIATELY — no confirm-anchor enqueue, nothing to poll for", async () => {
     anchorPort = buildAnchorPort({
-      submitAnchor: vi.fn().mockResolvedValue({ txHash: null, alreadyAnchored: true }),
+      submitAnchor: vi.fn().mockResolvedValue({
+        txHash: null,
+        alreadyAnchored: true,
+        anchoredAtBlockTimestamp: new Date("2026-01-01T00:00:00.000Z"),
+      }),
     });
-    handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository);
+    handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository, queue);
 
     await expect(handler.handle(payload)).resolves.toBeUndefined();
 
     expect(anchorRepository.updateSubmissionResult).toHaveBeenCalledWith("anchor-1", {
       txHash: null,
       status: AnchorStatus.CONFIRMED,
+      blockTimestamp: new Date("2026-01-01T00:00:00.000Z"),
     });
+    expect(trustRecordRepository.certify).toHaveBeenCalledWith("trust-record-1");
+    expect(queue.send).not.toHaveBeenCalled();
   });
 
   it("throws when the TrustRecord does not exist (durability: pg-boss will retry)", async () => {
     trustRecordRepository = buildTrustRecordRepository({ findById: vi.fn().mockResolvedValue(null) });
-    handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository);
+    handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository, queue);
 
     await expect(handler.handle(payload)).rejects.toThrow(/TrustRecord not found/);
     expect(anchorRepository.updateSubmissionResult).not.toHaveBeenCalled();
@@ -118,7 +156,7 @@ describe("AnchorDtrHandler", () => {
     trustRecordRepository = buildTrustRecordRepository({
       findById: vi.fn().mockResolvedValue(buildTrustRecord({ anchorId: null })),
     });
-    handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository);
+    handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository, queue);
 
     await expect(handler.handle(payload)).rejects.toThrow(/no linked Anchor/);
   });
@@ -127,9 +165,27 @@ describe("AnchorDtrHandler", () => {
     anchorPort = buildAnchorPort({
       submitAnchor: vi.fn().mockRejectedValue(new Error("RPC timeout")),
     });
-    handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository);
+    handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository, queue);
 
     await expect(handler.handle(payload)).rejects.toThrow("RPC timeout");
     expect(anchorRepository.updateSubmissionResult).not.toHaveBeenCalled();
+    expect(queue.send).not.toHaveBeenCalled();
+  });
+
+  it("throws (does not silently swallow) if the record is somehow no longer ANCHORING when AlreadyAnchored fires", async () => {
+    trustRecordRepository = buildTrustRecordRepository({
+      findById: vi.fn().mockResolvedValue(buildTrustRecord({ state: TrustRecordState.CERTIFIED })),
+    });
+    anchorPort = buildAnchorPort({
+      submitAnchor: vi.fn().mockResolvedValue({
+        txHash: null,
+        alreadyAnchored: true,
+        anchoredAtBlockTimestamp: new Date(),
+      }),
+    });
+    handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository, queue);
+
+    await expect(handler.handle(payload)).rejects.toThrow();
+    expect(trustRecordRepository.certify).not.toHaveBeenCalled();
   });
 });

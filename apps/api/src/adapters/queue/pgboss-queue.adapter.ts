@@ -22,4 +22,30 @@ export class PgBossQueueAdapter implements QueuePort {
     const boss = this.pgBossService.getBoss();
     return boss.send(jobName, payload, tx ? { db: toPgBossDb(tx) } : undefined);
   }
+
+  async sendAfter(
+    jobName: string,
+    payload: Record<string, unknown>,
+    delaySeconds: number,
+  ): Promise<string | null> {
+    const boss = this.pgBossService.getBoss();
+    return boss.sendAfter(jobName, payload, null, delaySeconds);
+  }
+
+  async findLatestJobByTrustRecordId(
+    queueName: string,
+    trustRecordId: string,
+  ): Promise<{ state: string; output: unknown } | null> {
+    const db = this.pgBossService.getBoss().getDb();
+    const schema = this.pgBossService.getSchema();
+    // Table/column names come from pg-boss's own migration DDL, not user
+    // input — safe to interpolate the schema name (developer-controlled
+    // config, same trust level as PGBOSS_SCHEMA elsewhere in this app).
+    const { rows } = await db.executeSql(
+      `SELECT state, output FROM "${schema}".job WHERE name = $1 AND data->>'trustRecordId' = $2 ORDER BY created_on DESC LIMIT 1`,
+      [queueName, trustRecordId],
+    );
+    const row = rows[0] as { state: string; output: unknown } | undefined;
+    return row ? { state: row.state, output: row.output } : null;
+  }
 }

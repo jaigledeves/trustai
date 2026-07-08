@@ -12,6 +12,7 @@ import { ViemAnchorAdapter } from "../../adapters/chain/viem-anchor.adapter";
 import { PrismaService } from "../../adapters/prisma/prisma.service";
 import { AnalyzeDocumentHandler } from "../../application/certification/jobs/analyze-document.handler";
 import { AnchorDtrHandler } from "../../application/certification/jobs/anchor-dtr.handler";
+import { ConfirmAnchorHandler } from "../../application/certification/jobs/confirm-anchor.handler";
 import { AI_ANALYSIS_PORT, type AiAnalysisPort } from "../../ports/ai-analysis.port";
 import { ANCHOR_PORT, type AnchorPort } from "../../ports/anchor.port";
 import { ANCHOR_REPOSITORY_PORT } from "../../ports/anchor-repository.port";
@@ -33,6 +34,7 @@ import { JobRegistrationService } from "./job-registration.service";
     PrismaService,
     AnalyzeDocumentHandler,
     AnchorDtrHandler,
+    ConfirmAnchorHandler,
     { provide: TRUST_RECORD_REPOSITORY_PORT, useClass: PrismaTrustRecordRepository },
     { provide: ANCHOR_REPOSITORY_PORT, useClass: PrismaAnchorRepository },
     { provide: TEXT_EXTRACTION_PORT, useClass: UnpdfTextExtractionAdapter },

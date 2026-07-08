@@ -53,6 +53,8 @@ function buildRepository(overrides: Partial<DigitalAssetRepositoryPort> = {}): D
 function buildQueue(overrides: Partial<QueuePort> = {}): QueuePort {
   return {
     send: vi.fn().mockResolvedValue("job-1"),
+    sendAfter: vi.fn().mockResolvedValue("job-1"),
+    findLatestJobByTrustRecordId: vi.fn().mockResolvedValue(null),
     ...overrides,
   };
 }
