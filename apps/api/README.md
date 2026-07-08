@@ -90,9 +90,196 @@ Verified locally against a disposable `postgres:16-alpine` Docker container (`pr
 no migration files yet — see Open Questions in design.md): all 12 e2e assertions pass, including
 the two that initially caught a real bug — see "Gotcha" below.
 
+**Gotcha — e2e files run sequentially, not in parallel (`fileParallelism: false`).** Several e2e
+specs each boot a full `AppModule` (including `WorkerModule`), and every booted instance registers
+its own `boss.work()` consumer for the same pg-boss queues against the same shared Postgres
+schema. With file-level parallelism, pg-boss can dispatch a job (e.g. `anchor-dtr`) created by one
+test file's app instance to a *different* file's app instance — one with a `ChainNotConfiguredAnchorAdapter`
+instead of a real chain adapter — causing spurious failures. `vitest.e2e.config.ts` disables file
+parallelism to make this shared-infrastructure interaction deterministic; unit tests
+(`vitest.config.ts`) are unaffected and still run in parallel.
+
 **Gotcha — `Test.createTestingModule(...)` does not run `main.ts`'s `bootstrap()`.** The global
 `ValidationPipe` (and any other `app.use*` call in `main.ts`) is NOT applied automatically to an
 app built via Nest's testing utilities; it must be re-registered explicitly in the e2e spec's
 `beforeAll`. Missing this made `S-AUTH-3`/`S-AUTH-4` (malformed email / weak password) silently
 return `201` instead of `400` during development of this suite, because `class-validator`
 decorators on `RegisterDto`/`LoginDto` were never being enforced.
+
+### Spike findings (Phase 0 / task 0.1 — certification-flow): transactional pg-boss enqueue
+
+design.md's open question: does making pg-boss's `send()` atomic with a DTR row write (so the
+job never gets enqueued if the surrounding write rolls back, and vice versa) require bumping
+Prisma from v6 to v7 (to use pg-boss's built-in `fromPrisma()` adapter with
+`@prisma/adapter-pg`), or can a hand-rolled wrapper avoid the bump?
+
+**Decision: hand-rolled `IDatabase` wrapper over Prisma v6's `$transaction` callback. No Prisma
+version bump.**
+
+- pg-boss's transactional `db` option (accepted by `send`, `sendAfter`, `insert`, `flow`, ...)
+  only requires an object implementing `IDatabase`: `executeSql(text, values) => Promise<{ rows }>`.
+  This is the entire contract — see `pg-boss`'s own `fromKnex`/`fromKysely`/`fromDrizzle`/`fromPrisma`
+  adapters, which are all ~10-line wrappers around this one method.
+- pg-boss ships a `fromPrisma()` helper, but its docs state it "Requires Prisma v7+ with
+  `@prisma/adapter-pg`". Inspecting its actual implementation
+  (`node_modules/pg-boss/dist/adapters/prisma.js`) shows it only calls
+  `tx.$queryRawUnsafe(text, ...values)` on the object passed to `prisma.$transaction(async (tx) => ...)`.
+  `$queryRawUnsafe` on the transaction client has been available since early Prisma versions —
+  including the v6.19.3 already used by this project — so the "v7+" requirement in pg-boss's docs
+  is a documentation/support-scope choice by its maintainer, not a technical necessity of what the
+  function does.
+- **Verified empirically** with a throwaway spike script (`prisma db push` against a local
+  `postgres:16-alpine` container, `pg-boss@12.25.1`): a ~10-line wrapper —
+  `{ executeSql: (text, values) => tx.$queryRawUnsafe(text, ...values).then(rows => ({ rows })) }` —
+  passed to `boss.send(queue, data, { db: wrapper })` inside `prisma.$transaction(async (tx) => {...})`:
+  - **Commit path**: an `Organization` row write + `boss.send(...)` in the same transaction both
+    persisted together.
+  - **Rollback path**: throwing inside the same transaction (after both the row write and the
+    `boss.send(...)` call) rolled back *both* — the organization row was never persisted and no
+    job row appeared in the pg-boss job table. Confirmed atomicity in both directions.
+- **Risk comparison**:
+  - Prisma v6→v7 bump: major-version upgrade mid-change, touches every existing repository/adapter
+    in `apps/api` (`PrismaService`, `UserRepository`, all future Prisma repositories in this
+    change), requires adding `@prisma/adapter-pg` and switching `PrismaClient` construction to the
+    driver-adapter pattern, and risks subtle behavior differences across the entire auth vertical
+    slice this change does not otherwise need to touch. High risk, high blast radius, for a
+    capability (`fromPrisma()`) that a 10-line hand-rolled function fully replicates on the current
+    Prisma version.
+  - Hand-rolled `IDatabase` wrapper: ~10 lines, zero new production dependencies beyond `pg-boss`
+    itself, zero changes to existing Prisma usage, isolated to the one call site
+    (`UploadAssetUseCase`'s `analyze-document` enqueue in Phase 2/3) that needs the transactional
+    guarantee. Low risk, low blast radius.
+  - Per this change's own guidance ("prefer the lower-risk option if both work"), and since both
+    options work, **the hand-rolled wrapper is the chosen approach.** It will be implemented as
+    `src/adapters/queue/prisma-pgboss-db.adapter.ts` in task 1.4 and reused wherever a job must be
+    enqueued atomically with a DTR write.
+- **Residual risk carried forward**: this wrapper depends on pg-boss's `db` option contract
+  remaining a plain `{ executeSql }` interface. If a future pg-boss major version changes that
+  contract, revisit — but the same risk would apply equally to the `fromPrisma()` adapter, so this
+  is not a risk specific to choosing the hand-rolled path.
+
+### AI analysis adapter configuration (Phase 4 — certification-flow)
+
+The `analyze-document` worker job (`AnalyzeDocumentHandler`) calls an `AiAnalysisPort`
+implementation, selected via the `AI_ADAPTER` env var:
+
+| `AI_ADAPTER` | Adapter | Requires |
+|---|---|---|
+| `stub` (default) | `StubAiAnalysisAdapter` — deterministic canned output, no network call | nothing |
+| `openai` | `OpenAiAnalysisAdapter` — real OpenAI structured-outputs call | `OPENAI_API_KEY` |
+
+```bash
+AI_ADAPTER="openai"
+OPENAI_API_KEY="sk-..."
+OPENAI_MODEL="gpt-5.4-mini"   # optional, this is the default
+```
+
+If `AI_ADAPTER=openai` and `OPENAI_API_KEY` is missing, `OpenAiAnalysisAdapter`'s constructor
+throws `MissingOpenAiApiKeyError` immediately at boot (fail-fast, same principle as
+`AesGcmAdapter`'s key validation) rather than failing lazily on the first job.
+
+**Contract parity**: both adapters return `{ analysis, provenance }`, where `analysis` MUST
+validate against `AiAnalysisOutputSchema` (dtr-core's `TrustRecordV1Schema.shape.analysis`) —
+`AnalyzeDocumentHandler` re-validates this itself regardless of adapter, so the two are guaranteed
+interchangeable. Verified in `src/adapters/ai/analysis-contract-parity.spec.ts`: the stub leg
+always runs; the OpenAI leg is gated on `OPENAI_API_KEY` being present in the environment
+(`describe.skipIf`, same D7-style service-gating pattern as `isDatabaseAvailable`) and is skipped
+gracefully — not failed — in environments without a real API key (e.g. this sandbox).
+
+**Why the OpenAI adapter hand-writes its JSON Schema instead of using `zodResponseFormat`**: the
+`openai` SDK's `zodResponseFormat` helper (from `openai/helpers/zod`) requires a `ZodType` from
+either the `zod/v3` or `zod/v4` subpath. This project's installed `zod` (3.25.x) is a transitional
+release that bundles both a top-level classic-v3 API *and* a separate `zod/v3`/`zod/v4`
+compat-subpath implementation — passing dtr-core's schema (built against the top-level import)
+into `zodResponseFormat` hits a genuine TypeScript structural mismatch between those two
+internally-distinct `ZodObject`/`ZodEffects` shapes (`error TS2589: Type instantiation is
+excessively deep and possibly infinite`, reproduced and confirmed, not assumed). The correct long-term
+fix is bumping `zod` to a stable v4 release across both `apps/api` and `@trustai/dtr-core` — out of
+scope for this phase and a real risk to `dtr-core`'s canonicalization/hashing code (ADR-001 schema
+discipline: schemas are append-only, frozen forever). Per this change's "prefer the lower-risk
+option" principle, `src/adapters/ai/openai.adapter.ts` instead hand-writes a ~10-line JSON Schema
+mirroring `AiAnalysisOutputSchema`'s three fields — safe because `AnalyzeDocumentHandler` always
+re-validates the response against the real Zod schema on the way back in, so any drift between the
+hand-written mirror and dtr-core's schema surfaces immediately as a validation failure rather than
+silently diverging. `src/adapters/ai/analysis-contract-parity.spec.ts` also has a tripwire test
+asserting `AiAnalysisOutputSchema`'s field names haven't changed.
+
+## Local dev setup (certification-flow)
+
+The full certification golden path (upload → analyze → review → confirm → anchor → confirm-anchor
+→ CERTIFIED) needs three pieces of local infrastructure. Postgres and MinIO run via Docker;
+anvil (for on-chain testing) runs natively and is started manually.
+
+### 1. PostgreSQL + MinIO (Docker)
+
+```bash
+docker compose -f infrastructure/docker-compose.yml up -d
+```
+
+| Service | Purpose | Port(s) |
+|---|---|---|
+| `postgres` | App DB + pg-boss's own schema (`PGBOSS_SCHEMA`, same instance) | `5432` |
+| `minio` | S3-compatible object store for encrypted asset bytes | `9000` (API), `9001` (console — `http://localhost:9001`, `minioadmin`/`minioadmin`) |
+
+Apply the Prisma schema once the containers are healthy (no migrations yet — see design.md's Open
+Questions): `pnpm --filter @trustai/api exec prisma db push`.
+
+### 2. anvil (local EVM, for chain-anchoring tests only)
+
+Not part of `docker-compose.yml` (deliberate — anchoring is the one capability that needs a real
+EVM, and most day-to-day work on this package doesn't touch it). Install Foundry
+(`smart-contracts/README.md` has the exact native-Windows/macOS/Linux install steps — no WSL
+required), then:
+
+```bash
+anvil
+```
+
+This starts a local chain at `http://127.0.0.1:8545` (chain id `31337`) with 10 pre-funded
+accounts. `test/anchor-chain.e2e-spec.ts` and `test/certification-flow.e2e-spec.ts` each deploy
+their own fresh `AnchorRegistry` instance to it per run (`smart-contracts/out/` must be built
+first — `forge build` in `smart-contracts/`) and are skipped gracefully, not failed, if anvil
+isn't reachable or the build artifact is missing.
+
+To point the real app (not just tests) at anvil, set in `.env`:
+
+```bash
+CHAIN_RPC_URL="http://127.0.0.1:8545"
+CHAIN_ID="31337"
+WORKER_WALLET_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"  # anvil's well-known account #0 — public, only ever funds local anvil
+ANCHOR_CONTRACT_ADDRESS="<address printed by `forge create`/`forge script` against anvil>"
+```
+
+Without these three set, `WorkerModule`'s `ANCHOR_PORT` factory falls back to
+`ChainNotConfiguredAnchorAdapter` — the app boots and every other feature works normally; only an
+actual `POST /trust-records/:id/anchor` submission fails, with a clear, actionable error.
+
+**Gotcha (pg-boss job backlog)**: repeated manual testing across a long dev session accumulates
+stale `analyze-document`/`anchor-dtr`/`confirm-anchor` job rows, which can make timing-sensitive
+e2e runs (or manual smoke tests) flaky. Purge before trusting any timing-sensitive run:
+
+```sql
+DELETE FROM pgboss.job WHERE name IN ('analyze-document', 'anchor-dtr', 'confirm-anchor');
+```
+
+## Worker jobs (pg-boss)
+
+Registered by `JobRegistrationService` (`src/modules/worker/job-registration.service.ts`), started
+via `WorkerModule` as part of normal app boot (`app.init()` also starts the worker in tests —
+there is no separate worker process in this MVP).
+
+| Job | Handler | Payload | Retry / timeout policy |
+|---|---|---|---|
+| `analyze-document` | `AnalyzeDocumentHandler` | `{ trustRecordId, assetId, organizationId }` | pg-boss `retryLimit: 3`, `retryBackoff: true`, `retryDelay: 30s`, `expireInSeconds: 300`. Any thrown error (no text layer, AI provider failure, schema-invalid AI output) is surfaced as the job's `failed`/`retry` state — read back by `GET /trust-records/:id`'s analysis-failure visibility (see below), not a silent DRAFT stall. |
+| `anchor-dtr` | `AnchorDtrHandler` | `{ trustRecordId, canonicalHash }` | pg-boss `retryLimit: 5`, `retryBackoff: true`, `retryDelay: 60s`, `expireInSeconds: 600`. On success, persists the tx as `PENDING` and enqueues `confirm-anchor`. On an `AlreadyAnchored` revert, certifies the record directly (ANCHORING→CERTIFIED) — nothing to poll for, the hash is already a confirmed on-chain fact (durability: a worker restart re-processing the same job never double-submits). |
+| `confirm-anchor` | `ConfirmAnchorHandler` | `{ trustRecordId, txHash, anchorId, attemptStartedAt }` | No fixed pg-boss retry — the handler manages its own loop via self-requeue: polls `AnchorPort.getConfirmationStatus`, and if `< 2` confirmations (INV-32) and the timeout window hasn't elapsed, re-schedules itself via `sendAfter(CONFIRM_ANCHOR_POLL_INTERVAL_SECONDS)`. On `>= 2` confirmations: `Anchor` → `CONFIRMED` (with `blockTimestamp`), `TrustRecord` ANCHORING→CERTIFIED. On timeout (`CONFIRM_ANCHOR_TIMEOUT_SECONDS`, default 600s): ANCHORING→FAILED (visible, not a silent stall) then immediately FAILED→ANCHORING with a fresh `anchor-dtr` job re-enqueued atomically (RF-033 automatic retry). |
+
+### Analysis-failure visibility (`GET /trust-records/:id`)
+
+No `TrustRecord.analysisStatus` column exists (deliberate — see design.md's "Analysis-failure
+visibility" decision). Instead, the detail endpoint joins the latest `analyze-document` pg-boss job
+row for that record (`data->>'trustRecordId'`) and surfaces `output.message` as
+`analysisFailureReason` whenever that job's state is `failed` **or** `retry` — deliberately
+including the in-progress `retry` state, not just the terminal `failed` one, since with
+`retryDelay: 30s`/`retryLimit: 3` a genuinely failed analysis (e.g. a scanned PDF with no text
+layer) would otherwise stay invisible for 90+ seconds after the very first attempt.
