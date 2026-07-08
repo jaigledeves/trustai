@@ -301,5 +301,73 @@ describe.skipIf(!dbAvailable || !storageAvailable)(
       const record = await prisma.trustRecord.findUnique({ where: { id: trustRecordId } });
       expect(record?.state).toBe("DISCARDED");
     });
+
+    it("S-DTR-6: GET detail returns the record with AI fields and provenance for the owning org", async () => {
+      const userA = await createAuthenticatedUser("dtr-get-detail");
+      const { trustRecordId, assetId } = await uploadAndWaitForAnalysis(
+        userA.accessToken,
+        "S-DTR-6",
+      );
+
+      const getRes = await request(app.getHttpServer())
+        .get(`/trust-records/${trustRecordId}`)
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+      expect(getRes.status).toBe(200);
+      expect(getRes.body.id).toBe(trustRecordId);
+      expect(getRes.body.assetId).toBe(assetId);
+      expect(getRes.body.state).toBe("DRAFT");
+      expect(typeof getRes.body.aiSummary).toBe("string");
+      expect(getRes.body.aiProvider).toBeTruthy();
+      expect(getRes.body.anchor).toBeNull();
+      expect(getRes.body.analysisFailureReason).toBeNull();
+    });
+
+    it("S-DTR-7: GET detail returns 404, not 403, for a cross-org request", async () => {
+      const userA = await createAuthenticatedUser("dtr-get-cross-org-a");
+      const userB = await createAuthenticatedUser("dtr-get-cross-org-b");
+      const { trustRecordId } = await uploadAndWaitForAnalysis(userA.accessToken, "S-DTR-7");
+
+      const getRes = await request(app.getHttpServer())
+        .get(`/trust-records/${trustRecordId}`)
+        .set("Authorization", `Bearer ${userB.accessToken}`)
+        .send();
+      expect(getRes.status).toBe(404);
+    });
+
+    it("S-DTR-8: GET detail surfaces the analyze-document failure reason (analysis-failure visibility)", async () => {
+      const userA = await createAuthenticatedUser("dtr-get-analysis-failed");
+
+      // Empty content stream -> unpdf.adapter's NoTextLayerError -> the
+      // real analyze-document job fails visibly (ai-document-analysis
+      // spec: "Explicit No-Text-Layer Failure").
+      const pdfBytes = buildMinimalPdf("");
+      const uploadRes = await request(app.getHttpServer())
+        .post("/assets")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .attach("file", pdfBytes, { filename: "no-text.pdf", contentType: "application/pdf" });
+      expect(uploadRes.status).toBe(201);
+      const { trustRecordId } = uploadRes.body as { trustRecordId: string };
+
+      const deadline = Date.now() + 15_000;
+      let reason: string | null = null;
+      while (Date.now() < deadline) {
+        const getRes = await request(app.getHttpServer())
+          .get(`/trust-records/${trustRecordId}`)
+          .set("Authorization", `Bearer ${userA.accessToken}`)
+          .send();
+        if (getRes.body.analysisFailureReason) {
+          reason = getRes.body.analysisFailureReason as string;
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+
+      expect(reason).toContain("no extractable text layer");
+
+      const record = await prisma.trustRecord.findUnique({ where: { id: trustRecordId } });
+      expect(record?.state).toBe("DRAFT");
+      expect(record?.aiSummary).toBeNull();
+    });
   },
 );
