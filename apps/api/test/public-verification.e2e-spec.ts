@@ -1,6 +1,7 @@
 import type { INestApplication } from "@nestjs/common";
 import { ValidationPipe } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
+import { sha256Hex, verifyAssetAgainstRecord } from "@trustai/dtr-core";
 import {
   createPublicClient,
   createWalletClient,
@@ -11,6 +12,7 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { ANCHOR_REGISTRY_ABI } from "../src/adapters/chain/anchor-registry.abi";
 import { PrismaService } from "../src/adapters/prisma/prisma.service";
 import { NOTIFICATION_PORT } from "../src/ports/notification.port";
 import {
@@ -412,16 +414,112 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
       }
     }, 30_000);
 
-    // Runs LAST — deliberately exhausts the shared `app`'s POST throttle
-    // bucket for this IP/route. Whatever budget remains from earlier
-    // tests, 21 more calls guarantees the 429 triggers by the 21st at the
-    // latest (spec: "Excess POST requests are throttled").
-    it("S-PV-6: 21st POST within the 60s window is throttled (429)", async () => {
+    it(
+      "S-PV-6: CRITICAL — independent reproducibility: a dtr-core hash computed OUTSIDE the app, " +
+        "plus a raw chain read bypassing AnchorPort, agree with the app's own VALID verdict " +
+        "(spec #247 'Verdict matches independent recomputation')",
+      async () => {
+        const pdfBytes = buildMinimalPdf("BT /F1 24 Tf 50 100 Td (PV-REPRO) Tj ET");
+        const trustRecordId = await certifyNewRecord("pv-repro", pdfBytes);
+
+        // ── Independent path: bypasses VerifyDocumentUseCase AND AnchorPort
+        // entirely. Reads the certified fields straight from Postgres (the
+        // same fields any verifier holding a legitimately-issued DTR would
+        // have — publishing that DTR JSON to a verifier is UC-05, out of
+        // scope here; what's under test is whether the ALGORITHM + ON-CHAIN
+        // STATE are independently reproducible, not the transport). Rebuilds
+        // the TrustRecordV1 candidate and calls dtr-core's OWN exported
+        // `verifyAssetAgainstRecord`/`sha256Hex` — the exact same public
+        // functions any third-party verifier (or the CLI in
+        // smart-contracts/README.md) would call — never TrustAI's own
+        // `VerifyDocumentUseCase` code.
+        const dbRecord = await prisma.trustRecord.findUniqueOrThrow({
+          where: { id: trustRecordId },
+          include: { asset: true },
+        });
+        const independentCandidate = {
+          schemaVersion: dbRecord.schemaVersion,
+          asset: {
+            sha256: dbRecord.asset.sha256,
+            mimeType: dbRecord.asset.mimeType,
+            sizeBytes: dbRecord.asset.sizeBytes,
+            ...(dbRecord.asset.filename ? { filename: dbRecord.asset.filename } : {}),
+          },
+          analysis: {
+            summary: dbRecord.aiSummary,
+            classification: dbRecord.aiClassification,
+            language: dbRecord.aiLanguage,
+          },
+          provenance: {
+            provider: dbRecord.aiProvider,
+            model: dbRecord.aiModel,
+            modelVersion: dbRecord.aiModelVersion,
+            promptVersion: dbRecord.aiPromptVersion,
+            taxonomyVersion: dbRecord.aiTaxonomyVersion,
+            analyzedAt: dbRecord.aiAnalyzedAt?.toISOString(),
+          },
+          issuedAt: dbRecord.issuedAt?.toISOString(),
+        };
+        const independentUploadSha256 = await sha256Hex(pdfBytes);
+        const verification = await verifyAssetAgainstRecord(independentCandidate, independentUploadSha256);
+        expect(verification.status).toBe("asset_verified");
+        if (verification.status !== "asset_verified") {
+          throw new Error("unreachable — asserted above");
+        }
+        const independentCanonicalHash = verification.canonicalHash;
+
+        // The app's OWN stored canonicalHash (computed at confirm time by
+        // ConfirmReviewUseCase) equals what this test independently derived —
+        // proof the hashing algorithm itself is reproducible, not a
+        // TrustAI-only secret computation.
+        expect(dbRecord.canonicalHash).toBe(independentCanonicalHash);
+
+        // Raw chain read — a plain viem PublicClient call directly against
+        // AnchorRegistry, NOT AnchorPort/ViemAnchorAdapter/the use case.
+        const isAnchoredOnChain = await publicClient.readContract({
+          address: contractAddress,
+          abi: ANCHOR_REGISTRY_ABI,
+          functionName: "isAnchored",
+          args: [`0x${independentCanonicalHash}` as `0x${string}`],
+        });
+        expect(isAnchoredOnChain).toBe(true);
+
+        // Compare to the app's own verdict through the real HTTP endpoint —
+        // two independently-arrived-at conclusions, same answer.
+        const postRes = await request(app.getHttpServer())
+          .post(`/public/verify/${trustRecordId}`)
+          .attach("file", pdfBytes, { filename: "doc.pdf", contentType: "application/pdf" });
+        expect(postRes.status).toBe(200);
+        expect(postRes.body.verdict).toBe("VALID");
+        expect(postRes.body.chainAnchor.anchored).toBe(true);
+      },
+      30_000,
+    );
+
+    // Runs after S-PV-6 (which adds one POST call) and before the GET
+    // throttle test — deliberately exhausts the shared `app`'s POST
+    // throttle bucket for this IP/route. Whatever budget remains from
+    // earlier tests, 21 more calls guarantees the 429 triggers by the 21st
+    // at the latest (spec: "Excess POST requests are throttled").
+    it("S-PV-7: 21st POST within the 60s window is throttled (429)", async () => {
       let lastStatus = 0;
       for (let i = 0; i < 21; i++) {
         const res = await request(app.getHttpServer())
           .post("/public/verify/throttle-probe-id")
           .attach("file", Buffer.from("probe"), { filename: "probe.pdf", contentType: "application/pdf" });
+        lastStatus = res.status;
+      }
+      expect(lastStatus).toBe(429);
+    }, 30_000);
+
+    // Runs LAST — GET has its own separate throttle bucket (60/min) from
+    // POST's (20/min), so ordering relative to S-PV-7 doesn't matter for
+    // correctness, but keeping both throttle-exhaustion tests together and
+    // last avoids any risk of starving earlier GET-based assertions.
+    it("S-PV-8: 61st GET within the 60s window is throttled (429)", async () => {
+      let lastStatus = 0;
+      for (let i = 0; i < 61; i++) {
+        const res = await request(app.getHttpServer()).get("/public/verify/throttle-probe-id").send();
         lastStatus = res.status;
       }
       expect(lastStatus).toBe(429);
