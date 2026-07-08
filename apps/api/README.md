@@ -90,6 +90,15 @@ Verified locally against a disposable `postgres:16-alpine` Docker container (`pr
 no migration files yet — see Open Questions in design.md): all 12 e2e assertions pass, including
 the two that initially caught a real bug — see "Gotcha" below.
 
+**Gotcha — e2e files run sequentially, not in parallel (`fileParallelism: false`).** Several e2e
+specs each boot a full `AppModule` (including `WorkerModule`), and every booted instance registers
+its own `boss.work()` consumer for the same pg-boss queues against the same shared Postgres
+schema. With file-level parallelism, pg-boss can dispatch a job (e.g. `anchor-dtr`) created by one
+test file's app instance to a *different* file's app instance — one with a `ChainNotConfiguredAnchorAdapter`
+instead of a real chain adapter — causing spurious failures. `vitest.e2e.config.ts` disables file
+parallelism to make this shared-infrastructure interaction deterministic; unit tests
+(`vitest.config.ts`) are unaffected and still run in parallel.
+
 **Gotcha — `Test.createTestingModule(...)` does not run `main.ts`'s `bootstrap()`.** The global
 `ValidationPipe` (and any other `app.use*` call in `main.ts`) is NOT applied automatically to an
 app built via Nest's testing utilities; it must be re-registered explicitly in the e2e spec's
@@ -194,3 +203,83 @@ re-validates the response against the real Zod schema on the way back in, so any
 hand-written mirror and dtr-core's schema surfaces immediately as a validation failure rather than
 silently diverging. `src/adapters/ai/analysis-contract-parity.spec.ts` also has a tripwire test
 asserting `AiAnalysisOutputSchema`'s field names haven't changed.
+
+## Local dev setup (certification-flow)
+
+The full certification golden path (upload → analyze → review → confirm → anchor → confirm-anchor
+→ CERTIFIED) needs three pieces of local infrastructure. Postgres and MinIO run via Docker;
+anvil (for on-chain testing) runs natively and is started manually.
+
+### 1. PostgreSQL + MinIO (Docker)
+
+```bash
+docker compose -f infrastructure/docker-compose.yml up -d
+```
+
+| Service | Purpose | Port(s) |
+|---|---|---|
+| `postgres` | App DB + pg-boss's own schema (`PGBOSS_SCHEMA`, same instance) | `5432` |
+| `minio` | S3-compatible object store for encrypted asset bytes | `9000` (API), `9001` (console — `http://localhost:9001`, `minioadmin`/`minioadmin`) |
+
+Apply the Prisma schema once the containers are healthy (no migrations yet — see design.md's Open
+Questions): `pnpm --filter @trustai/api exec prisma db push`.
+
+### 2. anvil (local EVM, for chain-anchoring tests only)
+
+Not part of `docker-compose.yml` (deliberate — anchoring is the one capability that needs a real
+EVM, and most day-to-day work on this package doesn't touch it). Install Foundry
+(`smart-contracts/README.md` has the exact native-Windows/macOS/Linux install steps — no WSL
+required), then:
+
+```bash
+anvil
+```
+
+This starts a local chain at `http://127.0.0.1:8545` (chain id `31337`) with 10 pre-funded
+accounts. `test/anchor-chain.e2e-spec.ts` and `test/certification-flow.e2e-spec.ts` each deploy
+their own fresh `AnchorRegistry` instance to it per run (`smart-contracts/out/` must be built
+first — `forge build` in `smart-contracts/`) and are skipped gracefully, not failed, if anvil
+isn't reachable or the build artifact is missing.
+
+To point the real app (not just tests) at anvil, set in `.env`:
+
+```bash
+CHAIN_RPC_URL="http://127.0.0.1:8545"
+CHAIN_ID="31337"
+WORKER_WALLET_PRIVATE_KEY="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"  # anvil's well-known account #0 — public, only ever funds local anvil
+ANCHOR_CONTRACT_ADDRESS="<address printed by `forge create`/`forge script` against anvil>"
+```
+
+Without these three set, `WorkerModule`'s `ANCHOR_PORT` factory falls back to
+`ChainNotConfiguredAnchorAdapter` — the app boots and every other feature works normally; only an
+actual `POST /trust-records/:id/anchor` submission fails, with a clear, actionable error.
+
+**Gotcha (pg-boss job backlog)**: repeated manual testing across a long dev session accumulates
+stale `analyze-document`/`anchor-dtr`/`confirm-anchor` job rows, which can make timing-sensitive
+e2e runs (or manual smoke tests) flaky. Purge before trusting any timing-sensitive run:
+
+```sql
+DELETE FROM pgboss.job WHERE name IN ('analyze-document', 'anchor-dtr', 'confirm-anchor');
+```
+
+## Worker jobs (pg-boss)
+
+Registered by `JobRegistrationService` (`src/modules/worker/job-registration.service.ts`), started
+via `WorkerModule` as part of normal app boot (`app.init()` also starts the worker in tests —
+there is no separate worker process in this MVP).
+
+| Job | Handler | Payload | Retry / timeout policy |
+|---|---|---|---|
+| `analyze-document` | `AnalyzeDocumentHandler` | `{ trustRecordId, assetId, organizationId }` | pg-boss `retryLimit: 3`, `retryBackoff: true`, `retryDelay: 30s`, `expireInSeconds: 300`. Any thrown error (no text layer, AI provider failure, schema-invalid AI output) is surfaced as the job's `failed`/`retry` state — read back by `GET /trust-records/:id`'s analysis-failure visibility (see below), not a silent DRAFT stall. |
+| `anchor-dtr` | `AnchorDtrHandler` | `{ trustRecordId, canonicalHash }` | pg-boss `retryLimit: 5`, `retryBackoff: true`, `retryDelay: 60s`, `expireInSeconds: 600`. On success, persists the tx as `PENDING` and enqueues `confirm-anchor`. On an `AlreadyAnchored` revert, certifies the record directly (ANCHORING→CERTIFIED) — nothing to poll for, the hash is already a confirmed on-chain fact (durability: a worker restart re-processing the same job never double-submits). |
+| `confirm-anchor` | `ConfirmAnchorHandler` | `{ trustRecordId, txHash, anchorId, attemptStartedAt }` | No fixed pg-boss retry — the handler manages its own loop via self-requeue: polls `AnchorPort.getConfirmationStatus`, and if `< 2` confirmations (INV-32) and the timeout window hasn't elapsed, re-schedules itself via `sendAfter(CONFIRM_ANCHOR_POLL_INTERVAL_SECONDS)`. On `>= 2` confirmations: `Anchor` → `CONFIRMED` (with `blockTimestamp`), `TrustRecord` ANCHORING→CERTIFIED. On timeout (`CONFIRM_ANCHOR_TIMEOUT_SECONDS`, default 600s): ANCHORING→FAILED (visible, not a silent stall) then immediately FAILED→ANCHORING with a fresh `anchor-dtr` job re-enqueued atomically (RF-033 automatic retry). |
+
+### Analysis-failure visibility (`GET /trust-records/:id`)
+
+No `TrustRecord.analysisStatus` column exists (deliberate — see design.md's "Analysis-failure
+visibility" decision). Instead, the detail endpoint joins the latest `analyze-document` pg-boss job
+row for that record (`data->>'trustRecordId'`) and surfaces `output.message` as
+`analysisFailureReason` whenever that job's state is `failed` **or** `retry` — deliberately
+including the in-progress `retry` state, not just the terminal `failed` one, since with
+`retryDelay: 30s`/`retryLimit: 3` a genuinely failed analysis (e.g. a scanned PDF with no text
+layer) would otherwise stay invisible for 90+ seconds after the very first attempt.
