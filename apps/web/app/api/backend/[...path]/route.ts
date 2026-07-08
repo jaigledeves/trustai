@@ -40,8 +40,8 @@ async function proxyRequest(
   const response = await fetch(targetUrl, {
     method: request.method,
     headers,
-    body: body && body.byteLength > 0 ? body : undefined,
     cache: "no-store",
+    ...(body && body.byteLength > 0 ? { body } : {}),
   });
 
   if (!response.ok) {
