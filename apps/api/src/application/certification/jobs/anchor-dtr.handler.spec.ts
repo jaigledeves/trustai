@@ -73,6 +73,7 @@ function buildAnchorPort(overrides: Partial<AnchorPort> = {}): AnchorPort {
   return {
     submitAnchor: vi.fn().mockResolvedValue(VALID_SUBMIT_RESULT),
     getConfirmationStatus: vi.fn(),
+    isAnchored: vi.fn(),
     ...overrides,
   };
 }
