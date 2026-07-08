@@ -24,15 +24,13 @@ describe("buildSessionCookieOptions (pure — spec: JWT Never Exposed to Client 
   });
 
   it("is only marked secure in production (dev over http must still work)", () => {
-    const original = process.env["NODE_ENV"];
-
-    process.env["NODE_ENV"] = "production";
+    vi.stubEnv("NODE_ENV", "production");
     expect(buildSessionCookieOptions().secure).toBe(true);
 
-    process.env["NODE_ENV"] = "development";
+    vi.stubEnv("NODE_ENV", "development");
     expect(buildSessionCookieOptions().secure).toBe(false);
 
-    process.env["NODE_ENV"] = original;
+    vi.unstubAllEnvs();
   });
 });
 

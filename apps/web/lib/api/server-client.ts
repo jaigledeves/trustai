@@ -37,8 +37,10 @@ export async function serverFetch<T>(
   const response = await fetch(url, {
     method: options.method ?? "GET",
     headers,
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
     cache: "no-store",
+    ...(options.body !== undefined
+      ? { body: JSON.stringify(options.body) }
+      : {}),
   });
 
   if (!response.ok) {
