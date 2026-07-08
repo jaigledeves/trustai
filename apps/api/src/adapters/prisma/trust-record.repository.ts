@@ -1,11 +1,18 @@
 import { Injectable } from "@nestjs/common";
-import type { TrustRecord as PrismaTrustRecord } from "@prisma/client";
+import type {
+  Anchor as PrismaAnchor,
+  DigitalAsset as PrismaDigitalAsset,
+  TrustRecord as PrismaTrustRecord,
+} from "@prisma/client";
+import { Anchor, AnchorStatus } from "../../domain/anchor.entity";
+import { AssetStatus, DigitalAsset } from "../../domain/digital-asset.entity";
 import { TrustRecord, TrustRecordState } from "../../domain/trust-record.entity";
 import type {
   AiAnalysisUpdateFields,
   ConfirmToReadyFields,
   ReviewFieldsUpdate,
   TrustRecordRepositoryPort,
+  TrustRecordWithAssetAndAnchor,
 } from "../../ports/trust-record-repository.port";
 import type { TransactionHandle } from "../../ports/queue.port";
 import { PrismaService } from "./prisma.service";
@@ -33,6 +40,26 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
       where: { id, asset: { organizationId } },
     });
     return record ? this.toDomain(record) : null;
+  }
+
+  async findByIdWithAssetAndAnchor(id: string): Promise<TrustRecordWithAssetAndAnchor | null> {
+    // public-verification (UC-02): deliberately unscoped — see the port
+    // doc comment. One query, joined via Prisma's `include`, never a
+    // separate round-trip per related row.
+    const record = await this.prisma.trustRecord.findUnique({
+      where: { id },
+      include: { asset: true, anchor: true },
+    });
+    if (!record) {
+      return null;
+    }
+
+    return {
+      trustRecord: this.toDomain(record),
+      issuedAt: record.issuedAt ? record.issuedAt.toISOString() : null,
+      asset: this.assetToDomain(record.asset),
+      anchor: record.anchor ? this.anchorToDomain(record.anchor) : null,
+    };
   }
 
   async updateAiAnalysis(id: string, fields: AiAnalysisUpdateFields): Promise<void> {
@@ -176,6 +203,57 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
         return TrustRecordState.FAILED;
       case "DISCARDED":
         return TrustRecordState.DISCARDED;
+    }
+  }
+
+  private assetToDomain(record: PrismaDigitalAsset): DigitalAsset {
+    return new DigitalAsset(
+      record.id,
+      record.sha256,
+      record.mimeType,
+      record.sizeBytes,
+      record.filename,
+      record.storageRef,
+      this.assetToDomainStatus(record.status),
+      record.organizationId,
+      record.createdByUserId,
+      record.createdAt,
+    );
+  }
+
+  private assetToDomainStatus(status: PrismaDigitalAsset["status"]): AssetStatus {
+    switch (status) {
+      case "PENDING":
+        return AssetStatus.PENDING;
+      case "READY":
+        return AssetStatus.READY;
+      case "DELETED":
+        return AssetStatus.DELETED;
+    }
+  }
+
+  private anchorToDomain(record: PrismaAnchor): Anchor {
+    return new Anchor(
+      record.id,
+      record.chain,
+      record.network,
+      record.txHash,
+      record.merkleRoot,
+      record.blockTimestamp,
+      this.anchorToDomainStatus(record.status),
+      record.createdAt,
+      record.updatedAt,
+    );
+  }
+
+  private anchorToDomainStatus(status: PrismaAnchor["status"]): AnchorStatus {
+    switch (status) {
+      case "PENDING":
+        return AnchorStatus.PENDING;
+      case "CONFIRMED":
+        return AnchorStatus.CONFIRMED;
+      case "FAILED":
+        return AnchorStatus.FAILED;
     }
   }
 }

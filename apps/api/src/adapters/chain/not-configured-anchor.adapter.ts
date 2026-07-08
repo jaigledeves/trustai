@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type {
+  AnchorExistenceStatus,
   AnchorPort,
   AnchorSubmitResult,
   ConfirmationStatus,
@@ -31,6 +32,10 @@ export class ChainNotConfiguredAnchorAdapter implements AnchorPort {
   }
 
   async getConfirmationStatus(_txHash: string): Promise<ConfirmationStatus> {
+    throw new ChainNotConfiguredError();
+  }
+
+  async isAnchored(_canonicalHash: string): Promise<AnchorExistenceStatus> {
     throw new ChainNotConfiguredError();
   }
 }

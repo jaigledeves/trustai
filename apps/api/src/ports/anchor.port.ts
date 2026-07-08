@@ -30,6 +30,18 @@ export interface ConfirmationStatus {
   blockTimestamp: Date | null;
 }
 
+export interface AnchorExistenceStatus {
+  anchored: boolean;
+  /**
+   * The on-chain block timestamp the hash was anchored at
+   * (`AnchorRegistry.anchoredAt()`). `null` when `anchored` is false — there
+   * is nothing to read. design.md "AnchorPort.isAnchored shape": no
+   * `txHash` here — `AnchorRegistry` has no hash->txHash getter; callers
+   * that need `txHash` already have it from the DB `Anchor` row.
+   */
+  blockTimestamp: Date | null;
+}
+
 /**
  * Chain-agnostic anchoring port (design.md "Chain client" decision: viem,
  * `PublicClient`/`WalletClient` split makes this trivially fakeable in
@@ -53,4 +65,13 @@ export interface AnchorPort {
    * timeout logic (not this port) decides when to give up.
    */
   getConfirmationStatus(txHash: string): Promise<ConfirmationStatus>;
+
+  /**
+   * blockchain-anchoring spec (delta) "Read-Only Anchor Existence Check":
+   * a read against `AnchorRegistry.isAnchored()`/`anchoredAt()` — no
+   * wallet, no transaction, never mutates chain state. Used by public
+   * verification (UC-02) to corroborate a `canonicalHash` on-chain
+   * without needing the worker's private key.
+   */
+  isAnchored(canonicalHash: string): Promise<AnchorExistenceStatus>;
 }

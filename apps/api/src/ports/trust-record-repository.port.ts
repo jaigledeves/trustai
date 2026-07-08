@@ -1,7 +1,25 @@
+import type { Anchor } from "../domain/anchor.entity";
+import type { DigitalAsset } from "../domain/digital-asset.entity";
 import type { TrustRecord } from "../domain/trust-record.entity";
 import type { TransactionHandle } from "./queue.port";
 
 export const TRUST_RECORD_REPOSITORY_PORT = Symbol("TrustRecordRepositoryPort");
+
+/**
+ * public-verification design.md "Repository lookup" decision: everything
+ * `VerifyDocumentUseCase` needs from one unscoped query — `trustRecord`
+ * (the domain entity, unchanged), `issuedAt` (persisted at the DRAFT->READY
+ * transition — `TrustRecord` itself deliberately doesn't carry it, see
+ * `ConfirmToReadyFields`), `asset` and `anchor` (existing domain entities,
+ * reused as-is rather than duplicating their fields here).
+ */
+export interface TrustRecordWithAssetAndAnchor {
+  trustRecord: TrustRecord;
+  /** ISO 8601 UTC instant, `null` while still DRAFT (never confirmed). */
+  issuedAt: string | null;
+  asset: DigitalAsset;
+  anchor: Anchor | null;
+}
 
 export interface AiAnalysisUpdateFields {
   aiSummary: string;
@@ -48,6 +66,17 @@ export interface TrustRecordRepositoryPort {
    * leaking existence across orgs.
    */
   findByIdForOrganization(organizationId: string, id: string): Promise<TrustRecord | null>;
+
+  /**
+   * public-verification (UC-02): unscoped by design — the public
+   * verification endpoints have no `organizationId` to scope by (design.md
+   * "Repository lookup" decision, rejecting composing
+   * `AnchorRepositoryPort.findById` + `DigitalAssetRepositoryPort.findById`
+   * specifically because the latter requires one). One Prisma query
+   * (`include: {asset, anchor}`) — never leaks more than existence + the
+   * fields `VerifyDocumentUseCase` already re-derives a verdict from.
+   */
+  findByIdWithAssetAndAnchor(id: string): Promise<TrustRecordWithAssetAndAnchor | null>;
 
   /**
    * Writes all AI fields + provenance atomically in one call — the caller

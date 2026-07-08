@@ -60,6 +60,7 @@ function buildTrustRecordRepository(
   return {
     findById: vi.fn().mockResolvedValue(buildTrustRecord()),
     findByIdForOrganization: vi.fn().mockResolvedValue(buildTrustRecord()),
+    findByIdWithAssetAndAnchor: vi.fn(),
     updateAiAnalysis: vi.fn().mockResolvedValue(undefined),
     updateReviewFields: vi.fn().mockResolvedValue(undefined),
     confirmToReady: vi.fn().mockResolvedValue(undefined),
