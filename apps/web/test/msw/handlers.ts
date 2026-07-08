@@ -1,4 +1,4 @@
-import { http, type HttpHandler } from "msw";
+import type { HttpHandler } from "msw";
 
 /**
  * Default (happy-path-agnostic) request handlers for the mocked NestJS API.
