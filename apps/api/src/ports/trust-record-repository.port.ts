@@ -1,6 +1,6 @@
 import type { Anchor } from "../domain/anchor.entity";
 import type { DigitalAsset } from "../domain/digital-asset.entity";
-import type { TrustRecord } from "../domain/trust-record.entity";
+import type { TrustRecord, TrustRecordState } from "../domain/trust-record.entity";
 import type { TransactionHandle } from "./queue.port";
 
 export const TRUST_RECORD_REPOSITORY_PORT = Symbol("TrustRecordRepositoryPort");
@@ -47,6 +47,19 @@ export interface ConfirmToReadyFields {
   issuedAt: string;
 }
 
+/** web-history (Phase 2 companion slice): list-view fields only — no AI/anchor joins. */
+export interface TrustRecordListItem {
+  id: string;
+  state: TrustRecordState;
+  filename: string | null;
+  createdAt: Date;
+}
+
+export interface TrustRecordListResult {
+  items: TrustRecordListItem[];
+  total: number;
+}
+
 export interface TrustRecordRepositoryPort {
   /**
    * Unscoped by organizationId: `TrustRecord` has no `organizationId`
@@ -66,6 +79,20 @@ export interface TrustRecordRepositoryPort {
    * leaking existence across orgs.
    */
   findByIdForOrganization(organizationId: string, id: string): Promise<TrustRecord | null>;
+
+  /**
+   * web-history (Phase 2 companion slice): org-scoped, paginated list for
+   * the frontend's `/dtrs` view. Same org-scoping join pattern as
+   * `findByIdForOrganization` (RNF-004: filtered at the query level via
+   * `DigitalAsset.organizationId`, never by post-filtering an unscoped
+   * result). List-view fields only — no AI/anchor joins (those are the
+   * detail view's job via `findByIdForOrganization` + the anchor repo).
+   */
+  findAllForOrganization(
+    organizationId: string,
+    page: number,
+    pageSize: number,
+  ): Promise<TrustRecordListResult>;
 
   /**
    * public-verification (UC-02): unscoped by design — the public

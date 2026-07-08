@@ -55,6 +55,7 @@ function buildTrustRecordRepository(
         await onRetryWithinTransaction({ $queryRawUnsafe: vi.fn() });
       }
     }),
+    findAllForOrganization: vi.fn(),
     ...overrides,
   };
 }

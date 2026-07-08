@@ -49,6 +49,7 @@ function buildTrustRecordRepository(
     certify: vi.fn().mockResolvedValue(undefined),
     markAnchoringFailed: vi.fn(),
     retryAnchoring: vi.fn(),
+    findAllForOrganization: vi.fn(),
     ...overrides,
   };
 }
