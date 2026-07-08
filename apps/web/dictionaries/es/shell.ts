@@ -8,6 +8,7 @@ export const shellDictionary = {
   appName: "TrustAI",
   nav: {
     dtrs: "Mis DTR",
+    newCertification: "Certificar documento",
     logout: "Cerrar sesión",
   },
   session: {

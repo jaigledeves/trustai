@@ -27,6 +27,7 @@ export default async function DashboardLayout({
         <span className="font-semibold">{shellDictionary.appName}</span>
         <nav className="flex items-center gap-4">
           <Link href="/dtrs">{shellDictionary.nav.dtrs}</Link>
+          <Link href="/dtrs/new">{shellDictionary.nav.newCertification}</Link>
           <LogoutButton />
         </nav>
       </header>
