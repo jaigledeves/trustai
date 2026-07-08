@@ -107,6 +107,36 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
     });
   }
 
+  async certify(id: string): Promise<void> {
+    await this.prisma.trustRecord.update({
+      where: { id },
+      data: { state: "CERTIFIED" },
+    });
+  }
+
+  async markAnchoringFailed(id: string): Promise<void> {
+    await this.prisma.trustRecord.update({
+      where: { id },
+      data: { state: "FAILED" },
+    });
+  }
+
+  async retryAnchoring(
+    id: string,
+    onRetryWithinTransaction?: (tx: TransactionHandle) => Promise<void>,
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.trustRecord.update({
+        where: { id },
+        data: { state: "ANCHORING" },
+      });
+
+      if (onRetryWithinTransaction) {
+        await onRetryWithinTransaction(tx);
+      }
+    });
+  }
+
   private toDomain(record: PrismaTrustRecord): TrustRecord {
     return new TrustRecord(
       record.id,

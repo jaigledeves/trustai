@@ -19,9 +19,9 @@ import {
   TRUST_RECORD_REPOSITORY_PORT,
   type TrustRecordRepositoryPort,
 } from "../../../ports/trust-record-repository.port";
+import { ANALYZE_DOCUMENT_QUEUE } from "./queue-names";
 
-/** design.md "pg-boss Jobs" table. Shared by the producer (UploadAssetUseCase) and consumer (JobRegistrationService) so both agree on the exact queue name. */
-export const ANALYZE_DOCUMENT_QUEUE = "analyze-document";
+export { ANALYZE_DOCUMENT_QUEUE };
 
 export interface AnalyzeDocumentJobPayload {
   trustRecordId: string;

@@ -56,6 +56,9 @@ function buildTrustRecordRepository(
         await onSubmittedWithinTransaction(FAKE_TX);
       }
     }),
+    certify: vi.fn(),
+    markAnchoringFailed: vi.fn(),
+    retryAnchoring: vi.fn(),
     ...overrides,
   };
 }
@@ -74,6 +77,8 @@ function buildAnchorRepository(overrides: Partial<AnchorRepositoryPort> = {}): A
 function buildQueue(overrides: Partial<QueuePort> = {}): QueuePort {
   return {
     send: vi.fn().mockResolvedValue("job-1"),
+    sendAfter: vi.fn().mockResolvedValue("job-1"),
+    findLatestJobByTrustRecordId: vi.fn().mockResolvedValue(null),
     ...overrides,
   };
 }

@@ -22,11 +22,17 @@ export class PrismaAnchorRepository implements AnchorRepositoryPort {
 
   async updateSubmissionResult(
     id: string,
-    fields: { txHash: string | null; status: AnchorStatus },
+    fields: { txHash: string | null; status: AnchorStatus; blockTimestamp?: Date | null },
   ): Promise<void> {
     await this.prisma.anchor.update({
       where: { id },
-      data: { txHash: fields.txHash, status: fields.status },
+      data: {
+        txHash: fields.txHash,
+        status: fields.status,
+        // Undefined is left untouched by Prisma; explicit null clears the
+        // column — only relevant if a caller deliberately wants to reset it.
+        ...(fields.blockTimestamp !== undefined ? { blockTimestamp: fields.blockTimestamp } : {}),
+      },
     });
   }
 

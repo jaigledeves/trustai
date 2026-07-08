@@ -16,12 +16,15 @@ export interface AnchorRepositoryPort {
   findById(id: string): Promise<Anchor | null>;
 
   /**
-   * Records the outcome of an `anchor-dtr` job's submission attempt.
-   * `txHash` is `null` when the job's `AlreadyAnchored` path fired (no new
-   * transaction was ever submitted — blockchain-anchoring spec).
+   * Records the outcome of an `anchor-dtr`/`confirm-anchor` job. `txHash`
+   * is `null` only for the `AlreadyAnchored` path (no new transaction was
+   * ever submitted — blockchain-anchoring spec). `blockTimestamp` is set
+   * once known: immediately for `AlreadyAnchored` (read from
+   * `AnchorRegistry.anchoredAt()`), or once `ConfirmAnchorHandler`
+   * observes >=2 confirmations (INV-32) for a freshly-submitted tx.
    */
   updateSubmissionResult(
     id: string,
-    fields: { txHash: string | null; status: AnchorStatus },
+    fields: { txHash: string | null; status: AnchorStatus; blockTimestamp?: Date | null },
   ): Promise<void>;
 }

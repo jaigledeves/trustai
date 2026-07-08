@@ -1,5 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import type { AnchorPort, AnchorSubmitResult } from "../../ports/anchor.port";
+import type {
+  AnchorPort,
+  AnchorSubmitResult,
+  ConfirmationStatus,
+} from "../../ports/anchor.port";
 
 export class ChainNotConfiguredError extends Error {
   constructor() {
@@ -23,6 +27,10 @@ export class ChainNotConfiguredError extends Error {
 @Injectable()
 export class ChainNotConfiguredAnchorAdapter implements AnchorPort {
   async submitAnchor(_canonicalHash: string): Promise<AnchorSubmitResult> {
+    throw new ChainNotConfiguredError();
+  }
+
+  async getConfirmationStatus(_txHash: string): Promise<ConfirmationStatus> {
     throw new ChainNotConfiguredError();
   }
 }

@@ -107,7 +107,11 @@ describe.skipIf(!anvilAvailable || !artifactExists)(
       // the same canonicalHash").
       const second = await adapter.submitAnchor(hash);
 
-      expect(second).toEqual({ txHash: null, alreadyAnchored: true });
+      expect(second.txHash).toBeNull();
+      expect(second.alreadyAnchored).toBe(true);
+      // Read for real from AnchorRegistry.anchoredAt() — proves this
+      // isn't just "no error", but a genuine on-chain timestamp lookup.
+      expect(second.anchoredAtBlockTimestamp).toBeInstanceOf(Date);
     });
 
     it("a different hash anchors independently (distinct tx from a previously-anchored hash)", async () => {

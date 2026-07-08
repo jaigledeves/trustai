@@ -25,4 +25,29 @@ export interface QueuePort {
     payload: Record<string, unknown>,
     tx?: TransactionHandle,
   ): Promise<string | null>;
+
+  /**
+   * Schedules a job to become available after `delaySeconds` — used by
+   * `ConfirmAnchorHandler` to self-requeue its own confirmation poll
+   * (design.md: "Self-requeues via sendAfter(15s) until 2 confirmations
+   * or a 10-min window elapses").
+   */
+  sendAfter(
+    jobName: string,
+    payload: Record<string, unknown>,
+    delaySeconds: number,
+  ): Promise<string | null>;
+
+  /**
+   * Phase 7: reads the latest job matching `queueName` whose payload's
+   * `trustRecordId` field equals `trustRecordId` — backs the
+   * analysis-failure-visibility read on `GET /trust-records/:id`
+   * (design.md "Analysis-failure visibility" decision: pg-boss's own job
+   * history is the durable source of truth for job outcomes, no new
+   * TrustRecord column). `null` if no such job exists yet.
+   */
+  findLatestJobByTrustRecordId(
+    queueName: string,
+    trustRecordId: string,
+  ): Promise<{ state: string; output: unknown } | null>;
 }

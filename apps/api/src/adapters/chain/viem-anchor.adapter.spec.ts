@@ -1,6 +1,7 @@
 import {
   BaseError,
   ContractFunctionRevertedError,
+  TransactionReceiptNotFoundError,
   encodeErrorResult,
   type PublicClient,
   type WalletClient,
@@ -71,19 +72,36 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
       }),
     );
     expect(walletClient.writeContract).toHaveBeenCalledWith(request);
-    expect(result).toEqual({ txHash: "0xtxhash123", alreadyAnchored: false });
+    expect(result).toEqual({
+      txHash: "0xtxhash123",
+      alreadyAnchored: false,
+      anchoredAtBlockTimestamp: null,
+    });
   });
 
-  it("CRITICAL: maps an AlreadyAnchored revert to success, never submitting a real transaction", async () => {
+  it("CRITICAL: maps an AlreadyAnchored revert to success, reads the original anchoredAt timestamp, never submits a real transaction", async () => {
+    const anchoredAtSeconds = 1_800_000_000n; // 2027-01-15T... — arbitrary, just needs to be > 0
     const publicClient = buildFakePublicClient({
       simulateContract: vi.fn().mockRejectedValue(buildContractRevertError("AlreadyAnchored")),
+      readContract: vi.fn().mockResolvedValue(anchoredAtSeconds),
     });
     const walletClient = buildFakeWalletClient();
     const adapter = new ViemAnchorAdapter({ publicClient, walletClient, contractAddress: CONTRACT_ADDRESS });
 
     const result = await adapter.submitAnchor(HASH);
 
-    expect(result).toEqual({ txHash: null, alreadyAnchored: true });
+    expect(publicClient.readContract).toHaveBeenCalledWith(
+      expect.objectContaining({
+        address: CONTRACT_ADDRESS,
+        functionName: "anchoredAt",
+        args: [HASH_0X],
+      }),
+    );
+    expect(result).toEqual({
+      txHash: null,
+      alreadyAnchored: true,
+      anchoredAtBlockTimestamp: new Date(Number(anchoredAtSeconds) * 1000),
+    });
     expect(walletClient.writeContract).not.toHaveBeenCalled();
   });
 
@@ -122,5 +140,51 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
     expect(publicClient.simulateContract).toHaveBeenCalledWith(
       expect.objectContaining({ args: [HASH_0X] }),
     );
+  });
+
+  describe("getConfirmationStatus", () => {
+    it("returns the confirmation count and block timestamp for a mined tx", async () => {
+      const blockTimestampSeconds = 1_800_000_100n;
+      const publicClient = buildFakePublicClient({
+        getTransactionReceipt: vi.fn().mockResolvedValue({ blockNumber: 100n }),
+        getBlockNumber: vi.fn().mockResolvedValue(102n), // 100 -> 102 = 3 confirmations
+        getBlock: vi.fn().mockResolvedValue({ timestamp: blockTimestampSeconds }),
+      });
+      const walletClient = buildFakeWalletClient();
+      const adapter = new ViemAnchorAdapter({ publicClient, walletClient, contractAddress: CONTRACT_ADDRESS });
+
+      const status = await adapter.getConfirmationStatus("0xsome-tx-hash");
+
+      expect(status).toEqual({
+        confirmations: 3,
+        blockTimestamp: new Date(Number(blockTimestampSeconds) * 1000),
+      });
+    });
+
+    it("returns 0 confirmations (not an error) when the tx isn't mined yet", async () => {
+      const publicClient = buildFakePublicClient({
+        getTransactionReceipt: vi.fn().mockRejectedValue(
+          new TransactionReceiptNotFoundError({ hash: "0xsome-tx-hash" }),
+        ),
+      });
+      const walletClient = buildFakeWalletClient();
+      const adapter = new ViemAnchorAdapter({ publicClient, walletClient, contractAddress: CONTRACT_ADDRESS });
+
+      const status = await adapter.getConfirmationStatus("0xsome-tx-hash");
+
+      expect(status).toEqual({ confirmations: 0, blockTimestamp: null });
+    });
+
+    it("propagates a genuine RPC/network error (not swallowed as '0 confirmations')", async () => {
+      const publicClient = buildFakePublicClient({
+        getTransactionReceipt: vi.fn().mockRejectedValue(new Error("RPC connection refused")),
+      });
+      const walletClient = buildFakeWalletClient();
+      const adapter = new ViemAnchorAdapter({ publicClient, walletClient, contractAddress: CONTRACT_ADDRESS });
+
+      await expect(adapter.getConfirmationStatus("0xsome-tx-hash")).rejects.toThrow(
+        "RPC connection refused",
+      );
+    });
   });
 });

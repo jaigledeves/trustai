@@ -102,4 +102,32 @@ export interface TrustRecordRepositoryPort {
     anchorId: string,
     onSubmittedWithinTransaction?: (tx: TransactionHandle) => Promise<void>,
   ): Promise<void>;
+
+  /**
+   * Phase 7: the ANCHORING->CERTIFIED transition's persistence (INV-32).
+   * Called either immediately (AnchorDtrHandler's `AlreadyAnchored` path —
+   * nothing to poll for, the hash is already a known-confirmed fact) or
+   * after `ConfirmAnchorHandler` observes >=2 confirmations. The caller is
+   * responsible for the state-machine guard before calling this.
+   */
+  certify(id: string): Promise<void>;
+
+  /**
+   * Phase 7: the ANCHORING->FAILED transition's persistence
+   * (blockchain-anchoring spec: "Automatic Retry With Visible State on
+   * Failure" — the failure must be visible, not a silent stall).
+   */
+  markAnchoringFailed(id: string): Promise<void>;
+
+  /**
+   * Phase 7: the FAILED->ANCHORING transition's persistence — the retry
+   * half of RF-033. Atomically re-enqueues a fresh `anchor-dtr` job via
+   * `onRetryWithinTransaction` (same transactional-callback pattern as
+   * `submitForAnchoring`), so the job can never be lost if the state
+   * write fails.
+   */
+  retryAnchoring(
+    id: string,
+    onRetryWithinTransaction?: (tx: TransactionHandle) => Promise<void>,
+  ): Promise<void>;
 }

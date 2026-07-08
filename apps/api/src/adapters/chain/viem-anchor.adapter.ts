@@ -2,11 +2,16 @@ import { Injectable, Logger } from "@nestjs/common";
 import {
   BaseError,
   ContractFunctionRevertedError,
+  TransactionReceiptNotFoundError,
   type Address,
   type PublicClient,
   type WalletClient,
 } from "viem";
-import type { AnchorPort, AnchorSubmitResult } from "../../ports/anchor.port";
+import type {
+  AnchorPort,
+  AnchorSubmitResult,
+  ConfirmationStatus,
+} from "../../ports/anchor.port";
 import { ANCHOR_REGISTRY_ABI } from "./anchor-registry.abi";
 
 export interface ViemAnchorAdapterConfig {
@@ -44,13 +49,42 @@ export class ViemAnchorAdapter implements AnchorPort {
       });
 
       const txHash = await this.config.walletClient.writeContract(request);
-      return { txHash, alreadyAnchored: false };
+      return { txHash, alreadyAnchored: false, anchoredAtBlockTimestamp: null };
     } catch (err) {
       if (this.isAlreadyAnchoredRevert(err)) {
+        const anchoredAtSeconds = await this.config.publicClient.readContract({
+          address: this.config.contractAddress,
+          abi: ANCHOR_REGISTRY_ABI,
+          functionName: "anchoredAt",
+          args: [hashBytes32],
+        });
+        const anchoredAtBlockTimestamp =
+          anchoredAtSeconds > 0n ? new Date(Number(anchoredAtSeconds) * 1000) : null;
+
         this.logger.log(
           `Hash already anchored on-chain, treating as success (no tx submitted): ${canonicalHash}`,
         );
-        return { txHash: null, alreadyAnchored: true };
+        return { txHash: null, alreadyAnchored: true, anchoredAtBlockTimestamp };
+      }
+      throw err;
+    }
+  }
+
+  async getConfirmationStatus(txHash: string): Promise<ConfirmationStatus> {
+    try {
+      const receipt = await this.config.publicClient.getTransactionReceipt({
+        hash: txHash as `0x${string}`,
+      });
+      const currentBlock = await this.config.publicClient.getBlockNumber();
+      const confirmations = Number(currentBlock - receipt.blockNumber + 1n);
+      const block = await this.config.publicClient.getBlock({ blockNumber: receipt.blockNumber });
+      return { confirmations, blockTimestamp: new Date(Number(block.timestamp) * 1000) };
+    } catch (err) {
+      // Not mined yet (or the RPC hasn't caught up) — this is a normal,
+      // expected state while polling, not a failure. The caller's own
+      // timeout logic decides when to give up waiting.
+      if (err instanceof TransactionReceiptNotFoundError) {
+        return { confirmations: 0, blockTimestamp: null };
       }
       throw err;
     }
