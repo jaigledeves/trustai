@@ -82,6 +82,25 @@ describe.skipIf(!dbAvailable || !storageAvailable)(
       };
     }
 
+    /**
+     * Uploads a real PDF WITHOUT waiting for the analyze-document job —
+     * the list endpoint (S-DTR-9/10/11) only needs id/state/filename/
+     * createdAt, so waiting up to 15s per record here would make
+     * multi-record pagination tests unnecessarily slow.
+     */
+    async function uploadAsset(
+      accessToken: string,
+      label: string,
+    ): Promise<{ assetId: string; trustRecordId: string }> {
+      const pdfBytes = buildMinimalPdf(`BT /F1 24 Tf 50 100 Td (${label}) Tj ET`);
+      const uploadRes = await request(app.getHttpServer())
+        .post("/assets")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .attach("file", pdfBytes, { filename: `${label}.pdf`, contentType: "application/pdf" });
+      expect(uploadRes.status).toBe(201);
+      return uploadRes.body as { assetId: string; trustRecordId: string };
+    }
+
     /** Uploads a real, text-extractable PDF and waits for the real analyze-document job to populate AI fields. */
     async function uploadAndWaitForAnalysis(
       accessToken: string,
@@ -368,6 +387,78 @@ describe.skipIf(!dbAvailable || !storageAvailable)(
       const record = await prisma.trustRecord.findUnique({ where: { id: trustRecordId } });
       expect(record?.state).toBe("DRAFT");
       expect(record?.aiSummary).toBeNull();
+    });
+
+    it("S-DTR-9: GET list is org-scoped (RNF-004) — org A never sees org B's records", async () => {
+      const userA = await createAuthenticatedUser("dtr-list-org-a");
+      const userB = await createAuthenticatedUser("dtr-list-org-b");
+      const { trustRecordId: recordA1 } = await uploadAsset(userA.accessToken, "S-DTR-9-a1");
+      const { trustRecordId: recordA2 } = await uploadAsset(userA.accessToken, "S-DTR-9-a2");
+      const { trustRecordId: recordB1 } = await uploadAsset(userB.accessToken, "S-DTR-9-b1");
+
+      const listA = await request(app.getHttpServer())
+        .get("/trust-records")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+      expect(listA.status).toBe(200);
+      expect(listA.body.total).toBe(2);
+      const idsA = (listA.body.items as Array<{ id: string }>).map((item) => item.id);
+      expect(idsA).toEqual(expect.arrayContaining([recordA1, recordA2]));
+      expect(idsA).not.toContain(recordB1);
+
+      const listB = await request(app.getHttpServer())
+        .get("/trust-records")
+        .set("Authorization", `Bearer ${userB.accessToken}`)
+        .send();
+      expect(listB.status).toBe(200);
+      expect(listB.body.total).toBe(1);
+      expect((listB.body.items as Array<{ id: string }>).map((item) => item.id)).toEqual([
+        recordB1,
+      ]);
+    });
+
+    it("S-DTR-10: GET list on an org with zero trust records returns {items: [], total: 0}, never a 404", async () => {
+      const userA = await createAuthenticatedUser("dtr-list-empty-org");
+
+      const listRes = await request(app.getHttpServer())
+        .get("/trust-records")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+
+      expect(listRes.status).toBe(200);
+      expect(listRes.body).toEqual({ items: [], total: 0, page: 1, pageSize: 20 });
+    });
+
+    it("S-DTR-11: GET list paginates correctly and caps pageSize at 100", async () => {
+      const userA = await createAuthenticatedUser("dtr-list-pagination");
+      await uploadAsset(userA.accessToken, "S-DTR-11-1");
+      await uploadAsset(userA.accessToken, "S-DTR-11-2");
+      await uploadAsset(userA.accessToken, "S-DTR-11-3");
+
+      const pageOne = await request(app.getHttpServer())
+        .get("/trust-records?page=1&pageSize=2")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+      expect(pageOne.status).toBe(200);
+      expect(pageOne.body.total).toBe(3);
+      expect(pageOne.body.items).toHaveLength(2);
+      expect(pageOne.body.page).toBe(1);
+      expect(pageOne.body.pageSize).toBe(2);
+
+      const pageTwo = await request(app.getHttpServer())
+        .get("/trust-records?page=2&pageSize=2")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+      expect(pageTwo.status).toBe(200);
+      expect(pageTwo.body.total).toBe(3);
+      expect(pageTwo.body.items).toHaveLength(1);
+
+      const overCapped = await request(app.getHttpServer())
+        .get("/trust-records?pageSize=500")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+      expect(overCapped.status).toBe(200);
+      expect(overCapped.body.pageSize).toBe(100);
     });
   },
 );
