@@ -187,4 +187,85 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
       );
     });
   });
+
+  describe("isAnchored", () => {
+    it("returns anchored=true with the on-chain block timestamp when the hash was anchored", async () => {
+      const anchoredAtSeconds = 1_800_000_200n;
+      const publicClient = buildFakePublicClient({
+        readContract: vi
+          .fn()
+          .mockResolvedValueOnce(true) // isAnchored
+          .mockResolvedValueOnce(anchoredAtSeconds), // anchoredAt
+      });
+      const adapter = new ViemAnchorAdapter({
+        publicClient,
+        contractAddress: CONTRACT_ADDRESS,
+      });
+
+      const result = await adapter.isAnchored(HASH);
+
+      expect(publicClient.readContract).toHaveBeenCalledWith(
+        expect.objectContaining({
+          address: CONTRACT_ADDRESS,
+          functionName: "isAnchored",
+          args: [HASH_0X],
+        }),
+      );
+      expect(result).toEqual({
+        anchored: true,
+        blockTimestamp: new Date(Number(anchoredAtSeconds) * 1000),
+      });
+    });
+
+    it("returns anchored=false with no block timestamp when the hash was never submitted", async () => {
+      const publicClient = buildFakePublicClient({
+        readContract: vi.fn().mockResolvedValueOnce(false), // isAnchored
+      });
+      const adapter = new ViemAnchorAdapter({
+        publicClient,
+        contractAddress: CONTRACT_ADDRESS,
+      });
+
+      const result = await adapter.isAnchored(HASH);
+
+      expect(result).toEqual({ anchored: false, blockTimestamp: null });
+      // No side effects: anchoredAt is never read when isAnchored is false.
+      expect(publicClient.readContract).toHaveBeenCalledTimes(1);
+    });
+
+    it("propagates an RPC/network error instead of swallowing it", async () => {
+      const publicClient = buildFakePublicClient({
+        readContract: vi.fn().mockRejectedValue(new Error("RPC connection refused")),
+      });
+      const adapter = new ViemAnchorAdapter({
+        publicClient,
+        contractAddress: CONTRACT_ADDRESS,
+      });
+
+      await expect(adapter.isAnchored(HASH)).rejects.toThrow("RPC connection refused");
+    });
+
+    it("does not require a walletClient (read-only, no wallet config needed)", async () => {
+      const publicClient = buildFakePublicClient({
+        readContract: vi.fn().mockResolvedValueOnce(false),
+      });
+      const adapter = new ViemAnchorAdapter({ publicClient, contractAddress: CONTRACT_ADDRESS });
+
+      await expect(adapter.isAnchored(HASH)).resolves.toEqual({
+        anchored: false,
+        blockTimestamp: null,
+      });
+    });
+  });
+
+  describe("submitAnchor without a configured walletClient", () => {
+    it("throws a clear error instead of a wallet-undefined crash", async () => {
+      const publicClient = buildFakePublicClient();
+      const adapter = new ViemAnchorAdapter({ publicClient, contractAddress: CONTRACT_ADDRESS });
+
+      await expect(adapter.submitAnchor(HASH)).rejects.toThrow(
+        "ViemAnchorAdapter.submitAnchor requires a configured walletClient",
+      );
+    });
+  });
 });
