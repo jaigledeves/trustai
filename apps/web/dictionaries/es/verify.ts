@@ -64,5 +64,7 @@ export const verifyDictionary = {
     hashLabel: "Hash SHA-256 del archivo subido",
     caveat:
       "Esto demuestra el cálculo independiente del hash del archivo en tu navegador — no reconstruye ni verifica el hash canónico anclado en la blockchain. Para una verificación completa y reproducible, consultá la documentación de dtr-core.",
+    error:
+      "No pudimos calcular el hash en tu navegador. Es posible que el cálculo criptográfico no esté disponible en este contexto (por ejemplo, fuera de una conexión segura).",
   },
 } as const;

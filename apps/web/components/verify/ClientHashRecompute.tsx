@@ -24,15 +24,31 @@ interface ClientHashRecomputeProps {
  */
 export function ClientHashRecompute({ file }: ClientHashRecomputeProps) {
   const [hash, setHash] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
     async function compute() {
-      const buffer = await file.arrayBuffer();
-      const computed = await sha256Hex(new Uint8Array(buffer));
-      if (!cancelled) {
-        setHash(computed);
+      // Reset any previous file's result the moment `file` changes, so we
+      // never briefly render the OLD file's hash (or a stale error) while
+      // the new one is still being computed. Done synchronously at the very
+      // start of `compute()` (invoked synchronously below), before any await.
+      setHash(null);
+      setFailed(false);
+      try {
+        const buffer = await file.arrayBuffer();
+        const computed = await sha256Hex(new Uint8Array(buffer));
+        if (!cancelled) {
+          setHash(computed);
+        }
+      } catch {
+        // Trust-critical: a swallowed rejection here (e.g. crypto.subtle
+        // unavailable on a non-secure context) would leave the panel blank
+        // forever. Surface an explicit error state instead.
+        if (!cancelled) {
+          setFailed(true);
+        }
       }
     }
 
@@ -46,7 +62,9 @@ export function ClientHashRecompute({ file }: ClientHashRecomputeProps) {
   return (
     <div role="status" className="flex flex-col gap-1">
       <p className="font-medium">{verifyDictionary.recompute.title}</p>
-      {hash ? (
+      {failed ? (
+        <p role="alert">{verifyDictionary.recompute.error}</p>
+      ) : hash ? (
         <div>
           <p className="text-sm">{verifyDictionary.recompute.hashLabel}</p>
           <code className="break-all">{hash}</code>

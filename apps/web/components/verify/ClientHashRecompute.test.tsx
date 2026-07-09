@@ -63,4 +63,43 @@ describe("ClientHashRecompute (spec: Client-Side Independent Hash Recompute — 
 
     expect(screen.getByText(/no reconstruye ni verifica el hash canónico anclado/)).toBeInTheDocument();
   });
+
+  it("renders an explicit error state (never blank forever) when the recompute rejects (e.g. crypto.subtle unavailable)", async () => {
+    sha256HexMock.mockRejectedValueOnce(new Error("crypto.subtle unavailable"));
+
+    render(<ClientHashRecompute file={fileWithArrayBuffer(new Uint8Array([1, 2, 3]))} />);
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/No pudimos calcular el hash en tu navegador/),
+      ).toBeInTheDocument(),
+    );
+    // The error state is announced (role="alert"), not silently swallowed.
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("clears the previous file's hash when the selected file changes (never shows a stale hash)", async () => {
+    sha256HexMock.mockResolvedValueOnce("a".repeat(64));
+    const { rerender } = render(
+      <ClientHashRecompute file={fileWithArrayBuffer(new Uint8Array([1, 2, 3]), "first.pdf")} />,
+    );
+    await waitFor(() => expect(screen.getByText("a".repeat(64))).toBeInTheDocument());
+
+    // Switch to a different file whose hash resolves later — the old hash
+    // must disappear immediately, not linger through the new computation.
+    let resolveSecond: (value: string) => void = () => {};
+    sha256HexMock.mockImplementationOnce(
+      () => new Promise<string>((resolve) => (resolveSecond = resolve)),
+    );
+    rerender(
+      <ClientHashRecompute file={fileWithArrayBuffer(new Uint8Array([9, 9]), "second.pdf")} />,
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByText("a".repeat(64))).not.toBeInTheDocument(),
+    );
+
+    resolveSecond("b".repeat(64));
+    await waitFor(() => expect(screen.getByText("b".repeat(64))).toBeInTheDocument());
+  });
 });
