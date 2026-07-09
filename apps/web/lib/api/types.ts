@@ -87,3 +87,45 @@ export interface TrustRecordListResponse {
   page: number;
   pageSize: number;
 }
+
+/** Mirrors `VerificationAttemptVerdict` (apps/api/src/ports/verification-attempt-repository.port.ts). */
+export type VerifyVerdict = "VALID" | "ASSET_MISMATCH" | "INVALID_RECORD" | "PENDING_ANCHOR";
+
+/** Mirrors `ChainAnchorResponseDto` (apps/api/src/modules/public-verification/dto/verify-hash-response.dto.ts). */
+export interface VerifyChainAnchorInfo {
+  anchored: boolean;
+  txHash: string | null;
+  blockTimestamp: string | null;
+  explorerUrl: string | null;
+  chainReadUnavailable: boolean;
+}
+
+/**
+ * Mirrors `VerifyHashResponseDto` — `GET /public/verify/:id`'s response.
+ * Deliberately has NO `analysis` field at all (INV-41) so the type itself
+ * enforces the hash-only view can never render AI analysis.
+ */
+export interface VerifyHashResponse {
+  verdict: VerifyVerdict;
+  documentIntegrity: boolean;
+  chainAnchor: VerifyChainAnchorInfo | null;
+  explanation: string;
+  disclaimer: string;
+  verifiedAt: string;
+}
+
+/** Mirrors `VerificationAnalysisDto`. */
+export interface VerificationAnalysis {
+  summary: string;
+  classification: string;
+  language: string;
+}
+
+/**
+ * Mirrors `VerifyUploadResponseDto` — `POST /public/verify/:id`'s response.
+ * Extends `VerifyHashResponse` with `analysis`, populated only for
+ * VALID/PENDING_ANCHOR (`null` otherwise).
+ */
+export interface VerifyUploadResponse extends VerifyHashResponse {
+  analysis: VerificationAnalysis | null;
+}
