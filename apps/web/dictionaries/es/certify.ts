@@ -22,6 +22,7 @@ export const certifyDictionary = {
     languageLabel: "Idioma",
     save: "Guardar cambios",
     saved: "Cambios guardados.",
+    analysisInProgress: "Analizando el documento… esto puede tardar unos segundos.",
     analysisFailedTitle: "No pudimos analizar este documento",
     editConflict:
       "El estado del documento cambió mientras editabas. Actualizamos la vista con los datos más recientes.",

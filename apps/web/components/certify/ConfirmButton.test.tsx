@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { server } from "../../test/msw/server";
 import { ConfirmButton } from "./ConfirmButton";
 
@@ -17,11 +17,13 @@ function renderWithQueryClient(ui: ReactNode) {
 }
 
 describe("ConfirmButton (spec: Confirm (DRAFT -> READY))", () => {
-  it("renders canonicalHash as frozen evidence on successful confirm", async () => {
+  it("issues the confirm request and surfaces no error on success (the frozen hash is the shell's job, not this button's)", async () => {
     const user = userEvent.setup();
+    let confirmed = false;
     server.use(
-      http.post("http://localhost:3000/api/backend/trust-records/tr-1/confirm", () =>
-        HttpResponse.json(
+      http.post("http://localhost:3000/api/backend/trust-records/tr-1/confirm", () => {
+        confirmed = true;
+        return HttpResponse.json(
           {
             trustRecordId: "tr-1",
             state: "READY",
@@ -29,17 +31,18 @@ describe("ConfirmButton (spec: Confirm (DRAFT -> READY))", () => {
             issuedAt: "2026-01-01T00:00:00.000Z",
           },
           { status: 201 },
-        ),
-      ),
+        );
+      }),
     );
 
     renderWithQueryClient(<ConfirmButton id="tr-1" />);
     await user.click(screen.getByRole("button", { name: "Confirmar certificación" }));
 
-    expect(await screen.findByText("a".repeat(64))).toBeInTheDocument();
-    expect(
-      screen.getByText("Hash canónico (evidencia congelada)"),
-    ).toBeInTheDocument();
+    await vi.waitFor(() => expect(confirmed).toBe(true));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    // The hash is rendered by CertifyWizard's shell (frozen evidence must
+    // outlive this button's DRAFT -> READY unmount), never by ConfirmButton.
+    expect(screen.queryByText("Hash canónico (evidencia congelada)")).not.toBeInTheDocument();
   });
 
   it("surfaces a 409 as a blocking error and never renders a hash", async () => {
