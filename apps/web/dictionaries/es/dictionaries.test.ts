@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { authDictionary } from "./auth";
+import { historyDictionary } from "./history";
 import { shellDictionary } from "./shell";
 
 /**
@@ -21,6 +22,7 @@ describe("dictionaries/es", () => {
   it.each([
     ["shellDictionary", shellDictionary],
     ["authDictionary", authDictionary],
+    ["historyDictionary", historyDictionary],
   ])(
     "every leaf value in %s is a non-empty string (guards against accidental English/blank literals — RNF-041)",
     (_name, dictionary) => {
