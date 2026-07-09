@@ -45,6 +45,54 @@ describe("PrismaTrustRecordRepository.findAllForOrganization (RNF-004: org-scope
     );
   });
 
+  it("clamps page<=0 up to 1 so `skip` is never negative (page=0 -> skip 0)", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const prisma = buildFakePrisma({ findMany });
+    const repository = new PrismaTrustRecordRepository(prisma);
+
+    await repository.findAllForOrganization("org-1", 0, 20);
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 0, take: 20 }),
+    );
+  });
+
+  it("clamps a negative page up to 1 (page=-1 -> skip 0, never a negative Prisma skip)", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const prisma = buildFakePrisma({ findMany });
+    const repository = new PrismaTrustRecordRepository(prisma);
+
+    await repository.findAllForOrganization("org-1", -1, 20);
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 0, take: 20 }),
+    );
+  });
+
+  it("clamps pageSize=0 up to 1 so `take` is never zero (page=2, pageSize=0 -> skip 1, take 1)", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const prisma = buildFakePrisma({ findMany });
+    const repository = new PrismaTrustRecordRepository(prisma);
+
+    await repository.findAllForOrganization("org-1", 2, 0);
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 1, take: 1 }),
+    );
+  });
+
+  it("clamps a negative pageSize up to 1 (pageSize=-5 -> take 1, never a negative Prisma take)", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const prisma = buildFakePrisma({ findMany });
+    const repository = new PrismaTrustRecordRepository(prisma);
+
+    await repository.findAllForOrganization("org-1", 1, -5);
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 0, take: 1 }),
+    );
+  });
+
   it("orders by createdAt desc and selects only list-view fields (no AI/anchor joins)", async () => {
     const findMany = vi.fn().mockResolvedValue([]);
     const prisma = buildFakePrisma({ findMany });

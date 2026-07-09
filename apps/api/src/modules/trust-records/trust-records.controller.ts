@@ -73,15 +73,19 @@ export class TrustRecordsController {
     @Query("pageSize", new DefaultValuePipe(20), ParseIntPipe) pageSize: number,
     @Request() req: { user: JwtPayload },
   ): Promise<TrustRecordListResponseDto> {
-    const cappedPageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+    // Lower-bound clamp so a hostile/typo'd `page<=0` never produces a
+    // negative Prisma `skip` (a DB error surfaced as 500) and `pageSize<=0`
+    // never yields a zero/negative `take`. Upper bound caps the page size.
+    const clampedPage = Math.max(1, page);
+    const clampedPageSize = Math.max(1, Math.min(pageSize, MAX_PAGE_SIZE));
 
     const { items, total } = await this.trustRecordRepository.findAllForOrganization(
       req.user.organizationId,
-      page,
-      cappedPageSize,
+      clampedPage,
+      clampedPageSize,
     );
 
-    return { items, total, page, pageSize: cappedPageSize };
+    return { items, total, page: clampedPage, pageSize: clampedPageSize };
   }
 
   @Get(":id")
