@@ -13,12 +13,14 @@ export default defineConfig({
   retries: process.env["CI"] ? 2 : 0,
   reporter: "list",
   use: {
-    baseURL: process.env["E2E_BASE_URL"] ?? "http://localhost:3000",
+    // 3100, not 3000 — apps/api conventionally owns :3000, so both dev
+    // servers can run side by side (required for e2e/certify-golden-path.spec.ts).
+    baseURL: process.env["E2E_BASE_URL"] ?? "http://localhost:3100",
     trace: "on-first-retry",
   },
   webServer: {
     command: "pnpm dev",
-    url: "http://localhost:3000",
+    url: process.env["E2E_BASE_URL"] ?? "http://localhost:3100",
     reuseExistingServer: !process.env["CI"],
     timeout: 120_000,
   },
