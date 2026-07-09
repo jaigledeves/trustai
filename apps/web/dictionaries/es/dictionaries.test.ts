@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { authDictionary } from "./auth";
 import { historyDictionary } from "./history";
 import { shellDictionary } from "./shell";
+import { verifyDictionary } from "./verify";
 
 /**
  * Recursively collects every leaf value in a dictionary object. Dictionaries
@@ -23,6 +24,7 @@ describe("dictionaries/es", () => {
     ["shellDictionary", shellDictionary],
     ["authDictionary", authDictionary],
     ["historyDictionary", historyDictionary],
+    ["verifyDictionary", verifyDictionary],
   ])(
     "every leaf value in %s is a non-empty string (guards against accidental English/blank literals — RNF-041)",
     (_name, dictionary) => {
