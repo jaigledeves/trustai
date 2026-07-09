@@ -27,7 +27,6 @@ export function ClientHashRecompute({ file }: ClientHashRecomputeProps) {
 
   useEffect(() => {
     let cancelled = false;
-    setHash(null);
 
     async function compute() {
       const buffer = await file.arrayBuffer();
