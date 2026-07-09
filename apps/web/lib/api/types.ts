@@ -71,3 +71,19 @@ export interface AnchorTrustRecordResponse {
   trustRecordId: string;
   state: "ANCHORING";
 }
+
+/** Mirrors `TrustRecordListItemDto` (apps/api/src/modules/trust-records/dto/trust-record-list-response.dto.ts) — list-view fields only, no AI/anchor joins. */
+export interface TrustRecordListItem {
+  id: string;
+  state: TrustRecordState;
+  filename: string | null;
+  createdAt: string;
+}
+
+/** Mirrors `TrustRecordListResponseDto`. */
+export interface TrustRecordListResponse {
+  items: TrustRecordListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
