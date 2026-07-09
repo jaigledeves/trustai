@@ -78,8 +78,14 @@ test.describe("Public verify (register -> certify -> confirm -> unauthenticated 
       .getByLabel("Elegí un archivo PDF para certificar")
       .setInputFiles({ name: "sample.pdf", mimeType: "application/pdf", buffer: pdfBytes });
     await page.getByRole("button", { name: "Subir documento" }).click();
-    await page.waitForURL(/\/dtrs\/[^/]+$/);
-    const trustRecordId = /\/dtrs\/([^/?]+)/.exec(page.url())?.[1];
+    // Upload navigates /dtrs/new -> /dtrs/{uuid}. Match the created record's
+    // URL specifically: a loose /\/dtrs\/[^/]+$/ also matches the /dtrs/new
+    // upload page we're already on, so waitForURL would resolve immediately
+    // and capture the literal "new" instead of the real trustRecordId.
+    const recordUrlPattern =
+      /\/dtrs\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+    await page.waitForURL(recordUrlPattern);
+    const trustRecordId = /\/dtrs\/([0-9a-f-]{36})$/.exec(page.url())?.[1];
     if (!trustRecordId) {
       throw new Error("Could not extract trustRecordId from the wizard URL");
     }
