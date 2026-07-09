@@ -11,6 +11,7 @@ import type {
   AiAnalysisUpdateFields,
   ConfirmToReadyFields,
   ReviewFieldsUpdate,
+  TrustRecordListResult,
   TrustRecordRepositoryPort,
   TrustRecordWithAssetAndAnchor,
 } from "../../ports/trust-record-repository.port";
@@ -40,6 +41,50 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
       where: { id, asset: { organizationId } },
     });
     return record ? this.toDomain(record) : null;
+  }
+
+  async findAllForOrganization(
+    organizationId: string,
+    page: number,
+    pageSize: number,
+  ): Promise<TrustRecordListResult> {
+    // RNF-004: same org-scoping join pattern as findByIdForOrganization —
+    // filtered at the query level via the DigitalAsset relation, never by
+    // post-filtering an unscoped result.
+    const where = { asset: { organizationId } };
+
+    // Defensive lower-bound clamp: even though the controller already
+    // normalizes these, this port is the last line before Prisma — a
+    // negative `skip`/zero `take` here is a 500/empty-page bug, so guard
+    // it at the query itself regardless of caller.
+    const safePage = Math.max(1, page);
+    const safePageSize = Math.max(1, pageSize);
+
+    const [records, total] = await Promise.all([
+      this.prisma.trustRecord.findMany({
+        where,
+        select: {
+          id: true,
+          state: true,
+          createdAt: true,
+          asset: { select: { filename: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        skip: (safePage - 1) * safePageSize,
+        take: safePageSize,
+      }),
+      this.prisma.trustRecord.count({ where }),
+    ]);
+
+    return {
+      items: records.map((record) => ({
+        id: record.id,
+        state: this.toDomainState(record.state),
+        filename: record.asset.filename,
+        createdAt: record.createdAt,
+      })),
+      total,
+    };
   }
 
   async findByIdWithAssetAndAnchor(id: string): Promise<TrustRecordWithAssetAndAnchor | null> {
