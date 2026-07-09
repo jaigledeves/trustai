@@ -53,6 +53,13 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
     // post-filtering an unscoped result.
     const where = { asset: { organizationId } };
 
+    // Defensive lower-bound clamp: even though the controller already
+    // normalizes these, this port is the last line before Prisma — a
+    // negative `skip`/zero `take` here is a 500/empty-page bug, so guard
+    // it at the query itself regardless of caller.
+    const safePage = Math.max(1, page);
+    const safePageSize = Math.max(1, pageSize);
+
     const [records, total] = await Promise.all([
       this.prisma.trustRecord.findMany({
         where,
@@ -63,8 +70,8 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
           asset: { select: { filename: true } },
         },
         orderBy: { createdAt: "desc" },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
+        skip: (safePage - 1) * safePageSize,
+        take: safePageSize,
       }),
       this.prisma.trustRecord.count({ where }),
     ]);
