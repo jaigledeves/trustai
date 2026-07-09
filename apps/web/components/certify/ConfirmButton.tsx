@@ -6,17 +6,22 @@ import { ApiError, mapApiError } from "../../lib/api/errors";
 import { useConfirm } from "../../lib/api/hooks/useConfirm";
 import { Button } from "../ui/button";
 
-/** Confirm step (spec: "Confirm (DRAFT -> READY)"). */
+/**
+ * Confirm step (spec: "Confirm (DRAFT -> READY)"). On success `useConfirm`
+ * writes `state: READY` + `canonicalHash` into the shared query cache; the
+ * wizard shell then renders the frozen hash and swaps this button out for the
+ * anchor step. This component therefore only owns the action + its error
+ * surface — the frozen-hash display is the shell's (it must survive the
+ * DRAFT -> READY unmount).
+ */
 export function ConfirmButton({ id }: { id: string }) {
   const confirm = useConfirm(id);
   const [error, setError] = useState<string | null>(null);
-  const [canonicalHash, setCanonicalHash] = useState<string | null>(null);
 
   async function handleConfirm() {
     setError(null);
     try {
-      const result = await confirm.mutateAsync();
-      setCanonicalHash(result.canonicalHash);
+      await confirm.mutateAsync();
     } catch (err) {
       if (err instanceof ApiError) {
         setError(mapApiError(err.status, "confirm"));
@@ -24,15 +29,6 @@ export function ConfirmButton({ id }: { id: string }) {
         throw err;
       }
     }
-  }
-
-  if (canonicalHash) {
-    return (
-      <div role="status" className="flex flex-col gap-1">
-        <p className="font-medium">{certifyDictionary.confirm.frozenHashLabel}</p>
-        <code className="break-all">{canonicalHash}</code>
-      </div>
-    );
   }
 
   return (
