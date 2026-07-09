@@ -17,8 +17,13 @@ interface DtrDetailPageProps {
  * Detail View") instead of the wizard. A freshly-anchored record still reaches
  * CERTIFIED live inside the wizard's `AnchorPoller`; this branch only governs
  * what a fresh navigation renders, so the two views never collide.
+ *
+ * Only CERTIFIED is truly terminal. FAILED is a TRANSIENT auto-retried state
+ * (confirm-anchor.handler flips FAILED->ANCHORING and re-enqueues), so a fresh
+ * navigation on a FAILED record must render the interactive `CertifyWizard`
+ * (which keeps polling to CERTIFIED), not the read-only card.
  */
-const TERMINAL_STATES: readonly TrustRecordState[] = ["CERTIFIED", "FAILED"];
+const TERMINAL_STATES: readonly TrustRecordState[] = ["CERTIFIED"];
 
 /**
  * State-driven detail route (spec: web-certify-wizard 3.9 + web-history 4.6).

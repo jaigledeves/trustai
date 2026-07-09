@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { authDictionary } from "./auth";
+import { certifyDictionary } from "./certify";
 import { historyDictionary } from "./history";
 import { shellDictionary } from "./shell";
 import { verifyDictionary } from "./verify";
@@ -23,6 +24,7 @@ describe("dictionaries/es", () => {
   it.each([
     ["shellDictionary", shellDictionary],
     ["authDictionary", authDictionary],
+    ["certifyDictionary", certifyDictionary],
     ["historyDictionary", historyDictionary],
     ["verifyDictionary", verifyDictionary],
   ])(
@@ -48,5 +50,19 @@ describe("dictionaries/es", () => {
     expect(authDictionary.register.errorDuplicateEmail).toBe(
       "Este email ya está registrado.",
     );
+  });
+
+  it("certify give-up copy says auto-update STOPPED and to reload — never implies it keeps updating on its own (matches the cap returning `false`)", () => {
+    // Once the poll cap is hit the interval returns `false`: nothing updates
+    // unless the user reloads. The copy must tell them so, not tell them to
+    // "wait a bit more" / "come back later" against a page that stopped polling.
+    for (const message of [
+      certifyDictionary.anchor.slowMessage,
+      certifyDictionary.review.analysisSlow,
+    ]) {
+      expect(message).toMatch(/recarg/i);
+      expect(message).not.toMatch(/esperar un poco/i);
+      expect(message).not.toMatch(/volvé más tarde/i);
+    }
   });
 });

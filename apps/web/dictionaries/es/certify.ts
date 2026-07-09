@@ -23,6 +23,8 @@ export const certifyDictionary = {
     save: "Guardar cambios",
     saved: "Cambios guardados.",
     analysisInProgress: "Analizando el documento… esto puede tardar unos segundos.",
+    analysisSlow:
+      "El análisis está tardando más de lo esperado y dejamos de actualizar esta página automáticamente. Recargá la página para ver si ya terminó, o descartá el borrador.",
     analysisFailedTitle: "No pudimos analizar este documento",
     editConflict:
       "El estado del documento cambió mientras editabas. Actualizamos la vista con los datos más recientes.",
@@ -38,14 +40,17 @@ export const certifyDictionary = {
     anchoringMessage: "Anclando en la blockchain… esto puede tardar unos minutos.",
     certifiedMessage: "¡Documento certificado! Podés inspeccionar la transacción on-chain.",
     explorerLinkLabel: "Ver transacción en el explorador",
-    failedMessage:
-      "El anclaje falló. El equipo de soporte ya fue notificado — no hace falta reintentar manualmente.",
+    retryingMessage:
+      "El anclaje no se confirmó en el tiempo previsto y se está reintentando automáticamente. No hace falta que hagas nada.",
+    slowMessage:
+      "El anclaje está tardando más de lo esperado y dejamos de actualizar esta página automáticamente. Recargá la página para comprobar si ya se completó.",
     errorGeneric: "No se pudo anclar en este momento.",
   },
   discard: {
     action: "Descartar borrador",
     confirmPrompt:
       "¿Seguro que querés descartar este borrador? Esta acción no se puede deshacer.",
+    discardedMessage: "Este borrador fue descartado.",
     errorGeneric: "No se pudo descartar el borrador.",
   },
 } as const;
