@@ -8,6 +8,9 @@ export interface ServerFetchOptions {
   query?: Record<string, string | number | undefined>;
 }
 
+/** Outbound request timeout — a stuck backend must not hang the RSC render. */
+const REQUEST_TIMEOUT_MS = 10_000;
+
 /**
  * Direct fetch to `API_BASE_URL`, for RSC / Server Action / route-handler
  * use. Reads the httpOnly session cookie server-side and re-attaches it as
@@ -34,14 +37,26 @@ export async function serverFetch<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
-    method: options.method ?? "GET",
-    headers,
-    cache: "no-store",
-    ...(options.body !== undefined
-      ? { body: JSON.stringify(options.body) }
-      : {}),
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: options.method ?? "GET",
+      headers,
+      cache: "no-store",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      ...(options.body !== undefined
+        ? { body: JSON.stringify(options.body) }
+        : {}),
+    });
+  } catch (error) {
+    // A backend outage/timeout throws a TypeError/AbortError here. Map it to
+    // an ApiError in the same {status,message} shape `errors.ts` consumes —
+    // never let an uncaught network error bypass the app's error handling.
+    if (error instanceof DOMException && error.name === "TimeoutError") {
+      throw new ApiError(503, "The backend service did not respond in time");
+    }
+    throw new ApiError(502, "Could not reach the backend service");
+  }
 
   if (!response.ok) {
     throw new ApiError(response.status, await readErrorMessage(response));

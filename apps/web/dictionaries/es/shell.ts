@@ -16,6 +16,8 @@ export const shellDictionary = {
   },
   errors: {
     generic: "Ocurrió un error inesperado. Probá de nuevo en unos minutos.",
+    genericTitle: "Algo salió mal",
+    retry: "Reintentar",
     notFound: "No encontramos lo que buscabas.",
   },
 } as const;
