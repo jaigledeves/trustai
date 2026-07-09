@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import { CertifyWizard } from "../../../../components/certify/CertifyWizard";
+import { DtrDetailCard } from "../../../../components/history/DtrDetailCard";
 import { ApiError } from "../../../../lib/api/errors";
 import { serverFetch } from "../../../../lib/api/server-client";
-import type { TrustRecordDetail } from "../../../../lib/api/types";
+import type { TrustRecordDetail, TrustRecordState } from "../../../../lib/api/types";
 
 interface DtrDetailPageProps {
   params: Promise<{ id: string }>;
@@ -10,10 +11,21 @@ interface DtrDetailPageProps {
 }
 
 /**
- * State-driven wizard shell (spec: web-certify-wizard, task 3.9). RSC
- * fetches the initial detail via `server-client` (Bearer attached
- * server-side from the session cookie); `CertifyWizard` (client island)
- * takes it from there and re-renders as the record's state advances.
+ * Terminal states have no interactive certification step left — the record is
+ * a finished historical entry, so the detail route serves the read-only
+ * `DtrDetailCard` (full timeline incl. AI analysis, spec: web-history "DTR
+ * Detail View") instead of the wizard. A freshly-anchored record still reaches
+ * CERTIFIED live inside the wizard's `AnchorPoller`; this branch only governs
+ * what a fresh navigation renders, so the two views never collide.
+ */
+const TERMINAL_STATES: readonly TrustRecordState[] = ["CERTIFIED", "FAILED"];
+
+/**
+ * State-driven detail route (spec: web-certify-wizard 3.9 + web-history 4.6).
+ * RSC fetches the detail via `server-client` (Bearer attached server-side from
+ * the session cookie). Active records (DRAFT/READY/ANCHORING/DISCARDED) render
+ * the interactive `CertifyWizard` client island; terminal records render the
+ * read-only `DtrDetailCard`.
  */
 export default async function DtrDetailPage({ params, searchParams }: DtrDetailPageProps) {
   const { id } = await params;
@@ -27,11 +39,15 @@ export default async function DtrDetailPage({ params, searchParams }: DtrDetailP
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 py-10">
-      <CertifyWizard
-        id={id}
-        initialRecord={record}
-        showDuplicateNotice={notice === "duplicate"}
-      />
+      {TERMINAL_STATES.includes(record.state) ? (
+        <DtrDetailCard record={record} />
+      ) : (
+        <CertifyWizard
+          id={id}
+          initialRecord={record}
+          showDuplicateNotice={notice === "duplicate"}
+        />
+      )}
     </main>
   );
 }
