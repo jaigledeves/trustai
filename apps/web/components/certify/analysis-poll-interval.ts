@@ -2,6 +2,14 @@ import type { TrustRecordDetail } from "../../lib/api/types";
 
 const POLL_INTERVAL_MS = 2000;
 
+/**
+ * Client-side give-up cap for the analysis window (spec: never a silent,
+ * infinite poll). At {@link POLL_INTERVAL_MS} this is ~5 minutes — well
+ * beyond a normal analyze-document job — after which the consumer surfaces
+ * a "tardando más de lo esperado" state instead of polling forever.
+ */
+export const MAX_ANALYSIS_POLL_ATTEMPTS = 150;
+
 type AnalysisPollInput = Pick<
   TrustRecordDetail,
   "state" | "aiSummary" | "analysisFailureReason"
@@ -30,10 +38,15 @@ export function isAnalysisPending(record: AnalysisPollInput | undefined): boolea
  * `resolveAnchorRefetchInterval`) so the "when do we stop polling?" logic is
  * testable with zero mocks, independent of TanStack Query's timing. Poll
  * while analysis is pending; stop the moment the summary arrives, a failure
- * reason is recorded, or the record leaves DRAFT.
+ * reason is recorded, the record leaves DRAFT, or the attempt cap is hit
+ * (a genuinely stuck job must not poll forever).
  */
 export function resolveAnalysisRefetchInterval(
   record: AnalysisPollInput | undefined,
+  attempts: number,
 ): number | false {
-  return isAnalysisPending(record) ? POLL_INTERVAL_MS : false;
+  if (!isAnalysisPending(record)) {
+    return false;
+  }
+  return attempts >= MAX_ANALYSIS_POLL_ATTEMPTS ? false : POLL_INTERVAL_MS;
 }

@@ -1,12 +1,17 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
+import { certifyDictionary } from "../../dictionaries/es/certify";
 import { server } from "../../test/msw/server";
 import { trustRecordQueryKey } from "../../lib/api/hooks/useTrustRecord";
 import type { TrustRecordDetail } from "../../lib/api/types";
 import { AnchorPoller } from "./AnchorPoller";
+import {
+  MAX_ANCHOR_POLL_ATTEMPTS,
+  resolveAnchorRefetchInterval,
+} from "./anchor-poll-interval";
 
 function buildRecord(overrides: Partial<TrustRecordDetail> = {}): TrustRecordDetail {
   return {
@@ -94,19 +99,65 @@ describe("AnchorPoller (spec: Anchor Submission and Polling — highest-risk log
     expect(screen.queryByRole("button", { name: "Anclar en blockchain" })).not.toBeInTheDocument();
   });
 
-  it("Reaches FAILED: stops polling and renders a visible failure state with NO retry button (RF-033)", async () => {
+  it("Transitions through FAILED: shows a transient 'reintentando automáticamente' status (NOT a dead terminal alert) with NO retry button (RF-033)", async () => {
     const queryClient = renderPoller(buildRecord({ state: "ANCHORING" }));
 
+    // FAILED is transient — the backend re-enqueues FAILED->ANCHORING, so the
+    // UI must present it as an in-progress retry, never a dead end.
     queryClient.setQueryData<TrustRecordDetail>(
       trustRecordQueryKey("tr-1"),
       buildRecord({ state: "FAILED" }),
     );
 
-    expect(
-      await screen.findByText(
-        "El anclaje falló. El equipo de soporte ya fue notificado — no hace falta reintentar manualmente.",
-      ),
-    ).toBeInTheDocument();
+    const status = await screen.findByText(
+      "El anclaje no se confirmó en el tiempo previsto y se está reintentando automáticamente. No hace falta que hagas nada.",
+    );
+    expect(status).toBeInTheDocument();
+    // Transient status, not a dead terminal alert.
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    // Still no manual retry button — retries are the backend's job.
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("counts ONLY real poll fetches toward the give-up cap — setQueryData cache writes (Anchor clicks / hydration) never advance it; real polls eventually stop polling and show 'slow'", async () => {
+    const anchoringMessage = "Anclando en la blockchain… esto puede tardar unos minutos.";
+    server.use(
+      http.get("http://localhost:3000/api/backend/trust-records/tr-1", () =>
+        HttpResponse.json(buildRecord({ state: "ANCHORING" })),
+      ),
+    );
+    const queryClient = renderPoller(buildRecord({ state: "ANCHORING" }));
+
+    // Walk right up to the edge with genuine poll fetches (each is a real
+    // `queryFn` run, exactly what an interval tick does).
+    await act(async () => {
+      for (let i = 0; i < MAX_ANCHOR_POLL_ATTEMPTS - 1; i += 1) {
+        await queryClient.refetchQueries({ queryKey: trustRecordQueryKey("tr-1") });
+      }
+    });
+    expect(screen.getByText(anchoringMessage)).toBeInTheDocument();
+    expect(screen.queryByText(certifyDictionary.anchor.slowMessage)).not.toBeInTheDocument();
+
+    // A flurry of cache writes — what `useAnchor.onSuccess` / focus rehydration
+    // do — bumps `dataUpdatedAt` but is NOT a poll, so it must NOT tip us over
+    // the cap. (The OLD `dataUpdatedAt` counter would trip 'slow' right here.)
+    await act(async () => {
+      for (let i = 0; i < 5; i += 1) {
+        queryClient.setQueryData<TrustRecordDetail>(
+          trustRecordQueryKey("tr-1"),
+          buildRecord({ state: "ANCHORING" }),
+        );
+      }
+    });
+    expect(screen.getByText(anchoringMessage)).toBeInTheDocument();
+    expect(screen.queryByText(certifyDictionary.anchor.slowMessage)).not.toBeInTheDocument();
+
+    // One more REAL poll reaches the cap: polling stops and 'slow' is surfaced.
+    await act(async () => {
+      await queryClient.refetchQueries({ queryKey: trustRecordQueryKey("tr-1") });
+    });
+    expect(await screen.findByText(certifyDictionary.anchor.slowMessage)).toBeInTheDocument();
+    // Pure resolver mirror: at the cap the interval is `false` (polling stops).
+    expect(resolveAnchorRefetchInterval("ANCHORING", MAX_ANCHOR_POLL_ATTEMPTS)).toBe(false);
   });
 });

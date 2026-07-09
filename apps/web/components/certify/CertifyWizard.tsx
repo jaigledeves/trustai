@@ -1,13 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { certifyDictionary } from "../../dictionaries/es/certify";
 import { useTrustRecord } from "../../lib/api/hooks/useTrustRecord";
 import type { TrustRecordDetail } from "../../lib/api/types";
-import { isAnalysisPending, resolveAnalysisRefetchInterval } from "./analysis-poll-interval";
+import {
+  MAX_ANALYSIS_POLL_ATTEMPTS,
+  isAnalysisPending,
+  resolveAnalysisRefetchInterval,
+} from "./analysis-poll-interval";
 import { AnchorPoller } from "./AnchorPoller";
 import { ConfirmButton } from "./ConfirmButton";
 import { DiscardDraftButton } from "./DiscardDraftButton";
-import { ReviewStep } from "./ReviewStep";
+import { hasAnalysisFailed, ReviewStep } from "./ReviewStep";
 
 interface CertifyWizardProps {
   id: string;
@@ -31,15 +36,24 @@ interface CertifyWizardProps {
  * spec explicitly forbids).
  */
 export function CertifyWizard({ id, initialRecord, showDuplicateNotice }: CertifyWizardProps) {
+  // Count ONLY real poll fetches, not `dataUpdatedAt` bumps: `initialData`
+  // hydration and any `setQueryData` cache write also stamp `dataUpdatedAt`
+  // without an API poll, so counting those could trip the give-up cap without a
+  // real poll. `onFetch` fires inside the query's `queryFn` — once per poll.
+  const [analysisPollAttempts, setAnalysisPollAttempts] = useState(0);
   const { data: record } = useTrustRecord(id, {
     initialData: initialRecord,
-    refetchInterval: (query) => resolveAnalysisRefetchInterval(query.state.data),
+    onFetch: () => setAnalysisPollAttempts((n) => n + 1),
+    refetchInterval: (query) =>
+      resolveAnalysisRefetchInterval(query.state.data, analysisPollAttempts),
   });
+
   const current = record ?? initialRecord;
   const state = current.state;
+  const analysisPollCapReached = analysisPollAttempts >= MAX_ANALYSIS_POLL_ATTEMPTS;
 
   if (state === "DISCARDED") {
-    return <p role="status">Este borrador fue descartado.</p>;
+    return <p role="status">{certifyDictionary.discard.discardedMessage}</p>;
   }
 
   return (
@@ -62,7 +76,19 @@ export function CertifyWizard({ id, initialRecord, showDuplicateNotice }: Certif
       {state === "DRAFT" ? (
         isAnalysisPending(current) ? (
           <>
-            <p role="status">{certifyDictionary.review.analysisInProgress}</p>
+            <p role="status">
+              {analysisPollCapReached
+                ? certifyDictionary.review.analysisSlow
+                : certifyDictionary.review.analysisInProgress}
+            </p>
+            <DiscardDraftButton id={id} />
+          </>
+        ) : hasAnalysisFailed(current) ? (
+          // Analysis FAILED: confirm would 409 against incomplete analysis,
+          // so render ONLY the failure banner + discard — never a dead-end
+          // ConfirmButton whose primary action can only fail.
+          <>
+            <ReviewStep id={id} record={current} />
             <DiscardDraftButton id={id} />
           </>
         ) : (

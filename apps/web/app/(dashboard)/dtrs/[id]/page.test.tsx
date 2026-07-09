@@ -83,13 +83,13 @@ describe("DtrDetailPage (spec: web-history — DTR Detail View, cross-org 404)",
     expect(screen.queryByText("WIZARD_ISLAND")).not.toBeInTheDocument();
   });
 
-  it("renders the read-only detail card for a terminal FAILED record", async () => {
+  it("renders the interactive wizard for a FAILED record (FAILED is transient/auto-retried, not terminal — must keep polling)", async () => {
     stubRecord(buildRecord("FAILED"));
 
     await renderPage("rec-1");
 
-    expect(screen.getByText("DETAIL_CARD")).toBeInTheDocument();
-    expect(screen.queryByText("WIZARD_ISLAND")).not.toBeInTheDocument();
+    expect(screen.getByText("WIZARD_ISLAND")).toBeInTheDocument();
+    expect(screen.queryByText("DETAIL_CARD")).not.toBeInTheDocument();
   });
 
   it("renders the interactive certify wizard for an in-progress DRAFT record", async () => {

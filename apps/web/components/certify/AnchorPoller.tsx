@@ -8,7 +8,10 @@ import { useAnchor } from "../../lib/api/hooks/useAnchor";
 import { useTrustRecord } from "../../lib/api/hooks/useTrustRecord";
 import type { TrustRecordDetail } from "../../lib/api/types";
 import { Button } from "../ui/button";
-import { resolveAnchorRefetchInterval } from "./anchor-poll-interval";
+import {
+  MAX_ANCHOR_POLL_ATTEMPTS,
+  resolveAnchorRefetchInterval,
+} from "./anchor-poll-interval";
 
 interface AnchorPollerProps {
   id: string;
@@ -21,18 +24,32 @@ interface AnchorPollerProps {
  * non-blocking: `useAnchor`'s `onSuccess` writes `ANCHORING` straight into
  * the query cache, so this component reflects it on the very next render,
  * before any poll tick. Polling itself starts/stops via
- * `resolveAnchorRefetchInterval` (pure, unit-tested) — `CERTIFIED`/`FAILED`
- * are terminal, no retry button (RF-033: retries are a backend/worker concern).
+ * `resolveAnchorRefetchInterval` (pure, unit-tested). Only `CERTIFIED` is
+ * terminal; `FAILED` is transient (the backend auto-retries FAILED->ANCHORING),
+ * so it renders a "reintentando" status and keeps polling (RF-033: retries
+ * are a backend/worker concern — no manual retry button).
  */
 export function AnchorPoller({ id, initialRecord }: AnchorPollerProps) {
   const anchorMutation = useAnchor(id);
   const [error, setError] = useState<string | null>(null);
+  // Count ONLY real poll fetches, not `dataUpdatedAt` bumps: `initialData`
+  // hydration (phantom attempt #1) and `useAnchor.onSuccess`'s `setQueryData`
+  // write both stamp `dataUpdatedAt` without any API poll, so counting those
+  // could trip the give-up cap on non-poll cache writes. `onFetch` fires inside
+  // the query's `queryFn`, so it advances once per actual poll and nothing else.
+  const [pollAttempts, setPollAttempts] = useState(0);
 
   const { data } = useTrustRecord(id, {
     initialData: initialRecord,
-    refetchInterval: (query) => resolveAnchorRefetchInterval(query.state.data?.state),
+    onFetch: () => setPollAttempts((n) => n + 1),
+    refetchInterval: (query) =>
+      resolveAnchorRefetchInterval(query.state.data?.state, pollAttempts),
   });
+
   const state = data?.state ?? initialRecord.state;
+  // Mirrors the pure resolver's give-up condition so the UI can surface a
+  // distinct "slow" state once we stop polling a job that never resolved.
+  const pollCapReached = pollAttempts >= MAX_ANCHOR_POLL_ATTEMPTS;
 
   async function handleAnchor() {
     setError(null);
@@ -59,6 +76,9 @@ export function AnchorPoller({ id, initialRecord }: AnchorPollerProps) {
   }
 
   if (state === "ANCHORING") {
+    if (pollCapReached) {
+      return <p role="status">{certifyDictionary.anchor.slowMessage}</p>;
+    }
     return <p role="status">{certifyDictionary.anchor.anchoringMessage}</p>;
   }
 
@@ -78,8 +98,15 @@ export function AnchorPoller({ id, initialRecord }: AnchorPollerProps) {
   }
 
   if (state === "FAILED") {
-    // No retry button by design (RF-033) — retries are automatic/backend.
-    return <p role="alert">{certifyDictionary.anchor.failedMessage}</p>;
+    // FAILED is transient, not terminal: the backend immediately transitions
+    // FAILED->ANCHORING and re-enqueues (confirm-anchor.handler). So this is a
+    // "reintentando automáticamente" status (role="status"), NOT a dead
+    // role="alert" — the poller keeps running to advance to CERTIFIED. If the
+    // attempt cap was reached, surface the distinct "slow" state instead.
+    if (pollCapReached) {
+      return <p role="status">{certifyDictionary.anchor.slowMessage}</p>;
+    }
+    return <p role="status">{certifyDictionary.anchor.retryingMessage}</p>;
   }
 
   return null;

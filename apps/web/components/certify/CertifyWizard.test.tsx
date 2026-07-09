@@ -1,9 +1,16 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
+import { certifyDictionary } from "../../dictionaries/es/certify";
+import { server } from "../../test/msw/server";
 import { trustRecordQueryKey } from "../../lib/api/hooks/useTrustRecord";
 import type { TrustRecordDetail } from "../../lib/api/types";
 import { CertifyWizard } from "./CertifyWizard";
+import {
+  MAX_ANALYSIS_POLL_ATTEMPTS,
+  resolveAnalysisRefetchInterval,
+} from "./analysis-poll-interval";
 
 // `DiscardDraftButton` (rendered in every DRAFT branch) calls `useRouter()`,
 // which throws without a mounted app router in jsdom (same approach as
@@ -126,5 +133,67 @@ describe("CertifyWizard (spec: AI Analysis Display — never a silent DRAFT stal
       screen.queryByText("Analizando el documento… esto puede tardar unos segundos."),
     ).not.toBeInTheDocument();
     expect(screen.getByText("El PDF no tiene una capa de texto extraíble.")).toBeInTheDocument();
+  });
+
+  it("does NOT render a dead-end ConfirmButton on a failed-analysis DRAFT (confirm would 409) — only the banner + discard", () => {
+    renderWizard(
+      buildRecord({
+        state: "DRAFT",
+        aiSummary: null,
+        analysisFailureReason: "El PDF no tiene una capa de texto extraíble.",
+      }),
+    );
+
+    // The primary action must be absent — it could only ever fail here.
+    expect(
+      screen.queryByRole("button", { name: "Confirmar certificación" }),
+    ).not.toBeInTheDocument();
+    // Discard remains the sole available action out of the failed state.
+    expect(screen.getByRole("button", { name: "Descartar borrador" })).toBeInTheDocument();
+  });
+
+  it("renders the discarded message from the dictionary (RNF-041 — no inline JSX literal) for a DISCARDED record", () => {
+    renderWizard(buildRecord({ state: "DISCARDED" }));
+
+    expect(screen.getByText("Este borrador fue descartado.")).toBeInTheDocument();
+  });
+
+  it("counts ONLY real poll fetches toward the analysis give-up cap — setQueryData cache writes never advance it; real polls eventually surface the slow state", async () => {
+    const analyzingMessage = "Analizando el documento… esto puede tardar unos segundos.";
+    const pending = () =>
+      buildRecord({ state: "DRAFT", aiSummary: null, analysisFailureReason: null });
+    server.use(
+      http.get("http://localhost:3000/api/backend/trust-records/tr-1", () =>
+        HttpResponse.json(pending()),
+      ),
+    );
+    const queryClient = renderWizard(pending());
+    expect(screen.getByText(analyzingMessage)).toBeInTheDocument();
+
+    // Walk up to the edge with genuine poll fetches.
+    await act(async () => {
+      for (let i = 0; i < MAX_ANALYSIS_POLL_ATTEMPTS - 1; i += 1) {
+        await queryClient.refetchQueries({ queryKey: trustRecordQueryKey("tr-1") });
+      }
+    });
+    expect(screen.getByText(analyzingMessage)).toBeInTheDocument();
+    expect(screen.queryByText(certifyDictionary.review.analysisSlow)).not.toBeInTheDocument();
+
+    // Cache writes bump `dataUpdatedAt` without any poll — the OLD counter would
+    // trip the "tardando más" state right here; the fetch-based one must not.
+    await act(async () => {
+      for (let i = 0; i < 5; i += 1) {
+        queryClient.setQueryData<TrustRecordDetail>(trustRecordQueryKey("tr-1"), pending());
+      }
+    });
+    expect(screen.getByText(analyzingMessage)).toBeInTheDocument();
+    expect(screen.queryByText(certifyDictionary.review.analysisSlow)).not.toBeInTheDocument();
+
+    // One more REAL poll reaches the cap: the slow state is surfaced.
+    await act(async () => {
+      await queryClient.refetchQueries({ queryKey: trustRecordQueryKey("tr-1") });
+    });
+    expect(await screen.findByText(certifyDictionary.review.analysisSlow)).toBeInTheDocument();
+    expect(resolveAnalysisRefetchInterval(pending(), MAX_ANALYSIS_POLL_ATTEMPTS)).toBe(false);
   });
 });
