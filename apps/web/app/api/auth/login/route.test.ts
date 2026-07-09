@@ -59,6 +59,51 @@ describe("POST /api/auth/login (spec: Login and Session Establishment)", () => {
     expect(mockCookieStore.set).not.toHaveBeenCalled();
   });
 
+  it("returns a 400 (never a 500) when the request body is malformed / not JSON", async () => {
+    mockCookieStore.set.mockClear();
+
+    const request = new NextRequest("http://localhost:3001/api/auth/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "this-is-not-json{",
+    });
+
+    const response = await POST(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body).toEqual({ status: 400, message: "email and password are required" });
+    expect(mockCookieStore.set).not.toHaveBeenCalled();
+  });
+
+  // `JSON.parse` accepts `null`, primitives and arrays WITHOUT throwing, so the
+  // parse try/catch never fires for them — the route must still guard before
+  // destructuring, otherwise `const { email } = null` throws a 500.
+  it.each([
+    ["null", "null"],
+    ["a JSON number primitive", "42"],
+    ["a JSON string primitive", '"just-a-string"'],
+    ["a JSON array", "[]"],
+  ])(
+    "returns a 400 (never a 500) when the JSON body is %s",
+    async (_label, rawBody) => {
+      mockCookieStore.set.mockClear();
+
+      const request = new NextRequest("http://localhost:3001/api/auth/login", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: rawBody,
+      });
+
+      const response = await POST(request);
+      const body = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(body).toEqual({ status: 400, message: "email and password are required" });
+      expect(mockCookieStore.set).not.toHaveBeenCalled();
+    },
+  );
+
   it("returns the distinct unverified-email message on 403 and never sets a cookie", async () => {
     mockCookieStore.set.mockClear();
     server.use(
