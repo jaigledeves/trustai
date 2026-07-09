@@ -17,7 +17,29 @@ interface LoginRequestBody {
  * unverified email) is chosen by `mapApiError`.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const { email, password } = (await request.json()) as LoginRequestBody;
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    // Malformed / non-JSON body: `request.json()` throws — surface the
+    // route's own 400 shape instead of letting it bubble as a 500.
+    return NextResponse.json(
+      { status: 400, message: "email and password are required" },
+      { status: 400 },
+    );
+  }
+
+  // `JSON.parse("null")` (and numbers/strings/booleans) parse WITHOUT throwing,
+  // so the catch above never fires for them. Destructuring `null` throws a
+  // TypeError (-> 500), so guard non-object bodies here and reuse the 400 shape.
+  if (!body || typeof body !== "object") {
+    return NextResponse.json(
+      { status: 400, message: "email and password are required" },
+      { status: 400 },
+    );
+  }
+
+  const { email, password } = body as LoginRequestBody;
 
   if (!email || !password) {
     return NextResponse.json(
