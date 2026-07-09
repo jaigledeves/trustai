@@ -58,6 +58,17 @@ describe("serverFetch (spec: Proxy call attaches Bearer header — same principl
     expect(receivedBody).toEqual({ summary: "updated" });
   });
 
+  it("maps a network failure (backend unreachable) to an ApiError 502, never an uncaught TypeError", async () => {
+    server.use(
+      http.get("http://localhost:3000/trust-records/down", () => HttpResponse.error()),
+    );
+
+    await expect(serverFetch("/trust-records/down")).rejects.toMatchObject({
+      name: "ApiError",
+      status: 502,
+    });
+  });
+
   it("throws an ApiError carrying the response status and message on a non-2xx response", async () => {
     server.use(
       http.get("http://localhost:3000/trust-records/missing", () =>

@@ -106,6 +106,43 @@ describe("app/api/backend/[...path] proxy (spec: Proxy call attaches Bearer head
     expect(response.status).toBe(204);
   });
 
+  it("rejects (400) a path whose leading empty segment would resolve to a foreign origin — never attaches the Bearer to it (SSRF guard)", async () => {
+    let leaked = false;
+    server.use(
+      http.get("http://evil.example.com/steal", () => {
+        leaked = true;
+        return HttpResponse.json({ ok: true });
+      }),
+    );
+
+    // A leading empty catch-all segment => `//evil.example.com/steal`, which
+    // `new URL()` resolves to http://evil.example.com — a different origin.
+    const request = new NextRequest("http://localhost:3001/api/backend//evil.example.com/steal");
+    const response = await GET(request, context(["", "evil.example.com", "steal"]));
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body).toEqual({ status: 400, message: "Invalid request path" });
+    // The forwarded request must never have reached the foreign host.
+    expect(leaked).toBe(false);
+  });
+
+  it("maps a backend network failure to a 502 {status, message} shape (no uncaught TypeError -> 500 crash)", async () => {
+    server.use(
+      http.get("http://localhost:3000/trust-records/down", () => HttpResponse.error()),
+    );
+
+    const request = new NextRequest("http://localhost:3001/api/backend/trust-records/down");
+    const response = await GET(request, context(["trust-records", "down"]));
+    const body = await response.json();
+
+    expect(response.status).toBe(502);
+    expect(body).toEqual({
+      status: 502,
+      message: "Could not reach the backend service",
+    });
+  });
+
   it("normalizes a 401 from the backend into a client-consumable {status, message} shape", async () => {
     server.use(
       http.get("http://localhost:3000/trust-records/2", () =>

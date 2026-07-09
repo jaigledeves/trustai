@@ -6,6 +6,9 @@ interface RouteContext {
   params: Promise<{ path: string[] }>;
 }
 
+/** Outbound request timeout — a stuck backend must not hang the proxy. */
+const REQUEST_TIMEOUT_MS = 10_000;
+
 /**
  * Generic Bearer-injecting proxy for every org-scoped backend call a Client
  * Component makes (design.md: "Single catch-all proxy ... avoids N
@@ -20,10 +23,24 @@ async function proxyRequest(
   context: RouteContext,
 ): Promise<NextResponse> {
   const { path } = await context.params;
-  const token = await getSession();
 
-  const targetUrl = new URL(`/${path.join("/")}`, config.apiBaseUrl());
+  const apiBaseUrl = config.apiBaseUrl();
+  const targetUrl = new URL(`/${path.join("/")}`, apiBaseUrl);
   targetUrl.search = request.nextUrl.search;
+
+  // SSRF guard: a leading empty catch-all segment makes `path.join("/")`
+  // start with `//host`, which `new URL()` resolves to an ARBITRARY origin —
+  // and we'd otherwise attach the user's Bearer to it. Reject anything that
+  // escaped the configured API origin BEFORE reading the session / attaching
+  // the token / fetching.
+  if (targetUrl.origin !== new URL(apiBaseUrl).origin) {
+    return NextResponse.json(
+      { status: 400, message: "Invalid request path" },
+      { status: 400 },
+    );
+  }
+
+  const token = await getSession();
 
   const headers = new Headers();
   const contentType = request.headers.get("content-type");
@@ -37,12 +54,30 @@ async function proxyRequest(
   const hasBody = request.method !== "GET" && request.method !== "HEAD";
   const body = hasBody ? await request.arrayBuffer() : undefined;
 
-  const response = await fetch(targetUrl, {
-    method: request.method,
-    headers,
-    cache: "no-store",
-    ...(body && body.byteLength > 0 ? { body } : {}),
-  });
+  let response: Response;
+  try {
+    response = await fetch(targetUrl, {
+      method: request.method,
+      headers,
+      cache: "no-store",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      ...(body && body.byteLength > 0 ? { body } : {}),
+    });
+  } catch (error) {
+    // Backend outage/timeout: return the same {status,message} JSON shape the
+    // client-fetch wrapper expects, never an uncaught TypeError -> 500 crash.
+    const isTimeout = error instanceof DOMException && error.name === "TimeoutError";
+    const status = isTimeout ? 503 : 502;
+    return NextResponse.json(
+      {
+        status,
+        message: isTimeout
+          ? "The backend service did not respond in time"
+          : "Could not reach the backend service",
+      },
+      { status },
+    );
+  }
 
   if (!response.ok) {
     return NextResponse.json(
