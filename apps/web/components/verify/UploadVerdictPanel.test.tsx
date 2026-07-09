@@ -91,6 +91,20 @@ describe("UploadVerdictPanel (spec: web-public-verify — Upload Verdict, All Fo
     expect(screen.getByText("Resumen Y")).toBeInTheDocument();
   });
 
+  it("clears the previous file's recompute panel when a new file is selected after a verdict (no stale hash)", async () => {
+    await uploadAndSubmit(baseResult({ verdict: "VALID" }));
+
+    // The recompute panel is mounted for the submitted file after a verdict.
+    expect(await screen.findByText("CLIENT_HASH_RECOMPUTE")).toBeInTheDocument();
+
+    // Selecting a new file before re-submitting must unmount the OLD file's
+    // recompute panel instead of leaving the previous file's hash on screen.
+    const user = userEvent.setup();
+    await user.upload(screen.getByLabelText("Elegí el archivo a verificar"), pdfFile("new.pdf"));
+
+    expect(screen.queryByText("CLIENT_HASH_RECOMPUTE")).not.toBeInTheDocument();
+  });
+
   it("INVALID_RECORD via POST on unknown id: renders as an error state — the UI never expected a 404 here", async () => {
     await uploadAndSubmit(baseResult({ verdict: "INVALID_RECORD", analysis: null, chainAnchor: null }));
 

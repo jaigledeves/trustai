@@ -32,6 +32,10 @@ export function UploadVerdictPanel({ id }: UploadVerdictPanelProps) {
     setFile(event.target.files?.[0] ?? null);
     setResult(null);
     setError(null);
+    // Also drop the previously-submitted file: otherwise, after a verdict,
+    // selecting a NEW file would keep rendering the OLD file's recomputed
+    // hash until the next submit.
+    setSubmittedFile(null);
   }
 
   async function handleSubmit() {
