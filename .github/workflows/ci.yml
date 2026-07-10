@@ -28,6 +28,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # dtr-core is consumed by api and web via its built dist/ (main + types),
+      # so it must be compiled before typechecking or testing the consumers.
+      - name: Build workspace libraries
+        run: pnpm --filter @trustai/dtr-core build
+
       - name: Typecheck (all packages)
         run: pnpm -r typecheck
 
