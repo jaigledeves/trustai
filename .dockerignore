@@ -1,0 +1,17 @@
+# Keep the Docker build context small and reproducible.
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+**/test-results
+**/playwright-report
+.git
+.github
+**/*.log
+**/.env
+**/.env.*
+!**/.env.example
+smart-contracts/out
+smart-contracts/cache
+smart-contracts/broadcast
