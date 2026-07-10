@@ -33,6 +33,12 @@ jobs:
       - name: Build workspace libraries
         run: pnpm --filter @trustai/dtr-core build
 
+      # Prisma 6 no longer generates the client on install. The api's model
+      # types (TrustRecord, DigitalAsset, Anchor, ...) come from this step.
+      # Generation only reads the schema — no database connection required.
+      - name: Generate Prisma client
+        run: pnpm --filter @trustai/api exec prisma generate
+
       - name: Typecheck (all packages)
         run: pnpm -r typecheck
 
