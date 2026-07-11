@@ -1,0 +1,63 @@
+sequenceDiagram
+    title Flujo de autenticación (registro, login, ruta protegida) — verificado contra el código
+
+    actor U as Usuario
+    participant B as Navegador (JS del cliente)
+    participant P as proxy.ts (edge, matcher /dtrs/*)
+    participant W as Web / Next.js (RSC + route handlers)
+    participant API as API NestJS (AuthController + JwtStrategy)
+    participant DB as PostgreSQL (Prisma)
+    participant M as Email (StubNotificationAdapter → logs)
+
+    Note over U,M: Fase 1 — Registro + verificación de email (NO hay login automático)
+    U->>B: Completa email + contraseña
+    B->>W: POST /api/backend/auth/register (proxy catch-all)
+    W->>API: POST /auth/register (sin token: aún no hay sesión)
+    API->>API: Hashea la contraseña con argon2
+    API->>DB: Crea User (emailVerified = false)
+    API->>M: Emite token de verificación
+    API-->>W: 201 Created
+    W-->>B: "Revisa tu email…" (RegisterForm, sin cookie)
+    Note over M: El token sale por los logs de la API (sin SMTP real en el MVP)
+    U->>B: Abre /verify-email?token=...
+    B->>W: GET /verify-email (Server Component)
+    W->>API: GET /auth/verify-email?token=...
+    API->>DB: emailVerified = true
+    API-->>W: { verified: true }
+    W-->>B: "Ya puedes iniciar sesión"
+
+    Note over U,DB: Fase 2 — Login (ÚNICO punto donde se setea la cookie de sesión)
+    U->>B: Envía credenciales
+    B->>W: POST /api/auth/login (route handler dedicado)
+    W->>API: POST /auth/login
+    API->>DB: Busca User por email
+    API->>API: Verifica contraseña (argon2) + emailVerified
+    alt Credenciales OK y email verificado
+        API-->>W: 200 { accessToken: JWT }
+        W->>B: Set-Cookie trustai_session=JWT (httpOnly, secure, sameSite=lax)
+        W-->>B: { ok: true } → redirige a /dtrs
+    else 401 credenciales / 403 email sin verificar
+        API-->>W: 401 / 403
+        W-->>B: mensaje mapeado (401 = copy anti-enumeración, no revela si el email existe)
+    end
+    Note over B,W: El JWT queda en la cookie httpOnly — document.cookie del navegador NUNCA lo lee (anti-XSS)
+
+    Note over U,API: Fase 3 — Acceso a ruta protegida /dtrs (doble candado)
+    U->>B: Navega a /dtrs
+    B->>P: GET /dtrs (la cookie viaja sola en el request)
+    alt No hay cookie
+        P-->>B: 302 → /login
+    else Hay cookie (proxy chequea SOLO presencia, nunca validez)
+        P->>W: NextResponse.next()
+        W->>W: getSession() lee el JWT desde la cookie (server-side)
+        W->>API: GET /trust-records con Authorization Bearer JWT (serverFetch, la cookie cruda nunca se reenvía)
+        API->>API: Valida la FIRMA y expiración del JWT (JwtStrategy)
+        alt JWT válido
+            API-->>W: 200 datos de la organización
+            W-->>B: HTML ya renderizado (el token no baja al cliente)
+        else JWT vencido/inválido
+            API-->>W: 401
+            W-->>B: se maneja el 401 (re-login)
+        end
+    end
+    Note over U,W: Logout = borrar la cookie (clearSessionCookie). El JWT es stateless: no hace falta avisar a la API

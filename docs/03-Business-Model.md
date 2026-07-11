@@ -60,7 +60,7 @@ notarización blockchain sin IA (OriginStamp), procesos manuales.
 
 ### 3. Propuesta de valor única
 
-> Certificá y comprendé tus documentos en un solo paso: evidencia
+> Certifica y comprende tus documentos en un solo paso: evidencia
 > criptográfica verificable por cualquiera + análisis IA del contenido,
 > empaquetados en un Digital Trust Record.
 

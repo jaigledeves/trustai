@@ -1,0 +1,31 @@
+sequenceDiagram
+    title Flujo de verificación pública (UC-02) — verificado contra el código
+
+    actor V as Verificador (sin cuenta)
+    participant W as Web (/verify/[id])
+    participant API as API (PublicVerificationController)
+    participant UC as VerifyDocumentUseCase
+    participant DB as PostgreSQL (Prisma)
+    participant CH as AnchorPort.isAnchored / Base Sepolia
+
+    Note over V,W: Camino A — solo hash (QR / URL, sin subir archivo)
+    V->>W: Escanea QR o abre URL /verify/:id
+    W->>API: GET /public/verify/:id?channel=QR
+    API->>UC: verifyByHash({ trustRecordId, channel })
+    UC->>DB: busca TrustRecord + Anchor
+    UC->>CH: isAnchored(canonicalHash) (fallback a Anchor.status si falla la lectura on-chain)
+    CH-->>UC: anchored=true/false
+    UC-->>API: verdict VALID/PENDING_ANCHOR/ASSET_MISMATCH (id existe)
+    API-->>W: 200 VerifyHashResponseDto (sin analysis, INV-41)
+    Note right of API: id inexistente -> 404 (asimetría GET, INV-41)
+
+    Note over V,W: Camino B — verificación completa (sube el mismo documento)
+    V->>W: Sube el PDF a verificar
+    W->>API: POST /public/verify/:id (multipart/form-data)
+    API->>UC: verifyByUpload({ trustRecordId, fileBytes, channel })
+    UC->>UC: recalcula SHA-256 del upload y compara con el DigitalAsset certificado
+    UC->>DB: busca TrustRecord + Anchor
+    UC->>CH: isAnchored(canonicalHash)
+    UC-->>API: verdict + analysis (solo si VALID/PENDING_ANCHOR)
+    API-->>W: 200 VerifyUploadResponseDto (id inexistente -> 200 INVALID_RECORD, nunca 404)
+    W-->>V: Veredicto + explicación + enlace a basescan.org/tx/:txHash

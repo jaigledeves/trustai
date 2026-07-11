@@ -146,7 +146,7 @@ RGPD del segmento (03 §Riesgos) y control de scope de la Constitución
 |---|---|---|
 | RNF-040 | El flujo de certificación es completable sin manual por un usuario no técnico (persona P3) | Must |
 | RNF-041 | Interfaz en español en MVP; arquitectura preparada para i18n | Should |
-| RNF-042 | La página de verificación es usable desde móvil (el QR se escanea con el teléfono) | Must |
+| RNF-042 | La página de verificación es usable desde el celular (el QR se escanea con el teléfono) | Must |
 
 ## Decisiones
 

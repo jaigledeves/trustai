@@ -97,10 +97,10 @@ Objetivo de cobertura: 100%. Con 15 líneas efectivas no hay excusa.
 
 | Aspecto | Decisión |
 |---|---|
-| Red MVP | Base Sepolia (testnet) — ADR-003 |
-| Toolchain | Foundry (`forge script` para deploy reproducible) |
+| Red MVP | Base Sepolia (testnet, chainId 84532) — ADR-003 |
+| Toolchain | Foundry (`smart-contracts/script/Deploy.s.sol`, `forge script` para deploy reproducible) |
 | Verificación de código | Publicar código fuente en el explorador (Basescan) tras el deploy — sin esto, RNF-032 cojea |
-| Registro | Dirección del contrato + bloque de despliegue documentados en config versionada |
+| Registro | **Ya desplegado**: `0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22` (recibo en `smart-contracts/broadcast/Deploy.s.sol/84532/run-latest.json`); configurado como `ANCHOR_CONTRACT_ADDRESS` en la API (docs/12-Deployment.md) |
 | Wallet del worker | Clave en secreto de entorno (RNF-005); wallet dedicada solo para anclar, sin fondos más allá del gas necesario |
 | Confirmaciones | El worker espera 2 confirmaciones antes de marcar `CERTIFIED` (INV-32) |
 | Reintentos | `AlreadyAnchored` ⇒ éxito; timeout/nonce ⇒ reintento con backoff (RF-033) |
@@ -150,6 +150,16 @@ Objetivo de cobertura: 100%. Con 15 líneas efectivas no hay excusa.
   contrato es permissionless — cualquier wallet nueva sigue anclando);
   solo interrumpe operación hasta rotar el secreto.
 
+El código en `smart-contracts/src/AnchorRegistry.sol` coincide exactamente
+con el bloque anterior — sin desviaciones. Suite de tests en
+`smart-contracts/test/AnchorRegistry.t.sol` (`.gas-snapshot` versionado en el
+repo para detectar regresiones de gas en CI, según lo previsto arriba). El
+worker (`ViemAnchorAdapter`, `apps/api/src/adapters/chain/`) usa el ABI en
+`anchor-registry.abi.ts` y hay un e2e "live" gateado por credenciales reales
+(`apps/api/test/anchor-basesepolia.e2e-spec.ts`) que somete una tx real a
+Base Sepolia y confirma `isAnchored` on-chain — la prueba más cercana a la
+demo del tribunal.
+
 ## Referencias
 
 - docs/adr/ADR-003-contrato-minimo-anchor-registry.md
@@ -157,6 +167,7 @@ Objetivo de cobertura: 100%. Con 15 líneas efectivas no hay excusa.
 - docs/07-Domain-Model.md (Anchor, INV-30..33)
 - docs/06-Requirements.md (RF-033/035/044, RNF-032)
 - docs/04-Viability.md (§1.2 costes de gas)
+- docs/12-Deployment.md (dirección del contrato como variable de entorno de la API)
 
 ## Checklist
 
@@ -165,8 +176,10 @@ Objetivo de cobertura: 100%. Con 15 líneas efectivas no hay excusa.
 - [x] Plan de pruebas Foundry (unit + fuzz + invariantes + gas)
 - [x] Estrategia de despliegue, wallet y confirmaciones
 - [x] Batching Merkle soportado sin cambios de contrato
-- [ ] Implementación + suite de tests (fase de desarrollo)
-- [ ] Revisión de seguridad ligera antes de mainnet (post-MVP)
+- [x] Implementación + suite de tests (`smart-contracts/test/AnchorRegistry.t.sol`)
+- [x] Desplegado en Base Sepolia (`0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22`) y validado con e2e "live" contra la red real
+- [ ] Verificación del código fuente en Basescan — pendiente de confirmar (no verificable desde el repo; revisar manualmente antes de la demo)
+- [ ] Revisión de seguridad ligera antes de mainnet (post-MVP; sigue aplicando, Base Sepolia es solo testnet)
 
 ## Próximo Documento
 

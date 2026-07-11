@@ -1,0 +1,31 @@
+C4Container
+    title TrustAI — C4 Nivel 2: Contenedores (verificado contra el código, 2026-07)
+
+    Person(orguser, "Usuario de despacho")
+    Person(verifier, "Verificador externo")
+
+    System_Boundary(trustai, "TrustAI") {
+        Container(web, "Web App", "Next.js 16 (App Router)", "UI de certificación (app/(dashboard)) + login/registro (app/(auth)) + página pública /verify/[id]")
+        Container(api, "API", "NestJS (Node)", "Módulos: auth, assets, trust-records, public-verification, health. Núcleo hexagonal (domain/application/ports/adapters)")
+        Container(worker, "Worker", "NestJS + pg-boss (mismo proceso que la API)", "Jobs: analyze-document, anchor-dtr, confirm-anchor (WorkerModule, in-process)")
+        ContainerDb(db, "PostgreSQL", "Prisma", "Users, Organizations, DigitalAssets, TrustRecords, Anchors, VerificationAttempts + cola pg-boss")
+        Container(dtrcore, "@trustai/dtr-core", "Paquete TS compartido (packages/dtr-core)", "Canonicalización RFC 8785 + SHA-256, verificación")
+        Container(contract, "AnchorRegistry", "Solidity 0.8.24 (Foundry)", "anchor(bytes32) + isAnchored(bytes32) + evento Anchored. Desplegado en Base Sepolia: 0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22")
+    }
+
+    System_Ext(llm, "OpenAI (adaptador real) / stub")
+    System_Ext(chain, "Base Sepolia (L2, chainId 84532)")
+    System_Ext(storage, "Object Storage S3-compatible (R2 / in-memory)")
+
+    Rel(orguser, web, "HTTPS")
+    Rel(verifier, web, "HTTPS (sin auth)")
+    Rel(web, api, "REST/JSON (Bearer + cookie httpOnly)")
+    Rel(api, db, "Prisma Client")
+    Rel(api, worker, "encola jobs (mismo proceso)", "pg-boss")
+    Rel(worker, llm, "análisis (AiAnalysisPort)")
+    Rel(worker, chain, "viem: submitAnchor / isAnchored")
+    Rel(worker, db, "actualiza estados de TrustRecord/Anchor")
+    Rel(api, storage, "blobs cifrados (StoragePort)")
+    Rel(contract, chain, "desplegado en")
+    Rel(api, dtrcore, "usa: sha256Hex, verifyAssetAgainstRecord")
+    Rel(web, dtrcore, "usa (hash en cliente, ClientHashRecompute)")

@@ -81,7 +81,7 @@ classDiagram
 ```
 
 **Lectura rápida**: una `Organization` tiene usuarios y activos. Cada
-`DigitalAsset` (un fichero, un hash) genera uno o más `TrustRecord`
+`DigitalAsset` (un archivo, un hash) genera uno o más `TrustRecord`
 (DTR) — la evidencia. El DTR congela el `AIAnalysis` como value object.
 Un `Anchor` certifica 1..N DTRs en una transacción (batching Merkle,
 04). Las `VerificationAttempt` registran la métrica clave del negocio.
@@ -99,7 +99,7 @@ Fuera de alcance: diseño físico de base de datos (08), contratos de API
 
 | Término | Significado exacto |
 |---|---|
-| **Activo digital** | Un fichero concreto: un contenido, un hash SHA-256. Si cambia un byte, es otro activo. |
+| **Activo digital** | Un archivo concreto: un contenido, un hash SHA-256. Si cambia un byte, es otro activo. |
 | **DTR (Trust Record)** | La evidencia: análisis IA congelado + hash del activo + metadatos, serializado canónicamente y anclado. |
 | **Anclaje (Anchor)** | La transacción blockchain que certifica el hash de uno o más DTRs. |
 | **Certificar** | Llevar un DTR desde borrador hasta anclado. |
@@ -175,7 +175,7 @@ stateDiagram-v2
 
 | Estado | Significado para el usuario (RF-014) |
 |---|---|
-| DRAFT | "Revisá el análisis antes de certificar" — todo editable. |
+| DRAFT | "Revisa el análisis antes de certificar" — todo editable. |
 | READY | "Listo para certificar" — análisis congelado. |
 | ANCHORING | "Certificando en blockchain…" — asíncrono (RNF-022). |
 | CERTIFIED | "Certificado" — verificable públicamente. |
@@ -210,7 +210,7 @@ stateDiagram-v2
 
 - **DTR mutable con historial de auditoría**: descartado; contradice
   ADR-001 y complica la verificación (¿qué versión se ancló?).
-- **Versionado sobre DigitalAsset (asset con N ficheros)**: descartado;
+- **Versionado sobre DigitalAsset (asset con N archivos)**: descartado;
   rompe la regla "un activo = un hash" que simplifica todo el modelo de
   verificación.
 - **AIAnalysis como entidad reutilizable entre DTRs**: descartado; dos

@@ -1,0 +1,47 @@
+sequenceDiagram
+    title Flujo de certificación (UC-01) — verificado contra el código
+
+    actor U as Usuario (org)
+    participant W as Web (CertifyWizard)
+    participant API as API (AssetsController / TrustRecordsController)
+    participant Q as pg-boss (worker in-process)
+    participant AI as AiAnalysisPort (OpenAI / stub)
+    participant DB as PostgreSQL (Prisma)
+    participant CH as AnchorPort (viem) / Base Sepolia
+
+    U->>W: Sube PDF (UploadStep)
+    W->>API: POST /assets (multipart/form-data)
+    API->>DB: crea DigitalAsset + TrustRecord DRAFT (idempotente por sha256, RF-012)
+    API->>Q: encola job analyze-document
+    API-->>W: 201 UploadAssetResponseDto
+
+    Q->>AI: analiza texto extraído (unpdf.adapter)
+    AI-->>Q: resumen + clasificación + idioma
+    Q->>DB: guarda aiSummary/aiClassification/aiLanguage
+
+    U->>W: Revisa análisis (ReviewStep)
+    W->>API: PATCH /trust-records/:id/review (opcional, edita campos)
+    API->>DB: actualiza campos IA en DRAFT
+
+    U->>W: Confirma (ConfirmButton)
+    W->>API: POST /trust-records/:id/confirm
+    API->>API: dtr-core: canonicaliza (RFC 8785) + SHA-256 -> canonicalHash
+    API->>DB: TrustRecord DRAFT -> READY (canonicalHash fijado, INV-22/24)
+    API-->>W: 200 ConfirmTrustRecordResponseDto
+
+    W->>API: POST /trust-records/:id/anchor
+    API->>DB: TrustRecord READY -> ANCHORING
+    API->>Q: encola job anchor-dtr (no bloqueante, RNF-022)
+    API-->>W: 200 AnchorTrustRecordResponseDto (state ANCHORING)
+
+    Q->>CH: submitAnchor(canonicalHash) (AnchorDtrHandler)
+    CH-->>Q: txHash
+    Q->>DB: Anchor.status = PENDING, guarda txHash
+
+    loop confirm-anchor (poll cada 15s, timeout 10 min)
+        Q->>CH: espera 2 confirmaciones (isAnchored / receipt)
+    end
+    Q->>DB: Anchor confirmado -> TrustRecord CERTIFIED (INV-32)
+
+    W->>API: GET /trust-records/:id (polling, AnchorPoller)
+    API-->>W: 200 detalle con anchor.txHash + state CERTIFIED

@@ -1,0 +1,20 @@
+C4Context
+    title TrustAI — C4 Nivel 1: Contexto (verificado contra el código, 2026-07)
+
+    Person(orguser, "Usuario de despacho", "P1-P3: certifica y gestiona activos")
+    Person(verifier, "Verificador externo", "P4: verifica sin cuenta")
+
+    System(trustai, "TrustAI", "Certificación inteligente de activos digitales (DTR)")
+
+    System_Ext(llm, "Proveedor LLM", "OpenAI (adaptador real) / stub de desarrollo: análisis documental")
+    System_Ext(chain, "Blockchain L2", "Base Sepolia: anclaje de evidencias (contrato AnchorRegistry desplegado)")
+    System_Ext(email, "Email transaccional", "verificación de cuenta (adaptador stub en MVP)")
+    System_Ext(storage, "Object Storage", "activos cifrados (S3-compatible: Cloudflare R2 en prod, in-memory en tests)")
+
+    Rel(orguser, trustai, "Certifica, consulta, comparte")
+    Rel(verifier, trustai, "Verifica DTRs (público, sin auth)")
+    Rel(trustai, llm, "Análisis: resumen + clasificación")
+    Rel(trustai, chain, "Ancla hashes / lee confirmaciones (viem)")
+    Rel(trustai, email, "Envía emails")
+    Rel(trustai, storage, "Guarda/recupera blobs cifrados (AES-256-GCM)")
+    Rel(verifier, chain, "Verificación independiente (enlace a tx)", "opcional")

@@ -70,6 +70,7 @@ serverless.
 | `API_BASE_URL` | sí | URL pública de la API en Railway (server-side). |
 | `NEXT_PUBLIC_API_BASE_URL` | sí | Misma URL (verificación pública llama directo, sin auth). |
 | `NEXT_PUBLIC_CHAIN_EXPLORER_BASE_URL` | no | `https://sepolia.basescan.org` (default). |
+| `NEXT_PUBLIC_APP_BASE_URL` | sí (prod) | Origen público del propio web (p. ej. `https://trustai-web-kappa.vercel.app`). Se usa para construir el enlace absoluto y el QR de verificación pública en el detalle del DTR. Default dev: `http://localhost:3100`. |
 | `NEXT_PUBLIC_PUBLIC_VERIFICATION_ENABLED` | no | `true` para mostrar la página de verificación pública. |
 | `SESSION_COOKIE_NAME` | no | Default `trustai_session`. |
 
@@ -84,14 +85,39 @@ serverless.
 `main.ts` hace `app.enableCors()` (permisivo, todos los orígenes). Suficiente para
 el MVP; endurecer al dominio del web de Vercel antes de un uso serio.
 
+## Usuario de prueba (demo para el revisor)
+
+El adaptador de notificación en el MVP (`StubNotificationAdapter`) solo
+escribe el token de verificación en los logs, no envía un email real. Para
+que un revisor pueda entrar sin ese paso, se siembra una cuenta ya
+verificada con:
+
+```powershell
+$env:API_BASE_URL="https://trustaiapi-production.up.railway.app"
+$env:DATABASE_URL="<DATABASE_URL de Railway>"
+pnpm --filter @trustai/api seed:demo
+```
+
+El script (`apps/api/scripts/seed-demo-user.mjs`) registra la cuenta contra
+la API real (hashing argon2 + creación de Organization/User por el código
+real) y luego marca `emailVerified = true` vía Prisma. Es idempotente:
+re-ejecutarlo sobre una cuenta existente solo la re-verifica. Credenciales
+por defecto (`DEMO_EMAIL` / `DEMO_PASSWORD` las sobreescriben): las
+publicadas en el README raíz. Requiere que la API esté desplegada y el
+`DATABASE_URL` apunte al Postgres de Railway.
+
 ## Checklist de corte
 
-- [ ] Contrato en Base Sepolia accesible (`isAnchored` responde).
+- [x] Contrato en Base Sepolia accesible (`isAnchored` responde) — verificado con el e2e "live" (`apps/api/test/anchor-basesepolia.e2e-spec.ts`, gateado por credenciales reales) y el recibo de despliegue en `smart-contracts/broadcast/Deploy.s.sol/84532/run-latest.json`.
 - [ ] Postgres de Railway migrado (`db:deploy` en release).
 - [ ] Bucket R2 creado y credenciales cargadas.
 - [ ] API `/health` responde 200 en su URL pública.
 - [ ] Web carga y `API_BASE_URL` apunta a la API.
 - [ ] Golden path end-to-end: registrar → verificar → certificar → CERTIFIED con tx en basescan.
+- [ ] Usuario de prueba sembrado (`pnpm --filter @trustai/api seed:demo`) y login verificado con las credenciales del README.
+
+Endpoints reales expuestos por la API en este despliegue:
+[`docs/api/endpoints.md`](api/endpoints.md).
 
 ## Pendientes / follow-ups
 

@@ -115,6 +115,27 @@ verificar en vivo, romper un documento en vivo.
   documentado — vídeo pregrabado del flujo + entorno local con stub
   (el mismo stub del ADR-004 sirve de contingencia de demo).
 
+## Estado de implementación (actualizado tras revisión de código, 2026-07)
+
+Verificado directamente contra `apps/api`, `apps/web` y `smart-contracts`:
+
+| Capacidad del alcance | Estado |
+|---|---|
+| Auth simple (UC-07) | Implementado: `auth.controller.ts` (register/verify-email/login/me), JWT + Argon2, `app/(auth)/{login,register,verify-email}` |
+| Certificar (UC-01) | Implementado end-to-end: `assets.controller.ts` (upload) → job `analyze-document` (IA) → `trust-records.controller.ts` (review/confirm/anchor) → jobs `anchor-dtr`/`confirm-anchor` → `CERTIFIED`. UI: `components/certify/{UploadStep,ReviewStep,ConfirmButton,AnchorPoller}` |
+| Verificar público (UC-02) | Implementado: `public-verification.controller.ts` (GET hash-only + POST upload), página `app/verify/[id]`, componentes `HashOnlyCard`/`UploadVerdictPanel`/`ClientHashRecompute` |
+| Historial básico (UC-03) | Implementado: `GET /trust-records` paginado + `app/(dashboard)/dtrs` (lista y detalle) |
+| Núcleo verificable (`dtr-core`) | Implementado: `packages/dtr-core` (canonicalización + hashing + verificación), usado por API y web |
+| Contrato `AnchorRegistry` en Base Sepolia | Desplegado: `0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22` (ver docs/09) |
+| Segundo adaptador IA real (Mistral) | Sigue fuera, como prevé la enmienda de ADR-004 más abajo: solo `openai` + `stub` en el código |
+
+Los criterios de aceptación 1-2 del MVP (registro/verificación de email,
+certificación hasta `CERTIFIED` con tx visible) son ejecutables hoy en el
+código; los criterios 3-5 (verificación de terceros, detección de alteración,
+reproducibilidad sin TrustAI) dependen de la demo en vivo y no se han
+verificado en esta pasada documental (requeriría ejecutar la aplicación, no
+solo leer el código).
+
 ## Referencias
 
 - docs/06-Requirements.md (MoSCoW base del recorte)
@@ -130,10 +151,13 @@ verificar en vivo, romper un documento en vivo.
 - [x] Entregables TFM mapeados
 - [x] Plan B de demo ante fallos de terceros
 - [x] Recortes con fecha/condición de retorno
-- [ ] Fase 2 (desarrollo) planificada — próximo paso
+- [x] Fase 2 (desarrollo) planificada y ejecutada — ver §Estado de implementación
 
 ## Próximo paso
 
 Fase 2 — Desarrollo: bootstrap del monorepo, `dtr-core` primero
 (TDD sobre canonicalización), luego contrato + suite Foundry, luego
-API/worker, luego web.
+API/worker, luego web. **Actualización:** las cuatro etapas están
+implementadas (ver §Estado de implementación); el siguiente paso real es
+la validación de los criterios de aceptación 3-5 en un entorno desplegado
+(docs/12-Deployment.md) y la demo del tribunal.
