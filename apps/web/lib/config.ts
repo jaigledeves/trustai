@@ -42,4 +42,13 @@ export const config = {
   chainExplorerBaseUrl:
     process.env["NEXT_PUBLIC_CHAIN_EXPLORER_BASE_URL"] ??
     "https://sepolia.basescan.org",
+
+  /**
+   * Public origin of THIS web app. Used to build absolute, shareable public
+   * verification links (`/verify/:id`) and their QR codes on the DTR detail
+   * view. Must be the deployed web URL in production so a scanned QR resolves.
+   * Defaults to the local dev port (see apps/web/package.json `dev -p 3100`).
+   */
+  appBaseUrl:
+    process.env["NEXT_PUBLIC_APP_BASE_URL"] ?? "http://localhost:3100",
 };

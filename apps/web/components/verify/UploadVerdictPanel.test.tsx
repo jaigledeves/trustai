@@ -37,7 +37,7 @@ async function uploadAndSubmit(response: VerifyUploadResponse) {
   postVerifyUploadMock.mockResolvedValueOnce(response);
   const user = userEvent.setup();
   render(<UploadVerdictPanel id="rec-1" />);
-  await user.upload(screen.getByLabelText("Elegí el archivo a verificar"), pdfFile());
+  await user.upload(screen.getByLabelText("Elige el archivo a verificar"), pdfFile());
   await user.click(screen.getByRole("button", { name: "Verificar documento" }));
 }
 
@@ -100,7 +100,7 @@ describe("UploadVerdictPanel (spec: web-public-verify — Upload Verdict, All Fo
     // Selecting a new file before re-submitting must unmount the OLD file's
     // recompute panel instead of leaving the previous file's hash on screen.
     const user = userEvent.setup();
-    await user.upload(screen.getByLabelText("Elegí el archivo a verificar"), pdfFile("new.pdf"));
+    await user.upload(screen.getByLabelText("Elige el archivo a verificar"), pdfFile("new.pdf"));
 
     expect(screen.queryByText("CLIENT_HASH_RECOMPUTE")).not.toBeInTheDocument();
   });

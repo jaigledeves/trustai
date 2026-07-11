@@ -45,7 +45,7 @@ describe("dictionaries/es", () => {
       "Email o contraseña incorrectos.",
     );
     expect(authDictionary.login.errorUnverifiedEmail).toBe(
-      "Verificá tu email antes de iniciar sesión.",
+      "Verifica tu email antes de iniciar sesión.",
     );
     expect(authDictionary.register.errorDuplicateEmail).toBe(
       "Este email ya está registrado.",

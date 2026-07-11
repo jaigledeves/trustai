@@ -21,7 +21,7 @@ describe("RegisterForm (spec: web-auth-flow Registration)", () => {
     await user.type(screen.getByLabelText("Contraseña"), "short");
     await user.click(screen.getByRole("button", { name: "Registrarme" }));
 
-    expect(await screen.findByText("Ingresá un email válido.")).toBeInTheDocument();
+    expect(await screen.findByText("Ingresa un email válido.")).toBeInTheDocument();
     expect(
       screen.getByText(
         "La contraseña debe tener al menos 8 caracteres, con una letra y un número.",
@@ -30,7 +30,7 @@ describe("RegisterForm (spec: web-auth-flow Registration)", () => {
     expect(requestMade).toBe(false);
   });
 
-  it("shows the 'revisá tu email' success screen on successful registration (no redirect, no auto-login)", async () => {
+  it("shows the 'revisa tu email' success screen on successful registration (no redirect, no auto-login)", async () => {
     const user = userEvent.setup();
     server.use(
       http.post("http://localhost:3000/api/backend/auth/register", () =>
@@ -45,7 +45,7 @@ describe("RegisterForm (spec: web-auth-flow Registration)", () => {
 
     expect(
       await screen.findByText(
-        "Revisá tu email para verificar tu cuenta antes de iniciar sesión.",
+        "Revisa tu email para verificar tu cuenta antes de iniciar sesión.",
       ),
     ).toBeInTheDocument();
   });

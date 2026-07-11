@@ -41,6 +41,18 @@ describe("DtrDetailCard (spec: web-history — DTR Detail View)", () => {
 
     const link = screen.getByRole("link", { name: "Ver transacción en el explorador" });
     expect(link.getAttribute("href")).toContain("0xabc123");
+
+    // A CERTIFIED record exposes the shareable public-verification block:
+    // the absolute /verify/:id link and its QR code.
+    const verifyLink = screen.getByRole("link", {
+      name: "Abrir verificación pública",
+    });
+    expect(verifyLink.getAttribute("href")).toBe(
+      "http://localhost:3100/verify/tr-1",
+    );
+    expect(
+      screen.getByTitle("Código QR de verificación pública"),
+    ).toBeInTheDocument();
   });
 
   it("renders pending copy instead of a hash/AI/anchor value for a fresh DRAFT record with none of them yet", () => {
@@ -69,6 +81,11 @@ describe("DtrDetailCard (spec: web-history — DTR Detail View)", () => {
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Ver transacción en el explorador" }),
+    ).not.toBeInTheDocument();
+
+    // The public-verification share/QR only appears once CERTIFIED.
+    expect(
+      screen.queryByRole("link", { name: "Abrir verificación pública" }),
     ).not.toBeInTheDocument();
   });
 });

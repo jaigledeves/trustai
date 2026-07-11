@@ -24,7 +24,7 @@ describe("mapApiError (pure — spec: no enumeration on login, distinct unverifi
 
   it("falls back to a generic message for an unmapped status/context pair", () => {
     expect(mapApiError(500, "login")).toBe(
-      "Ocurrió un error inesperado. Probá de nuevo en unos minutos.",
+      "Ocurrió un error inesperado. Prueba de nuevo en unos minutos.",
     );
   });
 

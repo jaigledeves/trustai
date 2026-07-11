@@ -25,7 +25,7 @@ describe("VerifyEmailPage (spec: Email Verification Landing)", () => {
     render(jsx);
 
     expect(
-      screen.getByText("Tu email quedó verificado. Ya podés iniciar sesión."),
+      screen.getByText("Tu email quedó verificado. Ya puedes iniciar sesión."),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ir a iniciar sesión" })).toHaveAttribute(
       "href",
@@ -49,7 +49,7 @@ describe("VerifyEmailPage (spec: Email Verification Landing)", () => {
     render(jsx);
 
     expect(
-      screen.getByText("El enlace es inválido o venció. Registrate de nuevo para recibir uno nuevo."),
+      screen.getByText("El enlace es inválido o venció. Regístrate de nuevo para recibir uno nuevo."),
     ).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Ir a iniciar sesión" })).not.toBeInTheDocument();
   });

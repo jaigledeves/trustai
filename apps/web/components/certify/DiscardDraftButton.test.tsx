@@ -43,7 +43,7 @@ describe("DiscardDraftButton (spec: Discard a Draft (SHOULD))", () => {
     await user.click(screen.getByRole("button", { name: "Descartar borrador" }));
 
     expect(window.confirm).toHaveBeenCalledWith(
-      "¿Seguro que querés descartar este borrador? Esta acción no se puede deshacer.",
+      "¿Seguro que quieres descartar este borrador? Esta acción no se puede deshacer.",
     );
     await vi.waitFor(() => expect(requestMade).toBe(true));
     await vi.waitFor(() => expect(pushMock).toHaveBeenCalledWith("/dtrs/new"));

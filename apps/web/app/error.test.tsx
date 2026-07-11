@@ -8,7 +8,7 @@ describe("app/error.tsx (root error boundary — spec: app renders its own {mess
     render(<Error error={new globalThis.Error("backend down")} unstable_retry={vi.fn()} />);
 
     expect(
-      screen.getByText("Ocurrió un error inesperado. Probá de nuevo en unos minutos."),
+      screen.getByText("Ocurrió un error inesperado. Prueba de nuevo en unos minutos."),
     ).toBeInTheDocument();
     // The raw error message must never be shown to the user.
     expect(screen.queryByText(/backend down/)).not.toBeInTheDocument();

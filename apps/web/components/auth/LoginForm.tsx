@@ -58,8 +58,8 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      <div>
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="login-email">{authDictionary.login.emailLabel}</Label>
         <Input
           id="login-email"
@@ -67,9 +67,13 @@ export function LoginForm() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
-        {fieldErrors.email ? <p role="alert">{fieldErrors.email}</p> : null}
+        {fieldErrors.email ? (
+          <p role="alert" className="text-sm text-destructive">
+            {fieldErrors.email}
+          </p>
+        ) : null}
       </div>
-      <div>
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="login-password">
           {authDictionary.login.passwordLabel}
         </Label>
@@ -80,11 +84,20 @@ export function LoginForm() {
           onChange={(event) => setPassword(event.target.value)}
         />
         {fieldErrors.password ? (
-          <p role="alert">{fieldErrors.password}</p>
+          <p role="alert" className="text-sm text-destructive">
+            {fieldErrors.password}
+          </p>
         ) : null}
       </div>
-      {formError ? <p role="alert">{formError}</p> : null}
-      <Button type="submit" disabled={submitting}>
+      {formError ? (
+        <p
+          role="alert"
+          className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
+          {formError}
+        </p>
+      ) : null}
+      <Button type="submit" size="lg" className="w-full" disabled={submitting}>
         {authDictionary.login.submit}
       </Button>
     </form>

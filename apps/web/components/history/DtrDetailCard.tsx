@@ -1,7 +1,8 @@
 import { historyDictionary } from "../../dictionaries/es/history";
 import { config } from "../../lib/config";
 import type { TrustRecordDetail } from "../../lib/api/types";
-import { Badge } from "../ui/badge";
+import { PublicVerifyShare } from "./PublicVerifyShare";
+import { StateBadge } from "./StateBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 interface DtrDetailCardProps {
@@ -29,13 +30,16 @@ export function DtrDetailCard({ record }: DtrDetailCardProps) {
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <span className="font-medium">{historyDictionary.detail.stateLabel}</span>
-          <Badge>{historyDictionary.states[record.state]}</Badge>
+          <StateBadge state={record.state} />
+
         </div>
 
         <div>
           <p className="font-medium">{historyDictionary.detail.canonicalHashLabel}</p>
           {record.canonicalHash ? (
-            <code className="break-all">{record.canonicalHash}</code>
+            <code className="mt-1 block rounded-md bg-muted px-3 py-2 font-mono text-xs break-all">
+              {record.canonicalHash}
+            </code>
           ) : (
             <p className="text-muted-foreground">
               {historyDictionary.detail.canonicalHashPending}
@@ -71,7 +75,12 @@ export function DtrDetailCard({ record }: DtrDetailCardProps) {
         <div>
           <p className="font-medium">{historyDictionary.detail.anchorTitle}</p>
           {explorerUrl ? (
-            <a href={explorerUrl} target="_blank" rel="noopener noreferrer">
+            <a
+              href={explorerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
               {historyDictionary.detail.anchorExplorerLinkLabel}
             </a>
           ) : (
@@ -80,6 +89,12 @@ export function DtrDetailCard({ record }: DtrDetailCardProps) {
             </p>
           )}
         </div>
+
+        {record.state === "CERTIFIED" ? (
+          <PublicVerifyShare
+            verifyUrl={`${config.appBaseUrl}/verify/${record.id}`}
+          />
+        ) : null}
       </CardContent>
     </Card>
   );

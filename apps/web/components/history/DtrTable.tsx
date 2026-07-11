@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { historyDictionary } from "../../dictionaries/es/history";
 import type { TrustRecordListItem } from "../../lib/api/types";
-import { Badge } from "../ui/badge";
+import { StateBadge } from "./StateBadge";
 import {
   Table,
   TableBody,
@@ -39,10 +39,15 @@ export function DtrTable({ items, total }: DtrTableProps) {
         {items.map((item) => (
           <TableRow key={item.id}>
             <TableCell>
-              <Link href={`/dtrs/${item.id}`}>{item.id}</Link>
+              <Link
+                href={`/dtrs/${item.id}`}
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                {item.id}
+              </Link>
             </TableCell>
             <TableCell>
-              <Badge>{historyDictionary.states[item.state]}</Badge>
+              <StateBadge state={item.state} />
             </TableCell>
             <TableCell>{formatCreatedAt(item.createdAt)}</TableCell>
           </TableRow>

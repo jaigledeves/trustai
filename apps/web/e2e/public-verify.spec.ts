@@ -62,7 +62,7 @@ test.describe("Public verify (register -> certify -> confirm -> unauthenticated 
     await page.getByLabel("Contraseña").fill(password);
     await page.getByRole("button", { name: "Registrarme" }).click();
     await expect(
-      page.getByText("Revisá tu email para verificar tu cuenta antes de iniciar sesión."),
+      page.getByText("Revisa tu email para verificar tu cuenta antes de iniciar sesión."),
     ).toBeVisible();
 
     await verifyUserDirectly(email);
@@ -75,7 +75,7 @@ test.describe("Public verify (register -> certify -> confirm -> unauthenticated 
 
     await page.goto("/dtrs/new");
     await page
-      .getByLabel("Elegí un archivo PDF para certificar")
+      .getByLabel("Elige un archivo PDF para certificar")
       .setInputFiles({ name: "sample.pdf", mimeType: "application/pdf", buffer: pdfBytes });
     await page.getByRole("button", { name: "Subir documento" }).click();
     // Upload navigates /dtrs/new -> /dtrs/{uuid}. Match the created record's
@@ -121,7 +121,7 @@ test.describe("Public verify (register -> certify -> confirm -> unauthenticated 
       ).toBeVisible();
 
       await publicPage
-        .getByLabel("Elegí el archivo a verificar")
+        .getByLabel("Elige el archivo a verificar")
         .setInputFiles({
           name: "tampered.pdf",
           mimeType: "application/pdf",
@@ -187,7 +187,7 @@ test.describe("Public verify (register -> certify -> confirm -> unauthenticated 
       await expect(publicPage.getByText("Válido").first()).toBeVisible();
 
       await publicPage
-        .getByLabel("Elegí el archivo a verificar")
+        .getByLabel("Elige el archivo a verificar")
         .setInputFiles({ name: "sample.pdf", mimeType: "application/pdf", buffer: originalPdf });
       await publicPage.getByRole("button", { name: "Verificar documento" }).click();
 

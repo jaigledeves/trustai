@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Wordmark } from "../../components/brand/Wordmark";
 import { LogoutButton } from "../../components/shell/LogoutButton";
+import { Button } from "../../components/ui/button";
 import { shellDictionary } from "../../dictionaries/es/shell";
 import { getSession } from "../../lib/session";
 
@@ -22,16 +24,24 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex items-center justify-between border-b px-6 py-4">
-        <span className="font-semibold">{shellDictionary.appName}</span>
-        <nav className="flex items-center gap-4">
-          <Link href="/dtrs">{shellDictionary.nav.dtrs}</Link>
-          <Link href="/dtrs/new">{shellDictionary.nav.newCertification}</Link>
-          <LogoutButton />
-        </nav>
+    <div className="flex min-h-screen flex-col bg-muted/30">
+      <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3">
+          <Link href="/dtrs" aria-label={shellDictionary.appName}>
+            <Wordmark />
+          </Link>
+          <nav className="flex items-center gap-1.5">
+            <Button variant="ghost" size="lg" asChild>
+              <Link href="/dtrs">{shellDictionary.nav.dtrs}</Link>
+            </Button>
+            <Button size="lg" asChild>
+              <Link href="/dtrs/new">{shellDictionary.nav.newCertification}</Link>
+            </Button>
+            <LogoutButton />
+          </nav>
+        </div>
       </header>
-      <main className="flex flex-1 flex-col">{children}</main>
+      {children}
     </div>
   );
 }

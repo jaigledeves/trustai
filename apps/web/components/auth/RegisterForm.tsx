@@ -63,16 +63,23 @@ export function RegisterForm() {
 
   if (succeeded) {
     return (
-      <div role="status">
-        <h1>{authDictionary.register.successTitle}</h1>
-        <p>{authDictionary.register.successMessage}</p>
+      <div
+        role="status"
+        className="flex flex-col gap-2 rounded-lg border border-border bg-accent/50 p-4 text-center"
+      >
+        <h1 className="text-lg font-semibold">
+          {authDictionary.register.successTitle}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {authDictionary.register.successMessage}
+        </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      <div>
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="register-email">{authDictionary.register.emailLabel}</Label>
         <Input
           id="register-email"
@@ -80,9 +87,13 @@ export function RegisterForm() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
         />
-        {fieldErrors.email ? <p role="alert">{fieldErrors.email}</p> : null}
+        {fieldErrors.email ? (
+          <p role="alert" className="text-sm text-destructive">
+            {fieldErrors.email}
+          </p>
+        ) : null}
       </div>
-      <div>
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="register-password">
           {authDictionary.register.passwordLabel}
         </Label>
@@ -93,11 +104,20 @@ export function RegisterForm() {
           onChange={(event) => setPassword(event.target.value)}
         />
         {fieldErrors.password ? (
-          <p role="alert">{fieldErrors.password}</p>
+          <p role="alert" className="text-sm text-destructive">
+            {fieldErrors.password}
+          </p>
         ) : null}
       </div>
-      {formError ? <p role="alert">{formError}</p> : null}
-      <Button type="submit" disabled={submitting}>
+      {formError ? (
+        <p
+          role="alert"
+          className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
+          {formError}
+        </p>
+      ) : null}
+      <Button type="submit" size="lg" className="w-full" disabled={submitting}>
         {authDictionary.register.submit}
       </Button>
     </form>

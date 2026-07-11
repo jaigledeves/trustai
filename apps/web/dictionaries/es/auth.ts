@@ -5,33 +5,39 @@
  */
 export const authDictionary = {
   register: {
-    title: "Creá tu cuenta",
+    title: "Crea tu cuenta",
+    subtitle: "Empieza a certificar tus documentos con IA y blockchain.",
+    loginPrompt: "¿Ya tienes una cuenta?",
+    loginCta: "Iniciar sesión",
     emailLabel: "Email",
     passwordLabel: "Contraseña",
     submit: "Registrarme",
     successTitle: "¡Ya casi está!",
     successMessage:
-      "Revisá tu email para verificar tu cuenta antes de iniciar sesión.",
+      "Revisa tu email para verificar tu cuenta antes de iniciar sesión.",
     errorDuplicateEmail: "Este email ya está registrado.",
-    errorInvalidEmail: "Ingresá un email válido.",
+    errorInvalidEmail: "Ingresa un email válido.",
     errorPasswordPolicy:
       "La contraseña debe tener al menos 8 caracteres, con una letra y un número.",
   },
   verifyEmail: {
     successTitle: "Cuenta verificada",
-    successMessage: "Tu email quedó verificado. Ya podés iniciar sesión.",
+    successMessage: "Tu email quedó verificado. Ya puedes iniciar sesión.",
     successCta: "Ir a iniciar sesión",
     errorTitle: "Enlace inválido",
-    errorMessage: "El enlace es inválido o venció. Registrate de nuevo para recibir uno nuevo.",
+    errorMessage: "El enlace es inválido o venció. Regístrate de nuevo para recibir uno nuevo.",
   },
   login: {
-    title: "Iniciá sesión",
+    title: "Inicia sesión",
+    subtitle: "Accede a tus certificaciones y Digital Trust Records.",
+    registerPrompt: "¿No tienes una cuenta?",
+    registerCta: "Crear cuenta",
     emailLabel: "Email",
     passwordLabel: "Contraseña",
     submit: "Ingresar",
     errorInvalidCredentials: "Email o contraseña incorrectos.",
-    errorUnverifiedEmail: "Verificá tu email antes de iniciar sesión.",
-    errorInvalidEmail: "Ingresá un email válido.",
-    errorPasswordRequired: "Ingresá tu contraseña.",
+    errorUnverifiedEmail: "Verifica tu email antes de iniciar sesión.",
+    errorInvalidEmail: "Ingresa un email válido.",
+    errorPasswordRequired: "Ingresa tu contraseña.",
   },
 } as const;

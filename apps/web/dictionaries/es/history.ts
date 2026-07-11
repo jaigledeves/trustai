@@ -26,6 +26,14 @@ export const historyDictionary = {
     anchorNotAnchored: "Este documento todavía no fue anclado.",
     anchorExplorerLinkLabel: "Ver transacción en el explorador",
   },
+  publicShare: {
+    title: "Verificación pública",
+    description:
+      "Comparte este enlace o escanea el código QR para verificar la autenticidad del documento, sin necesidad de una cuenta.",
+    urlLabel: "Enlace de verificación",
+    openLinkLabel: "Abrir verificación pública",
+    qrTitle: "Código QR de verificación pública",
+  },
   /** Mirrors `TrustRecordState` (lib/api/types.ts) 1:1 — every state must have a label. */
   states: {
     DRAFT: "Borrador",

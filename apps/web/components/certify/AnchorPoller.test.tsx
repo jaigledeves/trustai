@@ -91,7 +91,7 @@ describe("AnchorPoller (spec: Anchor Submission and Polling — highest-risk log
     );
 
     expect(
-      await screen.findByText("¡Documento certificado! Podés inspeccionar la transacción on-chain."),
+      await screen.findByText("¡Documento certificado! Puedes inspeccionar la transacción on-chain."),
     ).toBeInTheDocument();
     const link = screen.getByRole("link", { name: "Ver transacción en el explorador" });
     expect(link).toHaveAttribute("href", "https://sepolia.basescan.org/tx/0xabc123");

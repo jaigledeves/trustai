@@ -57,7 +57,7 @@ test.describe("Certify golden path (register -> verify -> login -> certify -> an
     await page.getByLabel("Contraseña").fill(password);
     await page.getByRole("button", { name: "Registrarme" }).click();
     await expect(
-      page.getByText("Revisá tu email para verificar tu cuenta antes de iniciar sesión."),
+      page.getByText("Revisa tu email para verificar tu cuenta antes de iniciar sesión."),
     ).toBeVisible();
 
     // 2. Verify — StubNotificationAdapter never exposes the raw token over
@@ -83,7 +83,7 @@ test.describe("Certify golden path (register -> verify -> login -> certify -> an
 
     // 4. Upload
     await page
-      .getByLabel("Elegí un archivo PDF para certificar")
+      .getByLabel("Elige un archivo PDF para certificar")
       .setInputFiles({
         name: "sample.pdf",
         mimeType: "application/pdf",

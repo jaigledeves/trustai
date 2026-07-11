@@ -43,7 +43,7 @@ describe("UploadStep (spec: PDF Upload)", () => {
     );
 
     renderWithQueryClient(<UploadStep />);
-    const input = screen.getByLabelText("Elegí un archivo PDF para certificar");
+    const input = screen.getByLabelText("Elige un archivo PDF para certificar");
     const docxFile = new File(["not a pdf"], "doc.docx", {
       type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     });
@@ -65,7 +65,7 @@ describe("UploadStep (spec: PDF Upload)", () => {
     );
 
     renderWithQueryClient(<UploadStep />);
-    const input = screen.getByLabelText("Elegí un archivo PDF para certificar");
+    const input = screen.getByLabelText("Elige un archivo PDF para certificar");
     await user.upload(input, pdfFile());
     await user.click(screen.getByRole("button", { name: "Subir documento" }));
 
@@ -84,7 +84,7 @@ describe("UploadStep (spec: PDF Upload)", () => {
     );
 
     renderWithQueryClient(<UploadStep />);
-    const input = screen.getByLabelText("Elegí un archivo PDF para certificar");
+    const input = screen.getByLabelText("Elige un archivo PDF para certificar");
     await user.upload(input, pdfFile());
     await user.click(screen.getByRole("button", { name: "Subir documento" }));
 

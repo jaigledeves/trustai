@@ -33,8 +33,8 @@ describe("LoginForm (spec: Login and Session Establishment)", () => {
     await user.type(screen.getByLabelText("Email"), "nope");
     await user.click(screen.getByRole("button", { name: "Ingresar" }));
 
-    expect(await screen.findByText("Ingresá un email válido.")).toBeInTheDocument();
-    expect(screen.getByText("Ingresá tu contraseña.")).toBeInTheDocument();
+    expect(await screen.findByText("Ingresa un email válido.")).toBeInTheDocument();
+    expect(screen.getByText("Ingresa tu contraseña.")).toBeInTheDocument();
     expect(requestMade).toBe(false);
   });
 
@@ -82,7 +82,7 @@ describe("LoginForm (spec: Login and Session Establishment)", () => {
     server.use(
       http.post("http://localhost:3000/api/auth/login", () =>
         HttpResponse.json(
-          { status: 403, message: "Verificá tu email antes de iniciar sesión." },
+          { status: 403, message: "Verifica tu email antes de iniciar sesión." },
           { status: 403 },
         ),
       ),
@@ -94,7 +94,7 @@ describe("LoginForm (spec: Login and Session Establishment)", () => {
     await user.click(screen.getByRole("button", { name: "Ingresar" }));
 
     expect(
-      await screen.findByText("Verificá tu email antes de iniciar sesión."),
+      await screen.findByText("Verifica tu email antes de iniciar sesión."),
     ).toBeInTheDocument();
     expect(pushMock).not.toHaveBeenCalled();
   });

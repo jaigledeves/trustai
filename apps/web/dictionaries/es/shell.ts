@@ -12,10 +12,10 @@ export const shellDictionary = {
     logout: "Cerrar sesión",
   },
   session: {
-    expired: "Tu sesión expiró, iniciá sesión de nuevo.",
+    expired: "Tu sesión expiró, inicia sesión de nuevo.",
   },
   errors: {
-    generic: "Ocurrió un error inesperado. Probá de nuevo en unos minutos.",
+    generic: "Ocurrió un error inesperado. Prueba de nuevo en unos minutos.",
     genericTitle: "Algo salió mal",
     retry: "Reintentar",
     notFound: "No encontramos lo que buscabas.",

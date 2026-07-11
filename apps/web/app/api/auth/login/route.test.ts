@@ -116,7 +116,7 @@ describe("POST /api/auth/login (spec: Login and Session Establishment)", () => {
     const body = await response.json();
 
     expect(response.status).toBe(403);
-    expect(body.message).toBe("Verificá tu email antes de iniciar sesión.");
+    expect(body.message).toBe("Verifica tu email antes de iniciar sesión.");
     expect(mockCookieStore.set).not.toHaveBeenCalled();
   });
 });

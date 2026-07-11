@@ -11,7 +11,7 @@ describe("validateRegisterForm (pure — spec: Client-side validation error)", (
   it("flags an invalid email format", () => {
     const errors = validateRegisterForm("not-an-email", "correcthorse1");
 
-    expect(errors.email).toBe("Ingresá un email válido.");
+    expect(errors.email).toBe("Ingresa un email válido.");
     expect(errors.password).toBeUndefined();
   });
 
@@ -39,13 +39,13 @@ describe("validateLoginForm (pure)", () => {
 
   it("flags an invalid email format", () => {
     expect(validateLoginForm("nope", "anything").email).toBe(
-      "Ingresá un email válido.",
+      "Ingresa un email válido.",
     );
   });
 
   it("flags an empty password without checking any policy (login has no complexity rule)", () => {
     expect(validateLoginForm("user@example.com", "").password).toBe(
-      "Ingresá tu contraseña.",
+      "Ingresa tu contraseña.",
     );
   });
 });
