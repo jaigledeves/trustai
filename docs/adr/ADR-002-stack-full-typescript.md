@@ -6,7 +6,7 @@
 
 ## Contexto
 
-La propuesta original del proyecto (docs/original_bigschool) planteaba
+La propuesta original del proyecto planteaba
 FastAPI (Python) + Next.js (TypeScript). El producto tiene dos pilares
 técnicos con ecosistemas en tensión:
 

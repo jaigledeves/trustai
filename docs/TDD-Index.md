@@ -2,8 +2,7 @@
 
 **Propósito:** índice maestro del Technical Design Document. El TDD no
 es un monolito: emerge de documentos modulares. Este índice mapea las
-23 secciones previstas (docs/original_bigschool/TrustAI_Master_TDD.md)
-a su documento fuente y estado.
+23 secciones previstas del TDD maestro a su documento fuente y estado.
 
 **Estados:** `pendiente` · `draft` · `aprobado`
 

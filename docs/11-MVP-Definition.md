@@ -142,7 +142,6 @@ solo leer el código).
 - docs/05-Personas-UseCases.md (UC-01/02/03/07)
 - docs/08-Architecture.md, docs/09, docs/10 (diseño que se implementa)
 - docs/adr/ADR-004-doble-adaptador-ia.md (enmienda MVP)
-- docs/original_bigschool/Documentacion-TFM-2.pdf (entregables y plazo)
 
 ## Checklist
 

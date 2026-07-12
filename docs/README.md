@@ -8,8 +8,7 @@ actualízalo en cada pasada de documentación en vez de duplicar contenido.
 
 La documentación numerada (`00`–`12`) es el TDD modular del proyecto — ver
 [TDD-Index.md](TDD-Index.md) para el mapeo completo a las 23 secciones
-previstas en `docs/original_bigschool/TrustAI_Master_TDD.md` (material
-fuente inmutable, no editar).
+previstas del TDD maestro.
 
 ## Capítulos
 
@@ -53,9 +52,3 @@ con una ADR nueva.
 
 [TDD-Index.md](TDD-Index.md) — mapea cada sección del TDD original a su
 documento fuente y estado (`pendiente` / `draft` / `aprobado`).
-
-## Material fuente (inmutable)
-
-[original_bigschool/](original_bigschool/) — propuesta de TFM, TDD maestro
-original, estrategia y roadmap, handover. No editar: es la referencia de
-origen sobre la que se ha construido el resto de la documentación.
