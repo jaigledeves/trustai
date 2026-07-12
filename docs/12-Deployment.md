@@ -119,6 +119,51 @@ publicadas en el README raíz. Requiere que la API esté desplegada y el
 Endpoints reales expuestos por la API en este despliegue:
 [`docs/api/endpoints.md`](api/endpoints.md).
 
+## Precondiciones de runtime
+
+El checklist de corte confirma que los servicios responden; estas
+precondiciones son las que hacen que el **flujo end-to-end** funcione en
+vivo. Son las que más se olvidan y las que rompen una demo aunque
+`/health` devuelva 200.
+
+### Deben estar vivas
+
+- **API (Railway)** respondiendo `/health` 200 en su URL pública.
+- **Web (Vercel)** cargando, con `API_BASE_URL` apuntando a la API.
+- **Contrato `AnchorRegistry` en Base Sepolia** accesible
+  (`0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22`).
+- **Postgres (Railway)** con el schema aplicado (`db:deploy` en release).
+  Si se resetea la base, hay que reaplicarlo.
+- **Wallet del worker con saldo de ETH de testnet (Base Sepolia).** Sin
+  gas, el anclaje falla y **ningún DTR llega a `CERTIFIED`**. Recargar en
+  un faucet de Base Sepolia antes de cualquier demostración.
+
+### Deben estar configuradas
+
+- API: `PUBLIC_VERIFICATION_ENABLED=true` (necesario para UC-02 y para el
+  DTR de ejemplo enlazado desde la landing).
+- API: si `AI_ADAPTER=openai`, la `OPENAI_API_KEY` debe ser válida y con
+  crédito; en caso contrario, `stub` cubre la demo.
+- Web: `NEXT_PUBLIC_PUBLIC_VERIFICATION_ENABLED=true` y
+  `NEXT_PUBLIC_APP_BASE_URL` con el origen público (enlace absoluto y QR).
+
+### Datos sembrados
+
+- Usuario revisor sembrado contra producción (`seed:demo` con
+  `API_BASE_URL` y `DATABASE_URL` de Railway).
+- DTR de ejemplo ya `CERTIFIED` cuyo `id` alimenta el CTA de verificación
+  de la landing (`NEXT_PUBLIC_DEMO_DTR_ID`).
+
+### Gotchas que rompen la demo
+
+1. **Gas del worker agotado** → no hay `CERTIFIED`. Revisar saldo antes
+   de demostrar.
+2. **OpenAI sin crédito** (si `AI_ADAPTER=openai`) → falla la revisión
+   IA. El `stub` es el plan B.
+3. **Base reseteada** → se pierden schema, usuario revisor y DTR de
+   ejemplo. Rehacer `db:deploy` + `seed:demo` + regenerar el DTR y su
+   `id`.
+
 ## Pendientes / follow-ups
 
 - Migraciones Prisma formales (hoy `db push`) antes de producción con datos reales.
