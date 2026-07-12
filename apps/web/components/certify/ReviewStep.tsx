@@ -8,6 +8,7 @@ import type { ReviewEditPatch, TrustRecordDetail } from "../../lib/api/types";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 
 interface ReviewStepProps {
   id: string;
@@ -79,15 +80,16 @@ export function ReviewStep({ id, record }: ReviewStepProps) {
   return (
     <div className="flex flex-col gap-4">
       <h2 className="text-xl font-semibold">{certifyDictionary.review.title}</h2>
-      <div>
+      <div className="space-y-1.5">
         <Label htmlFor="review-summary">{certifyDictionary.review.summaryLabel}</Label>
-        <textarea
+        <Textarea
           id="review-summary"
+          rows={4}
           value={summary}
           onChange={(event) => setSummary(event.target.value)}
         />
       </div>
-      <div>
+      <div className="space-y-1.5">
         <Label htmlFor="review-classification">
           {certifyDictionary.review.classificationLabel}
         </Label>
@@ -97,7 +99,7 @@ export function ReviewStep({ id, record }: ReviewStepProps) {
           onChange={(event) => setClassification(event.target.value)}
         />
       </div>
-      <div>
+      <div className="space-y-1.5">
         <Label htmlFor="review-language">{certifyDictionary.review.languageLabel}</Label>
         <Input
           id="review-language"

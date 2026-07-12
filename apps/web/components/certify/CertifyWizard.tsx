@@ -67,9 +67,11 @@ export function CertifyWizard({ id, initialRecord, showDuplicateNotice }: Certif
         // visible through READY/ANCHORING/CERTIFIED. It lives in the shell
         // (not ConfirmButton) because confirm flips state to READY, which
         // unmounts the DRAFT branch — the hash must outlive that swap.
-        <div role="status" className="flex flex-col gap-1">
+        <div role="status" className="flex flex-col gap-1.5">
           <p className="font-medium">{certifyDictionary.confirm.frozenHashLabel}</p>
-          <code className="break-all">{current.canonicalHash}</code>
+          <code className="block break-all rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-sm">
+            {current.canonicalHash}
+          </code>
         </div>
       ) : null}
 
