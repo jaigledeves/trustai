@@ -57,6 +57,13 @@ export default function LandingPage() {
               <Button size="lg" asChild>
                 <Link href="/register">{t.hero.primaryCta}</Link>
               </Button>
+              {config.demoDtrId ? (
+                <Button variant="secondary" size="lg" asChild>
+                  <Link href={`/verify/${config.demoDtrId}`}>
+                    {t.hero.demoCta}
+                  </Link>
+                </Button>
+              ) : null}
               <Button variant="outline" size="lg" asChild>
                 <Link href="#como-funciona">{t.hero.secondaryCta}</Link>
               </Button>

@@ -72,6 +72,7 @@ serverless.
 | `NEXT_PUBLIC_CHAIN_EXPLORER_BASE_URL` | no | `https://sepolia.basescan.org` (default). |
 | `NEXT_PUBLIC_APP_BASE_URL` | sí (prod) | Origen público del propio web (p. ej. `https://trustai-web-kappa.vercel.app`). Se usa para construir el enlace absoluto y el QR de verificación pública en el detalle del DTR. Default dev: `http://localhost:3100`. |
 | `NEXT_PUBLIC_PUBLIC_VERIFICATION_ENABLED` | no | `true` para mostrar la página de verificación pública. |
+| `NEXT_PUBLIC_DEMO_DTR_ID` | no | `id` de un DTR ya `CERTIFIED`. Si está seteada, la landing muestra un CTA "Ver una verificación de ejemplo" que enlaza a `/verify/:id` (probar sin registro). Debe existir y persistir en la base del entorno. |
 | `SESSION_COOKIE_NAME` | no | Default `trustai_session`. |
 
 ## Cloudflare R2

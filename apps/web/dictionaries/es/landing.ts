@@ -15,6 +15,7 @@ export const landingDictionary = {
       "La IA comprende el contenido, la blockchain certifica su integridad. Cada documento obtiene un Digital Trust Record verificable por cualquiera.",
     primaryCta: "Crear cuenta gratis",
     secondaryCta: "Ver cómo funciona",
+    demoCta: "Ver una verificación de ejemplo",
   },
   how: {
     title: "Cómo funciona",

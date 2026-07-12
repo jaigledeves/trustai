@@ -51,4 +51,13 @@ export const config = {
    */
   appBaseUrl:
     process.env["NEXT_PUBLIC_APP_BASE_URL"] ?? "http://localhost:3100",
+
+  /**
+   * Optional id of a pre-certified demo DTR. When set, the landing renders a
+   * "try it without signing up" CTA linking to its public `/verify/:id` page,
+   * so a reviewer can see the product working with zero registration. Left
+   * undefined (CTA hidden) until an operator sets it to a real CERTIFIED DTR
+   * that persists in the target database.
+   */
+  demoDtrId: process.env["NEXT_PUBLIC_DEMO_DTR_ID"] || undefined,
 };
