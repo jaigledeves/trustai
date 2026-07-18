@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustAI — Presentación TFM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <style>
+    /* ------------------------------------------------------------------ */
+    /* TrustAI brand theme — mirrors globals.css dark mode palette         */
+    /* primary:  oklch(0.62 0.19 264) ≈ #6366F1                           */
+    /* bg dark:  oklch(0.145 0 0)     ≈ #121218                           */
+    /* ------------------------------------------------------------------ */
+    :root {
+      --primary:      #6366F1;
+      --primary-dark: #4338CA;
+      --primary-dim:  rgba(99, 102, 241, 0.12);
+      --background:   #0f0f1a;
+      --card:         #1a1a2e;
+      --card-border:  rgba(255, 255, 255, 0.08);
+      --foreground:   #f8fafc;
+      --muted:        #a5b4fc;
+      --muted-2:      #64748b;
+      --accent:       #818cf8;
+    }
+
+    .reveal-viewport { background: var(--background); }
+
+    .reveal {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--foreground);
+      font-size: 22px;
+    }
+
+    /* Headings */
+    .reveal h1, .reveal h2, .reveal h3 {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--foreground);
+      text-transform: none;
+      margin: 0 0 0.4em;
+    }
+    .reveal h1 { font-size: 2.2em; line-height: 1.1; }
+    .reveal h2 { font-size: 1.5em; line-height: 1.2; }
+    .reveal h3 { font-size: 0.9em; color: var(--muted); font-weight: 500; margin: 0 0 0.6em; }
+
+    .reveal p { margin: 0.3em 0; }
+
+    /* Slide layout */
+    .reveal .slides section {
+      text-align: left;
+      padding: 0 1.8em;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Helpers */
+    .center { text-align: center; }
+    .accent { color: var(--primary); }
+    .dim    { color: var(--muted-2); }
+
+    /* Badge (slide category label) */
+    .badge {
+      display: inline-block;
+      padding: 0.18em 0.7em;
+      border-radius: 999px;
+      background: var(--primary-dim);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: var(--accent);
+      font-size: 0.55em;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      vertical-align: middle;
+      margin-bottom: 0.3em;
+    }
+
+    /* Card */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 0.65rem;
+      padding: 0.75em 1em;
+      margin: 0.3em 0;
+    }
+    .card.accent-border { border-color: rgba(99, 102, 241, 0.45); }
+    .card.green-border  { border-color: rgba(34, 197, 94, 0.45); }
+
+    /* Grids */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.7em; }
+
+    /* Flow diagram */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0.35em;
+      flex-wrap: wrap;
+      font-size: 0.65em;
+    }
+    .flow-step {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 0.45rem;
+      padding: 0.45em 0.7em;
+      text-align: center;
+      min-width: 80px;
+      line-height: 1.3;
+    }
+    .flow-step.hl {
+      border-color: rgba(99, 102, 241, 0.5);
+      background: var(--primary-dim);
+    }
+    .flow-step.ok {
+      border-color: rgba(34, 197, 94, 0.5);
+      background: rgba(34, 197, 94, 0.08);
+      color: #86efac;
+    }
+    .flow-arrow { color: var(--muted-2); font-size: 1.1em; }
+
+    /* Inline code */
+    .reveal code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--primary-dim);
+      border-radius: 0.25em;
+      padding: 0.1em 0.35em;
+      color: var(--accent);
+      font-size: 0.82em;
+    }
+
+    /* Code block */
+    .reveal pre {
+      background: #09090f;
+      border: 1px solid var(--card-border);
+      border-radius: 0.5em;
+      font-size: 0.5em;
+      margin: 0.4em 0;
+      box-shadow: none;
+      width: 100%;
+    }
+    .reveal pre code {
+      background: transparent;
+      padding: 0.9em 1.1em;
+      color: #e2e8f0;
+      font-size: 1em;
+      line-height: 1.55;
+      max-height: 280px;
+      overflow: auto;
+    }
+
+    /* Lists */
+    .reveal ul {
+      margin-left: 0;
+      list-style: none;
+      padding: 0;
+    }
+    .reveal ul li {
+      margin: 0.25em 0;
+      font-size: 0.78em;
+      padding-left: 1.2em;
+      position: relative;
+    }
+    .reveal ul li::before {
+      content: '▸';
+      color: var(--primary);
+      position: absolute;
+      left: 0;
+    }
+
+    /* Big stat number */
+    .stat {
+      font-size: 2.4em;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    /* Divider */
+    hr {
+      border: none;
+      border-top: 1px solid var(--card-border);
+      margin: 0.7em 0;
+    }
+
+    /* Tag pill */
+    .tag {
+      display: inline-block;
+      padding: 0.12em 0.45em;
+      border-radius: 0.3em;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6em;
+      margin: 0.1em;
+      color: var(--muted);
+    }
+
+    /* Highlight box (left-border callout) */
+    .callout {
+      border-left: 3px solid var(--primary);
+      background: var(--primary-dim);
+      padding: 0.5em 0.9em;
+      border-radius: 0 0.45rem 0.45rem 0;
+      font-size: 0.72em;
+      margin: 0.4em 0;
+    }
+
+    /* Table */
+    .reveal table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.65em;
+    }
+    .reveal table th {
+      background: var(--primary-dim);
+      color: var(--accent);
+      padding: 0.45em 0.8em;
+      text-align: left;
+      font-weight: 600;
+      border: none;
+    }
+    .reveal table td {
+      padding: 0.38em 0.8em;
+      border-bottom: 1px solid var(--card-border);
+      color: var(--foreground);
+      border-left: none;
+      border-right: none;
+    }
+    .reveal table tr:last-child td { border-bottom: none; }
+
+    /* Reveal.js chrome */
+    .reveal .progress { background: rgba(99, 102, 241, 0.2); height: 3px; }
+    .reveal .progress span { background: var(--primary); }
+    .reveal .controls { color: var(--primary); }
+    .reveal .slide-number {
+      background: transparent;
+      color: var(--muted-2);
+      font-size: 0.55em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Cover logo box */
+    .logo-box {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      border-radius: 1.1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2em;
+      margin-bottom: 0.5em;
+      box-shadow: 0 0 40px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Hexagonal arch boxes */
+    .hex-layer {
+      border: 1px dashed rgba(99,102,241,0.3);
+      border-radius: 0.5rem;
+      padding: 0.4em 0.6em;
+      margin: 0.3em 0;
+      font-size: 0.65em;
+    }
+    .hex-layer-label {
+      font-size: 0.6em;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.2em;
+    }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ===================== SLIDE 1: COVER ===================== -->
+    <section class="center" style="padding-top: 1.2em; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
+      <div class="logo-box">🔐</div>
+      <h1 style="font-size:2.8em; margin-bottom:0.1em;"><span class="accent">Trust</span>AI</h1>
+      <p style="font-size:0.85em; color:var(--muted); margin:0 0 0.6em;">Certificación inteligente de activos digitales</p>
+      <hr style="width:320px; margin:0.6em auto;">
+      <p style="font-size:0.7em; color:var(--muted-2);">
+        La IA comprende el contenido &nbsp;·&nbsp; la blockchain certifica su integridad
+      </p>
+      <p style="font-size:0.62em; color:var(--muted-2); margin-top:1.4em;">
+        Trabajo Fin de Máster &nbsp;·&nbsp; Jose Aguilera &nbsp;·&nbsp; 2026
+      </p>
+    </section>
+
+    <!-- ===================== SLIDE 2: PROBLEMA ===================== -->
+    <section>
+      <span class="badge">Motivación</span>
+      <h2>El problema</h2>
+      <div class="grid-2" style="margin-top:0.6em;">
+        <div class="card">
+          <p style="font-size:0.68em; color:var(--muted-2); margin-bottom:0.3em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Sin solución</p>
+          <ul>
+            <li>Un PDF revisado por IA es <strong>indistinguible</strong> de uno falsificado</li>
+            <li>No existe mecanismo para verificar independientemente la integridad de una evaluación</li>
+            <li>Toda verificación requiere <strong>confiar en la plataforma</strong> emisora</li>
+          </ul>
+        </div>
+        <div class="card accent-border">
+          <p style="font-size:0.68em; color:var(--primary); margin-bottom:0.3em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Con TrustAI</p>
+          <ul>
+            <li>Hash canónico del registro anclado <strong>on-chain</strong> (inmutable)</li>
+            <li>Verificación pública <strong>sin confiar</strong> en TrustAI</li>
+            <li>Cualquiera puede recalcular el hash y compararlo</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:0.8em;">
+        <strong>¿Por qué blockchain?</strong> El estado de la cadena es auditable públicamente y no depende de TrustAI para existir — ni siquiera para sobrevivir.
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 3: CONCEPTO DTR ===================== -->
+    <section>
+      <span class="badge">Concepto central</span>
+      <h2>Digital Trust Record <span class="accent">(DTR)</span></h2>
+      <p style="font-size:0.72em; color:var(--muted); margin-bottom:0.7em;">Un DTR es el registro completo y verificable de un activo certificado.</p>
+      <div class="grid-3">
+        <div class="card center">
+          <div style="font-size:1.8em; margin-bottom:0.2em;">🧠</div>
+          <p style="font-size:0.68em; font-weight:700; color:var(--accent);">Evaluación IA</p>
+          <p style="font-size:0.58em; color:var(--muted-2); margin-top:0.2em;">Análisis estructurado del contenido — score, resumen, flags de riesgo</p>
+        </div>
+        <div class="card center">
+          <div style="font-size:1.8em; margin-bottom:0.2em;">🔑</div>
+          <p style="font-size:0.68em; font-weight:700; color:var(--accent);">Hash canónico</p>
+          <p style="font-size:0.58em; color:var(--muted-2); margin-top:0.2em;">SHA-256 sobre representación determinista del DTR completo</p>
+        </div>
+        <div class="card center">
+          <div style="font-size:1.8em; margin-bottom:0.2em;">⛓️</div>
+          <p style="font-size:0.68em; font-weight:700; color:var(--accent);">Ancla on-chain</p>
+          <p style="font-size:0.58em; color:var(--muted-2); margin-top:0.2em;">Hash registrado en <code>AnchorRegistry</code> / Base Sepolia</p>
+        </div>
+      </div>
+      <hr style="margin-top:0.8em;">
+      <p style="font-size:0.7em; color:var(--muted); margin-bottom:0.4em;">Estados del ciclo de vida</p>
+      <div style="display:flex; gap:0.5em; font-size:0.65em;">
+        <div class="card" style="flex:1; text-align:center; color:var(--muted-2);">PENDING<br><span style="font-size:0.8em;">Subido, sin revisar</span></div>
+        <div class="flow-arrow" style="align-self:center;">→</div>
+        <div class="card" style="flex:1; text-align:center; color:#fbbf24;">REVIEWED<br><span style="font-size:0.8em;">IA completada</span></div>
+        <div class="flow-arrow" style="align-self:center;">→</div>
+        <div class="card" style="flex:1; text-align:center; color:#60a5fa;">ANCHORING<br><span style="font-size:0.8em;">TX enviada</span></div>
+        <div class="flow-arrow" style="align-self:center;">→</div>
+        <div class="card green-border" style="flex:1; text-align:center; color:#86efac;"><strong>CERTIFIED</strong><br><span style="font-size:0.8em;">On-chain confirmado</span></div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 4: FLUJO ===================== -->
+    <section>
+      <span class="badge">Flujo de certificación</span>
+      <h2>Cómo funciona</h2>
+      <p style="font-size:0.68em; color:var(--muted); margin-bottom:0.7em; font-weight:600;">UC-01 — Certificación de activo</p>
+      <div class="flow" style="justify-content:center; margin-bottom:0.5em;">
+        <div class="flow-step">
+          <div>📄</div>
+          <div style="font-weight:600; font-size:0.9em;">Subida</div>
+          <div style="color:var(--muted-2); font-size:0.8em;">AES-256-GCM → R2</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step hl">
+          <div>🧠</div>
+          <div style="font-weight:600; font-size:0.9em;">IA Review</div>
+          <div style="color:var(--muted-2); font-size:0.8em;">OpenAI / Stub</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div>🔧</div>
+          <div style="font-weight:600; font-size:0.9em;">Canoniza</div>
+          <div style="color:var(--muted-2); font-size:0.8em;">dtr-core</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div style="font-family:monospace;">#</div>
+          <div style="font-weight:600; font-size:0.9em;">SHA-256</div>
+          <div style="color:var(--muted-2); font-size:0.8em;">determinista</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step hl">
+          <div>⛓️</div>
+          <div style="font-weight:600; font-size:0.9em;">anchor()</div>
+          <div style="color:var(--muted-2); font-size:0.8em;">pg-boss worker</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step ok">
+          <div>✅</div>
+          <div style="font-weight:700; font-size:0.9em;">CERTIFIED</div>
+        </div>
+      </div>
+      <hr>
+      <p style="font-size:0.68em; color:var(--muted); margin-bottom:0.5em; font-weight:600;">UC-02 — Verificación pública (sin login)</p>
+      <div class="flow" style="justify-content:center;">
+        <div class="flow-step">
+          <div>📄</div>
+          <div style="font-weight:600; font-size:0.9em;">Activo original</div>
+          <div style="color:var(--muted-2); font-size:0.8em;">(cualquier persona)</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step hl">
+          <div>🔧</div>
+          <div style="font-weight:600; font-size:0.9em;">Re-canoniza</div>
+          <div style="color:var(--muted-2); font-size:0.8em;">mismo algoritmo</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step hl">
+          <div style="font-family:monospace;">#</div>
+          <div style="font-weight:600; font-size:0.9em;">Re-hashea</div>
+          <div style="color:var(--muted-2); font-size:0.8em;">local</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div>⛓️</div>
+          <div style="font-weight:600; font-size:0.9em;">exists()</div>
+          <div style="color:var(--muted-2); font-size:0.8em;">on-chain query</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step ok">
+          <div>🔐</div>
+          <div style="font-weight:700; font-size:0.9em;">VÁLIDO</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 5: ARQUITECTURA ===================== -->
+    <section>
+      <span class="badge">Diseño técnico</span>
+      <h2>Arquitectura</h2>
+      <div class="grid-2" style="margin-top:0.5em; align-items:start;">
+        <div>
+          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.4em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Capas del sistema (C4 Container)</p>
+          <div class="card" style="margin-bottom:0.35em;">
+            <div style="font-size:0.65em; color:var(--muted-2); margin-bottom:0.15em;">Web</div>
+            <span class="tag">Next.js App Router</span><span class="tag">Tailwind</span><span class="tag">TanStack Query</span>
+          </div>
+          <div class="card" style="margin-bottom:0.35em;">
+            <div style="font-size:0.65em; color:var(--muted-2); margin-bottom:0.15em;">API</div>
+            <span class="tag">NestJS</span><span class="tag">pg-boss</span><span class="tag">Prisma</span>
+          </div>
+          <div class="card accent-border" style="margin-bottom:0.35em;">
+            <div style="font-size:0.65em; color:var(--primary); margin-bottom:0.15em;">Core</div>
+            <span class="tag" style="color:var(--accent); border-color:rgba(99,102,241,0.4);">@trustai/dtr-core</span>
+            <span style="font-size:0.6em; color:var(--muted-2);"> — sin framework, sin BD</span>
+          </div>
+          <div class="card" style="margin-bottom:0.35em;">
+            <div style="font-size:0.65em; color:var(--muted-2); margin-bottom:0.15em;">Smart contract</div>
+            <span class="tag">Solidity ^0.8.20</span><span class="tag">Foundry</span><span class="tag">Base Sepolia</span>
+          </div>
+          <div class="card">
+            <div style="font-size:0.65em; color:var(--muted-2); margin-bottom:0.15em;">Almacenamiento</div>
+            <span class="tag">PostgreSQL</span><span class="tag">Cloudflare R2</span>
+          </div>
+        </div>
+        <div>
+          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.4em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">API — Arquitectura Hexagonal</p>
+          <div class="hex-layer" style="border-style:solid; border-color:rgba(34,197,94,0.3); text-align:center;">
+            <div class="hex-layer-label" style="color:#86efac;">Infraestructura (Adapters)</div>
+            <div style="color:var(--muted-2); font-size:0.85em;">OpenAI · StubAi · R2Store · Ethers.js · PgBoss</div>
+          </div>
+          <div style="display:flex; justify-content:center; gap:1em; font-size:0.6em; color:var(--muted-2); margin: 0.2em 0;">↑ depende de ↓ (inversión)</div>
+          <div class="hex-layer" style="text-align:center; border-color:rgba(99,102,241,0.4);">
+            <div class="hex-layer-label">Puertos (Interfaces)</div>
+            <div style="color:var(--muted-2); font-size:0.85em;">IAiReviewer · IAssetStore · IAnchorService</div>
+          </div>
+          <div style="display:flex; justify-content:center; gap:1em; font-size:0.6em; color:var(--muted-2); margin: 0.2em 0;">↑ usa ↓</div>
+          <div class="hex-layer" style="border-style:solid; border-color:rgba(99,102,241,0.6); text-align:center; background:var(--primary-dim);">
+            <div class="hex-layer-label">Dominio (Core)</div>
+            <div style="color:var(--muted); font-size:0.85em;">Entities · Use Cases · Domain Logic</div>
+          </div>
+          <div class="callout" style="margin-top:0.5em; font-size:0.62em;">
+            Los adaptadores son intercambiables sin tocar el dominio — stub en CI, implementación real en prod.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 6: DTR-CORE ===================== -->
+    <section>
+      <span class="badge">Paquete central</span>
+      <h2><code style="font-size:0.85em;">@trustai/dtr-core</code></h2>
+      <p style="font-size:0.7em; color:var(--muted);">Paquete puro TypeScript — sin framework, sin base de datos, sin IA. La única fuente de verdad sobre el protocolo DTR.</p>
+      <div class="grid-2" style="margin-top:0.6em;">
+        <div>
+          <div class="card" style="margin-bottom:0.4em;">
+            <p style="color:var(--accent); font-size:0.68em; font-weight:700; margin-bottom:0.2em;"><code style="font-size:1em;">canonicalize(dtr)</code></p>
+            <p style="font-size:0.6em; color:var(--muted-2);">Serialización determinista: claves ordenadas, números normalizados, campos nulos excluidos. El mismo DTR produce la misma cadena en cualquier entorno.</p>
+          </div>
+          <div class="card" style="margin-bottom:0.4em;">
+            <p style="color:var(--accent); font-size:0.68em; font-weight:700; margin-bottom:0.2em;"><code style="font-size:1em;">hashDtr(dtr)</code></p>
+            <p style="font-size:0.6em; color:var(--muted-2);">SHA-256 sobre la representación canónica → string hex de 64 caracteres. Idempotente: mismo DTR → mismo hash, siempre.</p>
+          </div>
+          <div class="card">
+            <p style="color:var(--accent); font-size:0.68em; font-weight:700; margin-bottom:0.2em;"><code style="font-size:1em;">verifyDtr(dtr, onChainHash)</code></p>
+            <p style="font-size:0.6em; color:var(--muted-2);">Recalcula el hash y compara contra el ancla. Devuelve <code>VALID</code> | <code>INVALID</code> | <code>NOT_FOUND</code>.</p>
+          </div>
+        </div>
+        <div>
+          <p style="font-size:0.6em; color:var(--muted); margin-bottom:0.25em;">Esquema DTR (Zod v1.0)</p>
+          <pre><code>const DTRSchema = z.object({
+  id:        z.string().uuid(),
+  version:   z.literal("dtr/1.0"),
+  assetId:   z.string(),
+  assetHash: z.string(),
+  aiReview: z.object({
+    model:   z.string(),
+    summary: z.string(),
+    score:   z.number().min(0).max(1),
+    flags:   z.array(z.string()),
+  }),
+  issuedAt:  z.string().datetime(),
+  issuerDid: z.string(),
+});</code></pre>
+          <div class="callout" style="font-size:0.62em; margin-top:0.4em;">
+            <strong>29 pruebas unitarias</strong> — canonicalización, hashing, verificación e idempotencia. Incluyendo casos edge: ordenación de claves, valores nulos, normalización numérica.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 7: SMART CONTRACT ===================== -->
+    <section>
+      <span class="badge">Blockchain</span>
+      <h2>AnchorRegistry</h2>
+      <div class="grid-2" style="margin-top:0.6em; align-items:start;">
+        <div>
+          <p style="font-size:0.68em; color:var(--muted); margin-bottom:0.5em;">Contrato mínimo, sin sorpresas, sin owner.</p>
+          <div class="card" style="margin-bottom:0.4em;">
+            <p style="color:var(--accent); font-size:0.68em; font-weight:700;"><code style="font-size:1em;">anchor(bytes32 hash)</code></p>
+            <p style="font-size:0.6em; color:var(--muted-2); margin-top:0.2em;">Registra el hash en el estado de la cadena. Emite <code>Anchored</code>. Idempotente — no revierte si ya existe.</p>
+          </div>
+          <div class="card" style="margin-bottom:0.6em;">
+            <p style="color:var(--accent); font-size:0.68em; font-weight:700;"><code style="font-size:1em;">exists(bytes32) → bool</code></p>
+            <p style="font-size:0.6em; color:var(--muted-2); margin-top:0.2em;">Consulta pública, gratuita, sin permisos. Cualquiera puede verificar.</p>
+          </div>
+          <ul style="font-size:0.68em;">
+            <li>Sin ownership ni control de acceso</li>
+            <li>Chain id: <code>84532</code> (Base Sepolia)</li>
+            <li>Probado con Foundry (unit + fuzz)</li>
+            <li>Desplegado: <code>0xe6738f...607C22</code></li>
+          </ul>
+          <div class="callout" style="font-size:0.62em; margin-top:0.5em;">
+            <strong>ADR-003:</strong> ERC-721 descartado — overhead innecesario para MVP. El contrato mínimo tiene la menor superficie de ataque posible.
+          </div>
+        </div>
+        <div>
+          <pre><code>// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract AnchorRegistry {
+    event Anchored(bytes32 indexed hash);
+
+    mapping(bytes32 => bool) private _anchors;
+
+    function anchor(bytes32 hash) external {
+        if (!_anchors[hash]) {
+            _anchors[hash] = true;
+            emit Anchored(hash);
+        }
+    }
+
+    function exists(bytes32 hash)
+        external
+        view
+        returns (bool)
+    {
+        return _anchors[hash];
+    }
+}</code></pre>
+          <p style="font-size:0.58em; color:var(--muted-2); margin-top:0.3em;">
+            Auditado en BaseScan: <code style="font-size:0.9em;">sepolia.basescan.org</code>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 8: IA ADAPTER ===================== -->
+    <section>
+      <span class="badge">Inteligencia Artificial</span>
+      <h2>Adaptador de IA dual</h2>
+      <div class="grid-2" style="margin-top:0.6em; align-items:start;">
+        <div>
+          <div class="callout" style="margin-bottom:0.7em;">
+            Puerto <code>IAiReviewer</code> — el dominio no sabe qué modelo usa ni si hay red disponible.
+          </div>
+          <div class="card" style="margin-bottom:0.4em;">
+            <p style="color:var(--accent); font-size:0.7em; font-weight:700; margin-bottom:0.2em;">StubAiAdapter</p>
+            <p style="font-size:0.6em; color:var(--muted-2);">Datos sintéticos deterministas. Sin red, sin coste, sin latencia. Activo en CI y entornos de desarrollo.</p>
+          </div>
+          <div class="card" style="margin-bottom:0.5em;">
+            <p style="color:var(--accent); font-size:0.7em; font-weight:700; margin-bottom:0.2em;">OpenAiAdapter</p>
+            <p style="font-size:0.6em; color:var(--muted-2);">Envía el texto del activo a GPT-4o. Respuesta validada con Zod antes de persistirse en el DTR.</p>
+          </div>
+          <p style="font-size:0.62em; color:var(--muted-2);">Selección por variable de entorno: <code>AI_ADAPTER=stub|openai</code></p>
+          <div class="callout" style="font-size:0.62em; margin-top:0.5em;">
+            <strong>ADR-004:</strong> El stub es ciudadano de primera clase, no un hack de testing. Permite demos offline y CI completamente determinista.
+          </div>
+        </div>
+        <div>
+          <p style="font-size:0.62em; color:var(--muted); margin-bottom:0.25em;">Resultado de revisión IA (validado con Zod)</p>
+          <pre><code>// AiReviewResult
+{
+  model:      "gpt-4o",
+  summary:    "Informe financiero Q1 2026.
+               Proyecciones de ingresos +18%
+               respecto al año anterior.",
+  score:      0.87,
+  flags:      ["datos_financieros", "pii"],
+  reviewedAt: "2026-07-15T10:30:00Z"
+}</code></pre>
+          <div class="card" style="margin-top:0.5em; font-size:0.62em;">
+            <p style="color:var(--accent); font-weight:600; margin-bottom:0.2em;">Flujo de validación</p>
+            <div style="color:var(--muted-2);">
+              GPT-4o → <code>JSON.parse</code> → <code>AiReviewSchema.parse()</code> → dominio
+            </div>
+            <div style="font-size:0.85em; margin-top:0.3em; color:var(--muted-2);">Si Zod falla → el DTR queda en PENDING, no se corrompe.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 9: STACK ===================== -->
+    <section>
+      <span class="badge">Infraestructura</span>
+      <h2>Stack y despliegue</h2>
+      <div class="grid-2" style="margin-top:0.5em; align-items:start;">
+        <div>
+          <table>
+            <tr><th>Capa</th><th>Tecnología</th></tr>
+            <tr><td>Web</td><td>Next.js 15 · App Router · Tailwind CSS</td></tr>
+            <tr><td>API</td><td>NestJS · pg-boss worker · Prisma ORM</td></tr>
+            <tr><td>Core</td><td>@trustai/dtr-core (TS puro)</td></tr>
+            <tr><td>Base de datos</td><td>PostgreSQL (datos + cola pg-boss)</td></tr>
+            <tr><td>Almacenamiento</td><td>Cloudflare R2 · AES-256-GCM en reposo</td></tr>
+            <tr><td>Blockchain</td><td>Base Sepolia · Ethers.js v6</td></tr>
+            <tr><td>IA</td><td>OpenAI GPT-4o · adaptador stub</td></tr>
+            <tr><td>Testing</td><td>Vitest · Playwright · Foundry</td></tr>
+          </table>
+        </div>
+        <div>
+          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.4em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Topología de producción</p>
+          <div class="card" style="font-size:0.65em; margin-bottom:0.35em;">
+            <span style="color:var(--primary);">▸</span> <strong>Vercel</strong> — Web Next.js (Edge Network, CI integrado)
+          </div>
+          <div class="card" style="font-size:0.65em; margin-bottom:0.35em;">
+            <span style="color:var(--primary);">▸</span> <strong>Railway</strong> — API NestJS + PostgreSQL
+          </div>
+          <div class="card" style="font-size:0.65em; margin-bottom:0.35em;">
+            <span style="color:var(--primary);">▸</span> <strong>Cloudflare R2</strong> — Activos cifrados en reposo
+          </div>
+          <div class="card" style="font-size:0.65em; margin-bottom:0.5em;">
+            <span style="color:var(--primary);">▸</span> <strong>Base Sepolia</strong> — Contrato AnchorRegistry
+          </div>
+          <div class="callout" style="font-size:0.62em;">
+            Monorepo pnpm workspaces:<br>
+            <code>packages/dtr-core</code> · <code>apps/api</code> · <code>apps/web</code> · <code>smart-contracts/</code>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 10: TESTING ===================== -->
+    <section>
+      <span class="badge">Calidad</span>
+      <h2>Pruebas y CI</h2>
+      <div class="grid-3" style="margin-top:0.6em;">
+        <div class="card center">
+          <div class="stat">327</div>
+          <p style="font-size:0.68em; color:var(--muted); margin-top:0.2em;">Pruebas unitarias</p>
+          <hr>
+          <p style="font-size:0.6em; color:var(--muted-2);">dtr-core 29 · API 170 · Web 128</p>
+        </div>
+        <div class="card center">
+          <div class="stat">E2E</div>
+          <p style="font-size:0.68em; color:var(--muted); margin-top:0.2em;">End-to-end real</p>
+          <hr>
+          <p style="font-size:0.6em; color:var(--muted-2);">Playwright (local) + Base Sepolia real</p>
+        </div>
+        <div class="card center">
+          <div class="stat">CI</div>
+          <p style="font-size:0.68em; color:var(--muted); margin-top:0.2em;">GitHub Actions</p>
+          <hr>
+          <p style="font-size:0.6em; color:var(--muted-2);">build · typecheck · lint · suite completa en cada push</p>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:0.7em;">
+        <div class="callout" style="font-size:0.7em;">
+          <strong>Contrato (Foundry):</strong> unit tests + fuzz tests sobre <code>anchor()</code> y <code>exists()</code>. Superficie de ataque mínima verificada formalmente.
+        </div>
+        <div class="callout" style="font-size:0.7em;">
+          <strong>dtr-core:</strong> casos edge cubiertos — ordenación de claves, valores nulos, normalización numérica, re-hashing idempotente bajo cualquier permutación.
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 11: DEMO ===================== -->
+    <section>
+      <span class="badge">Demo en vivo</span>
+      <h2>Pruébalo ahora</h2>
+      <div class="grid-2" style="margin-top:0.7em; align-items:start;">
+        <div>
+          <div class="card accent-border" style="margin-bottom:0.5em;">
+            <p style="color:var(--accent); font-size:0.7em; font-weight:700; margin-bottom:0.3em;">Aplicación web</p>
+            <code style="font-size:0.68em;">trustai-web-kappa.vercel.app</code>
+            <p style="font-size:0.6em; color:var(--muted-2); margin-top:0.3em;">Cuenta de prueba preconfigurada (email ya verificado):</p>
+            <div style="margin-top:0.2em;">
+              <span class="tag">revisor@trustai.app</span>
+              <span class="tag">RevisorTFM2026</span>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:0.5em;">
+            <p style="color:var(--accent); font-size:0.7em; font-weight:700; margin-bottom:0.2em;">Verificación pública (sin login)</p>
+            <code style="font-size:0.6em;">/verify/:id</code>
+            <p style="font-size:0.58em; color:var(--muted-2); margin-top:0.2em;">Recalcula el hash localmente y consulta Base Sepolia. Ningún dato sensible necesita salir del cliente.</p>
+          </div>
+          <div class="card">
+            <p style="color:var(--accent); font-size:0.7em; font-weight:700; margin-bottom:0.2em;">API de salud</p>
+            <code style="font-size:0.6em;">trustaiapi-production.up.railway.app/health</code>
+          </div>
+        </div>
+        <div class="center" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
+          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.5em;">Contrato en BaseScan</p>
+          <div style="background:white; width:170px; height:170px; border-radius:0.6rem; display:flex; align-items:center; justify-content:center; font-size:3.5em;">⛓️</div>
+          <p style="font-size:0.6em; color:var(--muted-2); margin-top:0.5em;">sepolia.basescan.org</p>
+          <code style="font-size:0.55em; color:var(--muted-2); display:block; margin-top:0.2em;">0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 12: ADRs ===================== -->
+    <section>
+      <span class="badge">Decisiones de arquitectura</span>
+      <h2>Architecture Decision Records</h2>
+      <p style="font-size:0.68em; color:var(--muted); margin-bottom:0.6em;">Cada decisión relevante registrada como ADR en <code>docs/adr/</code> con contexto, alternativas y consecuencias.</p>
+      <table>
+        <tr>
+          <th>ADR</th>
+          <th>Decisión</th>
+          <th>Alternativa descartada</th>
+        </tr>
+        <tr>
+          <td><code>001</code></td>
+          <td>Anclar hash canónico del DTR on-chain</td>
+          <td>Almacenar el JSON completo on-chain (costoso e inmutable de forma indeseable)</td>
+        </tr>
+        <tr>
+          <td><code>002</code></td>
+          <td>Stack full-TypeScript en monorepo pnpm</td>
+          <td>Backend Python / Go (ecosistemas separados, fricción entre equipos)</td>
+        </tr>
+        <tr>
+          <td><code>003</code></td>
+          <td>Contrato mínimo sin owner ni lógica de negocio</td>
+          <td>ERC-721 NFT (overhead innecesario para MVP, más superficie de ataque)</td>
+        </tr>
+        <tr>
+          <td><code>004</code></td>
+          <td>Adaptador dual IA: stub como ciudadano de primera clase</td>
+          <td>Mock solo en tests (stub descartable, no extensible)</td>
+        </tr>
+        <tr>
+          <td><code>005</code></td>
+          <td>Next.js App Router + TanStack Query</td>
+          <td>Pages Router / SWR (caching menos expresivo, SSR más limitado)</td>
+        </tr>
+        <tr>
+          <td><code>006</code></td>
+          <td>Vercel + Railway + R2 para despliegue</td>
+          <td>AWS full-stack (coste y complejidad excesivos para un MVP)</td>
+        </tr>
+      </table>
+    </section>
+
+    <!-- ===================== SLIDE 13: RESULTADOS ===================== -->
+    <section>
+      <span class="badge">Estado del proyecto</span>
+      <h2>Resultados</h2>
+      <div class="grid-3" style="margin-top:0.5em;">
+        <div class="card center">
+          <div class="stat" style="font-size:1.8em;">MVP</div>
+          <p style="font-size:0.65em; color:var(--muted);">Completo y en producción</p>
+          <p style="font-size:0.58em; color:var(--muted-2);">Flujo end-to-end probado contra Base Sepolia real</p>
+        </div>
+        <div class="card center">
+          <div class="stat">327</div>
+          <p style="font-size:0.65em; color:var(--muted);">Pruebas automáticas</p>
+          <p style="font-size:0.58em; color:var(--muted-2);">Unitarias + E2E + contrato Foundry</p>
+        </div>
+        <div class="card center">
+          <div class="stat">6</div>
+          <p style="font-size:0.65em; color:var(--muted);">ADRs documentados</p>
+          <p style="font-size:0.58em; color:var(--muted-2);">Con alternativas descartadas y consecuencias</p>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:0.7em;">
+        <div class="card">
+          <p style="color:var(--accent); font-size:0.68em; font-weight:700; margin-bottom:0.3em;">Lo que funciona en producción</p>
+          <ul>
+            <li>Registro de usuario + verificación de email</li>
+            <li>Subida de activos (PDF) cifrados en R2</li>
+            <li>Revisión IA (GPT-4o) → DTR estructurado</li>
+            <li>Anclaje on-chain → estado CERTIFIED</li>
+            <li>Verificación pública sin login (UC-02)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <p style="color:var(--accent); font-size:0.68em; font-weight:700; margin-bottom:0.3em;">Documentación viva</p>
+          <ul>
+            <li>TDD completo en <code>docs/</code> (13 secciones)</li>
+            <li>Diagramas C4 (context, container, component)</li>
+            <li>Endpoints de API documentados</li>
+            <li>Modelo de seguridad con diagramas de secuencia</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 14: PRÓXIMOS PASOS ===================== -->
+    <section>
+      <span class="badge">Roadmap</span>
+      <h2>Próximos pasos</h2>
+      <div class="grid-2" style="margin-top:0.7em;">
+        <div>
+          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.4em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Funcionalidad</p>
+          <div class="card" style="margin-bottom:0.4em;">
+            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">Firma del emisor (ECDSA)</p>
+            <p style="font-size:0.6em; color:var(--muted-2);">No-repudio real — el emisor firma el hash del DTR con su clave privada antes del anclaje.</p>
+          </div>
+          <div class="card" style="margin-bottom:0.4em;">
+            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">Mainnet (Base)</p>
+            <p style="font-size:0.6em; color:var(--muted-2);">El contrato ya está listo. Solo requiere ETH real y redeploy. Costo mínimo por transacción en Base L2.</p>
+          </div>
+          <div class="card">
+            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">Más tipos de activos</p>
+            <p style="font-size:0.6em; color:var(--muted-2);">Imágenes, audio, código fuente. El pipeline de canonicalización es extensible por tipo.</p>
+          </div>
+        </div>
+        <div>
+          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.4em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Plataforma y negocio</p>
+          <div class="card" style="margin-bottom:0.4em;">
+            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">SDK / API pública</p>
+            <p style="font-size:0.6em; color:var(--muted-2);">Permitir integración desde sistemas externos. Certificar activos sin usar la interfaz web.</p>
+          </div>
+          <div class="card" style="margin-bottom:0.4em;">
+            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">Modelo freemium</p>
+            <p style="font-size:0.6em; color:var(--muted-2);">N certificaciones gratis/mes. Planes para equipos y empresas con SLA.</p>
+          </div>
+          <div class="card">
+            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">Certificadores especializados</p>
+            <p style="font-size:0.6em; color:var(--muted-2);">Marketplace de revisores IA por dominio: legal, financiero, médico.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 15: CONCLUSIONES ===================== -->
+    <section>
+      <span class="badge">Cierre</span>
+      <h2>Conclusiones</h2>
+      <div style="max-width:740px; margin:0.7em auto 0;">
+        <div class="card accent-border" style="margin-bottom:0.4em;">
+          <p style="font-size:0.78em;"><strong style="color:var(--accent);">IA + blockchain resuelven el problema de la confianza</strong> sin requerir que el verificador confíe en el emisor.</p>
+        </div>
+        <div class="card" style="margin-bottom:0.4em;">
+          <p style="font-size:0.78em;"><strong style="color:var(--accent);">La arquitectura hexagonal</strong> permitió desarrollar y testear el dominio completamente aislado de la infraestructura — sin acoplamiento a ningún framework ni servicio externo.</p>
+        </div>
+        <div class="card" style="margin-bottom:0.4em;">
+          <p style="font-size:0.78em;"><strong style="color:var(--accent);">dtr-core como paquete puro</strong> garantiza que la canonicalización y verificación son reproducibles por cualquier implementación futura, en cualquier lenguaje.</p>
+        </div>
+        <div class="card green-border">
+          <p style="font-size:0.78em;"><strong style="color:#86efac;">El MVP está en producción</strong>, con flujo completo probado end-to-end contra Base Sepolia real y 327 pruebas automáticas pasando en CI.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 16: Q&A ===================== -->
+    <section class="center" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
+      <div class="logo-box" style="margin-bottom:0.5em;">🔐</div>
+      <h1 style="font-size:2.5em; margin-bottom:0.1em;"><span class="accent">Trust</span>AI</h1>
+      <h3 style="font-size:1.1em; margin-bottom:1em;">¿Preguntas?</h3>
+      <hr style="width:260px; margin:0 auto 0.8em;">
+      <p style="font-size:0.7em; color:var(--muted-2);">
+        Código · Documentación · Demo en vivo
+      </p>
+      <code style="font-size:0.68em; color:var(--accent); display:block; margin-top:0.3em;">trustai-web-kappa.vercel.app</code>
+      <p style="font-size:0.58em; color:var(--muted-2); margin-top:1.2em;">
+        Jose Aguilera &nbsp;·&nbsp; TFM 2026
+      </p>
+    </section>
+
+  </div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    progress: true,
+    controls: true,
+    center: false,
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    plugins: []
+  });
+</script>
+</body>
+</html>
