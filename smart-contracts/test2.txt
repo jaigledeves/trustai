@@ -1,0 +1,35 @@
+No files changed, compilation skipped
+
+Ran 12 tests for test/AnchorRegistry.t.sol:AnchorRegistryTest
+[PASS] testFuzz_AnyNonZeroHashAnchors(bytes32) (runs: 256, μ: 34389, ~: 34389)
+[PASS] testFuzz_DuplicateAlwaysReverts(bytes32) (runs: 256, μ: 34304, ~: 34304)
+[PASS] test_AnchorEmitsEvent() (gas: 34394)
+[PASS] test_AnchorStoresTimestamp() (gas: 33391)
+[PASS] test_DuplicateRevertsWithTheHash() (gas: 33898)
+[PASS] test_GasAnchorFirstCall() (gas: 33011)
+Logs:
+  anchor() gas: 29373
+
+[PASS] test_GasIsAnchored() (gas: 33949)
+Logs:
+  isAnchored() gas: 966
+
+[PASS] test_IsAnchoredFalseBeforeAnchor() (gas: 7720)
+[PASS] test_IsAnchoredTrueAfterAnchor() (gas: 30543)
+[PASS] test_MerkleRootAnchorable() (gas: 31502)
+[PASS] test_RevertAlreadyAnchored() (gas: 33935)
+[PASS] test_RevertZeroHash() (gas: 8369)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 14.51ms (40.85ms CPU time)
+
+Ran 1 test for test/AnchorRegistry.t.sol:AnchorRegistryInvariantTest
+[PASS] invariant_TimestampNeverChanges() (runs: 256, calls: 128000, reverts: 7162)
+
+╭----------------+----------+--------+---------+----------╮
+| Contract       | Selector | Calls  | Reverts | Discards |
++=========================================================+
+| AnchorRegistry | anchor   | 128000 | 7162    | 0        |
+╰----------------+----------+--------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 3.46s (3.46s CPU time)
+
+Ran 2 test suites in 3.46s (3.48s CPU time): 13 tests passed, 0 failed, 0 skipped (13 total tests)

@@ -9,10 +9,10 @@ const DEFAULT_MODEL = "gpt-5.4-mini";
 const PROMPT_VERSION = "v1";
 
 const SYSTEM_PROMPT = [
-  "You analyze a document's extracted text for a legal/business certification platform.",
-  "Produce a concise summary (1-3 sentences, max 1200 characters), classify the document",
-  `into exactly one of: ${DOCUMENT_TAXONOMY_V1.join(", ")}, and detect its ISO 639-1`,
-  "two-letter language code. Be factual — do not invent details not present in the text.",
+  "Analizas el texto extraído de un documento para una plataforma de certificación legal y empresarial.",
+  "Genera un resumen conciso (de 1 a 3 frases, con un máximo de 1200 caracteres), clasifica el documento",
+  `en exactamente una de las siguientes categorías: ${DOCUMENT_TAXONOMY_V1.join(", ")}, e identifica`,
+  "el idioma utilizando el código ISO 639-1 de dos letras. Sé estrictamente fiel al contenido del documento y no inventes información que no aparezca en el texto.",
 ].join(" ");
 
 /**

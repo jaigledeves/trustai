@@ -1,0 +1,3097 @@
+No files changed, compilation skipped
+
+Ran 12 tests for test/AnchorRegistry.t.sol:AnchorRegistryTest
+[PASS] testFuzz_AnyNonZeroHashAnchors(bytes32) (runs: 256, μ: 34389, ~: 34389)
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [34389] AnchorRegistryTest::testFuzz_AnyNonZeroHashAnchors(0xa24040ee141e485dbfa1a4f5fb5f488e9721c93b6e564aedd3b7869e01a78c4a)
+    ├─ [0] VM::assume(true) [staticcall]
+    │   └─ ← [Return]
+    ├─ [24351] AnchorRegistry::anchor(0xa24040ee141e485dbfa1a4f5fb5f488e9721c93b6e564aedd3b7869e01a78c4a)
+    │   ├─ emit Anchored(hash: 0xa24040ee141e485dbfa1a4f5fb5f488e9721c93b6e564aedd3b7869e01a78c4a, sender: AnchorRegistryTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], timestamp: 1)
+    │   ├─  storage changes:
+    │   │   @ 0xd15885970a7612ce158356dd3071485e39a605d770177f5a92d03aaeac9d84ce: 0 → 1
+    │   └─ ← [Stop]
+    ├─ [438] AnchorRegistry::anchoredAt(0xa24040ee141e485dbfa1a4f5fb5f488e9721c93b6e564aedd3b7869e01a78c4a) [staticcall]
+    │   └─ ← [Return] 1
+    ├─ [417] AnchorRegistry::isAnchored(0xa24040ee141e485dbfa1a4f5fb5f488e9721c93b6e564aedd3b7869e01a78c4a) [staticcall]
+    │   └─ ← [Return] true
+    └─ ← [Stop]
+
+[PASS] testFuzz_DuplicateAlwaysReverts(bytes32) (runs: 256, μ: 34304, ~: 34304)
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [34304] AnchorRegistryTest::testFuzz_DuplicateAlwaysReverts(0x546f2a85e52f9e1ce0d91ae27a35cdac2a2f86eb8940a1e13038964d74b605a1)
+    ├─ [0] VM::assume(true) [staticcall]
+    │   └─ ← [Return]
+    ├─ [24351] AnchorRegistry::anchor(0x546f2a85e52f9e1ce0d91ae27a35cdac2a2f86eb8940a1e13038964d74b605a1)
+    │   ├─ emit Anchored(hash: 0x546f2a85e52f9e1ce0d91ae27a35cdac2a2f86eb8940a1e13038964d74b605a1, sender: AnchorRegistryTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], timestamp: 1)
+    │   ├─  storage changes:
+    │   │   @ 0x8a006ad2d9f581ebf2c72c49ebced56433b9df44d94cee718cb12a886093dab2: 0 → 1
+    │   └─ ← [Stop]
+    ├─ [0] VM::expectRevert(AlreadyAnchored(0x546f2a85e52f9e1ce0d91ae27a35cdac2a2f86eb8940a1e13038964d74b605a1))
+    │   └─ ← [Return]
+    ├─ [508] AnchorRegistry::anchor(0x546f2a85e52f9e1ce0d91ae27a35cdac2a2f86eb8940a1e13038964d74b605a1)
+    │   └─ ← [Revert] AlreadyAnchored(0x546f2a85e52f9e1ce0d91ae27a35cdac2a2f86eb8940a1e13038964d74b605a1)
+    └─ ← [Stop]
+
+[PASS] test_AnchorEmitsEvent() (gas: 34394)
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [34394] AnchorRegistryTest::test_AnchorEmitsEvent()
+    ├─ [0] VM::expectEmit(true, true, false, true)
+    │   └─ ← [Return]
+    ├─ emit Anchored(hash: 0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5, sender: AnchorRegistryTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], timestamp: 1)
+    ├─ [24351] AnchorRegistry::anchor(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5)
+    │   ├─ emit Anchored(hash: 0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5, sender: AnchorRegistryTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], timestamp: 1)
+    │   ├─  storage changes:
+    │   │   @ 0xea6eaeb9f6e1140e90ee226112c7b36213ca653fda3fb872c013483eab4e9704: 0 → 1
+    │   └─ ← [Stop]
+    └─ ← [Stop]
+
+[PASS] test_AnchorStoresTimestamp() (gas: 33391)
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [33391] AnchorRegistryTest::test_AnchorStoresTimestamp()
+    ├─ [0] VM::warp(1720000000 [1.72e9])
+    │   └─ ← [Return]
+    ├─ [24351] AnchorRegistry::anchor(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5)
+    │   ├─ emit Anchored(hash: 0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5, sender: AnchorRegistryTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], timestamp: 1720000000 [1.72e9])
+    │   ├─  storage changes:
+    │   │   @ 0xea6eaeb9f6e1140e90ee226112c7b36213ca653fda3fb872c013483eab4e9704: 0 → 0x0000000000000000000000000000000000000000000000000000000066851e00
+    │   └─ ← [Stop]
+    ├─ [438] AnchorRegistry::anchoredAt(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5) [staticcall]
+    │   └─ ← [Return] 1720000000 [1.72e9]
+    └─ ← [Stop]
+
+[PASS] test_DuplicateRevertsWithTheHash() (gas: 33898)
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [33898] AnchorRegistryTest::test_DuplicateRevertsWithTheHash()
+    ├─ [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000002a)
+    │   ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000002a, sender: AnchorRegistryTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], timestamp: 1)
+    │   ├─  storage changes:
+    │   │   @ 0x64d962e4eec2a0d2e4053fc69d3b480f61c5923c09e4bad52cdeec343ff95073: 0 → 1
+    │   └─ ← [Stop]
+    ├─ [0] VM::expectRevert(AlreadyAnchored(0x000000000000000000000000000000000000000000000000000000000000002a))
+    │   └─ ← [Return]
+    ├─ [508] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000002a)
+    │   └─ ← [Revert] AlreadyAnchored(0x000000000000000000000000000000000000000000000000000000000000002a)
+    └─ ← [Stop]
+
+[PASS] test_GasAnchorFirstCall() (gas: 33011)
+Logs:
+  anchor() gas: 29373
+
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [33011] AnchorRegistryTest::test_GasAnchorFirstCall()
+    ├─ [24351] AnchorRegistry::anchor(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5)
+    │   ├─ emit Anchored(hash: 0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5, sender: AnchorRegistryTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], timestamp: 1)
+    │   ├─  storage changes:
+    │   │   @ 0xea6eaeb9f6e1140e90ee226112c7b36213ca653fda3fb872c013483eab4e9704: 0 → 1
+    │   └─ ← [Stop]
+    ├─ [0] console::log("anchor() gas:", 29373 [2.937e4]) [staticcall]
+    │   └─ ← [Stop]
+    └─ ← [Stop]
+
+[PASS] test_GasIsAnchored() (gas: 33949)
+Logs:
+  isAnchored() gas: 966
+
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [33949] AnchorRegistryTest::test_GasIsAnchored()
+    ├─ [24351] AnchorRegistry::anchor(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5)
+    │   ├─ emit Anchored(hash: 0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5, sender: AnchorRegistryTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], timestamp: 1)
+    │   ├─  storage changes:
+    │   │   @ 0xea6eaeb9f6e1140e90ee226112c7b36213ca653fda3fb872c013483eab4e9704: 0 → 1
+    │   └─ ← [Stop]
+    ├─ [417] AnchorRegistry::isAnchored(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5) [staticcall]
+    │   └─ ← [Return] true
+    ├─ [0] console::log("isAnchored() gas:", 966) [staticcall]
+    │   └─ ← [Stop]
+    └─ ← [Stop]
+
+[PASS] test_IsAnchoredFalseBeforeAnchor() (gas: 7720)
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [7720] AnchorRegistryTest::test_IsAnchoredFalseBeforeAnchor()
+    ├─ [2417] AnchorRegistry::isAnchored(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5) [staticcall]
+    │   └─ ← [Return] false
+    └─ ← [Stop]
+
+[PASS] test_IsAnchoredTrueAfterAnchor() (gas: 30543)
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [30543] AnchorRegistryTest::test_IsAnchoredTrueAfterAnchor()
+    ├─ [24351] AnchorRegistry::anchor(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5)
+    │   ├─ emit Anchored(hash: 0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5, sender: AnchorRegistryTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], timestamp: 1)
+    │   ├─  storage changes:
+    │   │   @ 0xea6eaeb9f6e1140e90ee226112c7b36213ca653fda3fb872c013483eab4e9704: 0 → 1
+    │   └─ ← [Stop]
+    ├─ [417] AnchorRegistry::isAnchored(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5) [staticcall]
+    │   └─ ← [Return] true
+    └─ ← [Stop]
+
+[PASS] test_MerkleRootAnchorable() (gas: 31502)
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [31502] AnchorRegistryTest::test_MerkleRootAnchorable()
+    ├─ [24351] AnchorRegistry::anchor(0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890)
+    │   ├─ emit Anchored(hash: 0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890, sender: AnchorRegistryTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], timestamp: 1)
+    │   ├─  storage changes:
+    │   │   @ 0x11e6eb2f1fee15ab6fc4ed91ee58408944ec29d0067d3ed8e1ec62e1b41bff40: 0 → 1
+    │   └─ ← [Stop]
+    ├─ [417] AnchorRegistry::isAnchored(0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890) [staticcall]
+    │   └─ ← [Return] true
+    ├─ [438] AnchorRegistry::anchoredAt(0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890) [staticcall]
+    │   └─ ← [Return] 1
+    └─ ← [Stop]
+
+[PASS] test_RevertAlreadyAnchored() (gas: 33935)
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [33935] AnchorRegistryTest::test_RevertAlreadyAnchored()
+    ├─ [24351] AnchorRegistry::anchor(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5)
+    │   ├─ emit Anchored(hash: 0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5, sender: AnchorRegistryTest: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], timestamp: 1)
+    │   ├─  storage changes:
+    │   │   @ 0xea6eaeb9f6e1140e90ee226112c7b36213ca653fda3fb872c013483eab4e9704: 0 → 1
+    │   └─ ← [Stop]
+    ├─ [0] VM::expectRevert(AlreadyAnchored(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5))
+    │   └─ ← [Return]
+    ├─ [508] AnchorRegistry::anchor(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5)
+    │   └─ ← [Revert] AlreadyAnchored(0x5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5)
+    └─ ← [Stop]
+
+[PASS] test_RevertZeroHash() (gas: 8369)
+Traces:
+  [121663] AnchorRegistryTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [8369] AnchorRegistryTest::test_RevertZeroHash()
+    ├─ [0] VM::expectRevert(ZeroHash())
+    │   └─ ← [Return]
+    ├─ [299] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000000)
+    │   └─ ← [Revert] ZeroHash()
+    └─ ← [Stop]
+
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 24.86ms (64.16ms CPU time)
+
+Ran 1 test for test/AnchorRegistry.t.sol:AnchorRegistryInvariantTest
+[PASS] invariant_TimestampNeverChanges() (runs: 256, calls: 128000, reverts: 7392)
+
+╭----------------+----------+--------+---------+----------╮
+| Contract       | Selector | Calls  | Reverts | Discards |
++=========================================================+
+| AnchorRegistry | anchor   | 128000 | 7392    | 0        |
+╰----------------+----------+--------+---------+----------╯
+
+Traces:
+  [165908] AnchorRegistryInvariantTest::setUp()
+    ├─ [84133] → new AnchorRegistry@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   └─ ← [Return] 420 bytes of code
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000045a666d7244b64736f6c6343000819)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000045a666d7244b64736f6c6343000819, sender: 0xeAEf18A937C496476D1d61d5F40aDc1F32620eD9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7f54cf4aabc0ab4a64c8f48a445436164380062a3652592588c4a40c3f4f97f5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xd3f73f409ead25336555bd092d186d76343f4a3c172e6545c083001e049c2ae8)
+    ├─ emit Anchored(hash: 0xd3f73f409ead25336555bd092d186d76343f4a3c172e6545c083001e049c2ae8, sender: 0xd4E6efD42e2da078D959eE9fddBD8d7017e81514, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x79316ecc1949c3b20aae5bf32940e0b5d3aa64fec53e548b51577bc52ca098c0: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000066d9a9a1)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000066d9a9a1, sender: 0x0000000000000000000000000000000000000061, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x30a29f32d46d8c26be9e9c948dd0c908a3aa540b634d31958e19bc15c1a313b6: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb5ca9e767ca526253c00f6d88f0f2f999f927c796be52231c333e53dc931d50e)
+    ├─ emit Anchored(hash: 0xb5ca9e767ca526253c00f6d88f0f2f999f927c796be52231c333e53dc931d50e, sender: 0xDFdD18b3a866dF75D8D0466a04C39A699E15583A, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x37925a6292147e540459fb1c35df343f1f9c3b565c41847dc2f95c4323c39663: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa6449ab3a96667295d10dc319e358462ff67b95019fa72b22a651cb25c065f4a)
+    ├─ emit Anchored(hash: 0xa6449ab3a96667295d10dc319e358462ff67b95019fa72b22a651cb25c065f4a, sender: 0x0000000000000000000000000000000000000020, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x88294bee524d48c71768cf6805d4e723fc1e6e7c47ec0b7b1bb562857072344a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x1066eb2e5c8594bd78081e1a5b34c673a658581fa13c6e77f24f418afa3fef7e)
+    ├─ emit Anchored(hash: 0x1066eb2e5c8594bd78081e1a5b34c673a658581fa13c6e77f24f418afa3fef7e, sender: 0x0000000000000000000000000000000000000FB5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x77013ce9a65574f4e72597c6d966f0a9bb62910f7b3d071aae67810a4e24c7f9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x430d6c7ee15f92655d97ac76818e65a3679302b15a43bddee084fe76121aa1cc)
+    ├─ emit Anchored(hash: 0x430d6c7ee15f92655d97ac76818e65a3679302b15a43bddee084fe76121aa1cc, sender: 0x00000000000000000000000000000000000000B8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x371ce8063e0f7e6e297b7af4a12d06d33bd7e7e330a43d7ace0797f1a36ebcb8: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9fd52724bb64b8a53b786f729ae0d9dfbb3bbc43704a1b1c3c1840487da9457f)
+    ├─ emit Anchored(hash: 0x9fd52724bb64b8a53b786f729ae0d9dfbb3bbc43704a1b1c3c1840487da9457f, sender: 0xA4A7761FA10b96515bb0a0d42194fCf80e0559B5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x37f365d862fbbfad2d4babaf8431cded34f6bc4c50967d43b208216912eac098: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xaae128095f494662721ed4b41d9b07e55211ab824f5f8aff5851094ae7427bd7)
+    ├─ emit Anchored(hash: 0xaae128095f494662721ed4b41d9b07e55211ab824f5f8aff5851094ae7427bd7, sender: 0x58929eE182B482585359f652Ae987F8c28c88cb6, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x887cbcf9b6b2ccb9f580509fbd49b814491b996f0b435f91b00f5f9c03d64a8c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000030d23812)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000030d23812, sender: 0x0000000000000000000000000000000000000237, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x130f8e25557e43abd7aee815d13ac1cbdbc8790d3557ddfea66bc239383949ae: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x20b65c2db75b36ab49ff612fe1054a009b9a64fa60f6826bb115d0468e77019b)
+    ├─ emit Anchored(hash: 0x20b65c2db75b36ab49ff612fe1054a009b9a64fa60f6826bb115d0468e77019b, sender: 0x99323277eCa2be995eab8F55A9eedb164dCea081, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8056312320ca60b7a53e4a8ad4c1569f7e302aff3a30bd65df3dfcbed9c6b75c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x81d9e6b70ca47e99a1e198dc62bafdfff45042736328d83e2a16f0be09d9b011)
+    ├─ emit Anchored(hash: 0x81d9e6b70ca47e99a1e198dc62bafdfff45042736328d83e2a16f0be09d9b011, sender: 0x1248B550acfEE61c78873441D6eBA4de07a65dC7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5159ac3306e0dc96596688ae74161550d002df287abc39198894d6a885321296: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x1a93d9924b7bcf92db95148b3cb966b6b4801419308fb04aa31c89780e9a3f8d)
+    ├─ emit Anchored(hash: 0x1a93d9924b7bcf92db95148b3cb966b6b4801419308fb04aa31c89780e9a3f8d, sender: 0x74161550d002DF287AbC39198894d6A885321296, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x427f0d93e24a17ca6477bc82fc311f78f3a8be287d82b5840cb4a15372510f01: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4fdd9848a45650e1328b104d047448a15971cb6e3481d3edcd43f5a3ca08504f)
+    ├─ emit Anchored(hash: 0x4fdd9848a45650e1328b104d047448a15971cb6e3481d3edcd43f5a3ca08504f, sender: 0x000000000000000000000000000000000000010D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x65caedee8054f3b7e7b930eaabf0b7615cfa76bda135bf85b96b3747d7bd8d3d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xbe0d5504ff06df6b6a320984e5e8c1f2bfd32dd2919a1d54e95c05c1a0677e3e)
+    ├─ emit Anchored(hash: 0xbe0d5504ff06df6b6a320984e5e8c1f2bfd32dd2919a1d54e95c05c1a0677e3e, sender: 0xe3c7bea031E8E8341558a3E9752FCFadc3c546E5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x141daf4d9b136a4912abcdbe77a11b1790e71393a6b00763fe07ce61dab52b40: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x600f6e58a481350b5c495cc02e4c767a1fb6d979605f6691ef0c33198b6a54fc)
+    ├─ emit Anchored(hash: 0x600f6e58a481350b5c495cc02e4c767a1fb6d979605f6691ef0c33198b6a54fc, sender: 0x0000000000000000000000000000000000000a0f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8981a02ce4851e96cf5991c1e2b204aa04d7f4ddb4fb891c01bc1dc830911cad: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000001f)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000001f, sender: 0x7973bAc39d7D9444F4c523536B5eC44564D53e14, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xcdbf706faff1444e72b0106ae4486b0256043747c99858ded580d001655540f5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000004)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000004, sender: 0x0000000000000000000000000000000000000019, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x52d75039926638d3c558b2bdefb945d5be8dae29dedd1c313212a4d472d9fde5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf85dabe2cac3139221301a0ce9e5154456e016dec27aa31eddaa2b41ca719bae)
+    ├─ emit Anchored(hash: 0xf85dabe2cac3139221301a0ce9e5154456e016dec27aa31eddaa2b41ca719bae, sender: 0x0000000000000000000000000000000000001148, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7318a89eb5b639d2b9be7276f59c5faa21adf8886a82be6a89bb1ebdd95a3856: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xba58d96344379aa791933fdf27f53de6dc749acf4c4ba28c367dc35116ef9148)
+    ├─ emit Anchored(hash: 0xba58d96344379aa791933fdf27f53de6dc749acf4c4ba28c367dc35116ef9148, sender: 0xAa7ff77860Dc39AB3B510E02db409Ba673Ee4a76, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x13aa0e34c44619a310d647d6835d70022fc02d87cc29afc0be6b31dc7518c248: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe18b935bf41a0206131f5041935a70da5ee1739e153642a5f5c869ddb5037b13)
+    ├─ emit Anchored(hash: 0xe18b935bf41a0206131f5041935a70da5ee1739e153642a5f5c869ddb5037b13, sender: 0x363F26E2343a540248299BD2A76511e8F2a78241, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe68e9a6ab55c29ea96f4110e05ae445505abed4d1fa37fc5bb1e3e89861d9129: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000022)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000022, sender: 0x000000000000000000000000000000004e487b72, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x660960054c44c4d83c420af65c54e6f3437517cffaa9996495231fee01bdba41: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000088b44c85)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000088b44c85, sender: 0x000000000000000000000000000000000000069d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4d7da2b4e8f2da52ae6c470808d56151608d3b23048e80c5800e104448dbcbe0: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x581f7d7f0586fb749ce49937e3a77d94cf3b338a3141b5d88137d8581a323770)
+    ├─ emit Anchored(hash: 0x581f7d7f0586fb749ce49937e3a77d94cf3b338a3141b5d88137d8581a323770, sender: 0x98aeE32c2031BC79493A23AAcF059fC1acf4CF04, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe1a10a29f822838a25b44783d846975b50e45aa9484ffa1cef15b848c26d3ab9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xeae7145eec6ed75c4e2f5e0fa8830f1e4558eb789ab218cb8126dfa5b0d5aa9e)
+    ├─ emit Anchored(hash: 0xeae7145eec6ed75c4e2f5e0fa8830f1e4558eb789ab218cb8126dfa5b0d5aa9e, sender: 0xB72452259E44DA8FB525929d1893fED888D53EeD, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xff63ec0dde3d4284842a5175cedc772cd0f40752afa6b0248fc2cd7ed76209bd: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe0daa5d0ac010b0b3280884c8251ee5322df6129d6f5643a8f53c357872e944b)
+    ├─ emit Anchored(hash: 0xe0daa5d0ac010b0b3280884c8251ee5322df6129d6f5643a8f53c357872e944b, sender: 0x00000000000000000000000000000000000001C1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7868676cea6ee3695805ec7c5b0c34c05b2fd98f949cab9ac843a8062bafa963: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x66ed1f00c2745ff7e98c62c3fa5cbb669fa0e7394786cad6a6c75726be889013)
+    ├─ emit Anchored(hash: 0x66ed1f00c2745ff7e98c62c3fa5cbb669fa0e7394786cad6a6c75726be889013, sender: 0x0000000000000000000000000000000000000784, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7a2904db58355a6c12bc146602bf720c34878164b024159983252f75f6ec0e57: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x7ccc4806c93b485a765bfa68424d1543191565ae30bd23d707675b5ffb9a7264)
+    ├─ emit Anchored(hash: 0x7ccc4806c93b485a765bfa68424d1543191565ae30bd23d707675b5ffb9a7264, sender: 0x00000000000000000000000000000000000004e1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5d35e3238c9b14e767538f11ed11a6f788f9e94c13e8b6e9c2d8668ccf665930: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x211d63ff8d0a05c1e4f7669a24f540e82ce4776fb52ce54d829d58110bf035aa)
+    ├─ emit Anchored(hash: 0x211d63ff8d0a05c1e4f7669a24f540e82ce4776fb52ce54d829d58110bf035aa, sender: 0x0000000000000000000000000000000000000448, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe77ea0fe9f4a24067877bf6e0df793eb034fa8439522c9d5945294b86202ad4f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x3010c0398e285b5322b417960f5e9ecae2a50886ecb19c10ef5048e1058729c0)
+    ├─ emit Anchored(hash: 0x3010c0398e285b5322b417960f5e9ecae2a50886ecb19c10ef5048e1058729c0, sender: 0x0000000000000000000000000000000000000017, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4601c7d0c5617e6c25f9578c63609e48a5c38694726b448aa3d640cf23f9e279: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000067a)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000067a, sender: 0xdA275A3698Ad68Ef3a1022ab0fCc19A88d638F0D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x95c9c9f1b15e6bd46cfb9e8302c855c7b9f7183d8d3cc5143b384cfff44a190c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000eecdf926)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000eecdf926, sender: 0x1d15827540C8702Ca628facA42b735bBDe18e61F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xad336c3b809c54d94d817e732395ae794656d912963861af56d294ef8bf6bde1: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x03ab225b8355769d5be2e94bf412e425420d5282969246859de883ef2fd03cdb)
+    ├─ emit Anchored(hash: 0x03ab225b8355769d5be2e94bf412e425420d5282969246859de883ef2fd03cdb, sender: 0x0000000000000000000000000000000000000220, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd10b95177b6f732b5da2ea7a6c505dd696765808954e12cb1c837b3955748632: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5daf8f85ef614e6a1c04fbea83199c03c7314f9208a82f2047a5d25eee02594c)
+    ├─ emit Anchored(hash: 0x5daf8f85ef614e6a1c04fbea83199c03c7314f9208a82f2047a5d25eee02594c, sender: 0xc2ff0679Ad11D85bDBC647f00882EE2175a6637D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6a6acbcdf0ac78b9e0449d18a849ca82e80051ad5fce7c60b6f66af4049fe4f3: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x97fa4e19eeae89df114d806005a760193cbd95ac02ba5afbed75d06b51fe278f)
+    ├─ emit Anchored(hash: 0x97fa4e19eeae89df114d806005a760193cbd95ac02ba5afbed75d06b51fe278f, sender: 0x0000000000000000000000000000000000000c30, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1770598f4fa1b4b3ab5ec8cf58c4a34759587c026db82e655524adabb97122e0: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x3da5e83a49f8579717bf92a6113b8de0d45a43c5b710d5bb067f2baa21659cf8)
+    ├─ emit Anchored(hash: 0x3da5e83a49f8579717bf92a6113b8de0d45a43c5b710d5bb067f2baa21659cf8, sender: 0x9807A0E06411A63a02b0756801cdBD5fD7FaF645, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xeb9b35311ce44cea848c415d0832c55d1ec0955e425a577577ecc505a38d7628: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x30165ae62dd98a75d02dcd97858679685a23f235731a621b4d6c5a5c3f962925)
+    ├─ emit Anchored(hash: 0x30165ae62dd98a75d02dcd97858679685a23f235731a621b4d6c5a5c3f962925, sender: 0x74161550d002DF287AbC39198894d6A885321296, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd83a9695cf2d940fb24708d1226f7669d5d40b6f452e0ca2d4fa09fb6d35a715: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000000b9)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000000b9, sender: 0x7109709ecFA91A80626Ff3989D68f67f5b1Dd12E, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3992491d0536d94062aad80f95ec43a4dcd28bab9efffb32d0ccec38ce243967: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf2850653098af8a63d8b8b3eb1cf39876cc75ec55fecdb50d86aa0360b31e557)
+    ├─ emit Anchored(hash: 0xf2850653098af8a63d8b8b3eb1cf39876cc75ec55fecdb50d86aa0360b31e557, sender: 0x00000000000000000000000000000000000004a6, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x9b62f3c6ce2b22abf21f57a932a4ea73e347f6121c4fe5469c7758897000c1e3: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf72e30a1881734e3e1ae5cfb62bf1c5fab7705336d9d68447fabc99cc86ee3f0)
+    ├─ emit Anchored(hash: 0xf72e30a1881734e3e1ae5cfb62bf1c5fab7705336d9d68447fabc99cc86ee3f0, sender: 0x00000000000000000000006f7265642074696D64, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4253967f97ffb4d7273040f44cf39f25d75e145caf51585fca4c3e184ca6fcdd: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000001dc)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000001dc, sender: 0xDFdD18b3a866dF75D8D0466a04C39A699E15583A, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb33fd55908acaf4aa0a171e7ee7398f02c97a886a0fd41a76e8253bc3552c349: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x383495b73bede195a7b3dedfd6403fb79e47b32457cc006d4adb73cf25accf6a)
+    ├─ emit Anchored(hash: 0x383495b73bede195a7b3dedfd6403fb79e47b32457cc006d4adb73cf25accf6a, sender: 0xd2bC78ff2C832D8A0E1c368aD3c3cb9847Bbca85, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1839bf6aaba768308ff143de594787f8bfa588e2c8fb1fbbf9743ea48b71fc7c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000007ef)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000007ef, sender: 0x00000000000000000000000000000000000000D2, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x63513224b6a7e9af063c25b0b3fdf0d434de7fb9b670feeaed93f73b03147a45: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x729b48f53219fc1ffddcb7dd4bd32d1338f5b9fd676dcdefc50c890ededd7957)
+    ├─ emit Anchored(hash: 0x729b48f53219fc1ffddcb7dd4bd32d1338f5b9fd676dcdefc50c890ededd7957, sender: 0x0000000000000000000000000000000000000019, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xae589c3f4ed312e5746e02c7ffbce8984f4fd11aba60ed02a2bd8f9bc481daaa: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000000fa)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000000fa, sender: 0x0000000000000000000000000000000000000c32, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa98a32f7a59f3f6bcbed1c4f043d749c3e80bb1dd0bed953d203c3da51c5271c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xd9577d09895468f8dfe5c9878b11573b7f975ce302760516dfdc8a2f412f74b9)
+    ├─ emit Anchored(hash: 0xd9577d09895468f8dfe5c9878b11573b7f975ce302760516dfdc8a2f412f74b9, sender: 0x4476375460f6b1ABb4C31cff3ceE57BbC0fc6Fd1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xcb774389e1768f852d1bfaf2a0f658390b5ac95d7df035ceb9d236555cd1b00e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000007109709ecfa91a80626ff3989d68f67f5b1dd12d)
+    ├─ emit Anchored(hash: 0x0000000000000000000000007109709ecfa91a80626ff3989d68f67f5b1dd12d, sender: 0x0608e8b08F625B407FBD85195fD3dD6FCec1c149, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8a9cd87eea258802f4d0958a95ea017f329af1ff1a82b77631468b5ca28529e2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000212)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000212, sender: 0x2c27Ba9d469b0aF4B6e83242526bB72Ab8f23C9B, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x67c47ca55f98ed03787ab1d716f8e1af69349dd210d289221bc503edfe455468: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9490885d1a5f59b856a24132718ca1f09bb83221bf152cea602fdf4284ffe6d3)
+    ├─ emit Anchored(hash: 0x9490885d1a5f59b856a24132718ca1f09bb83221bf152cea602fdf4284ffe6d3, sender: 0x594787F8bfa588e2C8fB1fbBf9743EA48B71FC7C, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa957e33769619f187d2c2d200784aa9f3a33b68168c50a60e8749207dd3df8d5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000000e4)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000000e4, sender: 0x0000000000000000000000000000000000000ACc, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf9088989bec992d4b345f9cf3b6c87c214da535c23c03b9453857c00745af36e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000001d4)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000001d4, sender: 0xfCB1eD48CC77a3868703473A8D47df4877ceAcF4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdbacf0626d1d814fd5d504189e5d5800cfd88bcf349ba6ba602b922e791aad56: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000ee9)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000ee9, sender: 0xc18fE04331423035a1eeEF13FBAc945e1066CA80, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xcf58e021bb90de64b7cdeef56831288ad4b31d85d018fc9bc06db02a5b70a1fa: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4c3b9c3dc2df8d8e63a47df2abc01c625336f65c365d9aeb8bbb8bfbd66bd235)
+    ├─ emit Anchored(hash: 0x4c3b9c3dc2df8d8e63a47df2abc01c625336f65c365d9aeb8bbb8bfbd66bd235, sender: 0x218A5EF43106166aA509E83E1bD497A29cDe22b6, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4a39b6f05866b6b97f9b28fe2ff1af32d37dfb4ca0e2e272477b29f655798c52: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x13ba65295b6957414d14820342b9daf16ea9211a9b4d80b3bb03e1a8af1963e4)
+    ├─ emit Anchored(hash: 0x13ba65295b6957414d14820342b9daf16ea9211a9b4d80b3bb03e1a8af1963e4, sender: 0x0000000000000000000000000000000000000525, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdeb411ed422d4b178ac9b557106b3f1c9f6d2bd0e20577db8e092508091acd40: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6973416e63686f7265642829206761733a000000000000000000000000000000)
+    ├─ emit Anchored(hash: 0x6973416e63686f7265642829206761733a000000000000000000000000000000, sender: 0x183fC76Ca4E6A8fa69192cD7D9fAE2D87C72b7a2, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdfcb06064ec6d079475dbb8a73687eb2436021c5f3dcb4e0820e26ef6e8bda32: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf2f4e81a5e1debaed29a201635016820f491e7ecdfeece448cc997384fba5f7e)
+    ├─ emit Anchored(hash: 0xf2f4e81a5e1debaed29a201635016820f491e7ecdfeece448cc997384fba5f7e, sender: 0x056Be5F6d4E7648c4afD812adF9AFAbd26D30b5d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x64f51b82a84b19b581af0a27ceff012cd1116792b6c0213cd6dc9654cee251a2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8367d48a1abb42fb32d5e48b6f280030e78b64da3993b376c0f8afe4a6179b2c)
+    ├─ emit Anchored(hash: 0x8367d48a1abb42fb32d5e48b6f280030e78b64da3993b376c0f8afe4a6179b2c, sender: 0x3b6c87C214DA535C23c03B9453857c00745Af36e, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf93d8686c10d8e3b6989f00d4597175d720d99005e9dcfcfbd336d2b39112327: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9b62f3c6ce2b22abf21f57a932a4ea73e347f6121c4fe5469c7758897000c1e3)
+    ├─ emit Anchored(hash: 0x9b62f3c6ce2b22abf21f57a932a4ea73e347f6121c4fe5469c7758897000c1e3, sender: 0x0000000000000000000000000000000000000448, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x198d8d7dec230524ab0efd1d2d4aacbece64e986f8f1978ac4cd4e4c57cd0be6: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000916a17c7)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000916a17c7, sender: 0xa849ca82e80051AD5fCE7C60b6F66AF4049Fe4f3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd0ab297d0fb024ea669007e6891d369b45ce778df93ea9a642a1eae1fd3d4acb: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x53cacdfa402b4ce128fff94f472d340298d4449e01bd39edfd72261c8e26a11a)
+    ├─ emit Anchored(hash: 0x53cacdfa402b4ce128fff94f472d340298d4449e01bd39edfd72261c8e26a11a, sender: 0x264C30115fFEa593a86BFB67C8e7DEd00bf75D1F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x978feaa954793b9ab2db968c17e31e8f303ec32607cf3dd0ca1ac0821c0aad9b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc7b27073f32dfbe777e67e592e0dd2747d56f1f2ea1c30e7b209338b16185fa7)
+    ├─ emit Anchored(hash: 0xc7b27073f32dfbe777e67e592e0dd2747d56f1f2ea1c30e7b209338b16185fa7, sender: 0xA6923bbD98F2aEceBea559221dd12D6078Ba1e9d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb973238d79eb6a043782d36f54165d6a08cf17a9765e2a06d9b31278c7e3853d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4df7496df4f97154bf8afe700712627b23b85fb4a6e15262d7a13612e591474a)
+    ├─ emit Anchored(hash: 0x4df7496df4f97154bf8afe700712627b23b85fb4a6e15262d7a13612e591474a, sender: 0xb891FF810384193b73c4d076b2ae661bA0B321a5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x640a47c0a44aa9f3d63e28911cd60aeb84180bfe92b6440842145f05e3e7877d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000001d)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000001d, sender: 0x15deb798Bb3E4dfA0139dfa1B3d433cc23b72f00, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb84e4298f3a6292774b798b43a202ce92291460f19fe80ed2d2d7e8e4674dcba: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xbedd14fa92e73f696b878d2449add982f715b7f9db3b29021a1d3eb6e2d75558)
+    ├─ emit Anchored(hash: 0xbedd14fa92e73f696b878d2449add982f715b7f9db3b29021a1d3eb6e2d75558, sender: 0x0386F67c788d9AD5419652886f2cc1E0ed134C0C, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe55792a0d61d531591868cd43567f222635c529756443380bdf6677ac9566c1d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000dad)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000dad, sender: 0x00000000000000000000000000000000000000A1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd500c9923a177566732b20fc24c226431fb9ecb78b6552485cdbd8050f85f9b5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa4cab2b7fd8ee6872d1107fd4d2e54f2ebf1b3be3e0671345a1a0c38c0ef3c77)
+    ├─ emit Anchored(hash: 0xa4cab2b7fd8ee6872d1107fd4d2e54f2ebf1b3be3e0671345a1a0c38c0ef3c77, sender: 0x000000000000000000000000000000000000082b, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdfa6e4d2d9b1669f3622a5c7494560441996318115f9db077d2453c944f01f41: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8c48ee5e7e4d28fda1df5e2420866d69ef3865e9480b9b6eaddf1bbd60a5d793)
+    ├─ emit Anchored(hash: 0x8c48ee5e7e4d28fda1df5e2420866d69ef3865e9480b9b6eaddf1bbd60a5d793, sender: 0x0000000000000000000000000000000000000238, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xeaa6b5e5605f91b35d79c1abc8263b4e702dfe7172910897707793da2020d1ec: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000001124)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000001124, sender: 0x7362Fa570A6077D0C17B5644ec010b4F3c341599, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3f574bf06fb42470f45c955ac2d35785971b554f631438aef25d60fb83067452: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xba6b1be86b7b41b1ea9ff6d8d5f3890d29561ed406c61459d06106382a0fbde7)
+    ├─ emit Anchored(hash: 0xba6b1be86b7b41b1ea9ff6d8d5f3890d29561ed406c61459d06106382a0fbde7, sender: 0x0000000000000000000000000000000000000a0f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2f491f78c4fed4321ab4040cab4071883706360e749f97e3f5f51cc31a4a56ae: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa5f6443c16248dea6086aeca03adf0218e84bb4412f147a84b11b7b8a7eb7e5c)
+    ├─ emit Anchored(hash: 0xa5f6443c16248dea6086aeca03adf0218e84bb4412f147a84b11b7b8a7eb7e5c, sender: 0x000000000000000000000000000000000000012f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x37c940d080322a56f0f0abb4359466f277d0984ccc301e91b5d2ff3b5b6a53ba: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2d30e5ddf676645da1acc9c4f587017b5bd92becdaf4e4f403b006966f32f34f)
+    ├─ emit Anchored(hash: 0x2d30e5ddf676645da1acc9c4f587017b5bd92becdaf4e4f403b006966f32f34f, sender: 0x000000000000000000000000000000000000011D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x75f924b44b5d43abf5b38b2bd627e155723b22a2d4e2ec7ff4e7f57cbf8bb3b5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6340553110867fdf0b7c30033882807f7286725464d3ce246aecc64fe9db9879)
+    ├─ emit Anchored(hash: 0x6340553110867fdf0b7c30033882807f7286725464d3ce246aecc64fe9db9879, sender: 0x000000000000000000000000000000000000037F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6d92e99a87e9f553530e685fcfdd3bb59bbb666ac2ed86d4a0fe31f4494d7afd: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x655990fb30ee0389ead12bd8be6ab0dafebb2d93c8ccf6cf6c397bed1b03b37d)
+    ├─ emit Anchored(hash: 0x655990fb30ee0389ead12bd8be6ab0dafebb2d93c8ccf6cf6c397bed1b03b37d, sender: 0x74161550d002DF287AbC39198894d6A885321296, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x89659213769014b23a4bb4cce36b978c90e1acedd33a3aa9638c5f0601ddd2f6: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4917332f1113d48fde78ef226aa83bc050466f2b2e68bde0f9cd8d443af83c46)
+    ├─ emit Anchored(hash: 0x4917332f1113d48fde78ef226aa83bc050466f2b2e68bde0f9cd8d443af83c46, sender: 0xc7beE638B55f21276c11f80409b4a7ecBeA661b4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xaba9d85b8a95ea221c2fae2bcf14be4135ebe7208bd8572f738e70c07450a077: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000000b)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000000b, sender: 0x5a5a9Ae60FF4b8Cf0702561E882b088483b9C96D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x9115655cbcdb654012cf1b2f7e5dbf11c9ef14e152a19d5f8ea75a329092d5a6: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000218a5ef43106166aa509e83e1bd497a29cde22b6)
+    ├─ emit Anchored(hash: 0x000000000000000000000000218a5ef43106166aa509e83e1bd497a29cde22b6, sender: 0x00000000000000000000000000000000000004a7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x85e68e259cdd6dc0c03d68a88da7a428147b9becb0b3e4b0e568693ee6ccc4db: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2a8eb34540c4335fe11c650686c192411cb48369df289951679e83883b7fc440)
+    ├─ emit Anchored(hash: 0x2a8eb34540c4335fe11c650686c192411cb48369df289951679e83883b7fc440, sender: 0xa9892a8485b5e3451E5D04fc87852116b93dD03d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x32ca5420998c1ac9ffd0ca05d088f0cd2673e4c6cd32d76c8f5c012fd4d22789: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xfe4902c4dd1ca2e16f6917927be4668e44ae61b6e17b97da1af8e5341f414247)
+    ├─ emit Anchored(hash: 0xfe4902c4dd1ca2e16f6917927be4668e44ae61b6e17b97da1af8e5341f414247, sender: 0x74fdf1B9CA87f0A8268758CFc42B83a0aB8fE684, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd3b2a2f4c01fe2630cf4c31296eb467cff741c7c522e752d59443ae85066a592: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x19ade1fb45d9a1eb0a6d399c6772a3b81c6c9775d1bfb0f90e45134c6024729e)
+    ├─ emit Anchored(hash: 0x19ade1fb45d9a1eb0a6d399c6772a3b81c6c9775d1bfb0f90e45134c6024729e, sender: 0x00000000000000000000000000000000000004e1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xff9165bd18d0458c7233cf631d6db4ac97a5950d53831b49bc6afcc0e4b1c52f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x199adfef45fed59604e91b1d8bbd9ba046b96685f5de44def52e4dbcba3d13a0)
+    ├─ emit Anchored(hash: 0x199adfef45fed59604e91b1d8bbd9ba046b96685f5de44def52e4dbcba3d13a0, sender: 0x00000000000000000000000000000000000003F8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x25bf74a40184bdbed4b9d709ceb19e4e6db23cf0a5e58f2244f6eb4c2417b85f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000000f)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000000f, sender: 0xf6A6Ae632b7087fDC086835F452C673D74fE33b3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7536f03fc5db63ca945db399fd3b92bff9b5879a5c0d7d84d2973ef5c841ea06: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x36dff14065323d16792fa2276b390c0b25e5ff58dadcaf1437eb5bcb3ce5bd30)
+    ├─ emit Anchored(hash: 0x36dff14065323d16792fa2276b390c0b25e5ff58dadcaf1437eb5bcb3ce5bd30, sender: 0x00000000000000000000000000000000000000E3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf42d87fdd5cc2ae7a28121f83e72c33f39aba7002f22d0870b279db675f633bf: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4c2d374ad3904b65490235fb1f6cb34e8296fd47cbd6e9bd5a30b9fc0870fca0)
+    ├─ emit Anchored(hash: 0x4c2d374ad3904b65490235fb1f6cb34e8296fd47cbd6e9bd5a30b9fc0870fca0, sender: 0x0000000000000000000000000000000000000301, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2d1b246f1d634051737f087f1f67b270e9fecb995b9643b8f140f6313f61f542: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2af155aa0be57467a3ee7024233358c2f161c59655e55bb301760a4625562da6)
+    ├─ emit Anchored(hash: 0x2af155aa0be57467a3ee7024233358c2f161c59655e55bb301760a4625562da6, sender: 0xc2D35785971B554f631438aEF25D60Fb83067452, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe2e684525163d105c90acb9a154c00784c975b55b9168a931bec3c7e18eb2b98: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x69e963392cc3d6ad7e472ff0315dcebcb14d08a343e3412889b4be77ecfb7767)
+    ├─ emit Anchored(hash: 0x69e963392cc3d6ad7e472ff0315dcebcb14d08a343e3412889b4be77ecfb7767, sender: 0x000000000000000000000000000000000000101B, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5d0bdb2cb2036ccc50492230860d2af07b1bb832ed7383739b8b2675f7641480: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xca3ed530ca4bbbec037b7e469962b5d8756416b8a4ac384e8777d5390beba834)
+    ├─ emit Anchored(hash: 0xca3ed530ca4bbbec037b7e469962b5d8756416b8a4ac384e8777d5390beba834, sender: 0x0000000000000000000000000000000000000330, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xfe0b1ac7474d6d9cd4e456c78086ab7a5c1eaf26bfc8d376cb0afb68e72123c2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa4545118f260e40bc9cdfe596cd1fe043122d22582feb71a4491dd8ded47376e)
+    ├─ emit Anchored(hash: 0xa4545118f260e40bc9cdfe596cd1fe043122d22582feb71a4491dd8ded47376e, sender: 0xf412E425420d5282969246859de883Ef2fD03cdB, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe6f5b8a8702ca321dec4ab6db3f4628b9cee495988d879f172c844a120a0c345: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xaddeb1c99c4a94d520b5792590c976658b86694dc15d2af8231522ccfaf7b015)
+    ├─ emit Anchored(hash: 0xaddeb1c99c4a94d520b5792590c976658b86694dc15d2af8231522ccfaf7b015, sender: 0xe1CAA0E765fE9eA204d38326F949e364A89f08Aa, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0928436cd8dab9958c65931bd0e6f4f6d744cfea462140dc6f03451596163c31: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xccb554b11105d16fedf89e33fcbd3a52c7a4e852ce6d8d24451e3677c252b77f)
+    ├─ emit Anchored(hash: 0xccb554b11105d16fedf89e33fcbd3a52c7a4e852ce6d8d24451e3677c252b77f, sender: 0x2BC68602Dc6DA7D2478577133d5172C56bD123F4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xda945ea6e7b9cebdacd954acd298451dda4ef8d0b9799e4b396407b99800c451: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000003)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000003, sender: 0x000000000000000000000000000000000000001D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x101e368776582e57ab3d116ffe2517c0a585cd5b23174b01e275c2d8329c3d83: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2a84e324ecaf1cc10caa272b26db268b8a8f9e3021ad6f870a46ff0d0ef484b8)
+    ├─ emit Anchored(hash: 0x2a84e324ecaf1cc10caa272b26db268b8a8f9e3021ad6f870a46ff0d0ef484b8, sender: 0x00000000000000000000000000000000000007ED, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x540c443b80c4b84a313326b28074d42ca686e2187da851487367aea7ae4ce8ef: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa66ba24b97868c81d674ce9986d4403f98ed2deda9c287cee60815ef608d56af)
+    ├─ emit Anchored(hash: 0xa66ba24b97868c81d674ce9986d4403f98ed2deda9c287cee60815ef608d56af, sender: 0x5241167Faf6850F53f0144fF8DA7d592179a1705, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x18cd0cc35353e7f8056e18b884d3efc7f50364de7f01a21c95c47d16ac39aed4: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x73db4f950c9ee363903397dbdb35e3e22a833fe046a55fe811cd048c8f5e2cf2)
+    ├─ emit Anchored(hash: 0x73db4f950c9ee363903397dbdb35e3e22a833fe046a55fe811cd048c8f5e2cf2, sender: 0xc2ff0679Ad11D85bDBC647f00882EE2175a6637D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xbf1594cd25fa4c24d73d528b72b7606a7f4e8389b6ddf1037ce6b12338b71bde: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x3cb4251617718b20dbef05c9de5f7c06b054a1d24d0d007c75903402fe72e5ef)
+    ├─ emit Anchored(hash: 0x3cb4251617718b20dbef05c9de5f7c06b054a1d24d0d007c75903402fe72e5ef, sender: 0x0000000000000000000000000000000000000DB0, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x33cf0214d2a88f8a5e30d4f859c6f71557b220e0968a1fe18f51b09a3fd39188: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x1e00aae23b626164e297e6a4e326aac5cbf7cf5b5714288d283ab10d2cee88ae)
+    ├─ emit Anchored(hash: 0x1e00aae23b626164e297e6a4e326aac5cbf7cf5b5714288d283ab10d2cee88ae, sender: 0xe561f993Df4a9ce5e3A5151e5d36C725fE16278C, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe3d54b261ce6429320307cca51b2ef939aa9e7cfd45529e7204a10e58eb118a1: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x3b75641c98ecf0b89673c51239eb2165bce052ad9e55068c2ba23c3baf1bc081)
+    ├─ emit Anchored(hash: 0x3b75641c98ecf0b89673c51239eb2165bce052ad9e55068c2ba23c3baf1bc081, sender: 0x0000000000000000000000000000000000000fca, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5f965eb127f71b4e70b52a991e9366075b7192c9b31c3f49e94cae70fc4df5ad: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x47518a865b5ab2ae704ca1b346535c89605fbc5f5c5f2d07aa2c88284aeaf36f)
+    ├─ emit Anchored(hash: 0x47518a865b5ab2ae704ca1b346535c89605fbc5f5c5f2d07aa2c88284aeaf36f, sender: 0x000000000000000000000000000000000000064e, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0f782c79a44f1c32251d2b99fda64058ee7ae5269f4b64a3028fed34a3ce83ea: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe77ea0fe9f4a24067877bf6e0df793eb034fa8439522c9d5945294b86202ad4f)
+    ├─ emit Anchored(hash: 0xe77ea0fe9f4a24067877bf6e0df793eb034fa8439522c9d5945294b86202ad4f, sender: 0x8Bbd9Ba046b96685F5de44dEF52E4dBCba3D13A0, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xfc21cf13c1054ff10251a5e7f755911b05bfda08640670ab34aa9bbf91c84620: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6293a441a69a18e998fd9df7f1769c5a87956fb768666c6b908a3c37c5d23233)
+    ├─ emit Anchored(hash: 0x6293a441a69a18e998fd9df7f1769c5a87956fb768666c6b908a3c37c5d23233, sender: 0x0000000000000000000000000000000000000748, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc4b8645fe0ed11126744bd5bc5fe3e7b7be6acc38867a16465e3a6f7d5f67006: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000100000000)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000100000000, sender: 0x000000000000000000000000000000000000013b, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3899af0860961dd971c7bbf9e2178ba68d9ce848a05258101c2da99667c62241: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe4bf91ca7d91dd59d15b264db64f9d536fa273cd0489744c78b1ec2d34a40c80)
+    ├─ emit Anchored(hash: 0xe4bf91ca7d91dd59d15b264db64f9d536fa273cd0489744c78b1ec2d34a40c80, sender: 0x62BAFDFff45042736328d83E2a16f0Be09D9B011, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x9077fc3ea604b2a5d839b1c03e28b86b669b59bbdbfbeb771315cc1c4133efbd: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe0b3d86bcd5fbedf5b053297741ba658451cbc93b778caddbb692d9deed651cf)
+    ├─ emit Anchored(hash: 0xe0b3d86bcd5fbedf5b053297741ba658451cbc93b778caddbb692d9deed651cf, sender: 0x3d25899CDA5ba660C75B16D75068Da73d9De6C7e, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf3acefdac2ea4440d4d59a95aeaac6464fddcd52851390265effcb7832274ffb: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000009591a610)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000009591a610, sender: 0x0000000000000000000000000000000000000bBA, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc904abc8a9829d67f33d9fa8f6bc283be7d4a82c6617860a365e8f85cdd7e759: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa9e66c5f73cd07fd3ba849d20c16da030bff794333dff68b2787e7891a8a6add)
+    ├─ emit Anchored(hash: 0xa9e66c5f73cd07fd3ba849d20c16da030bff794333dff68b2787e7891a8a6add, sender: 0x66F0E4200dc3780F1585dcA8ada4AAA0E0906AC4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x72dc870b47aeb1b9a64980d750871a96599207d035c5e161789f13752e83a248: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xeb9b35311ce44cea848c415d0832c55d1ec0955e425a577577ecc505a38d7628)
+    ├─ emit Anchored(hash: 0xeb9b35311ce44cea848c415d0832c55d1ec0955e425a577577ecc505a38d7628, sender: 0x183fC76Ca4E6A8fa69192cD7D9fAE2D87C72b7a2, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x72e6f5fa91b3529dcb30736cf6843b9c02a4bd6116e01537960cc1c0d8c6aa87: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x09794922e673e8b7ef97ed5f8af410a74c22bab1e08e3f3780427ef7375c29cf)
+    ├─ emit Anchored(hash: 0x09794922e673e8b7ef97ed5f8af410a74c22bab1e08e3f3780427ef7375c29cf, sender: 0xB3c74264C32fCc58480eB443BB80535eCa822EdA, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x943ec93c8cdf0c13f0b419fe0ad11d201147cf75ab1ec2c703850fed68a9d879: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xff63ec0dde3d4284842a5175cedc772cd0f40752afa6b0248fc2cd7ed76209bd)
+    ├─ emit Anchored(hash: 0xff63ec0dde3d4284842a5175cedc772cd0f40752afa6b0248fc2cd7ed76209bd, sender: 0x15DEB798bB3E4dFa0139DFA1B3D433cC23B72f01, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x11d979a07f5be8cdd9371bfef2917fb26f1ef65241c5b924442083fcfe7f941f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000004a7)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000004a7, sender: 0xcCD4c1120FA4301187171103FCE5d6c871EF3235, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc12ee03e42ece4e7f14c7d1446de2f6843ca9c5383708932c3c71b09e4eab171: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf7f203fc655c1f63a4e3e3996007cd44799ac0f84583f2527a0fe4e09214c830)
+    ├─ emit Anchored(hash: 0xf7f203fc655c1f63a4e3e3996007cd44799ac0f84583f2527a0fe4e09214c830, sender: 0x0000000000000000000000000000000000000FB6, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x313ee64212d5436e23cb0c871ddf3707db6b63e6fce64246cd4aebb5a4e07e00: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x046cd407a187a945cd51fe947eb0625f11f0eaac453a746bec51c3937744c9a3)
+    ├─ emit Anchored(hash: 0x046cd407a187a945cd51fe947eb0625f11f0eaac453a746bec51c3937744c9a3, sender: 0x000000000000000000000000000000000000013b, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x435b4bf528c11d6ada053ca354070f05a6b0d95190256ec3bbc3a57561ca7d2e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000101a)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000101a, sender: 0xcc08dE847fC20d677206edf6EB78aA168CD0aca2, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5ca6576078cdcc162c33610e6890b876804e6fb3bea1d21676e24e0a81cea98c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000010b9)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000010b9, sender: 0x8D0B598122C9a8a885Ff6b1e9CE33c6952cF4B0D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8b573861d1046ee778670d1b5d8c012e1a9fca59525dbd60d641386008dc61e4: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8c629160682e2edebaebc375907f589d4c65c597c3ac33b1a9363a711a2c0006)
+    ├─ emit Anchored(hash: 0x8c629160682e2edebaebc375907f589d4c65c597c3ac33b1a9363a711a2c0006, sender: 0x0000000000000000000000000000000000001000, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xfe682106ac2ad0728069e9a96f7c4717519576ff619cc8489003b210a12d3b4e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000009d6)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000009d6, sender: 0xF1769c5a87956fB768666c6b908a3C37c5d23233, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x73e377b977cb0d5ef5a1ee4b658e80264ceb3826e43b5dd3f7a00a7e0068dbee: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000e76)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000e76, sender: 0x54070F05A6b0d95190256ec3bBc3A57561Ca7d2e, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3fa9d90a1daad1e128ead0ae16bdbb992c4e5c063b3e290ee322352ee7f65e9d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0bb4809edf3ed7a673dc49f28c750bb32667d0324f90c03ef9ec0678783d5cf8)
+    ├─ emit Anchored(hash: 0x0bb4809edf3ed7a673dc49f28c750bb32667d0324f90c03ef9ec0678783d5cf8, sender: 0x000000000000000000000000000000000000055D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4aed0bd0ad36d365634bd63f831b685548a7b094a69d737db0e758eb27323bad: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x44735ff5d3da94dd031803dfe1e3b152f0e61221915f0aa9623427dbe760170d)
+    ├─ emit Anchored(hash: 0x44735ff5d3da94dd031803dfe1e3b152f0e61221915f0aa9623427dbe760170d, sender: 0x8BDAE08b9C63B9caBF0576daDA1Ab2BE2eCBF963, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x510c6585612f814e61949805f7a466c4b61461dadc3bac012b226a3f06f649db: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000015deb798bb3e4dfa0139dfa1b3d433cc23b72f00)
+    ├─ emit Anchored(hash: 0x00000000000000000000000015deb798bb3e4dfa0139dfa1b3d433cc23b72f00, sender: 0xCb3FE7C59D3F68d8FAa5e5AB915f18a0D5F0167D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x27389fbfb08c65ea7c9ba265c9a2b8d4b6c9362ef03c47191ce69727e7cae37a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000109)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000109, sender: 0x000000000000000000000000000000009591a610, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5a24cb71b7ea1f7f827bb5b6f6bbf10b34892562dd63fa25026b676c6e9fbca2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xcb5b02bf19c157b28db5d0510ded007697b051a90e9d073476be1d342df911ed)
+    ├─ emit Anchored(hash: 0xcb5b02bf19c157b28db5d0510ded007697b051a90e9d073476be1d342df911ed, sender: 0x00000000000000000000000000000000000001eb, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x998d8c3e6313aff8945dac2d2dd5509a20089b043236c07c4023a5f5edbd815f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8fb74ce1bed7be5bc27d737d65b47dd144c2db5e22b36b54025e2752f269a1d6)
+    ├─ emit Anchored(hash: 0x8fb74ce1bed7be5bc27d737d65b47dd144c2db5e22b36b54025e2752f269a1d6, sender: 0x4ff57094C4205434068Bb9c61e28fddDD3dCA843, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa40be17983766266731ae6b931a008ed57c3355746ac2cfaf2f3e1efac1192c8: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc624b66cc0138b8fabc209247f72d758e1cf3343756d543badbf24212bed8c16)
+    ├─ emit Anchored(hash: 0xc624b66cc0138b8fabc209247f72d758e1cf3343756d543badbf24212bed8c16, sender: 0xd4007Bf3d89996Fbed3DBff1D51695DB78b3C75c, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7afb0f889ef08e7d605ea2267a82e5cefef85101bdd259260e4c807d9baaf287: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xbaab324756b711f574531bc3afe58e2d6c56707047d31e8c26c719b0941fdc10)
+    ├─ emit Anchored(hash: 0xbaab324756b711f574531bc3afe58e2d6c56707047d31e8c26c719b0941fdc10, sender: 0xa8830f1e4558eb789Ab218cb8126dfA5B0d5Aa9E, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8fb88b4fbb2186a20edaff6fc004c57454d7a493fe9576b665d19585cec91dcb: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8c9e5b0dde9c38b360325f0a6693c60b7fa1f7d395368a83143ad59aa917ee65)
+    ├─ emit Anchored(hash: 0x8c9e5b0dde9c38b360325f0a6693c60b7fa1f7d395368a83143ad59aa917ee65, sender: 0x000000000000000000000000000000000000090C, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x40a577b19648fd04ea10f19986d8855296e387c01e2089858196442139e7dd86: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x7a7c35af41ea91005783b20e4093983950ea6d2b5777d6021984bdafe230cef8)
+    ├─ emit Anchored(hash: 0x7a7c35af41ea91005783b20e4093983950ea6d2b5777d6021984bdafe230cef8, sender: 0x00000000000000000000000000000000000000e1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x50a61083a8d85919c1b00cf94795165d5f05ac0d8e384fb6bc54824c45925681: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x69f17053bb996d66cee355737e0319fd3bca88fb2c041d1fbc1115d0a1c84560)
+    ├─ emit Anchored(hash: 0x69f17053bb996d66cee355737e0319fd3bca88fb2c041d1fbc1115d0a1c84560, sender: 0x1939F1E53A75e2e93cE85868562F19C150485316, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x87df9f6ca42137e5083b238776403bc0542362291c6df24b2dbd01a082e09636: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x422001b4c9796d5a09ab696e341d3c17f6d97615a8c1c41bd9dd4d601a0e997c)
+    ├─ emit Anchored(hash: 0x422001b4c9796d5a09ab696e341d3c17f6d97615a8c1c41bd9dd4d601a0e997c, sender: 0xd2bC78ff2C832D8A0E1c368aD3c3cb9847Bbca85, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb53fe4b4ca5f60017ac82c494bfd8bdaf1f8a65c3dce663a5168f559cb39a9df: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa98a32f7a59f3f6bcbed1c4f043d749c3e80bb1dd0bed953d203c3da51c5271c)
+    ├─ emit Anchored(hash: 0xa98a32f7a59f3f6bcbed1c4f043d749c3e80bb1dd0bed953d203c3da51c5271c, sender: 0x00000000000000000000000000000000000010bF, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf9a89701af5501983b6dd28df0ae7317242a74fb9031487a5773249c6ac4ddb0: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000001132)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000001132, sender: 0xe2898E82AbFe04c9120006D62b56f27F929Bf680, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x12b8e7fa93f72f84e6412d9b061992a85d33db0e7584075563fdd2b2ee830356: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x91a4a8af5594de4c5560a4979318f129d04d0bb1b59efd6ddc11ebff67735b1a)
+    ├─ emit Anchored(hash: 0x91a4a8af5594de4c5560a4979318f129d04d0bb1b59efd6ddc11ebff67735b1a, sender: 0x784ce8cb629dE285D73C403Acb61352e92430deE, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8b2cc5f7b32fb74916b418e89b210ede29aac2fa945f7b331a70452642d281bd: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xcd4b9d9eb19a2d211743d8f088ee865fa0ec90e670d5f76af51d95f050b8da62)
+    ├─ emit Anchored(hash: 0xcd4b9d9eb19a2d211743d8f088ee865fa0ec90e670d5f76af51d95f050b8da62, sender: 0x00000000000000000000000000000000000000A7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x03bfa19a2ff6735d07ec020805108cafda3137f664006d5d19a866e7e1fe2d3c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xff358fae335dfded0de03f3f0a1a80de8f78602add6b0227b455f4775d494a78)
+    ├─ emit Anchored(hash: 0xff358fae335dfded0de03f3f0a1a80de8f78602add6b0227b455f4775d494a78, sender: 0x6007cD44799AC0F84583F2527a0fE4e09214c830, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x9ebd76eb7e9e1fe940d457d4852fc55d5f5e868defa77633c0969b0321eed502: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000004e487b71)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000004e487b71, sender: 0xD6Fc0b1B361A3eD9e766606DE764c93d633167c1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc68a6d4b97e036af6640a25bb017f4ee515d5b471b2d94d45f4f9a8406f6837b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa4dd5018dafb045e0983119436f3aae2cd31a9607761f43bf37bca7246334969)
+    ├─ emit Anchored(hash: 0xa4dd5018dafb045e0983119436f3aae2cd31a9607761f43bf37bca7246334969, sender: 0xcbCD037525182Be2Fe5AE5673Af5134EB544CE3f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf1a913fec19b7b5fbdcf9d078de4b439b96624bdc91a2602dac1f4e023b98615: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8e4319e7b3691650ef567f9f50d6d33e0271db1bb61573dc0ffd073c60aec270)
+    ├─ emit Anchored(hash: 0x8e4319e7b3691650ef567f9f50d6d33e0271db1bb61573dc0ffd073c60aec270, sender: 0x0000000000000000000000000000000000000FCB, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x30908ae499a4c9c25ff275887c5edc602e69781fbe9ea1e1c29acb6679654d01: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe66bdbdf1ae65a6845c76ff106d6bbe964d350e58333ec2182ea9027ce19ad16)
+    ├─ emit Anchored(hash: 0xe66bdbdf1ae65a6845c76ff106d6bbe964d350e58333ec2182ea9027ce19ad16, sender: 0xf6bBF10B34892562dD63fA25026B676C6E9fBCA2, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf3b1e9d7d6e35e314d29378a6c31e77e9c0d48017d0c4969f8bfe2fde9266350: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xdb0d673a322827cba64998452a74c45232d561f4c2e2f4b9c8c76d058f0fab0b)
+    ├─ emit Anchored(hash: 0xdb0d673a322827cba64998452a74c45232d561f4c2e2f4b9c8c76d058f0fab0b, sender: 0x00000000000000000000000000000000000010F9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb554586b9266d78a1faff408b71677911914bb13b5fe19ebb5db535bd029e89c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9730736af1ce669822578ab8c4d3d0d18bf98ed82d70424406395ffef5f3b6a0)
+    ├─ emit Anchored(hash: 0x9730736af1ce669822578ab8c4d3d0d18bf98ed82d70424406395ffef5f3b6a0, sender: 0x5FB09eDe6Ee9D178b9132388129D6B40644d946c, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1089a9fdd6e2c17db6df2cae080f7c29ee49837c1be08bd5b8f2c06c04145838: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xcdb43cc9c971685c750b51e13dfc823c616be9dab58cec0d43f8e9ebe3825965)
+    ├─ emit Anchored(hash: 0xcdb43cc9c971685c750b51e13dfc823c616be9dab58cec0d43f8e9ebe3825965, sender: 0x00000000000000000000000000000000000000fc, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4e7c237b6ff4a8cf38c4fd4e6bd366bc52502171cf6b9e4db4fbfa19679deb49: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000061e)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000061e, sender: 0xe53d99Ab94134Ba682e3D28159D39Eeea99156Ad, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6e7a891a5c9ac62199ae6c08eda727a01c3e1b01b3d3ce035924b48657a7b52f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc2ff85b20fe13a345877f349296bb65aae9e93446c43a88fd834c422fb523a30)
+    ├─ emit Anchored(hash: 0xc2ff85b20fe13a345877f349296bb65aae9e93446c43a88fd834c422fb523a30, sender: 0x0000000000000000000000000000000000000b29, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x571afb1ea2be1405d11aedac5271d5d26abf543be8d39affad69082fd00d8c12: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4cb130fccc301f62152970ab9e184f571b1e57bf7236d8b2455a7490d6af08f6)
+    ├─ emit Anchored(hash: 0x4cb130fccc301f62152970ab9e184f571b1e57bf7236d8b2455a7490d6af08f6, sender: 0xF2917Fb26F1EF65241c5b924442083fcfe7f941f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8af8153c9b3def3092c8a00dcfe6e5c343d5d4736f0b9a6d2e7ec4f6a9cfc3c2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5db0139bdd44c01a9f9ce6db63145d62e1738cc23a9e47219798f3c1cb9d50e2)
+    ├─ emit Anchored(hash: 0x5db0139bdd44c01a9f9ce6db63145d62e1738cc23a9e47219798f3c1cb9d50e2, sender: 0x00000000000000000000000000000000000009eE, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1f98d9746a2055da7917b4b9325f3ec6895e66b9c7373d5bdb399c4476d46756: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe3d54b261ce6429320307cca51b2ef939aa9e7cfd45529e7204a10e58eb118a1)
+    ├─ emit Anchored(hash: 0xe3d54b261ce6429320307cca51b2ef939aa9e7cfd45529e7204a10e58eb118a1, sender: 0x7818DE5c5b76464293fdAAec580aBEab33C10066, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x05d93af72c245b4fb2f49e3929820579e9edfcc35f627467a5dae36cf9f7a990: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc2c7d01519eb28120d03bf0f51a18859b5db4145f1ce526e88fa7ef441577c31)
+    ├─ emit Anchored(hash: 0xc2c7d01519eb28120d03bf0f51a18859b5db4145f1ce526e88fa7ef441577c31, sender: 0xD2f0dd842b01E1A1e3db198De6677100290dD016, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf87db3ce21f06829adbc4c90ba1ba6a734aef53f2edb84a07e5a86430f3126d1: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xaac1eaab028e7e1b6a594621eb318b288f129561423739bae5a003f243502013)
+    ├─ emit Anchored(hash: 0xaac1eaab028e7e1b6a594621eb318b288f129561423739bae5a003f243502013, sender: 0x58929eE182B482585359f652Ae987F8c28c88cb6, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1d6bf928046923849fb1be59fd6783efa41476024cb10a0a2c588c554d2a057d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x25ecd480a48bc0d919e225de3d371cf1ac130a1ddaed49a9ee865ffe2ba4b338)
+    ├─ emit Anchored(hash: 0x25ecd480a48bc0d919e225de3d371cf1ac130a1ddaed49a9ee865ffe2ba4b338, sender: 0x000000000000000000000000000000000000101C, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd8d8022599605db2ba9af628902f35c79e0669b4b8e09e490f914fdfbdf71d41: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa902a5c599ea05e25262bad432839a6db87b1629a81f74f4185b12dab55f7fda)
+    ├─ emit Anchored(hash: 0xa902a5c599ea05e25262bad432839a6db87b1629a81f74f4185b12dab55f7fda, sender: 0x31a008Ed57C3355746Ac2cFaf2F3E1EfAc1192c8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x238ad3dc2ef206945b3530342ef3b1bd21736197a439f11ec85926155ac821a5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000085226c80)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000085226c80, sender: 0x000000000000000000000000000000000000069d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x57faa9feb2efe96d6047deb07c702a13a126cf11f93fab9fc5883b70530fbf22: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x114870c7f3ed7698484b06abeae51bee877ca12e532b2029930c01136b3fda99)
+    ├─ emit Anchored(hash: 0x114870c7f3ed7698484b06abeae51bee877ca12e532b2029930c01136b3fda99, sender: 0xC004C57454d7A493Fe9576B665d19585CEc91dcb, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x281a1400d4e98855289d589f497c2c713a4cdee9aef6bf883d2ae77a667dc3d1: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000023)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000023, sender: 0x0000000000000000000000000000000000000032, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2a400e8b310fbd326e4c5c4aed5c8212a6b2bd98d80dbef0077b1b2ee20907d4: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x30ffe7435a3c85e67821e71a51a64fdfbb4d831ffc145bb78e61ae78c340376e)
+    ├─ emit Anchored(hash: 0x30ffe7435a3c85e67821e71a51a64fdfbb4d831ffc145bb78e61ae78c340376e, sender: 0x1ec84145F12eFD17F6eAe5FCFfCb06cE03C528E5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4d41cc891d46423f686c57255289ac13a6332ba0618eef911b6a7837372a17c5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4658c7b9a9b3d1c3276e5265c173a6a3d351ae15c8c1c8b716122e0155c0e78a)
+    ├─ emit Anchored(hash: 0x4658c7b9a9b3d1c3276e5265c173a6a3d351ae15c8c1c8b716122e0155c0e78a, sender: 0x000000000000000000000000000000000000070b, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5b295b2baa9bc13db82f3630563eccb3f7e87223ae7e1cec2c4008a8f1f1e28f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2bbc3ce9fe5442503a8091b4db5927ba03bbc38bd6b99698da935926a5e523b6)
+    ├─ emit Anchored(hash: 0x2bbc3ce9fe5442503a8091b4db5927ba03bbc38bd6b99698da935926a5e523b6, sender: 0x0b61e48f27Cd9c338CD527cC9ae1f0E3208386E5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0a6c9176aaf40bfb1fe0f404f92693d0c33239cea5e19e0fcd6adb11f610dd19: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x96ff209eef60e7bc3e25d3850d45bc216fb07a530f5db140e7cc30f943b72a67)
+    ├─ emit Anchored(hash: 0x96ff209eef60e7bc3e25d3850d45bc216fb07a530f5db140e7cc30f943b72a67, sender: 0x8c46430A351F0c0A119333b8b6000dE584717783, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x77e0dac4a9b26a2a06142433d672f75579fd3db69c7ea22089a7a025dff4b1ce: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000c18fe04331423035a1eeef13fbac945e1066ca80)
+    ├─ emit Anchored(hash: 0x000000000000000000000000c18fe04331423035a1eeef13fbac945e1066ca80, sender: 0xeAEf18A937C496476D1d61d5F40aDc1F32620eD9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4d8afa756f051d61474507a40b4934a223b018a6c429e56f83e0197d3886b097: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000007973bac39d7d9444f4c523536b5ec44564d53e14)
+    ├─ emit Anchored(hash: 0x0000000000000000000000007973bac39d7d9444f4c523536b5ec44564d53e14, sender: 0xc2eF5AA77f2728F39650117C2760035EEe0e6F8D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xeebafeb9d67ff6b9dda22d00f991333a3888c18cf0a04f61fda8710551a5f913: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xebe7cdd0346147f0dd82f6149f3cfe59c0ec9919cc3f5d13e3349943bb00e7d6)
+    ├─ emit Anchored(hash: 0xebe7cdd0346147f0dd82f6149f3cfe59c0ec9919cc3f5d13e3349943bb00e7d6, sender: 0x000000000045a666D7244B64736f6c6343000819, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0731c69e02cc45adae50b195df8cb5594755aeda389de9b7e7c307174510e85f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xcf7544c618dd2fd7a986fd13a31c04a50e46073f619770e02848425b8d17962a)
+    ├─ emit Anchored(hash: 0xcf7544c618dd2fd7a986fd13a31c04a50e46073f619770e02848425b8d17962a, sender: 0x000000000000000000000000000000000000069d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xee4801c3c676276f382aaac17587a10393243fdbcbf426c8c06714674bf41440: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xadc2bbc54ddf23c4f9dba0ef0084b1e47f485fb71296fe4c989eb9baf79fa441)
+    ├─ emit Anchored(hash: 0xadc2bbc54ddf23c4f9dba0ef0084b1e47f485fb71296fe4c989eb9baf79fa441, sender: 0x00000000000000000000000000000000000001C1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4821a88948bbc3a1274b93d016718a4f1fc3a1973366c80f01e7d7f38ae04276: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa6349ea91248abeb8ab0fc4825d120ab115b5811bde91a4ac2b98435f185ad4d)
+    ├─ emit Anchored(hash: 0xa6349ea91248abeb8ab0fc4825d120ab115b5811bde91a4ac2b98435f185ad4d, sender: 0x34f5ECD8389Ae0432aF62DC132A24118292866ba, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x65d22f624adbcc8b21a0544104792e963c6057b420935590385bc866e65a4ba9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe63b47f2791ba0567f25fdd174e2c018e53fdd3218f1f51a71ca9653a67c2a7f)
+    ├─ emit Anchored(hash: 0xe63b47f2791ba0567f25fdd174e2c018e53fdd3218f1f51a71ca9653a67c2a7f, sender: 0x966Ad540727d0DEF3499190B4f6236B52a3D37C7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x9abeb14b997f373273414f21601035158df5300264f17177cf235c426d5529c2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5a24cb71b7ea1f7f827bb5b6f6bbf10b34892562dd63fa25026b676c6e9fbca2)
+    ├─ emit Anchored(hash: 0x5a24cb71b7ea1f7f827bb5b6f6bbf10b34892562dd63fa25026b676c6e9fbca2, sender: 0x32a4eA73e347F6121c4Fe5469c7758897000C1e3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xde5db64bea573bdb3a8e2c9bf60373be04b38adcb305de9a0274e96fe007af58: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x37efc46ca32b39d0fd0159f77f2b184e665f312e3d90a97a87f658c65e4aa3c6)
+    ├─ emit Anchored(hash: 0x37efc46ca32b39d0fd0159f77f2b184e665f312e3d90a97a87f658c65e4aa3c6, sender: 0xaF00C439f471717642Bcc1c5Ea4392Aac7EcA93F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x75aff929ca8a9986121b9f5a555d7281ee6a99523c576a96d6a74439c20a5d8f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x3142dd1ae9a8b889b4dfb40d6303e72329ce1b7eb23e9e8443b590077d62fccf)
+    ├─ emit Anchored(hash: 0x3142dd1ae9a8b889b4dfb40d6303e72329ce1b7eb23e9e8443b590077d62fccf, sender: 0x5271d5D26aBF543be8D39aFfAD69082fd00D8C12, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdf2940346ad3e20e55423f283057144309f6c0b3de1cb7518e53850489f4a8e7: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc2159e71e2ba52b7ab4cef2ebdcff475f4b4bedf9655344290c8153cff17a11b)
+    ├─ emit Anchored(hash: 0xc2159e71e2ba52b7ab4cef2ebdcff475f4b4bedf9655344290c8153cff17a11b, sender: 0x000000000000000000000000000000000000090D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x724f226a46acfbba507004fc6530ab40bda51d53cbe31856c80f5a1a1b2b20be: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000415)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000415, sender: 0x0000000000000000000000000000000000000145, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x52c7213db56e699c5684a81479a1d012f2943a014ea72cf7737b84bb24cd7107: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa330bfd6f7d95ed9e66df0bb6108f6a50549b458712d0130c9cb7f4a6f511955)
+    ├─ emit Anchored(hash: 0xa330bfd6f7d95ed9e66df0bb6108f6a50549b458712d0130c9cb7f4a6f511955, sender: 0x0000000000000000000000000000000000000f22, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe77cd7e193d9a2cfa7b87f4af43a4958303fbb336d9dc7f1f9d49a465b57cba9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x09393fedf6bc91744316f76699f37db37f390f7fd37d1ce271eec423107898b8)
+    ├─ emit Anchored(hash: 0x09393fedf6bc91744316f76699f37db37f390f7fd37d1ce271eec423107898b8, sender: 0xdE5F7c06B054A1D24D0d007C75903402Fe72e5Ef, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7fbdf4fe5113e946d1baaaae1beea7fe3226e22fb0e4448782f5a59654e522d7: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8ebe62b92534f92b33e314bd08fc31dc016197f419968963bc1cbe77146ac946)
+    ├─ emit Anchored(hash: 0x8ebe62b92534f92b33e314bd08fc31dc016197f419968963bc1cbe77146ac946, sender: 0xe33B164D1b41fe15275Aa1963Cb02bbA96f9D009, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa206c04304898534f935f7188c32e05edee23a6c6b09c49c936e0de3c3339828: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x020377d634a3307b3e716a79815f647641e62f74aa53efb44765b917e3065133)
+    ├─ emit Anchored(hash: 0x020377d634a3307b3e716a79815f647641e62f74aa53efb44765b917e3065133, sender: 0x71D33F071A13289B63Fec79800159A2ec5279796, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1c790b4bdba49388f84b60c02776729f05feaad23611b2f0690d4fda7ec8a2da: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000009d5)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000009d5, sender: 0x241d3855c0beeB272821B8F1E6F1AdE7a601140F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb5670ee42f29f0a5281a4fd6a882c25500ef27fedba32ba8182542501dab1eb1: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x77458ab84a36d14931dbc256888683fd299228ff57b1c1f63768dc3315e4e3a0)
+    ├─ emit Anchored(hash: 0x77458ab84a36d14931dbc256888683fd299228ff57b1c1f63768dc3315e4e3a0, sender: 0xE0887CEe05F5E62961f8542693aFb678c4197918, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa019f156063dc9b32921af38641d5f05f68085d563fa9ca649f092382206df3b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf87db3ce21f06829adbc4c90ba1ba6a734aef53f2edb84a07e5a86430f3126d1)
+    ├─ emit Anchored(hash: 0xf87db3ce21f06829adbc4c90ba1ba6a734aef53f2edb84a07e5a86430f3126d1, sender: 0x1d15827540C8702Ca628facA42b735bBDe18e61F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x22bd8fad831e81db1e050a4dac73f34d66cfb3a4312f9515412fad587b4880a9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x402426dd0c1b123880dd5d5208ad525c16a415ce82003676f3e124918fa0417e)
+    ├─ emit Anchored(hash: 0x402426dd0c1b123880dd5d5208ad525c16a415ce82003676f3e124918fa0417e, sender: 0x000000000000000000000000000000004F0B5800, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x50d481fc00a56cef052c0e0cebdf38d36c5bf1f7dbcf0f05f3126e7ad788453e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000010f2)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000010f2, sender: 0x2776729F05feAad23611B2f0690d4fDa7Ec8a2Da, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6e0fc12bd46ce175c12906c2b78cd1320436034ee988c14d02b8bf5c490327a9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x53bc71a223a85e6ab5af8e3e89ccf01042b120cb07adb17863b788f5dd78e66f)
+    ├─ emit Anchored(hash: 0x53bc71a223a85e6ab5af8e3e89ccf01042b120cb07adb17863b788f5dd78e66f, sender: 0xb850c745198C1f6De3EC5138e5D8e2F16583E454, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6c522277057602eac0b37ca232be266462d93617e10b2535719f9d5811cf6345: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000127)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000127, sender: 0x00000000000000000000000000000000000010F8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5e04fd047aa9239f86163e327dfe4994f72fc2d59a2010a198e6fd8687b4db07: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x808f3d9ac812a98c893f78c7efb96d67e459d607cb2de9e5efd07939480bb04e)
+    ├─ emit Anchored(hash: 0x808f3d9ac812a98c893f78c7efb96d67e459d607cb2de9e5efd07939480bb04e, sender: 0xeDa727a01c3e1B01B3D3CE035924B48657a7b52f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1a108d1b5de4662ebb5c584428109ea8b9bd3969751c045472933b0db88ad5d2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x25e92fa09a85c004d388d0f6914ab0ea381b5c070f832b4eeff8253d4cfb1d74)
+    ├─ emit Anchored(hash: 0x25e92fa09a85c004d388d0f6914ab0ea381b5c070f832b4eeff8253d4cfb1d74, sender: 0x74616D70206d757374206E65766572206368616E, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x740704d5a9743e27b9e5295291a99f549ef8c4b49ae965731145fdc1f623b5d0: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x21f11d2f7ebf68c370a4df856108824f5744e4c657ebdb64837a567552181263)
+    ├─ emit Anchored(hash: 0x21f11d2f7ebf68c370a4df856108824f5744e4c657ebdb64837a567552181263, sender: 0x0000000000000000000000000000000000000C05, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x23ce6352da682942042a6465603851218745eb074877bb231d474c3a859dff3f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe6b68d3effc2d7bd45d6c8563a050749fb5f66e921e59b9690932ac85fd4c1d7)
+    ├─ emit Anchored(hash: 0xe6b68d3effc2d7bd45d6c8563a050749fb5f66e921e59b9690932ac85fd4c1d7, sender: 0xA6923bbD98F2aEceBea559221dd12D6078Ba1e9d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb3b11121d3a720ca36bb42ee9a72629c9aae45b011b14dac17a4ade355bc0e24: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x931215ef44a304033f21204b7a38dee01f975b241efa3b8e1e3a8c189d985a38)
+    ├─ emit Anchored(hash: 0x931215ef44a304033f21204b7a38dee01f975b241efa3b8e1e3a8c189d985a38, sender: 0x0000000000000000000000000000000000000447, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0a03d2247804b5408587ac4010f8cefbfe87f26085eff2de0c39cf19b87b9d5e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc80c8ba5d1d03999e45c1089793546f9ba686d7dd92631fd1fa67806b6e3c53b)
+    ├─ emit Anchored(hash: 0xc80c8ba5d1d03999e45c1089793546f9ba686d7dd92631fd1fa67806b6e3c53b, sender: 0x0000000000000000000000000000000085226C80, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8fd1243fb8ebb0818bc7c2e8ada0d5a824d3df280e92d5d14586b8cca746aaed: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000fd9)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000fd9, sender: 0x000000000000000000000000000000000000092F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb8fadb487af847d8d77fdebd4f534e3ce6ffadbb265ecec75b7871460d535f2c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xabc50e424d4f93392fee73d362a9a797f9604da58b084942c695be3ec8fecf96)
+    ├─ emit Anchored(hash: 0xabc50e424d4f93392fee73d362a9a797f9604da58b084942c695be3ec8fecf96, sender: 0x0000000000000000000000000000000000000016, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8c591b7c72fed45ef2321773f156d099297f0ac752f1604af721ec5363cb04b8: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x685d890661c1288affd02b0968c06ada429be6a27c0eec33ce82dab1e0b1820e)
+    ├─ emit Anchored(hash: 0x685d890661c1288affd02b0968c06ada429be6a27c0eec33ce82dab1e0b1820e, sender: 0x0000000000000000000000000000000085226C80, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3b81c3ce6aca22f9c4ef7013137d2930cc5c21a4b447be7675b69a4d6be9762b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000007109709ecfa91a80626ff3989d68f67f5b1dd12e)
+    ├─ emit Anchored(hash: 0x0000000000000000000000007109709ecfa91a80626ff3989d68f67f5b1dd12e, sender: 0x0000000000000000000000000000000000000FB5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xfbff819ad4c4f51b031cfb62b0766b34431e1f91e02e54a0c95af77a5f74338a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xfb4b2c53e05dfb4c1c21a4586f90c335f86923e7f1932a46298397015b9d8725)
+    ├─ emit Anchored(hash: 0xfb4b2c53e05dfb4c1c21a4586f90c335f86923e7f1932a46298397015b9d8725, sender: 0x6C505dd696765808954E12CB1C837b3955748632, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4af05f4dd7f61fb6574789b1bc1dd99df943e86dc39cb9460ae9d665c655cf8e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000000d2)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000000d2, sender: 0x68c06Ada429bE6A27c0EeC33ce82DAB1e0b1820e, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc0d27dadfcf8ee0186a0f6fe9b5805a51e99869050491e4a3040efec012a214f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x1d9c7f9ba4e5abf2afebdf875de6001736802ff7b207cbbed42a5efbf5766867)
+    ├─ emit Anchored(hash: 0x1d9c7f9ba4e5abf2afebdf875de6001736802ff7b207cbbed42a5efbf5766867, sender: 0x7f72D758E1Cf3343756D543bAdbF24212beD8c16, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xfeb253e0e73001fd88475936dad6d0dba5fa086042ec4b21f2f741aa13f54ff3: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xeb6ca64faad5082460f5c5fd0ced063eb184cf1ab6d76f440cf6f27e950bd0ad)
+    ├─ emit Anchored(hash: 0xeb6ca64faad5082460f5c5fd0ced063eb184cf1ab6d76f440cf6f27e950bd0ad, sender: 0x141d80e2cB219368e822dC7c5c4005E73be2bff1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x88d47cc820df1f836cd26ab7b24e68df5987f1ab6d41efb570b9d6dd0bdde000: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xfc7b297340f850e830752c7f2d2d7f7c6f48d282784635e0335db7fa3400d7d7)
+    ├─ emit Anchored(hash: 0xfc7b297340f850e830752c7f2d2d7f7c6f48d282784635e0335db7fa3400d7d7, sender: 0x24620C1FB49Cbb316EB7dB1B2ebdE753D7432a1D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdf73450da8229bd00d02bc924ffd40cd2bb32e77912c4820fad9fb0c57e937cb: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf00369d1d5a49846a19c8501cba41126911a3bf1def48ff9d5d2344fce417d79)
+    ├─ emit Anchored(hash: 0xf00369d1d5a49846a19c8501cba41126911a3bf1def48ff9d5d2344fce417d79, sender: 0x5FB09eDe6Ee9D178b9132388129D6B40644d946c, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd3f3d2d8abe468abf051f16a3116fe1aeff91d34f08c7acb55c76e1aac62426c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2cb9e509b4cb56cb04ce64389039725b68b140ecfc779b503c78b368f31eb86e)
+    ├─ emit Anchored(hash: 0x2cb9e509b4cb56cb04ce64389039725b68b140ecfc779b503c78b368f31eb86e, sender: 0x00000000000000000000000000000000000010D4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf4b9b8facc8a2cbd30d86001f9752131c66efa913f5a807fa5cbd5b5f693c398: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x036a7f37451af5259437a7181abf61f1bdf3b23a8d23bacd71683097471b5f05)
+    ├─ emit Anchored(hash: 0x036a7f37451af5259437a7181abf61f1bdf3b23a8d23bacd71683097471b5f05, sender: 0xF43a4958303fBb336d9Dc7f1F9d49a465b57Cba9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7811d632bf13c37ae75c787e5e7801aa116c8d904ca96684106abbd8891e3cba: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000006a9)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000006a9, sender: 0x0000000000000000000000000000000000001143, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x57d1741231f929b92c0b63f4e15f5a71db10bbe08ce055a956faadffcc5d7f8e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe4815b0fe3cf43c15b84548b3f162cc50162cec995d6b857fa776ba5342f77f5)
+    ├─ emit Anchored(hash: 0xe4815b0fe3cf43c15b84548b3f162cc50162cec995d6b857fa776ba5342f77f5, sender: 0x3353356c29C05300fAbF5C5dDa6998580418eDd4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x34506535778ac976e6d92025e19d81a52a1d5a2ffee6f8f397894327341a5de4: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9b878091a19e27dc4435879fd0015b3617c3262c57bb182b9c5e567594de2559)
+    ├─ emit Anchored(hash: 0x9b878091a19e27dc4435879fd0015b3617c3262c57bb182b9c5e567594de2559, sender: 0x000000000000000000000000000000000000007a, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x965082c854d497a4f30c040a6b92d8ec145a0895bf0282538bc183d22af10612: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xd63eecad2951582500f8c47e175643e5e939afc9e267124b80035591b9ea3e2e)
+    ├─ emit Anchored(hash: 0xd63eecad2951582500f8c47e175643e5e939afc9e267124b80035591b9ea3e2e, sender: 0x000000000000000000000000000000000000021f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x49db47c8968fa8278d48cea88a6f348745537a50f93538759680b5387991cd47: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4a9f07d4866995ab5661f7220340a567dd9f435340fc9f28a07f2c274aec7ff5)
+    ├─ emit Anchored(hash: 0x4a9f07d4866995ab5661f7220340a567dd9f435340fc9f28a07f2c274aec7ff5, sender: 0x00000000000000000000000000000000b5508aa9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xedabc8c6329feb69a77adb88bf329fd1edada27c4068f2aa653c1ade2b002289: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xbfc349e30f3f984a006804593f293116ceefa15859c68d7cc7e04d93b2574abb)
+    ├─ emit Anchored(hash: 0xbfc349e30f3f984a006804593f293116ceefa15859c68d7cc7e04d93b2574abb, sender: 0x63D4F95f627E05A00Ca5444698df2A974A657f8d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5d2123405f5e59d358ef207f1727162231a780e64e0f6c0320b6c4029f1b4bb0: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4ff519b7cecec90cf383971cea84ba5ab4a79990670aaa8825210f1ad1a04cbc)
+    ├─ emit Anchored(hash: 0x4ff519b7cecec90cf383971cea84ba5ab4a79990670aaa8825210f1ad1a04cbc, sender: 0x3116fe1AEfF91D34f08C7AcB55c76E1Aac62426C, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0c2fd6ea8e06aadf7db3e8038dd8f3c0fa866a2ee87365792e5c7db4e71ea5ab: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4486204285482acf14e90dce9beb79952af8d175d2df67505aa50708a243c6d2)
+    ├─ emit Anchored(hash: 0x4486204285482acf14e90dce9beb79952af8d175d2df67505aa50708a243c6d2, sender: 0xd8F8969dd4F8c29EE6a5A000d6886C21563057ae, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdf42ba63db73a84123f775e8ab74328397beca5a14c4e1c4aed3447ef5615459: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2204a33cb7626488c1216a0ba3a260f52a5a649fbf647686fd4f6fb888e5e928)
+    ├─ emit Anchored(hash: 0x2204a33cb7626488c1216a0ba3a260f52a5a649fbf647686fd4f6fb888e5e928, sender: 0x000000000000000000000000000000000000015d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x683cefa2017ef6350467dcf0f41bfd86008836a23fe1e5fba8d270fdb77b0d40: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xddab8362be0e28845784e280045fe83575cec2ffd84a9ece082b8e88bd0cb0d4)
+    ├─ emit Anchored(hash: 0xddab8362be0e28845784e280045fe83575cec2ffd84a9ece082b8e88bd0cb0d4, sender: 0x0000000000000000000000000000000000000155, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x48aed76b01763b1b402c69998c805b709e90ea4623ce597ca07ad0fae2a1e214: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000061)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000061, sender: 0x2d6839C8bBa1b79be6A31Db0e270f12A2CdEBa04, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd376c0dc9e6a0a44867c5e1fefd6ecef82bbd522b0a13a792fef5100445ee323: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x15295860386d26cc27d4021188a01ac82a5268e3f00f641b7f7704eef303ee44)
+    ├─ emit Anchored(hash: 0x15295860386d26cc27d4021188a01ac82a5268e3f00f641b7f7704eef303ee44, sender: 0x0a1324019B916C4220dDEA0Bbf7Caf744a6d2AdB, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0e8e0f4f200e7468821c2e6d328bfb975a8fe29ae408ad568f079daa6f442bf3: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000102e)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000102e, sender: 0xEdE2b468f699Cab5221a99A654c14a5CeC18d01B, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa5297384f0b71c9eb39696cc02fdfd39a211897c5c09d1dbb274c98f515ee909: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000303)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000303, sender: 0x000000000000000000000000000000000667f9D6, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x402d3112cefb769d4cb419d633f0f346f675da21457936329b37c1145151c009: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xba1558616c1e4f5c4b91b18721be069e88c93a6e5a5540ce46ff88fee8feb19d)
+    ├─ emit Anchored(hash: 0xba1558616c1e4f5c4b91b18721be069e88c93a6e5a5540ce46ff88fee8feb19d, sender: 0x0E676B5191846Fb42A53259e3Cd88D841cbb0654, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4b3f6fb6c98c8d8ef47697515a511c2059f99b933c9ba68ca08d7800d13c0160: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6305ec829d7e08dcd90b4aa9ecb547ca4c34dbcf8f38313109d0e4cc07d0a924)
+    ├─ emit Anchored(hash: 0x6305ec829d7e08dcd90b4aa9ecb547ca4c34dbcf8f38313109d0e4cc07d0a924, sender: 0x00000000000000000000000000000000f1AE58D6, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3ed3c24506e406aa2c26958c9c8b53db8f952e6bb7e5805d5d4392602a941f0c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8f149c720c2f4826225114869ea949ab60389cdd3656b286ced3be67025daba9)
+    ├─ emit Anchored(hash: 0x8f149c720c2f4826225114869ea949ab60389cdd3656b286ced3be67025daba9, sender: 0xA12D06d33Bd7E7e330A43d7aCe0797f1a36EbcB8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3737a95aeea281a39bd2695b8e2edea245f712b3fc7888f40c4bcf936b186a91: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x1f99ca0d251405cec968351147cb7f4fe2f2bb838077dcdc97437749af0a670c)
+    ├─ emit Anchored(hash: 0x1f99ca0d251405cec968351147cb7f4fe2f2bb838077dcdc97437749af0a670c, sender: 0xD86f004801251325D3605bE67Ef4DF44A6decbD6, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xab629452ca41966509cc9b4d672fcb99d975cb3395567f8c1ea4dafc6ccaa495: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x382b494c330ff9d28988860c405d3de89107b7513b4bf71f50a2eb8a4d7e6c6c)
+    ├─ emit Anchored(hash: 0x382b494c330ff9d28988860c405d3de89107b7513b4bf71f50a2eb8a4d7e6c6c, sender: 0x000000000000000000000000000000000000102E, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2669a420f76e23dc2e7bbc74ebeb1471d84340789373854944244e2f6f27191a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x634034d3e6594e948c2732282ee9a814a407dad3231c3f30dd6f06cff45514c4)
+    ├─ emit Anchored(hash: 0x634034d3e6594e948c2732282ee9a814a407dad3231c3f30dd6f06cff45514c4, sender: 0x000000000000000000000000000000004F0b5801, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6423083ac752bb62db99b59c213522182ed750b09b22f2bbea15799dc7bf317e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc0d27dadfcf8ee0186a0f6fe9b5805a51e99869050491e4a3040efec012a214f)
+    ├─ emit Anchored(hash: 0xc0d27dadfcf8ee0186a0f6fe9b5805a51e99869050491e4a3040efec012a214f, sender: 0x4D712AFdcaaf2900a1326F4E6f340b563A0E8735, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x117a39419c824731fbc0bd51b6c1c425b2e4126c71935a0eb941d37be0c0346e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf4337ffba174aa163957bf8da102ac45a855b6eed8884e2a12245937f8b53bbf)
+    ├─ emit Anchored(hash: 0xf4337ffba174aa163957bf8da102ac45a855b6eed8884e2a12245937f8b53bbf, sender: 0xb744e966bdc2b82A803Ee447ebBabD190a575C29, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x381efa8221f78e9d0b3f31a5e7ccc4f98246abfe2920264ebbe0c671c459354f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x80ce29a4d9d1fbb4d92fea648ab809f26c1b3804ba4e7166d13fd0ce8ef9a50d)
+    ├─ emit Anchored(hash: 0x80ce29a4d9d1fbb4d92fea648ab809f26c1b3804ba4e7166d13fd0ce8ef9a50d, sender: 0x2ae5D7D8D84E2aa1A719570E2C70dD54cD5A99A6, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4604413f73080ee54a1b34aa8c7eb6bd0f5a53d5c2c14967f69b053f6b7eae8f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000008d0b598122c9a8a885ff6b1e9ce33c6952cf4b0d)
+    ├─ emit Anchored(hash: 0x0000000000000000000000008d0b598122c9a8a885ff6b1e9ce33c6952cf4b0d, sender: 0x0000000000000000000000000000000000000A86, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb9132cfbe8945d188cf6c487c2708b176e9c07db3b058fa1ccd9ff941d43585e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa5e4847982d5735a7b9b57baaa11cffacf6c5418631094e0185d3e12166cfcba)
+    ├─ emit Anchored(hash: 0xa5e4847982d5735a7b9b57baaa11cffacf6c5418631094e0185d3e12166cfcba, sender: 0x00000000000000000000000000000000000001A2, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8fb32115f0fcf932cd56d803dedd940b67b9edcf70614658e0942a037ca11312: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x7f0751ec0f341cc2b178c02c79ed70cb72c4a50a2a9fb7d956c7285921a4a6e8)
+    ├─ emit Anchored(hash: 0x7f0751ec0f341cc2b178c02c79ed70cb72c4a50a2a9fb7d956c7285921a4a6e8, sender: 0x9bF74Ceb9c40815E05D0461666120dC0c352b972, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdf703ece4667328b9fdb14739abfb6bc137e528f136befce6866fb81f02ec6a9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x70f958adf609e5e99572ed5b865d0269f9c4ae23590a35978e2dabd126a236fb)
+    ├─ emit Anchored(hash: 0x70f958adf609e5e99572ed5b865d0269f9c4ae23590a35978e2dabd126a236fb, sender: 0x3353356c29C05300fAbF5C5dDa6998580418eDd4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xeac6128822016f03d49be45d7ec8e492100fd42db23d721bb2ef3afb6749106b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x87e98c74952136dad74ed31f7550c18bc546d32f0b0cfb606e7c1caa14135c9d)
+    ├─ emit Anchored(hash: 0x87e98c74952136dad74ed31f7550c18bc546d32f0b0cfb606e7c1caa14135c9d, sender: 0xFace0a006cAd69ca9bfC3732Ab2f72453336969E, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8b3ad0df97cf181a51a4debdcbf644cbd89f1f2da56a76f651e8648e4b833727: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xda9c84369a6bc26591046cb3e47edba1e85e56eb4278c60f905aa52ff05ddb56)
+    ├─ emit Anchored(hash: 0xda9c84369a6bc26591046cb3e47edba1e85e56eb4278c60f905aa52ff05ddb56, sender: 0xc2eF5AA77f2728F39650117C2760035EEe0e6F8D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6fb9795cfe9b78aeb1976d2700299f408789b7496f3bd113319c581e86356ecc: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9c87f468c80a44439f690601c403bead176381f11ba60756c7035049ac18187b)
+    ├─ emit Anchored(hash: 0x9c87f468c80a44439f690601c403bead176381f11ba60756c7035049ac18187b, sender: 0xD72aCcB9695949e8e0e0482371719d97ef720f93, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x23a1fbcd1c18df76a7c3da076e548ed6ed3a0b095753f8bd79adfccc357d4292: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x10addd3a8a72df4e232151deaf40c610cf39416fc95f3c613d23c182a2ce4166)
+    ├─ emit Anchored(hash: 0x10addd3a8a72df4e232151deaf40c610cf39416fc95f3c613d23c182a2ce4166, sender: 0x0000000000000000000000000000000000001062, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc483917eb0dff4d1fcd6351a62c7d6965c69c965b8709536bb5c5c968fdf8ab3: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x01e00cd3bf3645162722f0dccc9d54a6be1dd70035cbaa8e95a4408a46e09c67)
+    ├─ emit Anchored(hash: 0x01e00cd3bf3645162722f0dccc9d54a6be1dd70035cbaa8e95a4408a46e09c67, sender: 0xDd4acD9be8d6E5aa9101B7627309020C7ef6a017, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa3c2014ee1ce1198074433863e4308ba1dbddf832c36405cfe3ba23303d0c530: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe0a95e175a3be0532f06c36dee27f8c1fa3e853f1cf2250022acbf1718ec57a3)
+    ├─ emit Anchored(hash: 0xe0a95e175a3be0532f06c36dee27f8c1fa3e853f1cf2250022acbf1718ec57a3, sender: 0x6F90c335F86923e7F1932A46298397015b9D8725, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1fedf0dc0d84a9a169ac6f40de2094de107bf74d6120f0c233a4aed517f328d9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000001)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000001, sender: 0x141d80e2cB219368e822dC7c5c4005E73be2bff1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xada5013122d395ba3c54772283fb069b10426056ef8ca54750cb9bb552a59e7d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x628b264fa75dcd74fc3bc78883059f36674f63d575895eccff7e450726b31221)
+    ├─ emit Anchored(hash: 0x628b264fa75dcd74fc3bc78883059f36674f63d575895eccff7e450726b31221, sender: 0x00000000000000000000000000000000E20c9f71, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x38e75f5b6d43cfa4b533d5c7c8e6b0078ca22e7d98b6f68dcb8986555098ba5c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x181c844bb2afe0101d6855f952c2b2b28016a8e2fdb8b1b6cb39ccb341602d86)
+    ├─ emit Anchored(hash: 0x181c844bb2afe0101d6855f952c2b2b28016a8e2fdb8b1b6cb39ccb341602d86, sender: 0x0000000000000000000000000000000000000d0c, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb968ff67c56f481050105262ffb2ca77cad38c89fcf0bd4325e775203c0facd0: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe0edadbc55688ddda6f3aa41407b7ff164c6a98f821689533952bd4963c44cd7)
+    ├─ emit Anchored(hash: 0xe0edadbc55688ddda6f3aa41407b7ff164c6a98f821689533952bd4963c44cd7, sender: 0x0000000000000000000000000000000000000126, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x296a52c3b062ea1f72477df4cdedb37c9c78bae41c4ba68927e3dde10016badb: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xd2f94722e93a1f081947a7afca81113468c3211ab542772143d6187eefabf675)
+    ├─ emit Anchored(hash: 0xd2f94722e93a1f081947a7afca81113468c3211ab542772143d6187eefabf675, sender: 0x0000000000000000000000000000000066d9A9A0, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa12994bfa121b0319159ac49914f5a827d5f8d530e3fae98cfa4ffa16b105926: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb9c77c9206195ffb203a02b8b3c500aa514fffad87aee32d785d528c59e496c5)
+    ├─ emit Anchored(hash: 0xb9c77c9206195ffb203a02b8b3c500aa514fffad87aee32d785d528c59e496c5, sender: 0x6007cD44799AC0F84583F2527a0fE4e09214c830, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x37f62e6716c552fa72bc34f294a174a1ae41d69a1f1bc4be804dfc6ebb8d8754: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000d84)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000d84, sender: 0x3A1BE2464CD4f0a5c410329395fC5303e1c9f006, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x83650636d5458d44853b1b5b44210b7f0ecbb175eeca29e58d367aa7e89161a2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x7d6a7915d9499abd00283720e884fac52730eab685da98a7c03dea78a7aab802)
+    ├─ emit Anchored(hash: 0x7d6a7915d9499abd00283720e884fac52730eab685da98a7c03dea78a7aab802, sender: 0x00000000000000000000000000000000000004E3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x772c499fd689d4018df122a01d0c729bf50fcc12cca474eef6537420f7995c2d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000004ff57094c4205434068bb9c61e28fdddd3dca843)
+    ├─ emit Anchored(hash: 0x0000000000000000000000004ff57094c4205434068bb9c61e28fdddd3dca843, sender: 0x000000000000000000000000000000000000064f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd535215885e42ff5da65af57e0b1079552607d93120d42fdc791a24e07f07eae: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5ef4075e54c854c64ddff7454bea3977b92b683aacefb7eefe9ab908db8ae890)
+    ├─ emit Anchored(hash: 0x5ef4075e54c854c64ddff7454bea3977b92b683aacefb7eefe9ab908db8ae890, sender: 0xE027C7218C35de9c798f653760B69BCA74EE30b3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x02761a903355a7187fc4d31b5dfd901d4f5eb822a19deb0521824524af7cc037: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb527aa975f523a5e72efaa810120f64734c9d6934d883999f4b351714ff8997a)
+    ├─ emit Anchored(hash: 0xb527aa975f523a5e72efaa810120f64734c9d6934d883999f4b351714ff8997a, sender: 0x315dceBcb14D08A343E3412889B4bE77eCFb7767, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb1f2cf9029aee8a280de2f2dc5ae43614e507e4f9fd28f605a4c90f63db2f7d4: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x29987030893de0b5f6243ac1f0817c198bd164591c60e7fcf63a4a2980c93b19)
+    ├─ emit Anchored(hash: 0x29987030893de0b5f6243ac1f0817c198bd164591c60e7fcf63a4a2980c93b19, sender: 0x00000000000000000000000000000000000003eC, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x88e7f8e8690b6d69c25f8a789d1ca11394abd0b50c66842a6ddc94eb84c2044d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6f8de6dddf51c2a494963481308c0e21ad991de8b5ebf4eab2018954f5180ff0)
+    ├─ emit Anchored(hash: 0x6f8de6dddf51c2a494963481308c0e21ad991de8b5ebf4eab2018954f5180ff0, sender: 0x0000000000000000000000000000000000000156, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa37c54833d61c2a34ebe0f02f328c47ca52feba57bed46b2c8320e908438abc5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x42644dc202e4c3ac7753b30210c01a63d640c6225635d491d1b974401bb16968)
+    ├─ emit Anchored(hash: 0x42644dc202e4c3ac7753b30210c01a63d640c6225635d491d1b974401bb16968, sender: 0x5fbE083340d83e40161dE964A2f6Fc2aC667635c, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7521457da386b72e9e2c10d5d4915c500946d3f1461297b71abf985616742b3c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9360481335629eb58464e7d6bee48dee0ed58338fcae59ff69196ee1270bdb05)
+    ├─ emit Anchored(hash: 0x9360481335629eb58464e7d6bee48dee0ed58338fcae59ff69196ee1270bdb05, sender: 0xe1CAA0E765fE9eA204d38326F949e364A89f08Aa, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x38dac242e3377aedfa6f375315a40e5b37fd63864d605976d79b5fbbd1c40398: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xbba438c0780f144b18cbee8987f4bcb7df0203d5604ecbf6d8c2540a438359b6)
+    ├─ emit Anchored(hash: 0xbba438c0780f144b18cbee8987f4bcb7df0203d5604ecbf6d8c2540a438359b6, sender: 0x8EC761F69f8C9979f331Aeb3a8b91EAAb324E592, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x61139a5857431b9625a2dc521a16070efd159f955b5ddf62a4ee67c1b8cb7b6b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9882d2740a1d7af5d241d77e465850e66dc408effa4beb9cebf5c9c0cda9420b)
+    ├─ emit Anchored(hash: 0x9882d2740a1d7af5d241d77e465850e66dc408effa4beb9cebf5c9c0cda9420b, sender: 0x00000000000000000000000000000000000000CF, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb8e6737902474b6f22286583c7edef2b1f98de09409308e547ee0446ff047e74: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x40990d27311169cb998d4ba6c794b4cd79b3a4bf1a742822ba8b99b5ce4516c8)
+    ├─ emit Anchored(hash: 0x40990d27311169cb998d4ba6c794b4cd79b3a4bf1a742822ba8b99b5ce4516c8, sender: 0x00000000000000000000000000000000000000b9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x49479e2ccffd0d3552410909c765cd243cfdb123638e4a94f76f48dd334443bd: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb3b11121d3a720ca36bb42ee9a72629c9aae45b011b14dac17a4ade355bc0e24)
+    ├─ emit Anchored(hash: 0xb3b11121d3a720ca36bb42ee9a72629c9aae45b011b14dac17a4ade355bc0e24, sender: 0xEEAe4a7023cDc5c477B91a786fe76e26bd90921a, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x254867befa5d80f03dbfda9547657b36de95266136de41e3a1d0df7c51327ddf: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf7a87bbafe13f84e464ffe438ebe2d16c500406873ca819c841e07d03400cad5)
+    ├─ emit Anchored(hash: 0xf7a87bbafe13f84e464ffe438ebe2d16c500406873ca819c841e07d03400cad5, sender: 0x0000000000000000000000000000000000000D84, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x437472494242216b6f1b2bbe1bd6e5959ed739f869564404f38323f8d2b15d44: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000039e)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000039e, sender: 0x68c06Ada429bE6A27c0EeC33ce82DAB1e0b1820e, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x32285b8da2baa83da776890db92caae528162db8634c7883464c366c0fe81389: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x3f7399b81dc8e6b4eeae71a9fe07212497dd82b653255f7d677f67db1c8d8530)
+    ├─ emit Anchored(hash: 0x3f7399b81dc8e6b4eeae71a9fe07212497dd82b653255f7d677f67db1c8d8530, sender: 0x860d2Af07b1BB832ed7383739B8b2675F7641480, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xeb1a175f2379c34471c25d70f32dece913b7072e45215cf6613727673b033b60: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000e2898e82abfe04c9120006d62b56f27f929bf680)
+    ├─ emit Anchored(hash: 0x000000000000000000000000e2898e82abfe04c9120006d62b56f27f929bf680, sender: 0x00000000000000000000000000000000000010F8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5e71a54f7410125e9261e563807096c8ab3c98d15aeeb1b71f1320f5efd5a309: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xd8917ef869e1e3af473dfd8b7dc27b2bde5fdd29036f0531fecce9c5333db5c7)
+    ├─ emit Anchored(hash: 0xd8917ef869e1e3af473dfd8b7dc27b2bde5fdd29036f0531fecce9c5333db5c7, sender: 0xfffFFFfFFfFFfFffFffFffFffffFFfFFFfffFFE1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe01565ad0d9fc7e8603f4c63507a991d32cbcfddd123dbe1471a41eccf61ebaf: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00a6cea0968e365473e695afaabf912bf17d76b19b760863473744a3fc8c30d6)
+    ├─ emit Anchored(hash: 0x00a6cea0968e365473e695afaabf912bf17d76b19b760863473744a3fc8c30d6, sender: 0x0000000000000000000000000000000000000996, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4fe435ca38c7b8630fd1a3b90da4a867922de4a2f9738b665192ae61717ecc07: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xff676b1d5aa25e409f427667ec0de4f7ea50750e018c1a9dd0b40640b86cf6cb)
+    ├─ emit Anchored(hash: 0xff676b1d5aa25e409f427667ec0de4f7ea50750e018c1a9dd0b40640b86cf6cb, sender: 0x3062590d80D264bb8f4fB69c98d28580D76A3083, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x688a16b4a713c0fcc5d39badabd93ed7da498b91b1afaed116b1745308037071: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xfafff49b4579ac444f7a661ee17f8d78c06fd96411c678f33f6080990d88e4b0)
+    ├─ emit Anchored(hash: 0xfafff49b4579ac444f7a661ee17f8d78c06fd96411c678f33f6080990d88e4b0, sender: 0x0000000000000000000000000000000000000548, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe4461c49ce52b812158cd1a3a9ea1b86ce543c6d5faedd8084fec5bb63fc0e77: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb973238d79eb6a043782d36f54165d6a08cf17a9765e2a06d9b31278c7e3853d)
+    ├─ emit Anchored(hash: 0xb973238d79eb6a043782d36f54165d6a08cf17a9765e2a06d9b31278c7e3853d, sender: 0x00000000000000000000000000000000000001DC, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf4b457bf59f0faadde87775faf79103304feb44ce4a9dbc9e62a77acde3f6648: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb3166d271e62d40b6a39bb38782b753ac8ce7874ba39c2103d644423a58be9cb)
+    ├─ emit Anchored(hash: 0xb3166d271e62d40b6a39bb38782b753ac8ce7874ba39c2103d644423a58be9cb, sender: 0xf932Adf671f23eC773F61b51E314722931f7470c, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x93b3a11e2315045221742ef27977fb3d263a9bc1326af5d11abac26cf846e35a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc35914e9cf4ed9a5ede976bb2750352028c3a63157847d70f6e790c72ce9f11d)
+    ├─ emit Anchored(hash: 0xc35914e9cf4ed9a5ede976bb2750352028c3a63157847d70f6e790c72ce9f11d, sender: 0x3d371cf1aC130A1dDaED49a9EE865fFE2Ba4B338, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2aeb0ff09e718ddccb933a39da5d64388c7e8bb77b00b101c6d835e4a62b3a83: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xeebafeb9d67ff6b9dda22d00f991333a3888c18cf0a04f61fda8710551a5f913)
+    ├─ emit Anchored(hash: 0xeebafeb9d67ff6b9dda22d00f991333a3888c18cf0a04f61fda8710551a5f913, sender: 0x0340A567Dd9F435340fC9F28A07F2c274aec7FF5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x81d443f297d6b4b7c66e74b02f9537fa71002b221d782315f7f68f7a4e856d3e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc75bde76e9cb8e60814081d56f2105850886ee34e30dfd7dbf5c03c71dc01d5d)
+    ├─ emit Anchored(hash: 0xc75bde76e9cb8e60814081d56f2105850886ee34e30dfd7dbf5c03c71dc01d5d, sender: 0x000000000000000000000000000000000000015c, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd885b686fa72bdf744e19e4917d48e18018ee4f5ef53122b2142f3791def3ce2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xff1c1b5de518cb7c5da620541f591b3a5a328b9d9c954921a7f9839c910df76f)
+    ├─ emit Anchored(hash: 0xff1c1b5de518cb7c5da620541f591b3a5a328b9d9c954921a7f9839c910df76f, sender: 0x0000000000000000000000000000000000000aA3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5024e29a054cb1a9d2e4e8df0dc1d2e4c0077fba84afdde9d2ba8237592dd15c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa9bafd1a0fa6fa9eabbb1f966948b5a9bf23063317cd521f09b06abb9f679ed9)
+    ├─ emit Anchored(hash: 0xa9bafd1a0fa6fa9eabbb1f966948b5a9bf23063317cd521f09b06abb9f679ed9, sender: 0x0000000000000000000000000000000000000D41, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7c9fa8fd705c2cec5ba29a170041eb5d38da79e1fbd907516a1e564451ba4291: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb8557729009b8ba1fd247c22d8786026cd2027599e95f6b4a0966b2f8b7cc4e6)
+    ├─ emit Anchored(hash: 0xb8557729009b8ba1fd247c22d8786026cd2027599e95f6b4a0966b2f8b7cc4e6, sender: 0x0000000000000000000000000000000000000e16, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0bba419025905faa89b9815ba0a6cf1bb1a772ba53ac8a5dcfe04a9b15169694: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xdd759be76156771904e2f8a75e96b52ed2cebb577964dff0eeaf48c8cb0116d0)
+    ├─ emit Anchored(hash: 0xdd759be76156771904e2f8a75e96b52ed2cebb577964dff0eeaf48c8cb0116d0, sender: 0x0E3a21bb10CFDd9819A358c29a8c3Be29A2a3B10, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x9c5517493f9a84bdbe0ec659199c6fab16cf1951b46e69cc5807b1c8f4851bd4: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xbe1aa70e7c41b0f7b2965edfa23de4ddecbbed2e934840c0f0191daad7250717)
+    ├─ emit Anchored(hash: 0xbe1aa70e7c41b0f7b2965edfa23de4ddecbbed2e934840c0f0191daad7250717, sender: 0x2fC20dD499ab9EFa8B58Fb359407906047bc6d10, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8835a38d8d0e00ec2f66273ab907304a086f6d8833e90bc0e7a48f81751d7f4b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000128)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000128, sender: 0x000000000000000000000000000000003F7286F4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe6fde59f9de8bdd319c5efff6ce3ce87221da86d1b0ff6024fe5f593b5d593a5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000126)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000126, sender: 0x0000000000000000000000000000000000000b54, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x30e4952366ba5bc1e37d39c50483364536a8418874dff15dd463c26b2b8590af: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc9162d98708b6702e7fa8440185b74f85678d18dbbe1dc5a85ffd73ddebaec42)
+    ├─ emit Anchored(hash: 0xc9162d98708b6702e7fa8440185b74f85678d18dbbe1dc5a85ffd73ddebaec42, sender: 0x00000000000000000000000000000000000007F9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb663e920b9de0980e42ef6af5faaec9561fce4a30c837a3b4b381b97b2fff289: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x112b65c796689a85856903fa3619158f0db75776ef0eded6ff81befa6e4272f6)
+    ├─ emit Anchored(hash: 0x112b65c796689a85856903fa3619158f0db75776ef0eded6ff81befa6e4272f6, sender: 0xFE29249e8F0b54c2974D2Ab1cd8C682e5f4a7fDA, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x42ed50fcf250b39265db02a24a71b0547ca0fcaecea572822164193b8901dbc3: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x74009cca0088599ab51ea9cf55d1f435aef716c05c780bb709fd1f7063c2c0f0)
+    ├─ emit Anchored(hash: 0x74009cca0088599ab51ea9cf55d1f435aef716c05c780bb709fd1f7063c2c0f0, sender: 0x0dcFEdf167280095C31BFa3CF34E4F29582e3daD, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc7ada8a255949150fc1aa2243dc05af9204b51dc1a98ca18c4f5361a419f0dbf: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb852f7189e05a65914d7550a1136798c93297669a20ad8bd1002b71c5fe1b193)
+    ├─ emit Anchored(hash: 0xb852f7189e05a65914d7550a1136798c93297669a20ad8bd1002b71c5fe1b193, sender: 0x00000000000000000000006f7265642074696D64, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7e1dbf85e6e1bbe3940e58e29d707c7ffe897ce0e888c67375b0aa5eafbf82c9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xceb11522b0b03cc888b9fe6bdbd0cea0dab5a1df785bf916ea4b1583dc4fa4c4)
+    ├─ emit Anchored(hash: 0xceb11522b0b03cc888b9fe6bdbd0cea0dab5a1df785bf916ea4b1583dc4fa4c4, sender: 0x0000000000000000000000000000000030D23813, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x968be2a37255825bfc6dcf32843e35393c6c0ced8807068107b12aff550cd0ee: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xfe99d76567cd91efdfe8215442ffdad5b1d08d17b160d520d9c908175acbcafc)
+    ├─ emit Anchored(hash: 0xfe99d76567cd91efdfe8215442ffdad5b1d08d17b160d520d9c908175acbcafc, sender: 0x241d3855c0beeB272821B8F1E6F1AdE7a601140F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc1b97f68f63ce83a2cafbfb310060fd0a801c99d1dd8ac10dfae03627bef6f0f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000b850c745198c1f6de3ec5138e5d8e2f16583e454)
+    ├─ emit Anchored(hash: 0x000000000000000000000000b850c745198c1f6de3ec5138e5d8e2f16583e454, sender: 0x0000000000000000000000000000000000000447, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x644efb5657ac65b5d37c9fbe295e49918e17161673cf0bee788948d1b5c2a36a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xd2771e9f75194d3768999eb1a4c51dff6763a2624ae5ba8f3bc61c9b12c30504)
+    ├─ emit Anchored(hash: 0xd2771e9f75194d3768999eb1a4c51dff6763a2624ae5ba8f3bc61c9b12c30504, sender: 0x154C00784c975b55B9168a931BEC3c7e18EB2B98, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2660cbedf22c59e6f1e566db88453999f07faea4eb694468a3d4929c3b63b9d2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x982e2dd49ecaec2b1e916f1f744e3dd5738892c8f5f42559d0cbe0fc8e1f7c3a)
+    ├─ emit Anchored(hash: 0x982e2dd49ecaec2b1e916f1f744e3dd5738892c8f5f42559d0cbe0fc8e1f7c3a, sender: 0xe60C93b00f1eD042624baF49939A9b6F814C57ce, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xbb440a03147bd4688143e562a4700b96b0e2b8851889e77a0b3436fa4d3abe9a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf36141cd46de924dc3d083deb786c0802d5bdc71b4da083db582cb2414cf7728)
+    ├─ emit Anchored(hash: 0xf36141cd46de924dc3d083deb786c0802d5bdc71b4da083db582cb2414cf7728, sender: 0x00000000000000000000000000000000f1AE58D5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb2ca1f5a04fa2190a08c07db05e84b841b01d78ad4cf1fe997fd400b9e3250d5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc138721b742cac579248321a59bbd12e62a8d608cf66e34d7e2bd1ebcceac179)
+    ├─ emit Anchored(hash: 0xc138721b742cac579248321a59bbd12e62a8d608cf66e34d7e2bd1ebcceac179, sender: 0x00000000000000000000000000000000000001Da, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2ef84880e690cffabb6390b6faa53513fd8051f8046937bd6964d58cb7504502: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x27dae63101db15960c60fda1deabf5a0e8f130b86b2100ff135654a2f9f7bdee)
+    ├─ emit Anchored(hash: 0x27dae63101db15960c60fda1deabf5a0e8f130b86b2100ff135654a2f9f7bdee, sender: 0x00000000000000000000000000000000000010a8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5a2c3cc846267ddd331fafb4edfe16e8ae8aebef8dc58f1cdb24830b26fe6053: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x15435dbb7e51a8ec32523e2f1a9a902f83ffa42669b61d51fc1f891829a999e5)
+    ├─ emit Anchored(hash: 0x15435dbb7e51a8ec32523e2f1a9a902f83ffa42669b61d51fc1f891829a999e5, sender: 0x0000000000000000000000000000000000000086, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x99373fc73dda487ffd45a72278964a508ff602dfa3c020a3003b8f4d7a314c26: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf653b3d658a46cd07efc7810da85c07cea291e08d6cab991c2154ecaee31331f)
+    ├─ emit Anchored(hash: 0xf653b3d658a46cd07efc7810da85c07cea291e08d6cab991c2154ecaee31331f, sender: 0x456766D686d2ebb2Ba83B952430C5083f823381c, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xbf9933f38a14fd1935bc5e60e1fd150c850dc315cf18eed27029aad27fb3bbf6: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x87f37d54ae29ae16a3dc3a604c8d70e0e0f8064ec4d13e417ecfb2cf401347b0)
+    ├─ emit Anchored(hash: 0x87f37d54ae29ae16a3dc3a604c8d70e0e0f8064ec4d13e417ecfb2cf401347b0, sender: 0x8D8DB5A84e5780Da8e796F09b04adb466f86B0AD, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf08491d6280d5e19749e19d1c9346bb14a99fc32190bf1a1e81f4b3227fe4cc9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000d0d)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000d0d, sender: 0x6cE3Ce87221dA86D1b0fF6024fE5f593B5d593a5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd37b74f21cd8ad5ffc1f9cc15eb8977c5c31bcb0a0e037e4fc1450dc6fbce78a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000aca)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000aca, sender: 0x00000000000000000000000000000000000000A7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe2933d3d1dd94b22fc81d6daa0429fe3cfcd695d7b62867bd25c858115481683: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x7fbdf4fe5113e946d1baaaae1beea7fe3226e22fb0e4448782f5a59654e522d7)
+    ├─ emit Anchored(hash: 0x7fbdf4fe5113e946d1baaaae1beea7fe3226e22fb0e4448782f5a59654e522d7, sender: 0xA6601442942Efa5D7C0431B276C0124E1f35F404, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5ba50ae9af102ff91709bb60c67f243db4d0be3450bab97b91cf7f1101725562: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xffc1cf4488c6c31c14ab0b87bbb13fd51a15aa348af6e2456407cc50aebaecfe)
+    ├─ emit Anchored(hash: 0xffc1cf4488c6c31c14ab0b87bbb13fd51a15aa348af6e2456407cc50aebaecfe, sender: 0x00000000000000000000000000000000Ba414fA7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xbc2eceebf5b35c7da2c6bc27680c24dea45d44dadb900a008af0631a0797e83e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb3faaeca770e97a5be43b7ea08741d5fe3380b756b0eeacf8079370d041e833e)
+    ├─ emit Anchored(hash: 0xb3faaeca770e97a5be43b7ea08741d5fe3380b756b0eeacf8079370d041e833e, sender: 0xB907304a086f6d8833e90Bc0e7a48f81751D7f4b, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7c267a4a15fc65c6122f594273de6096bb2e8f21ffbada3906b71c6105c25118: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000f53)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000f53, sender: 0xCe0e888bB2EABfdF1A6d813625b11Da3c9e95bF0, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x93f0464bdd391d46fff36fe54f718608889b1a1f3218bac6d6fe2f16177b6168: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xba1becd3b6e22f12783deec03c830965758dd5beecaf6549af1c1a30c7c39fa6)
+    ├─ emit Anchored(hash: 0xba1becd3b6e22f12783deec03c830965758dd5beecaf6549af1c1a30c7c39fa6, sender: 0x88596e648B8Ca8F22683C74A85abd5dC40108EeD, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x13b18d179c50eb81e12962f0e3bd44920e0b9b27a72394e995996506ac1fce07: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc8da3c1bef78760709c86b49072d7ef5163fa4cd705aa7985334ad7ff94ba735)
+    ├─ emit Anchored(hash: 0xc8da3c1bef78760709c86b49072d7ef5163fa4cd705aa7985334ad7ff94ba735, sender: 0x000000000000000000000000000000004F0b5801, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6ba540d5f44b91ee290f99223899721110a6d920db4788a1a2e6afe1fab9ffee: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6e0fc12bd46ce175c12906c2b78cd1320436034ee988c14d02b8bf5c490327a9)
+    ├─ emit Anchored(hash: 0x6e0fc12bd46ce175c12906c2b78cd1320436034ee988c14d02b8bf5c490327a9, sender: 0x0000000000000000000000000000000000000782, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x99f338bd9692ec86ce9e8b1db2482f4914959ae66f2bf255dcaa58e4c7a11520: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5269918c42c8d523df69fb9e889d6a953dbd03ac33b08a2ab7f020567a16492a)
+    ├─ emit Anchored(hash: 0x5269918c42c8d523df69fb9e889d6a953dbd03ac33b08a2ab7f020567a16492a, sender: 0x00000000000000000000000000000000000001eb, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4c86292ff2c63a95c793e2c6d5602cb75b37f4bac0803f54e5193bdbff16ee9f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xcf159ce83471b077d9a0c06b08227f97116b09b9e29534385aa8ce2a908e857a)
+    ├─ emit Anchored(hash: 0xcf159ce83471b077d9a0c06b08227f97116b09b9e29534385aa8ce2a908e857a, sender: 0x00000000000000000000000000000000000003c9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x845e84b278ee6658b4d46728eae8a695d99c684371aeddfec84253bc3a77b052: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb310bd58ac4e73bdea84f97ba74c019281b4480d285a5abe069e37d7c1d021ca)
+    ├─ emit Anchored(hash: 0xb310bd58ac4e73bdea84f97ba74c019281b4480d285a5abe069e37d7c1d021ca, sender: 0xC4cC9c9f47b2E74Fbd5f0aBC5F61320EA9B20363, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7056674b5cff8832ca839312c267b28e7703ad28aec762f0e04ba73164c803c2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2b481b1449725b4333c5c3945d000edbad7935880b5a8a814d034488c2b0c736)
+    ├─ emit Anchored(hash: 0x2b481b1449725b4333c5c3945d000edbad7935880b5a8a814d034488c2b0c736, sender: 0xF9752131C66efA913f5A807fa5cbD5b5f693C398, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd054ec1f21041a2bf09c8001bb886686b9a815eff3a0d333b08b1888f17acf43: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2408b8c556a8347448ada2f2f7acb0ebc22b4f50a61f944c8e9820fe72a4e016)
+    ├─ emit Anchored(hash: 0x2408b8c556a8347448ada2f2f7acb0ebc22b4f50a61f944c8e9820fe72a4e016, sender: 0x5615DEb798bB3E4dFa0139DfA1b3D433CC23B730, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2cc664ce2f7a4703f07fb919dbf78054715b92824e4b3754fe55b0afea716cc6: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8f0be7e245c85bfea2a6361449fa12bd2fbbd1884899bb75e21be86e9e072247)
+    ├─ emit Anchored(hash: 0x8f0be7e245c85bfea2a6361449fa12bd2fbbd1884899bb75e21be86e9e072247, sender: 0x0c8FF5aEE105bf16Be9fE635f72Fd6e957bd90d2, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2672712c3d8b94d20d50a2e2446bb64c4402a399c7e0b1af34dcc5a771eacc90: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x1f615aa224cf3a242e82cbd1356846a3b02d936f4932d6245bf00933e5b98fa3)
+    ├─ emit Anchored(hash: 0x1f615aa224cf3a242e82cbd1356846a3b02d936f4932d6245bf00933e5b98fa3, sender: 0x99F37dB37f390F7FD37d1Ce271Eec423107898B8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa9adf084a98c700264afcdc2e5e8f5e0e293e42ef1afb52cf42281597b320167: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xec0d1b597900669f2cfe6372498e97d6f87d9f2c2e2f1a646f13e6cbb68de663)
+    ├─ emit Anchored(hash: 0xec0d1b597900669f2cfe6372498e97d6f87d9f2c2e2f1a646f13e6cbb68de663, sender: 0x3062590d80D264bb8f4fB69c98d28580D76A3083, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2adff7a42b8fe017ee343ae5fd3e757d311ae5144f5242dae35968afb281f28d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf8f09605532c6b4fdca809c644da629146a13563a7635686127cdba472e1b206)
+    ├─ emit Anchored(hash: 0xf8f09605532c6b4fdca809c644da629146a13563a7635686127cdba472e1b206, sender: DefaultSender: [0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38], timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe5d2fabebc606859bb900896813a6e54b12ef53d3d2bb48aafb6f6864f5c75f1: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x40b847ea7026512608f0b703f8e94a0e30f874cbabd620cb4cc23fa8b0f74794)
+    ├─ emit Anchored(hash: 0x40b847ea7026512608f0b703f8e94a0e30f874cbabd620cb4cc23fa8b0f74794, sender: 0x0000000000000000000000000000000009591a62, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x978bfd47eb0292e0bf033b4292c44b4d72d0d7e03247cf35645d38b95e6cf71d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x498a09b9c687405ef1d75b3857c292d89abd231f301d0c6dd3d28d5bbc277a2c)
+    ├─ emit Anchored(hash: 0x498a09b9c687405ef1d75b3857c292d89abd231f301d0c6dd3d28d5bbc277a2c, sender: 0x0000000000000000000000000000000000001141, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7e27fa542fdca1e10f33746a107f0c34bfe8695ed24b7ba7916549988a796a2d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xaddf0f4092d8cf783261442910e27cd1313a7db7d7058e7395005820d5b841ec)
+    ├─ emit Anchored(hash: 0xaddf0f4092d8cf783261442910e27cd1313a7db7d7058e7395005820d5b841ec, sender: 0x66F0E4200dc3780F1585dcA8ada4AAA0E0906AC4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xad576c24081336959716bc671fb6f95e5a111a59a70cef3ad3e572c16137fe58: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xd3a591d7bb99a235a988b7b5c32da5fa15d010b36d1c0ebb236b1e63556e4240)
+    ├─ emit Anchored(hash: 0xd3a591d7bb99a235a988b7b5c32da5fa15d010b36d1c0ebb236b1e63556e4240, sender: 0xfffFFFfFFfFFfFffFffFffFffffFFfFFFfffFFE1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4722218dfd7b5728c5effffbee82cd0851c4fa1b8c72fa7b0f8de49d20425278: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf2f48276d0f7b50edf3219b7f4a2b9848cfe6938a5b00ce0ebd257967cfc9ab0)
+    ├─ emit Anchored(hash: 0xf2f48276d0f7b50edf3219b7f4a2b9848cfe6938a5b00ce0ebd257967cfc9ab0, sender: 0xfCBd3A52C7a4e852Ce6D8d24451E3677C252B77f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc03b4db1fff6fe0b73b6d34121942d7689d0f366cf1729ee51d2ba341f92bd72: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000007ed)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000007ed, sender: 0xF728c23A472AeBd3525146ec12a683c2Da62AE0b, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1f6cf5db6177668986ce6c00802a219eb83cf9533d144fa4c371ff27eb082108: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2fcba73e68772ef0a7d476502fdbb2ed1bfe9ee5dc2a0ba8c9ac1c634607e1c1)
+    ├─ emit Anchored(hash: 0x2fcba73e68772ef0a7d476502fdbb2ed1bfe9ee5dc2a0ba8c9ac1c634607e1c1, sender: 0x0000000000000000000000000000000000000303, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1c511780d33d3a6d1f8c3d6e75b08d9eb6318c6c9c712ed40407f2fe1cf05c64: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x3a3efd618af577c40f51e132a65a57e00e7146d436f460d64dc869cbe1776b3e)
+    ├─ emit Anchored(hash: 0x3a3efd618af577c40f51e132a65a57e00e7146d436f460d64dc869cbe1776b3e, sender: 0x0000000000000000000000000000000066d9A9A0, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x32ae2257ab403756bddc4ace5106579152499ddefb681e5b7ccab340235bead5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5b8b72cf11a49bd070fa86132cec0b022a4b423e5bfdb0b6d71d4881b9cd7524)
+    ├─ emit Anchored(hash: 0x5b8b72cf11a49bd070fa86132cec0b022a4b423e5bfdb0b6d71d4881b9cd7524, sender: 0x00000000000000000000000000000000000000bb, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xecb581e2b5713f403d67d0e79dee441e0e869cfffb15c021cfa7ae6a1c4534e1: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x735ec25b3ed4af5c591572832c82e345f0b346d08c93e4dda3abaadb6a529ef1)
+    ├─ emit Anchored(hash: 0x735ec25b3ed4af5c591572832c82e345f0b346d08c93e4dda3abaadb6a529ef1, sender: 0x0000000000000000000000000000000000000c29, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x74b361750c2942eed528c78de3f6ea4f14514e3ae1297de84ae9a2ee3c30c0e9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5f7d237b3af0bfc1c8fcb84f9a73605cb3a608e9ff59a411897df71cbedf3459)
+    ├─ emit Anchored(hash: 0x5f7d237b3af0bfc1c8fcb84f9a73605cb3a608e9ff59a411897df71cbedf3459, sender: 0xaB74328397bECA5A14c4E1C4AED3447EF5615459, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xbe854fb62def69fdf6b498d9aff52f6599aaddf2939cb79976ee77ed664a1b66: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5f17d3a55fb3972502a7e5383661e3c85b446eaee07624ecc8c2fcd25496751a)
+    ├─ emit Anchored(hash: 0x5f17d3a55fb3972502a7e5383661e3c85b446eaee07624ecc8c2fcd25496751a, sender: 0x0000000000000000000000000000000000000F9E, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xfd2be4b063c8f50091546dbbb6a1aa2290f33d3b6e1494222c95e9610e2e3973: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xea4b2224f369f9d10ecae1b64a21a5a5a367e6c3c616f76669416750cd1a0fa9)
+    ├─ emit Anchored(hash: 0xea4b2224f369f9d10ecae1b64a21a5a5a367e6c3c616f76669416750cd1a0fa9, sender: 0x000000000000000000000000000000000000059E, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x90fa4f736b7969450d869161b378b7bda01035953d25618c6705ca19d68fff15: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x39e6a2296a46baba1375d6b49aa7e8556eba78dfe396ab4bfba7b2c37bc97270)
+    ├─ emit Anchored(hash: 0x39e6a2296a46baba1375d6b49aa7e8556eba78dfe396ab4bfba7b2c37bc97270, sender: 0x0000000000000000000000000000000000000C04, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc4cc2c6724abdf2cac3588baf42a430b94f656fe0fc3180ef17e35e887d76406: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf2217221a138c214d808fb832808d68f82936d4cb97d816131b823aee690e052)
+    ├─ emit Anchored(hash: 0xf2217221a138c214d808fb832808d68f82936d4cb97d816131b823aee690e052, sender: 0x72b6e352cd357AF9AC7a885b69B56478285Cf0b7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe419b18334bbc370a354bb5558eac4f070fd8186f65190dbabce72543b8e1f3b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xada5013122d395ba3c54772283fb069b10426056ef8ca54750cb9bb552a59e7d)
+    ├─ emit Anchored(hash: 0xada5013122d395ba3c54772283fb069b10426056ef8ca54750cb9bb552a59e7d, sender: 0x0000000000000000000000000000000000000d99, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x71f7c59e865974ae95b1d73e89460f39f1b24654357aaa807973f6b3eb800f0d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0b6fb96f38df3a281a071a2e7f0212cfd07bdd8c5cd07025c8062b66b509fe00)
+    ├─ emit Anchored(hash: 0x0b6fb96f38df3a281a071a2e7f0212cfd07bdd8c5cd07025c8062b66b509fe00, sender: 0x6eACeA6B20D16B5a18613752794a82611094f6d1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4a5c761d31b682f1d495459f83a4cb0faa422d6ef91890d14f4f95fca5be91b1: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000111b)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000111b, sender: 0x000000000000000000000000000000000000061f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7ce8869f14277f8c40b59d67d186fe84835861f626d646e3091ecdad91885286: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8ca976dd58eff2fba8052f8adfe79696fef7ff25fa1dd71e27378c86c669ac5d)
+    ├─ emit Anchored(hash: 0x8ca976dd58eff2fba8052f8adfe79696fef7ff25fa1dd71e27378c86c669ac5d, sender: 0x2C82E345F0b346d08c93e4DDa3AbaaDb6A529eF1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdf56de9834426ff0c6902223e64086aede7cb1b52fd9e1886bbc43dd584bcf59: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xbf97c6f2f217281c67c7169aad15d0f1c70d04577d71d6eaf2a630ced058823c)
+    ├─ emit Anchored(hash: 0xbf97c6f2f217281c67c7169aad15d0f1c70d04577d71d6eaf2a630ced058823c, sender: 0x6303E72329Ce1b7Eb23e9e8443B590077D62Fccf, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xedc049981d6bcfc3dd02c53d0d742b6fda9e1a559013f869a2c39227f4ccd03f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4de94a58eb4ae69f107fde8c77105b77f97d9c7fff407ff2f18013260eb28fce)
+    ├─ emit Anchored(hash: 0x4de94a58eb4ae69f107fde8c77105b77f97d9c7fff407ff2f18013260eb28fce, sender: 0x00000000000000000000000000000000000010b8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8a5a53b2c1973a8b27e3f485619bbed2040a57e23e203792090c4e6223904013: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x655c408e80119b2ba31cf9012f8e526b42cf7ec35416836b90d9ef546135f144)
+    ├─ emit Anchored(hash: 0x655c408e80119b2ba31cf9012f8e526b42cf7ec35416836b90d9ef546135f144, sender: 0xDd4acD9be8d6E5aa9101B7627309020C7ef6a017, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x9a4ec7a628040d6a172dcc9ac267213fa637b2becd56aab38d935bbc75ab9a57: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x96bf87cd70f32c9b6a5341ff06be2c045275f96e9008233b18072c77cb992297)
+    ├─ emit Anchored(hash: 0x96bf87cd70f32c9b6a5341ff06be2c045275f96e9008233b18072c77cb992297, sender: 0xF43a4958303fBb336d9Dc7f1F9d49a465b57Cba9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5f3f172450202386553da92255acbcd2acc11b1fb0774f7a1357f01263186550: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x42a0274be8b89b52ee04a4a372b3bedc210006bbad8b17c1c788c580cbc82c90)
+    ├─ emit Anchored(hash: 0x42a0274be8b89b52ee04a4a372b3bedc210006bbad8b17c1c788c580cbc82c90, sender: 0x00000000000000000000000000000000000007FB, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x90f5f974f7ae836d15014cab7a43e02df2ebc778006a4e1221369994d5103a15: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x77013ce9a65574f4e72597c6d966f0a9bb62910f7b3d071aae67810a4e24c7f9)
+    ├─ emit Anchored(hash: 0x77013ce9a65574f4e72597c6d966f0a9bb62910f7b3d071aae67810a4e24c7f9, sender: 0xefaB469d6aa338eFD94df4D58C9DCC7BB89143B7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd72a0b73ed47c4fa9fed7e52e94e97b2654aea5594458e6695bae169c2ce08f2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb8aaa09e0cbf1669a8d157e7429169ae00cfb69ade99baa72028553fd4cde57b)
+    ├─ emit Anchored(hash: 0xb8aaa09e0cbf1669a8d157e7429169ae00cfb69ade99baa72028553fd4cde57b, sender: 0xA102Ac45a855b6Eed8884e2a12245937f8b53BBF, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x259820cbadd1a22e5fb765a1e57938d4cf0040558ac2c0503cd7e1f9bea56c37: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x988db71e1df9075db2ff3b56b5c86bfc816ee2a17f3cb9865670dc1dcb54b05c)
+    ├─ emit Anchored(hash: 0x988db71e1df9075db2ff3b56b5c86bfc816ee2a17f3cb9865670dc1dcb54b05c, sender: 0x76Aa47105616A36590f5F27c595cF11834B91cEa, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x42aaba0acb6731e044b99f2f31cd241b1f4f9a45876a51055c829a9a46b8abe6: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x7f0f30043ee7a1a3c4bc43b0fab548c9e60b8529bd26f6940ca083fa1b1a4f2f)
+    ├─ emit Anchored(hash: 0x7f0f30043ee7a1a3c4bc43b0fab548c9e60b8529bd26f6940ca083fa1b1a4f2f, sender: 0x00000000000000000000000000000000000001AD, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe226c111a00b4cdd1cc48bb73466ba8143634e7b72bfe27ff2968de59c265cfc: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x26cfae055e53d20d80f00c27c4f4882537a86ad58f12b5b5a69ac2c61a7c148b)
+    ├─ emit Anchored(hash: 0x26cfae055e53d20d80f00c27c4f4882537a86ad58f12b5b5a69ac2c61a7c148b, sender: 0x00000000000000000000000000000000000010F3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd0a1bfdec1518c80e4d30f373ee6287e6d366659c973fdb8da5772ed12194479: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x542f59d09ecd755c79c4d0bcc35d3d2f696f19a7c5e316304f52f8cd95204de6)
+    ├─ emit Anchored(hash: 0x542f59d09ecd755c79c4d0bcc35d3d2f696f19a7c5e316304f52f8cd95204de6, sender: 0xE1D8b6626CA1D3e3799531f6Cb99eB8B07799c7F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4df89759fa91eef528e6559038d34769a27badb9fb90d8a6f41ed8ca9b076bcd: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4a5b831a52da075471ddc1df45bb6a666289ef757ccc08a93202decab3566a86)
+    ├─ emit Anchored(hash: 0x4a5b831a52da075471ddc1df45bb6a666289ef757ccc08a93202decab3566a86, sender: 0x10384128b7171a2A11D28518f8031D88Be5Ff5FF, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd54b1d93c0f48fc167f01a42fb899d272af0fc239be872bd2b6e65ee0fa2f547: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x80a04ad57ac7ce6a09d8329ccc4c095c2152ea476fef79fbe634e36789cdbf64)
+    ├─ emit Anchored(hash: 0x80a04ad57ac7ce6a09d8329ccc4c095c2152ea476fef79fbe634e36789cdbf64, sender: 0x8211C4274A9f4B1Ad8b0007D618d11c9c660c2D8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3f5301e5d37a3616fd8dd56a224d7a401c75a5a02a8cc12c9988e6469185da3a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000101)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000101, sender: 0x0000000000000000000000000000000000000427, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3ce224443cd7e3900fe45a75a91ec974d7fb1a917e7e728e31ffbd25704a2732: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x842d08fce50ba8116940f07949d1212bb8c86adbb0a5d047024364e968ac698d)
+    ├─ emit Anchored(hash: 0x842d08fce50ba8116940f07949d1212bb8c86adbb0a5d047024364e968ac698d, sender: 0x10bBF043B4fFc8e52c47C61D1457a6F07EA18D3c, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xfa8cbd679e6a5208dbbf2e17cb994ba156a66173d1617a9439b8f79515506454: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xfe19501ce73fb698cdac619ccb01a370ab0c1a87239b2d8def60561cae04319f)
+    ├─ emit Anchored(hash: 0xfe19501ce73fb698cdac619ccb01a370ab0c1a87239b2d8def60561cae04319f, sender: 0x000000000000000000000000000000000000010c, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6f0ca1d7d89942a0a545472422936373d559f493d23ae37b49c38690c06a3001: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x508ea0a39228c2e9efac98f4451d64e1bb7c1d42782222009a1bc4ece7a4c9ed)
+    ├─ emit Anchored(hash: 0x508ea0a39228c2e9efac98f4451d64e1bb7c1d42782222009a1bc4ece7a4c9ed, sender: 0xE027C7218C35de9c798f653760B69BCA74EE30b3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdcfa169b2bbc33bcd7198d14321a95a26d86ac51b12f1c2e45d7d547d25bf45a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xfba74557111ad7378df2fa7ddbca89e65958aa1d745f6e1b93af7d4d27ffcbff)
+    ├─ emit Anchored(hash: 0xfba74557111ad7378df2fa7ddbca89e65958aa1d745f6e1b93af7d4d27ffcbff, sender: 0xA659D641879f6a65002d4d8b4ced3c9c78CeD869, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe01dbf129aeaee85f82e42ab703831e70599e9f0759c11689b2e080604eb8aac: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5b9443a9085cd763c5004bffda754b51943a70b3d80067d5a2544854014d0356)
+    ├─ emit Anchored(hash: 0x5b9443a9085cd763c5004bffda754b51943a70b3d80067d5a2544854014d0356, sender: 0x000000000000000000000000000000000000016a, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd9bbce8b367140262dfed6e07f8f935d2ec008aa7ae0c69dcffba7581f64fa4a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x92124bede5b88fc300458202ac3d223b2c3408c09419c6fd8d80b5e37d0179bc)
+    ├─ emit Anchored(hash: 0x92124bede5b88fc300458202ac3d223b2c3408c09419c6fd8d80b5e37d0179bc, sender: 0xE770bb7F43d4117962940D83Ecb950C46a00807a, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6dab5f7cb30cde6b0915e629d989bc7594e0c8c2251b63205c58b726f019ecb7: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc5173482ad8db0c1b59f4bc233bf19fdf845917e498a5d72c750da07020f1039)
+    ├─ emit Anchored(hash: 0xc5173482ad8db0c1b59f4bc233bf19fdf845917e498a5d72c750da07020f1039, sender: 0x000000000000000000000000000000000000111D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x118471e46373639b89c7e647508b43ab9569fd1dbd62cd81b0a64affaeef615e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000145)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000145, sender: 0xcEF5DE80620A141BEfcb3F723604252b11DA6d01, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3cf37595cd499be52965dd5cca4dc7fd8080976ba95b4d20907743b4d3ecf9ff: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x539df61da3546ccfcad837685d944695e7557324f6e225d6d74b6e370604ccb2)
+    ├─ emit Anchored(hash: 0x539df61da3546ccfcad837685d944695e7557324f6e225d6d74b6e370604ccb2, sender: 0x0fDb5a4e467d6Eb89A888E34665fd231C71d4CC0, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x80c9d3293dd1db7838ec82b2d8de4381d4d4169e6896e156903b6f4942b5abdf: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x3a754dbd35021442806b331eb5c3481404077e1fa808feeb5a6b926ae6a77542)
+    ├─ emit Anchored(hash: 0x3a754dbd35021442806b331eb5c3481404077e1fa808feeb5a6b926ae6a77542, sender: 0x00000000000000000000000000000000000000dF, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x9290a4fcaeb02f2c79bdde2fc6e25e3309798d2513a1bcd91940f5b4e7e82204: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x16900a9a9607210c549c87a9cc9d32b412bcba8032671d250fe480574e298c4d)
+    ├─ emit Anchored(hash: 0x16900a9a9607210c549c87a9cc9d32b412bcba8032671d250fe480574e298c4d, sender: 0xB3c74264C32fCc58480eB443BB80535eCa822EdA, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf954d9bf2cecd9dbffc7913b1d15827540c8702ca628faca42b735bbde18e61f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xbdf73318d0020fd592415ba6ca2d1afdfe0349583aa6b77ff19f141d52ce194f)
+    ├─ emit Anchored(hash: 0xbdf73318d0020fd592415ba6ca2d1afdfe0349583aa6b77ff19f141d52ce194f, sender: 0x0000000000000000000000000000000000001148, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x15fa12ed87341522977910d9f15cfea7b54ae4f61d8ded04e605fe218ea2480a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0b18a7dcc0e84a3132e634d3b640389b8740a215afd3f26cfc200962bdb905c6)
+    ├─ emit Anchored(hash: 0x0b18a7dcc0e84a3132e634d3b640389b8740a215afd3f26cfc200962bdb905c6, sender: 0x00000000000000000000000000000000000010b8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x06bf0a5d21a6b0bc21bb9c54ad3fe1f9fa2ebd4dd77cdbeb4a92ca084a5d8c3d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x73d35430120ca7fc6b2bb079562e27d48ab55a76f5dc118f2f26c3e91ac57d96)
+    ├─ emit Anchored(hash: 0x73d35430120ca7fc6b2bb079562e27d48ab55a76f5dc118f2f26c3e91ac57d96, sender: 0x00000000000000000000000000000000000000fa, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x02fa6ecd601238f7213a4504d90e99d8b3827f02667a06d7f6e1ffc8ab03cea9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8373158a4dad6bacf922eba5012716bd45b3a6f7ceb357fd283b36ebaa10a79d)
+    ├─ emit Anchored(hash: 0x8373158a4dad6bacf922eba5012716bd45b3a6f7ceb357fd283b36ebaa10a79d, sender: 0xDc1e916c7322Bf65B320085B22F27F78CdB31DC3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xaa702a00326fc8af7d6f95ab2d207cf36a5f24df41d9557305b3b281d39d511b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000167)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000167, sender: 0x000000000000000000000000000000003e5e3c24, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6cec44c34efdba490f3ab1336603140e8c0c28cdc34b65964a9ac1f0bfec07dd: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9c5517493f9a84bdbe0ec659199c6fab16cf1951b46e69cc5807b1c8f4851bd4)
+    ├─ emit Anchored(hash: 0x9c5517493f9a84bdbe0ec659199c6fab16cf1951b46e69cc5807b1c8f4851bd4, sender: 0x000000000045a666D7244b64736F6c6343000817, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x235d175614c02e000de9e3bec87ac97344eb448728293a229241c337f42e350c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x1c160927f3c2e795bc5ed83465c28eff065b9e418a0714b161fa30b03e0aaf0c)
+    ├─ emit Anchored(hash: 0x1c160927f3c2e795bc5ed83465c28eff065b9e418a0714b161fa30b03e0aaf0c, sender: 0x7A38DEe01F975B241eFa3B8e1e3A8C189d985A38, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf9e33444bd8d34ae3cf202b648ecaa0f2c86055c362e05f2044fbca0ff263200: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x38806fb0837c2cbbad3eeeaa4d4591dc948aeb964f345c1db6b9630fa10299a6)
+    ├─ emit Anchored(hash: 0x38806fb0837c2cbbad3eeeaa4d4591dc948aeb964f345c1db6b9630fa10299a6, sender: 0xf77743DAd7448215C3e8D25fB7EADd9320b9D1d9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1f9eda23cb475bd0c8783648527824510e0f62c706ed2512793d21f28f89efa5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xce70729d7484e44f1abef8661d63d052120047eebd223663a4901af1b471c72f)
+    ├─ emit Anchored(hash: 0xce70729d7484e44f1abef8661d63d052120047eebd223663a4901af1b471c72f, sender: 0x00000000000000000000000000000000000008b5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf8e1e4afef2ef72b7906546a384192d4424d230ed1933ad9e2aa3b0d877b710d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x16c8a454a06428b5adf7595fbac198eb259ee51990ddc73defdee1cdd7b6cdf3)
+    ├─ emit Anchored(hash: 0x16c8a454a06428b5adf7595fbac198eb259ee51990ddc73defdee1cdd7b6cdf3, sender: 0x115BF8e2E3B7d4c5e74c323C4Cc22cC06D989edB, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xee1a2f373ad409531a656fcc718eba82b99124fc0a9aed29017c835280702d8f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8ad41d5dabab915478c901743ba0fdf1d76a9ddda46162cfdd16189497fdafab)
+    ├─ emit Anchored(hash: 0x8ad41d5dabab915478c901743ba0fdf1d76a9ddda46162cfdd16189497fdafab, sender: 0x000000000000000000000000000000000000030C, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1b6f75b3fba2b651b94da044f710b0b68c44db234bbb09696c79f23c5f37527e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x052648ff815ef99826489d4cd50b55ca890d37aa98b347e17fdaddb770d0efce)
+    ├─ emit Anchored(hash: 0x052648ff815ef99826489d4cd50b55ca890d37aa98b347e17fdaddb770d0efce, sender: 0x61052633385A61c97Ed8A61C5ca189D20A5070c9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x050bbb763a777f9e318ea6e37d8d0d954f99bb86f1bc0b14795e392c7689e22a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6d1fc213243d1d844b829dd2220980b263863dc7c64a690f96777c2bd8049a08)
+    ├─ emit Anchored(hash: 0x6d1fc213243d1d844b829dd2220980b263863dc7c64a690f96777c2bd8049a08, sender: 0x7Fc10c72a2a507b3d00ba9537aF253305B11941a, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0e257b54baf88f62aaae37b960f5306885819eb75c8a1409062c924db7b921f1: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xddf1a4cfc45e1b3ccb3ce381b2184636b42f06c24c22d9ece3263ea0cc5614f6)
+    ├─ emit Anchored(hash: 0xddf1a4cfc45e1b3ccb3ce381b2184636b42f06c24c22d9ece3263ea0cc5614f6, sender: 0x000000000000000000000000000000000000019a, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x92eab708fb449eae334f2f27a909a679259e4ee08e4417bf1bbb9b951b162c1e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xfc5756aa95844f05c952c43dcca9f10097a7dd6eb1fc897e993b2adfad2a1658)
+    ├─ emit Anchored(hash: 0xfc5756aa95844f05c952c43dcca9f10097a7dd6eb1fc897e993b2adfad2a1658, sender: 0xffbdeC66D39c24767bCC6e39c6ffc13346297Ca4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5542294b81a767c9043c014a809c0fca2eefd9581ab8ee888b2a23fa8c4e124b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x49d3e788a9a7f6076e849d4614d30a409f2c83f649b3057e9076d21f259734f5)
+    ├─ emit Anchored(hash: 0x49d3e788a9a7f6076e849d4614d30a409f2c83f649b3057e9076d21f259734f5, sender: 0x698272117636b20ffAC3184512c70434e116ACB5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa10319dc822338be1098e66c13a570be00891581ea8545c78b036853f26b3132: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x91c03f184181aebb8d8062116cf478101d7ee11e3fc68afd9d908759071de9d4)
+    ├─ emit Anchored(hash: 0x91c03f184181aebb8d8062116cf478101d7ee11e3fc68afd9d908759071de9d4, sender: 0xfF2fDB0c6da48585b01474b8C17Db333FE8049C4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x907db6b0b10c8adf40b519015bfb1a6a6fde53ff50bce4e730ab6477a9d359de: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9df63c5727b1897551bdd6f9303fb1980018d1e600582549825845f0c9c8927f)
+    ├─ emit Anchored(hash: 0x9df63c5727b1897551bdd6f9303fb1980018d1e600582549825845f0c9c8927f, sender: 0xAF40C610cf39416fC95f3c613d23C182A2ce4166, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdfa4f3efa8b9f70b9166f150d5b5e790c78ccdc17cab1c61eff483392b641e68: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xddf37e48888abd38e6482010c18e1c111fef93eb8aea95ca7c42598c0418444b)
+    ├─ emit Anchored(hash: 0xddf37e48888abd38e6482010c18e1c111fef93eb8aea95ca7c42598c0418444b, sender: 0x3C9FCAa55e81CE805933AAFC10e9C3BB8b97FB3d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4039fe6e02dc7417dd6f25ac97742520b8a032738679b1bfe5a3a54912eeb561: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xd5c446a716a612e8806005a1c9d092e247e0fc13ba2c0395f70f6fb5acb4e7ef)
+    ├─ emit Anchored(hash: 0xd5c446a716a612e8806005a1c9d092e247e0fc13ba2c0395f70f6fb5acb4e7ef, sender: 0xCe45B83875B5cCB66ECecc8A41Ffe6E6b96d00Ea, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x348014f8e8d3827f22ced7f7333f9665ffdaf225d09f63cb1b6ec96478a71dbc: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x662d410bcd99e186f39e1f7ec1ff82b228908e069e95776a97f3e706fb6cf971)
+    ├─ emit Anchored(hash: 0x662d410bcd99e186f39e1f7ec1ff82b228908e069e95776a97f3e706fb6cf971, sender: 0x3e4308ba1dBDdF832c36405CFe3ba23303d0C530, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf949f60d4e8e51d91f91022f52e3478691543767530fdb42278f947f6d191ad2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000dc4)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000dc4, sender: 0x00000000000000000000000000000000000002Ac, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc21099b1235097ae196d7b8bb3ca4db80ac28a2c57a7b6e04f0ea3c0618ac54a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x865dc3c884e03bc83ca7ed5f6582c2a335bdd82b37df779f45028e2fcb488ea1)
+    ├─ emit Anchored(hash: 0x865dc3c884e03bc83ca7ed5f6582c2a335bdd82b37df779f45028e2fcb488ea1, sender: 0x000000000000000000000000000000000000006F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7977642595c284d4ce0b1397dc8abb200ab3b48b9ecfa9a48cafa58a0eccd83f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa57de403605d4c18c373df482733e08f79fcb0626bf054c9a022815635e2b3f2)
+    ├─ emit Anchored(hash: 0xa57de403605d4c18c373df482733e08f79fcb0626bf054c9a022815635e2b3f2, sender: 0x6cA6ADF72311D6f728C6C5f0B27554e67B87760a, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3fca2a4fc036b506f78fa51345c45fe23c4964b7775b5490d76701499c23ea2b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2701c75dd7e8e28b756e7c395d8332600bcf394837b7206577a88897bb198b75)
+    ├─ emit Anchored(hash: 0x2701c75dd7e8e28b756e7c395d8332600bcf394837b7206577a88897bb198b75, sender: 0x0000000000000000000000000000000000000Db1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa07840572046420a75c4ad1db097483a267b30d8cb92d5ed42117e3f12a85b1b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5e5a839823d5242984e09ce162d26fa8737b4b1d38766f81facc8ab6cd0b47c1)
+    ├─ emit Anchored(hash: 0x5e5a839823d5242984e09ce162d26fa8737b4b1d38766f81facc8ab6cd0b47c1, sender: 0xda401428879c79A9DABd7C3Bf5c928aC44A2E0A6, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5fd8e87b6cb4961a7d8a3e5129de1348f450aa9eee1bf864982899754346a4b8: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000007b10399a)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000007b10399a, sender: 0x0000000000000000000000000000000000000760, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xbfb138478345854059c3c4521bf25e0f1d93c3fb5373241def2d2ec2a12cce39: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4991947bd178f922e028a2f03b9b4408af6d27a9261aba8e3b9b10c55ddbfaa7)
+    ├─ emit Anchored(hash: 0x4991947bd178f922e028a2f03b9b4408af6d27a9261aba8e3b9b10c55ddbfaa7, sender: 0x6dCBA6500Ac43A62c8a8Cb7d0a9c0dDc1D37a83C, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2d4b7b82bd465252665d03f0ca029d22c07bc92612a1277526a4f4261a0d3aff: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb244bb9a1c865930026872e02e06366750cc66ecb0fe0c649b1ef9dd8f6b3d89)
+    ├─ emit Anchored(hash: 0xb244bb9a1c865930026872e02e06366750cc66ecb0fe0c649b1ef9dd8f6b3d89, sender: 0x00000000000000000000000000000000000001AF, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6aa69133f15a7debe01f797cc072a7c3c2c4c5782fd1d33b8de780725eaa14ab: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6a8a6f07a36e1e2921d93380226118f1fec0d334ca269c890601f1177e34b27b)
+    ├─ emit Anchored(hash: 0x6a8a6f07a36e1e2921d93380226118f1fec0d334ca269c890601f1177e34b27b, sender: 0x0000000000000000000000000000000000000FD9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xedc9b79ca1a97f5828f95e491436ad56faa4b93f7f74b936f8c08f6fad1cb865: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000e1caa0e765fe9ea204d38326f949e364a89f08aa)
+    ├─ emit Anchored(hash: 0x000000000000000000000000e1caa0e765fe9ea204d38326f949e364a89f08aa, sender: 0x86c192411cb48369DF289951679e83883B7fC440, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x976d770008c707c84069eac391908ad7e36a324b9d0a029a9b26b4deee28b4ac: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5a9b7bed7599a5843bdcf448ec7daf64a5b05113ad0ad886f1b88f0ae5fa4b2e)
+    ├─ emit Anchored(hash: 0x5a9b7bed7599a5843bdcf448ec7daf64a5b05113ad0ad886f1b88f0ae5fa4b2e, sender: 0x3A202ce92291460F19FE80ED2d2D7E8e4674dcBA, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc4fcbfe6dd3fbde9a26ce7d61b4af8e7e17a2677fabe722d1fe0220297549cbb: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x29a6eaf36086c75fca6388315e43bef189910fa99f8412af3b04d478a1c31231)
+    ├─ emit Anchored(hash: 0x29a6eaf36086c75fca6388315e43bef189910fa99f8412af3b04d478a1c31231, sender: 0xCb3FE7C59D3F68d8FAa5e5AB915f18a0D5F0167D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1e879a1dbd90c5c81f99878e867640f4a4c3ab81c8a77dc839b865700d9339b3: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x340b5a182ca8bf5e95f65a51a5dacd14d64e4b4ca81dab3e7a2105af7f7fcf23)
+    ├─ emit Anchored(hash: 0x340b5a182ca8bf5e95f65a51a5dacd14d64e4b4ca81dab3e7a2105af7f7fcf23, sender: 0xc1B102A393eA0667602C59838c5297911F3a3Ab3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xeb9c1795f48766b9018a16e15525c37646b8915222b7d5adbc5646e6c215e584: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf0a917e4a04fe1782e73b4b3a97ae763c0241f8ff69c2132a3eb04b76dceb5b5)
+    ├─ emit Anchored(hash: 0xf0a917e4a04fe1782e73b4b3a97ae763c0241f8ff69c2132a3eb04b76dceb5b5, sender: 0x0000000000000000000000000000000000000202, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x16a5c18cfae33aacbcadbf7177a27c8ed6d94486408d86ef0d6d4d4a03b5e369: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xc724f569274204f61141dfb994ac7da43dd2bf1014799dcf32c7daede0a2c09d)
+    ├─ emit Anchored(hash: 0xc724f569274204f61141dfb994ac7da43dd2bf1014799dcf32c7daede0a2c09d, sender: 0xdE2743a48Bf737fFf037b2F82A8E88DDb0170082, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x061422d4bafb668db05cf0ac5059c50d66774f0425d0fbce751a7685a6c53bd5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0c51ef84bfc3a4bcf389ab1af2f092be87771fe427ee42c4071dc1fef07c2ddf)
+    ├─ emit Anchored(hash: 0x0c51ef84bfc3a4bcf389ab1af2f092be87771fe427ee42c4071dc1fef07c2ddf, sender: 0x3353356c29C05300fAbF5C5dDa6998580418eDd4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0198f0836f9c2c1273b47ca785f0a89bf160c45e064794be31e31a3d1b8a0b5d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000008211c4274a9f4b1ad8b0007d618d11c9c660c2d8)
+    ├─ emit Anchored(hash: 0x0000000000000000000000008211c4274a9f4b1ad8b0007d618d11c9c660c2d8, sender: 0xcbCD037525182Be2Fe5AE5673Af5134EB544CE3f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8d2ebf0751d1cedb0a19420a3c8891e2983edf34c043722668249b53370b679c: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x96feccb47fa36de0c6c6fe0e9024e1e2e93277b177dc6e38820eda0b685890f3)
+    ├─ emit Anchored(hash: 0x96feccb47fa36de0c6c6fe0e9024e1e2e93277b177dc6e38820eda0b685890f3, sender: 0xd05A8293cC40cf2dC8504A407c9E58819fDA2cfF, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xea0bef33839aa39d86eaf4ba00ebc6bba7e90efec08a0e4e1e7489865939ad7e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5860d67ffb923c3cfc8f959d074572313ddc5832c341cb1adc13f3b412eca7a1)
+    ├─ emit Anchored(hash: 0x5860d67ffb923c3cfc8f959d074572313ddc5832c341cb1adc13f3b412eca7a1, sender: 0x54598dB7F1B03eaA42D6B7883Fe47B61A5Ece5Ed, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc40b65fe07c1657fddbde323b0f40848a655028d1921aa0abe6d66d76f549672: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4a3334590251574622c20cf546130682bd1ef62cff033e0207f848ef266075c7)
+    ├─ emit Anchored(hash: 0x4a3334590251574622c20cf546130682bd1ef62cff033e0207f848ef266075c7, sender: 0x442Fd076171BcD6e96636daC98E8AFD05D8e69F7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xef171a3329139955b580ab59f9fb1137efb64443173b57935248896aa9f34806: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xd141fd49de44c24c8bb2ece2f1e84110b4b5dc935d90de16490dd53c72bdc771)
+    ├─ emit Anchored(hash: 0xd141fd49de44c24c8bb2ece2f1e84110b4b5dc935d90de16490dd53c72bdc771, sender: 0xa12E48CE7EbCaEc3282f3245c3234F0A3981721a, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdfe1333fe1494655083b2c21db3af053aa9ae6b7e6be37028d76746b6a29eedf: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000c4cc9c9f47b2e74fbd5f0abc5f61320ea9b20363)
+    ├─ emit Anchored(hash: 0x000000000000000000000000c4cc9c9f47b2e74fbd5f0abc5f61320ea9b20363, sender: 0x3fF23f4ad7cc7DE3056cB2a3404bE7840f5340F1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd3b508aed8b6a708f1c93f16bafebdc96d3d62d1254740766ba2fc804037b6dd: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf9b80ebe941d3ded4ef9bab5ea4b3e34c74a4b80b4485da9781ccaa033038677)
+    ├─ emit Anchored(hash: 0xf9b80ebe941d3ded4ef9bab5ea4b3e34c74a4b80b4485da9781ccaa033038677, sender: 0x34f5ECD8389Ae0432aF62DC132A24118292866ba, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5dc40ca403c62552150e229e4ea8ab322de02810cab2058e1bdb9d2e1bc876a1: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe29d992ba71d50aefe2296463e0ecf896e927a831cfa6668612f3386c7fe427e)
+    ├─ emit Anchored(hash: 0xe29d992ba71d50aefe2296463e0ecf896e927a831cfa6668612f3386c7fe427e, sender: 0x17965675A74e68Abc2A58DdF7F2eba2FceE6629C, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x40a25e2632c27fb4b9914f102640fac2934c7074f5556ee234d5bc00fbda7818: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x964907c591b4806f3f1f204c65d6e84df206728ef0f0a6f5ae601f84a21ec467)
+    ├─ emit Anchored(hash: 0x964907c591b4806f3f1f204c65d6e84df206728ef0f0a6f5ae601f84a21ec467, sender: 0x0000000000000000000000000000000000000041, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb3aa9ff6ab17529271db8d5b4bceabf14e54899eaeb009695307c0fcad4f12d9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa967ebe00ee88e43f16b875d81a823ed2cb8f252a925209b1df8ace92cb8fe21)
+    ├─ emit Anchored(hash: 0xa967ebe00ee88e43f16b875d81a823ed2cb8f252a925209b1df8ace92cb8fe21, sender: 0x0000000000000000000000000000000000000071, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xaf8af2d9a0c896b136355a26ac21fee5bbbd32c3ed76abc853785cf81c97ac07: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf183236ecea484e5392a94f339e1f8aab9993c963e2c164e8a32b62f8832805f)
+    ├─ emit Anchored(hash: 0xf183236ecea484e5392a94f339e1f8aab9993c963e2c164e8a32b62f8832805f, sender: 0x000000000000000000000000000000000000069d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe5b8ded88ec2e39cf751fbf4042f7f5f1f0784290314167eb81152679ce89397: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x772099573be513ac689f233679e5c90c549000f00755eef768a215d4b783162f)
+    ├─ emit Anchored(hash: 0x772099573be513ac689f233679e5c90c549000f00755eef768a215d4b783162f, sender: 0x5A511c2059f99B933c9BA68cA08D7800D13c0160, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdbf5bb8a03aeaf0850c371f3652bd1651447d5a943d07975047e42025d337bfe: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x7f7c8817268168aa06b89d43fabb7dcc72c2b4f9f5dd036425f5bc89d2fbf8e4)
+    ├─ emit Anchored(hash: 0x7f7c8817268168aa06b89d43fabb7dcc72c2b4f9f5dd036425f5bc89d2fbf8e4, sender: 0x000000000000000000000000000000000000101A, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xcbd19ace712e7f6180f55de4ab5b5759a433b55cb0bee9a9305d561e089e32a9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x7f43f5474828587a86c587fcee5c374f267862602813976f612f246247f28e61)
+    ├─ emit Anchored(hash: 0x7f43f5474828587a86c587fcee5c374f267862602813976f612f246247f28e61, sender: 0x9b210ede29AAC2Fa945F7B331a70452642d281Bd, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3205f0baec8cbab4551e954c27b2ec2a280505ee65dc9f0e8d8c5ca93d3e35f6: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000008b5)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000008b5, sender: 0x546d036de809A31c982ADd653112baCF16dAdbD3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x75bd44059cb3d6144ba160612cdd34da2fb03e4b7cb5f9cb057fb9ee7a2cbbf7: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9bae5b20c241b5fe54721a5f67057b42e211c712e74c53b8c92e7728cad62495)
+    ├─ emit Anchored(hash: 0x9bae5b20c241b5fe54721a5f67057b42e211c712e74c53b8c92e7728cad62495, sender: 0x000000000000000000000000000000000000059a, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd7a4a09c39e60c3a444a417fca0718d9c37ac171bca6a0579ba9552d75bd00e5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000c78)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000c78, sender: 0xeE7398f02C97a886A0fD41A76E8253bc3552c349, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xc8a339ab6d98c0e4ac9c16e477f8fa6e0604eea2cf172acb5c937e1bf809cd67: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5e463288a2947ac2eeb82eef87987a236f2d664aa5abb0fe655ee8578339de24)
+    ├─ emit Anchored(hash: 0x5e463288a2947ac2eeb82eef87987a236f2d664aa5abb0fe655ee8578339de24, sender: 0x62BAFDFff45042736328d83E2a16f0Be09D9B011, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x889b09d40c3a13323a6829c80d3b9835f63be7d8c0ba36e91a1b48dfbbe948a7: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xbd033213a20dee4647a8593653e5f676a5e3d04ce6ba9fc67f91cf67d0d15504)
+    ├─ emit Anchored(hash: 0xbd033213a20dee4647a8593653e5f676a5e3d04ce6ba9fc67f91cf67d0d15504, sender: 0x830F4fd9c7E5b99DeDedA6302a5f4898907eE63f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2de3b78dd9e93679a1e5d3d242031534998d2f3b66a3f46cb47b6ded96017684: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe7ccc1a2be2e2e02bf64bc1be57b082ddb6bcce2975565bd004887ece9e46268)
+    ├─ emit Anchored(hash: 0xe7ccc1a2be2e2e02bf64bc1be57b082ddb6bcce2975565bd004887ece9e46268, sender: 0x0000000000000000000000000000000000000Ed7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xe4636ddf8362444180a5d28fbdcc7d0338fcf2f9be79c15c754a9ef3cf0547af: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xfcba992e7dd23bad7d33c62b8a8a355812e3d94e8575344327e32b31d900b35d)
+    ├─ emit Anchored(hash: 0xfcba992e7dd23bad7d33c62b8a8a355812e3d94e8575344327e32b31d900b35d, sender: 0x000000000000000000000000000000004e487B70, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7456ddd1f443389e117ca60da087f17c90fe3856edcf60482200ae4159703b93: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x560050c7f10c0f760b0decf4e3079012b0fc2ab6a463025d52388af374b8a3e7)
+    ├─ emit Anchored(hash: 0x560050c7f10c0f760b0decf4e3079012b0fc2ab6a463025d52388af374b8a3e7, sender: 0x0B4934A223b018A6C429e56F83e0197D3886b097, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2603ffd90f5d123d85f5bc994b7e22939ee9b69d5820cbf7c756ae6939165b4d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xdc35e5b2cd17d2d4c9e7110f3374f0c4af792b66be1cea950937846744ae113c)
+    ├─ emit Anchored(hash: 0xdc35e5b2cd17d2d4c9e7110f3374f0c4af792b66be1cea950937846744ae113c, sender: 0x00000000000000000000000000000000000010bF, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7606a3aab9a6bced8d62525546bc75ea70eee7745f40aac338bbca3a3a0fa653: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000f9e)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000f9e, sender: 0x15DeB798Bb3e4dFa0139dfA1B3d433CC23B72f02, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x09522fc243fc1827f9e2f99fd0e470d835d291051eab2e7049fd4ccbfec5db5a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000007f72d758e1cf3343756d543badbf24212bed8c16)
+    ├─ emit Anchored(hash: 0x0000000000000000000000007f72d758e1cf3343756d543badbf24212bed8c16, sender: 0x0000000000000000000000000000000000000087, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xfbfdb6808baa26ad22e9d96b2bbf5a8abe01dbd5bcb35148004e9e486fdc18fd: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000429)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000429, sender: 0xA4700b96B0E2b8851889E77A0B3436FA4d3Abe9a, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xea29e4aa47d15718e9b541c18c2468c6d014929e12bf09fa8e32f9b4c2a90196: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xd0c52bb229210f782587fb53b025c294b0ba33c232450342a782f8822ad4f34f)
+    ├─ emit Anchored(hash: 0xd0c52bb229210f782587fb53b025c294b0ba33c232450342a782f8822ad4f34f, sender: 0x5d000EdbaD7935880b5a8A814d034488c2B0C736, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x555efe31e5f97a496cfa6e657010670635e81d1395444af42c7ba8edd83b925b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x29ff712303379606661d010b32032e092a961a9d3946fa72e0a1862c9fc2ea7d)
+    ├─ emit Anchored(hash: 0x29ff712303379606661d010b32032e092a961a9d3946fa72e0a1862c9fc2ea7d, sender: 0xd02836AC79C5EF88ebAa8fE69d953e34b659F76D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x10c641265b55790596c10248ea5e2b151c99b1439eb2fca7f708ef469ec07444: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4a5acb23912f1f44bd1194dff626ae9bc604c1a1674650aff37ac04925d3f0fe)
+    ├─ emit Anchored(hash: 0x4a5acb23912f1f44bd1194dff626ae9bc604c1a1674650aff37ac04925d3f0fe, sender: 0x02FdFD39A211897C5c09D1dBB274c98f515Ee909, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xcf6373f9d2a1a21ae794283eb72ce9703bf9e7048348edbc667553e905f53676: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xced5bd84990fa397e575b47d87d6f75200fdb88a7182ab731ec2cc00d55f5b81)
+    ├─ emit Anchored(hash: 0xced5bd84990fa397e575b47d87d6f75200fdb88a7182ab731ec2cc00d55f5b81, sender: 0x0000000000000000000000000000000000000Ed8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x40d36febc86c8d8bb547671b4cd9d7408fc09cb3b047a06bc4e198978464beca: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8d2ebf0751d1cedb0a19420a3c8891e2983edf34c043722668249b53370b679c)
+    ├─ emit Anchored(hash: 0x8d2ebf0751d1cedb0a19420a3c8891e2983edf34c043722668249b53370b679c, sender: 0xcfafe3187c2457e21c97A1ab557760b2Eb06E6a8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x53756bb09d5700e9fe60e443159847f000140f964ab4c49a3f0e685e1949e9e8: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe6f5b8a8702ca321dec4ab6db3f4628b9cee495988d879f172c844a120a0c345)
+    ├─ emit Anchored(hash: 0xe6f5b8a8702ca321dec4ab6db3f4628b9cee495988d879f172c844a120a0c345, sender: 0x1F591b3A5a328B9d9c954921a7f9839C910DF76f, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7d9279deb198fa10bc47dc835f5e8d43b60c7c6947e87a834e86993a507127db: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x579b84c00c12b12ca226a691d0672393eabf515df6bcaaefc2015261f5dd3d31)
+    ├─ emit Anchored(hash: 0x579b84c00c12b12ca226a691d0672393eabf515df6bcaaefc2015261f5dd3d31, sender: 0x0000000000000000000000000000000000000D85, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x70410874e8f490eff5f2e610239867185b1941c494fd5cb9312212a24e50e099: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000008f3)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000008f3, sender: 0x00000000000000000000000000000000000003eC, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3a43879680a20b1fb5157dd1cf6a64a6c2f944fa149542d8f53a0ad3c820df10: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe19c7fb92233307dd73a4bd1faeb3f0a3637c43108ca0fc8b8c72a66921ca1e3)
+    ├─ emit Anchored(hash: 0xe19c7fb92233307dd73a4bd1faeb3f0a3637c43108ca0fc8b8c72a66921ca1e3, sender: 0x0000000000000000000000000000000000000bb1, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf7d03246296c5c6af98de4ab59e02f06d36140ba64ebe989e5323380bb3955c6: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0ca44d4c00b818532752323b2c98808343ddff14aebb2a8d494f1632ed2e157c)
+    ├─ emit Anchored(hash: 0x0ca44d4c00b818532752323b2c98808343ddff14aebb2a8d494f1632ed2e157c, sender: 0x0000000000000000000000000000000000000D85, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa215f88bad30750d99b5f305e4d316d10393d535b8ceb776e4b4d0aca017f3b0: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6067dede92a25e91431b0cc41c6a808f901f407545aa519882df5195b10c3ac6)
+    ├─ emit Anchored(hash: 0x6067dede92a25e91431b0cc41c6a808f901f407545aa519882df5195b10c3ac6, sender: 0xB3136cbe481f20C3618D9A4C1F67C8A8fBb5B930, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0b88ebbb948a75662213d05fc6a7a80e8e8d4c7d35bab1f2057bf21e6483bd43: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb5670ee42f29f0a5281a4fd6a882c25500ef27fedba32ba8182542501dab1eb1)
+    ├─ emit Anchored(hash: 0xb5670ee42f29f0a5281a4fd6a882c25500ef27fedba32ba8182542501dab1eb1, sender: 0x0000000000000000000000000000000000000202, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x188d5a5aa656515d85880ebb6957597671cf72e9f099266ebcc8784e1d8f4cce: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000000000000000000000000000000000000000102d)
+    ├─ emit Anchored(hash: 0x000000000000000000000000000000000000000000000000000000000000102d, sender: 0x0000000000000000000000000000000000000092, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x335107fff129a724be6b5fa372c58b1a8ab27967580a8016c9132361bed70ecd: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe7f4b585bce4e4a5f4261bccaa034d99df25e6c1f925331272cd73ded6288e40)
+    ├─ emit Anchored(hash: 0xe7f4b585bce4e4a5f4261bccaa034d99df25e6c1f925331272cd73ded6288e40, sender: 0x10bBF043B4fFc8e52c47C61D1457a6F07EA18D3c, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xac7f4e8e3accd9752410777c4809a01405b6878fe7d0ab591c432a5517df4c61: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x85bd16e6e24548033622026b1cc6b21d534a0b5140701c541c66679ee252897a)
+    ├─ emit Anchored(hash: 0x85bd16e6e24548033622026b1cc6b21d534a0b5140701c541c66679ee252897a, sender: 0xA6923bbD98F2aEceBea559221dd12D6078Ba1e9d, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1352b4408114c33ffdc671884523df2acad783a268266a42965bf8be9dca0d9e: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x49db47c8968fa8278d48cea88a6f348745537a50f93538759680b5387991cd47)
+    ├─ emit Anchored(hash: 0x49db47c8968fa8278d48cea88a6f348745537a50f93538759680b5387991cd47, sender: 0x0F9b012B17B2340A14e2a6c3a51a160E5F330735, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa767fd930f3ef537aaa943e1f764c2043b49baeafeb01bbdf5501401aa658ac4: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xccedc3b55c6584389354ec5afb7c22e78291b3865dea17d690d10c884b89093b)
+    ├─ emit Anchored(hash: 0xccedc3b55c6584389354ec5afb7c22e78291b3865dea17d690d10c884b89093b, sender: 0xEe82cd0851C4fA1B8C72FA7b0f8de49D20425278, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x358aea5b86cadb6706267d9fcb93b7ad58713d1af570879271038b122d0d2964: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x2beef5b5ee4920e9ef4d22565749718f9f66b42a3b8dba442385ab62ca233296)
+    ├─ emit Anchored(hash: 0x2beef5b5ee4920e9ef4d22565749718f9f66b42a3b8dba442385ab62ca233296, sender: 0x702D03de968C483baa8B8d1D785f95c4FEa7a368, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xab018eb73966676c6b64a1438a0b6f6d704c3592950f6835e4362f2da3a872c4: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6452220eee5109563aeb7d57f9d87c81d8f54a7e6567b7a8562e24b612555aa5)
+    ├─ emit Anchored(hash: 0x6452220eee5109563aeb7d57f9d87c81d8f54a7e6567b7a8562e24b612555aa5, sender: 0x88EE865fA0Ec90e670d5f76Af51d95F050B8da62, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x353cee4a2e925c52654cec4af1c2802641a4600567b8a7ae0770aeabf7c47d16: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000face0a006cad69ca9bfc3732ab2f72453336969e)
+    ├─ emit Anchored(hash: 0x000000000000000000000000face0a006cad69ca9bfc3732ab2f72453336969e, sender: 0xca81113468C3211ab542772143D6187EEFaBF675, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd75efc7c5dd106651e42ca01c8e46427cce942ee19a576e2450a350ac18e33e0: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x85e68e259cdd6dc0c03d68a88da7a428147b9becb0b3e4b0e568693ee6ccc4db)
+    ├─ emit Anchored(hash: 0x85e68e259cdd6dc0c03d68a88da7a428147b9becb0b3e4b0e568693ee6ccc4db, sender: 0x66756fdE4E5aAF89389bB2c67829A077cf137B1B, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7f94e307424fe1e828a50551d28f764ddf4a82c52c859e0b59677dc5d5043686: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9077fc3ea604b2a5d839b1c03e28b86b669b59bbdbfbeb771315cc1c4133efbd)
+    ├─ emit Anchored(hash: 0x9077fc3ea604b2a5d839b1c03e28b86b669b59bbdbfbeb771315cc1c4133efbd, sender: 0xd395c0Cbf0Bbbf7814230f057E007F2768C2C8CB, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6906f87a5c9a7b23212876c310638f944ee1546ced4fbcb7f0548f75d8afeba9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa689338c39b109da48fb42dd80cf823e09e71cf54effef5874735f68fe805ae5)
+    ├─ emit Anchored(hash: 0xa689338c39b109da48fb42dd80cf823e09e71cf54effef5874735f68fe805ae5, sender: 0x00000000000000000000000000000000BA414fA5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x081407601cd2537a6884056b8d21b5c5d65a55e0cbcbdbd1779251655b93da52: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe0b207451a101abda83e355efdf7e2780088a4d41125c38f70b17feeec859c2a)
+    ├─ emit Anchored(hash: 0xe0b207451a101abda83e355efdf7e2780088a4d41125c38f70b17feeec859c2a, sender: 0xe1CAA0E765fE9eA204d38326F949e364A89f08Aa, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xaed087188a35cd3f7961c9265241167faf6850f53f0144ff8da7d592179a1705: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x09e5c79abdb1452ca310d87353a40dab5c9df749f71835be51d14930491b0d10)
+    ├─ emit Anchored(hash: 0x09e5c79abdb1452ca310d87353a40dab5c9df749f71835be51d14930491b0d10, sender: 0x00000000000000000000000000000000000003F8, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x1d5b3d2422158c5223ba490f2bd336943dff3599b68192fd9433b5985b704a21: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xa0120f4fb21b308d67f0ecf36a0dde640da9eb31e1297163abe97dc709ca4e61)
+    ├─ emit Anchored(hash: 0xa0120f4fb21b308d67f0ecf36a0dde640da9eb31e1297163abe97dc709ca4e61, sender: 0x533Ba377dA4cd97992B2e57b32B11624b8b3aF8D, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd3169a39147c44390497ebd745ffa380a6ef2da1480bd4482af7ea8adf246daa: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x79c0147edf5cf65d2c05b4a1fc3793ae577d6a4132c3bb7aa8eb591521e205d5)
+    ├─ emit Anchored(hash: 0x79c0147edf5cf65d2c05b4a1fc3793ae577d6a4132c3bb7aa8eb591521e205d5, sender: 0x71Dee9985FCE0eDCA7d462aDCBdB697ee5a70dB6, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb00e42cef9f4017c7f7494f3041f3208774e79b64f21cbb3fa0921c9f72f7fbf: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x39b570e98e41f094e656b53bf2b7a753c888e7bfcd222e0a0af7b5175dd8d3a0)
+    ├─ emit Anchored(hash: 0x39b570e98e41f094e656b53bf2b7a753c888e7bfcd222e0a0af7b5175dd8d3a0, sender: 0xCEeC8Dfc692c8c991CB47c660852206d47f86A4B, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x074e6c45de29c032b4f1afced36a2c2a5d5051d8098461127ed467e32fb00805: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xfc137a636d074fca06a1cf78843ed127c846eca61f5ac60b4a824bcf8f5df51a)
+    ├─ emit Anchored(hash: 0xfc137a636d074fca06a1cf78843ed127c846eca61f5ac60b4a824bcf8f5df51a, sender: 0xB1045Dc2aC1A442774471281F8315a0Ecd9bFF59, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x88ee26eb524b69e44ed461e7969ab3500dd401e5a08e64b57ab572a0f3a84491: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x573685e0e7299d131e44643f874385e130e5a50aec2220af02c767d20eb63d9b)
+    ├─ emit Anchored(hash: 0x573685e0e7299d131e44643f874385e130e5a50aec2220af02c767d20eb63d9b, sender: 0xa74B8789f0d7DB3b48b558f0AA0FBC535D315c55, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x53b6e7d6e797462d5b5250d9395d7f00ddc1eb75309108353e232a3e55c196d5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0fbd2981416e864474292ed4ca79f900bc62a5b35e893433d1e815f75a3efff2)
+    ├─ emit Anchored(hash: 0x0fbd2981416e864474292ed4ca79f900bc62a5b35e893433d1e815f75a3efff2, sender: 0x0000000000000000000000000000000000006E62, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa718e806b9a9eb7cfe2b23a8042ee08e45e9b38f1612a691ffef120c964447d3: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x7f7c738e72bdac60d72474a765c1c96500faff0310f0f63425c2c031ac6ca16b)
+    ├─ emit Anchored(hash: 0x7f7c738e72bdac60d72474a765c1c96500faff0310f0f63425c2c031ac6ca16b, sender: 0x000000000000000000000000000000000000032F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x7f4d0db3d984ae08e06927abe3f7e77c30ff144a14923689d24b9a75d15b7bed: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000003062590d80d264bb8f4fb69c98d28580d76a3083)
+    ├─ emit Anchored(hash: 0x0000000000000000000000003062590d80d264bb8f4fb69c98d28580d76a3083, sender: 0x73dE6096BB2E8F21FFBaDa3906B71c6105c25118, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4170dfa0c37af147593707f1c18a67c13cefec85071b449484da8404e543a51d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8b3f6e15ecc0b843ac14435a8dbc15d689a428fcaa3321093e79f126d8d7fd10)
+    ├─ emit Anchored(hash: 0x8b3f6e15ecc0b843ac14435a8dbc15d689a428fcaa3321093e79f126d8d7fd10, sender: 0x1beEA7fe3226e22fb0e4448782F5a59654E522d7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x83569767ba14259bf6d4d57dc5ef4217f42966fedae3ba6739119ed3ecc81824: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xdea56d86ce190e9cbb5b5776c51265b998b2d0202360ed79eeb095960553aa21)
+    ├─ emit Anchored(hash: 0xdea56d86ce190e9cbb5b5776c51265b998b2d0202360ed79eeb095960553aa21, sender: 0x03041c45CAC56B05B962Ad8b4fC78C13A81E31A0, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x15555ed16875709d8c9256edc6a3905b87c3f4635cb4e1b241107dfbede8a6ad: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0000000000000000000000000000000000000000000000000000000000000e18)
+    ├─ emit Anchored(hash: 0x0000000000000000000000000000000000000000000000000000000000000e18, sender: 0x000000000000000000000000000000000A9254e3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6932173f1522a7251a057dcc679003cc37ae8059ed58926a179381664c0c7934: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x4bfcd2f4a92073e693a6c3d89812071e520a4c303c239500dede236cd58ff927)
+    ├─ emit Anchored(hash: 0x4bfcd2f4a92073e693a6c3d89812071e520a4c303c239500dede236cd58ff927, sender: 0x0000000000000000000000000000000000000099, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x22ea6bd3008a6ada44b42ee807af996bdad2e9e6973033f691323da6bb607578: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb90ab9735b8fe86ce2f430998e8fe7c9fdd52061b014e283c73d403844e2049c)
+    ├─ emit Anchored(hash: 0xb90ab9735b8fe86ce2f430998e8fe7c9fdd52061b014e283c73d403844e2049c, sender: 0xD846975B50e45aa9484FFA1cef15b848c26d3AB9, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x277f53f295d133a32cd2f3ddb72a8416168455e6b60beb842fe92848a87673a2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9e99f873617a16cc0abb58f8b796e242173b215cdcc275e67f3102323da0d4f3)
+    ├─ emit Anchored(hash: 0x9e99f873617a16cc0abb58f8b796e242173b215cdcc275e67f3102323da0d4f3, sender: 0x0000000000000000000000000000000000000fca, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4d2ed7d9a3788602b929ff9bc5adc2d57c6f302dd89252b1fed9022fea74ca44: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x1b4e54eeec19f30f5c1557ba831b347cbe401d6e73035f13d0f3e53ec92aa4e7)
+    ├─ emit Anchored(hash: 0x1b4e54eeec19f30f5c1557ba831b347cbe401d6e73035f13d0f3e53ec92aa4e7, sender: 0xD66ffCfbEa35d2Bf9fb0A1865dfAC9D74a9eE876, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x8b464b066382563e96d50e4a0d38225ac6dfbc815fe7b4095dad711797d27471: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xcb07ae93d0da22a95c5b2310cb1cc405dfe435fa45d859984f8dd6cae44582ff)
+    ├─ emit Anchored(hash: 0xcb07ae93d0da22a95c5b2310cb1cc405dfe435fa45d859984f8dd6cae44582ff, sender: 0x302011A06BcC578EdadA17FE19dd950b29683398, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x18a87bcd31392855c10b6ce25d50f92fc5840d3f1d0a0fe62cbc7baca1e43280: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x88cc3d04917517907aa51d6666fa8b78a9d2df77481763a122a0babd37b925d4)
+    ├─ emit Anchored(hash: 0x88cc3d04917517907aa51d6666fa8b78a9d2df77481763a122a0babd37b925d4, sender: 0x72B7606a7f4E8389B6DdF1037cE6b12338B71bdE, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x665410d6efa41126a64a66609731d33117d7a6f28a8acbc196737e2c03a8fcb3: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6eb043f97b04a8652329eb3c6872147735abf21deff6ad08e0ea97972d7fb194)
+    ├─ emit Anchored(hash: 0x6eb043f97b04a8652329eb3c6872147735abf21deff6ad08e0ea97972d7fb194, sender: 0x86D4403F98ED2DeDa9C287CEE60815eF608D56AF, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xf55218a2611a0d1cde8bbe16b97dfdb8ceb58fb769b6b529926a56efd775608d: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6a6acbcdf0ac78b9e0449d18a849ca82e80051ad5fce7c60b6f66af4049fe4f3)
+    ├─ emit Anchored(hash: 0x6a6acbcdf0ac78b9e0449d18a849ca82e80051ad5fce7c60b6f66af4049fe4f3, sender: 0x1ec84145F12eFD17F6eAe5FCFfCb06cE03C528E5, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa44c4079083e5aff4de712147217bb52acbe930288c69cbbbbfbfd8f0f2cf81b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xcb565cbb0730c7934f49567d49b581b1a7cbf372ed005f3c357747ded42e9f51)
+    ├─ emit Anchored(hash: 0xcb565cbb0730c7934f49567d49b581b1a7cbf372ed005f3c357747ded42e9f51, sender: 0xA021418D2AA5d333Cd62B006b7d8755442Cc937A, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x46fcccc71afe9cc4360dd2d2a35f0dac76f55d91ec828c74397b793e3f449fe9: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x5ce84ef86b65dbdee8366974816560feb1afda6e4fd344d7fd62c38b4d7fb830)
+    ├─ emit Anchored(hash: 0x5ce84ef86b65dbdee8366974816560feb1afda6e4fd344d7fd62c38b4d7fb830, sender: 0x8F64B14E10434A1B231285a1E450c9cc223D1aFD, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x2797a5a8101229ef61c6fb74663119d914c6bcc5c77a36fe52723b8542786c9f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x220aa7be0139cbe45a37b2ad706c2d37b147f4d042a2ae77e60332209e659a78)
+    ├─ emit Anchored(hash: 0x220aa7be0139cbe45a37b2ad706c2d37b147f4d042a2ae77e60332209e659a78, sender: 0x00000000000000000000000000000000000000CF, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd7f94944cf5f7c3f86a9bd68617f077cd6247a794b98e737b4de5c2e48d1e3a5: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x3ba924ef8282b11b6908a495f7acec8f96eba5355d3d5748d7f34fc5aca59dcd)
+    ├─ emit Anchored(hash: 0x3ba924ef8282b11b6908a495f7acec8f96eba5355d3d5748d7f34fc5aca59dcd, sender: 0x00000000000000000000000000000000000009eE, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x6ed17091271cf225db1add3efbc8a48b5c567936332b307b6b906d5af3ad96a1: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x579e73585a761f5c20e31c5a5f9ecdfd430450b06de39316298653087bd98184)
+    ├─ emit Anchored(hash: 0x579e73585a761f5c20e31c5a5f9ecdfd430450b06de39316298653087bd98184, sender: 0x784fEA0b40025779D3C7e8b3c1dEf736Ba4AdD82, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x3f9241c1794b18d04ec280e87573f740e0478d91576a055f332bb6f4be74feec: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xbca4318cd6d7f44c3fe4ee2072ec9c271631791a5b80a4b4d290ace69155e152)
+    ├─ emit Anchored(hash: 0xbca4318cd6d7f44c3fe4ee2072ec9c271631791a5b80a4b4d290ace69155e152, sender: 0x718ca1f09bB83221bf152CeA602fdf4284FFE6d3, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xb813fd522879a3db4efb9e8dbd5a557ee090867c2b2e839885970a730070ff99: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xf460992a8fa7cf235cc8834aff0620c5ddcd5b6178072eb212288d7ab70ddc75)
+    ├─ emit Anchored(hash: 0xf460992a8fa7cf235cc8834aff0620c5ddcd5b6178072eb212288d7ab70ddc75, sender: 0xb1616E9ae0dd5acec16fFecC2836E114a5C6e6EE, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x25f81287387a3c0dd018dc77e6561d2323409874a0e98acc9756da69f46c0e6a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x6400a2dceda5fb6a8397ebf0a1f7d6089181f8dbaeae232fb04ca694f8b79b1a)
+    ├─ emit Anchored(hash: 0x6400a2dceda5fb6a8397ebf0a1f7d6089181f8dbaeae232fb04ca694f8b79b1a, sender: 0x00000000000000000000000000000000000002e4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x814966666bae03afb899cefa0cd5d8b284505af62e04a18dccd2bd7142fe48d2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x67cf5ad368e06a0ecd4c7a2eeb1280da7de928ca689f1fe1b3ebc14fe1f4e616)
+    ├─ emit Anchored(hash: 0x67cf5ad368e06a0ecd4c7a2eeb1280da7de928ca689f1fe1b3ebc14fe1f4e616, sender: 0xf3c3353DEe7f47a82E7d2343d74e24e260Dd8deD, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0818ea2eb76f9b88ce5f01b55b6a1f5186a88dc9779e9d540c0474c7766d3dc2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x1c20ce879b1784cdd37b7e5f4480b6c851fec8493ab7894eda79c2e39860b545)
+    ├─ emit Anchored(hash: 0x1c20ce879b1784cdd37b7e5f4480b6c851fec8493ab7894eda79c2e39860b545, sender: 0x865d0269f9C4AE23590a35978e2dABD126a236fb, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x14bfd6dccd8724e244e90e63a4868edb3c167b9de3cb9407a7c843ab24e46907: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x000000000000000000000000594787f8bfa588e2c8fb1fbbf9743ea48b71fc7c)
+    ├─ emit Anchored(hash: 0x000000000000000000000000594787f8bfa588e2c8fb1fbbf9743ea48b71fc7c, sender: 0x45eB579d68e643EBbE196343F9fffC657Ed12F89, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xdf88335aa48577a35fe719295d8dbc7d9015d09c1cc09a390602d43529bc47a2: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x3f39cf89b10bf52a5d25f23588a8012b9fa621e791e5d51996e44d4f749a8b6c)
+    ├─ emit Anchored(hash: 0x3f39cf89b10bf52a5d25f23588a8012b9fa621e791e5d51996e44d4f749a8b6c, sender: 0xd98faa971cfF6A4E68e6A6dC210C56806349ac96, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xfae32270534eb591f656f2000edc3d1db866ad25f8eff3dfc282900e57444a50: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x85f114730e5faa0096d76e61fb9e61ce1f90d7daa69742383a8fabc934dd3421)
+    ├─ emit Anchored(hash: 0x85f114730e5faa0096d76e61fb9e61ce1f90d7daa69742383a8fabc934dd3421, sender: 0x1Ab320e00bB4e0A0Fb665798Af83A630Aa8C0C40, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xd461e31ca1ffe7a5b900cba8eb111012e6605190d27b4bae4139746d7513c60a: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x30cd5015e58b9c24eb2595e46f57007c5ed8a4ec876a16d456573afa20d3e9f5)
+    ├─ emit Anchored(hash: 0x30cd5015e58b9c24eb2595e46f57007c5ed8a4ec876a16d456573afa20d3e9f5, sender: 0x000000000000000000000000000000000000043F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x83b78959cb7ee34101afeb200f0f00bc4adca6a051eb86dc20a124485af223c6: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x0582b1a631216b45f654b79fbe91c7cce9d943a90bfee3ef90f5cab59871b373)
+    ├─ emit Anchored(hash: 0x0582b1a631216b45f654b79fbe91c7cce9d943a90bfee3ef90f5cab59871b373, sender: 0x72b6e352cd357AF9AC7a885b69B56478285Cf0b7, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x04eacec2101e8fceefa8dcfd8e4dbe926deb6806d26ae3f542a45713c445a25b: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xef9ecc601ddf811691dd36fece1bdce519077fc8e56acb64f1aaf8e7abf49a96)
+    ├─ emit Anchored(hash: 0xef9ecc601ddf811691dd36fece1bdce519077fc8e56acb64f1aaf8e7abf49a96, sender: 0x42B9DaF16ea9211a9B4d80b3Bb03E1a8AF1963E4, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x36dd70af948a4797e219e47ed5d7106c1c52da55bafa6cb47418af00c0923e86: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000000000000000000000000000000000000000000000fb)
+    ├─ emit Anchored(hash: 0x00000000000000000000000000000000000000000000000000000000000000fb, sender: 0xa8830f1e4558eb789Ab218cb8126dfA5B0d5Aa9E, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x4c337270162aac3e0998a27c3a2ab9613a51ab704ee469e241cb021bc0b88df4: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x9b6c8ddfea1f8525182ac027d299517ac99be0ebe33eb56560bd800d3acfe571)
+    ├─ emit Anchored(hash: 0x9b6c8ddfea1f8525182ac027d299517ac99be0ebe33eb56560bd800d3acfe571, sender: 0xB72A8416168455e6b60bEB842FE92848A87673a2, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x0619359147cd3468d2a88955dcf3853658cac4be7db3a151ce8d0ae24d8af8d6: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x3dc7876b9e3ff1d0409dd78353a760fba453228b039d97742c2cf0d0ba298af2)
+    ├─ emit Anchored(hash: 0x3dc7876b9e3ff1d0409dd78353a760fba453228b039d97742c2cf0d0ba298af2, sender: 0x0000000000000000000000000000000000000181, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0xa8f1e8f36afc02507822d86858823f401bf8206b73d45617e704398c16c39217: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xe651aafad9afd5971ed6de01e1cf7e26f6f1beb48e386459e32ad59b76839a5d)
+    ├─ emit Anchored(hash: 0xe651aafad9afd5971ed6de01e1cf7e26f6f1beb48e386459e32ad59b76839a5d, sender: 0xd01Fd363D157E952C3D91273972C9a01aC61Cd3F, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x17478689d5a594e927bc5429f5bcb8f84ad638027d968641b7aed4c64c9d355f: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x8da93f78e9418a2d31f6e53740bd8c41b762e9788af90a73dc7faacb63c4062b)
+    ├─ emit Anchored(hash: 0x8da93f78e9418a2d31f6e53740bd8c41b762e9788af90a73dc7faacb63c4062b, sender: 0x7CA8eC55888A17E7054643Bf7110f6a11C5df698, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x17a8975e675efd040c01a14ed45fd71b658e786bb547e034fd01f50aee7b8122: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0xb84e4298f3a6292774b798b43a202ce92291460f19fe80ed2d2d7e8e4674dcba)
+    ├─ emit Anchored(hash: 0xb84e4298f3a6292774b798b43a202ce92291460f19fe80ed2d2d7e8e4674dcba, sender: 0xAFF0f89c208119CeAf5142230E7a238b5F7C1A98, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x5d399aeb6f2bde74462d349e4e9d057ecf5ffc117db383c0d158d9b5e89f1a20: 0 → 1
+    └─ ← [Stop]
+
+  [24351] AnchorRegistry::anchor(0x00000000000000000000005615deb798bb3e4dfa0139dfa1b3d433cc23b72f02)
+    ├─ emit Anchored(hash: 0x00000000000000000000005615deb798bb3e4dfa0139dfa1b3d433cc23b72f02, sender: 0x66eE2B3f807EaFFfc719c90100a2C89622C01167, timestamp: 1)
+    ├─  storage changes:
+    │   @ 0x93c49c13dd9f63faa14438bedbf22a3a6c00bbd19ec593e0129051b816866b2f: 0 → 1
+    └─ ← [Stop]
+
+  [2297] AnchorRegistryInvariantTest::invariant_TimestampNeverChanges()
+    └─ ← [Stop]
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 6.35s (6.35s CPU time)
+
+Ran 2 test suites in 6.36s (6.37s CPU time): 13 tests passed, 0 failed, 0 skipped (13 total tests)

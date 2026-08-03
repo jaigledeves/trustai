@@ -2,7 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import type { AiAnalysisPort, AiAnalysisRawResult } from "../../ports/ai-analysis.port";
 
 /**
- * MVP stub: deterministic canned output, no real AI call. Used in unit
+ * Deterministic canned output, no real AI call. Used in unit
  * tests, CI, and as a demo contingency (proposal §Riesgos Plan B) — mirrors
  * `StubNotificationAdapter`'s pattern. Output is schema-valid by
  * construction (verified in stub.adapter.spec.ts against the shared
