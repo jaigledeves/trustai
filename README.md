@@ -102,6 +102,26 @@ docs/                # Documentación de producto e ingeniería (incluye el índ
 
 **Requisitos previos:** Node `>=22`, pnpm `11.9.0`, Docker.
 
+### Atajo (Windows / PowerShell 7+)
+
+Los scripts `dev-up.ps1` y `dev-down.ps1` automatizan todo el arranque de
+forma idempotente (arrancan Docker Desktop si hace falta, levantan
+Postgres + MinIO, crean el bucket S3, copian los `.env` faltantes desde
+`.env.example`, generan `ASSET_ENCRYPTION_KEY` si está vacía, aplican el
+esquema Prisma, siembran el usuario demo y arrancan API y web en
+segundo plano):
+
+```powershell
+pnpm install
+.\dev-up.ps1     # levanta todo; imprime URLs, credenciales y logs
+.\dev-down.ps1   # detiene servidores y contenedores (conserva datos)
+```
+
+Logs en vivo: `Get-Content "$env:TEMP\trustai\api.log" -Wait`.
+Para borrar también los datos: `.\dev-down.ps1 -Full -Volumes`.
+
+### Paso a paso (cualquier SO)
+
 ```bash
 # 1. Instalar dependencias
 pnpm install
