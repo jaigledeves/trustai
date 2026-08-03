@@ -1,11 +1,12 @@
 "use client";
 
+import { Check, ExternalLink, ShieldAlert, UploadCloud } from "lucide-react";
 import { useState, type ChangeEvent } from "react";
 import { verifyDictionary } from "../../dictionaries/es/verify";
 import { postVerifyUpload } from "../../lib/api/public-verify-client";
 import type { VerifyUploadResponse } from "../../lib/api/types";
+import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
-import { Label } from "../ui/label";
 import { ClientHashRecompute } from "./ClientHashRecompute";
 
 interface UploadVerdictPanelProps {
@@ -56,18 +57,68 @@ export function UploadVerdictPanel({ id }: UploadVerdictPanelProps) {
     }
   }
 
+  const t = verifyDictionary.upload;
+
   return (
-    <div className="flex flex-col gap-4">
-      <Label htmlFor="verify-upload-file">{verifyDictionary.upload.fileLabel}</Label>
-      <input id="verify-upload-file" type="file" onChange={handleFileChange} />
-      {error ? <p role="alert">{error}</p> : null}
-      <Button type="button" onClick={handleSubmit} disabled={!file || isPending}>
-        {verifyDictionary.upload.submitLabel}
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-lg shadow-primary/5 sm:p-8">
+      <h2 className="text-lg font-semibold">{t.panelTitle}</h2>
+      <p className="mt-1 text-sm text-muted-foreground text-pretty">{t.panelDescription}</p>
+
+      {/* Native <label>+<input> (not the shadcn Label) so the whole dashed
+          dropzone is the clickable trigger. The input carries an explicit
+          `aria-label` equal to `fileLabel`: getByLabelText matches on the
+          label's raw textContent (which also includes the visible hint), so the
+          aria-label is what keeps the test's exact lookup unambiguous. */}
+      <label
+        htmlFor="verify-upload-file"
+        className="mt-5 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/40 px-6 py-10 text-center transition-colors hover:border-primary/40 hover:bg-accent/40"
+      >
+        <span
+          aria-hidden="true"
+          className="flex size-11 items-center justify-center rounded-xl bg-accent text-primary"
+        >
+          <UploadCloud className="size-6" />
+        </span>
+        <span className="text-sm font-medium">{t.fileLabel}</span>
+        <span className="text-xs text-muted-foreground">{t.dropzoneHint}</span>
+      </label>
+      <input
+        id="verify-upload-file"
+        type="file"
+        aria-label={t.fileLabel}
+        className="sr-only"
+        onChange={handleFileChange}
+      />
+
+      {file ? (
+        <p className="mt-3 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">{file.name}</span>
+        </p>
+      ) : null}
+
+      {error ? (
+        <p role="alert" className="mt-3 text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
+
+      <Button
+        type="button"
+        size="lg"
+        onClick={handleSubmit}
+        disabled={!file || isPending}
+        className="mt-5 w-full sm:w-auto"
+      >
+        {t.submitLabel}
       </Button>
 
-      {submittedFile ? <ClientHashRecompute file={submittedFile} /> : null}
+      {submittedFile ? (
+        <div className="mt-6 border-t border-border pt-6">
+          <ClientHashRecompute file={submittedFile} />
+        </div>
+      ) : null}
       {result ? <VerdictOutcome result={result} /> : null}
-    </div>
+    </section>
   );
 }
 
@@ -78,14 +129,28 @@ function isErrorVerdict(verdict: VerifyUploadResponse["verdict"]): boolean {
 
 function VerdictOutcome({ result }: { result: VerifyUploadResponse }) {
   const copy = verifyDictionary.verdicts[result.verdict];
+  const isError = isErrorVerdict(result.verdict);
 
   return (
-    <div role={isErrorVerdict(result.verdict) ? "alert" : "status"} className="flex flex-col gap-2">
-      <h3 className="font-semibold">{copy.title}</h3>
-      <p>{copy.message}</p>
+    <div className="mt-6 flex flex-col gap-4">
+      <div
+        role={isError ? "alert" : "status"}
+        className={cn(
+          "rounded-xl p-4",
+          isError ? "bg-destructive/10 text-destructive" : "bg-emerald-50 text-emerald-600",
+        )}
+      >
+        <div className="flex items-center gap-2">
+          {isError ? <ShieldAlert className="size-5" /> : <Check className="size-5" />}
+          <h3 className="font-semibold">{copy.title}</h3>
+        </div>
+        <p className="mt-1 text-sm">{copy.message}</p>
+      </div>
 
       {result.analysis ? (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4 text-sm">
+          {/* Value kept as the element's only direct text node (label is a
+              nested <span>) so getByText("Resumen X") resolves — see test. */}
           <p>
             <span className="font-medium">{verifyDictionary.analysis.summaryLabel}: </span>
             {result.analysis.summary}
@@ -102,8 +167,14 @@ function VerdictOutcome({ result }: { result: VerifyUploadResponse }) {
       ) : null}
 
       {result.chainAnchor?.explorerUrl ? (
-        <a href={result.chainAnchor.explorerUrl} target="_blank" rel="noopener noreferrer">
+        <a
+          href={result.chainAnchor.explorerUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary underline-offset-2 hover:underline"
+        >
           {verifyDictionary.landing.anchorExplorerLinkLabel}
+          <ExternalLink className="size-4" />
         </a>
       ) : null}
     </div>

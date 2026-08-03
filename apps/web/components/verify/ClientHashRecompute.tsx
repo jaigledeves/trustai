@@ -60,17 +60,23 @@ export function ClientHashRecompute({ file }: ClientHashRecomputeProps) {
   }, [file]);
 
   return (
-    <div role="status" className="flex flex-col gap-1">
+    <div role="status" className="flex flex-col gap-2">
       <p className="font-medium">{verifyDictionary.recompute.title}</p>
       {failed ? (
-        <p role="alert">{verifyDictionary.recompute.error}</p>
+        <p role="alert" className="text-sm text-destructive">
+          {verifyDictionary.recompute.error}
+        </p>
       ) : hash ? (
-        <div>
-          <p className="text-sm">{verifyDictionary.recompute.hashLabel}</p>
-          <code className="break-all">{hash}</code>
+        <div className="flex flex-col gap-1">
+          <p className="text-sm text-muted-foreground">{verifyDictionary.recompute.hashLabel}</p>
+          <code className="block break-all rounded-lg bg-muted/60 px-3 py-2 font-mono text-xs text-card-foreground">
+            {hash}
+          </code>
         </div>
       ) : null}
-      <p className="text-muted-foreground text-sm">{verifyDictionary.recompute.caveat}</p>
+      <p className="text-muted-foreground text-sm text-pretty">
+        {verifyDictionary.recompute.caveat}
+      </p>
     </div>
   );
 }
