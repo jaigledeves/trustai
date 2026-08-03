@@ -22,6 +22,15 @@ export const landingDictionary = {
   nav: {
     login: "Iniciar sesión",
     register: "Crear cuenta",
+    // In-page anchor labels. Hrefs (#como-funciona, #verificacion, #casos,
+    // #faq) are structural and live in `Nav.tsx` (same pattern as the
+    // hardcoded /login, /register hrefs); only the labels are dictionary copy.
+    sectionLinks: {
+      howItWorks: "Cómo funciona",
+      verification: "Verificación",
+      useCases: "Casos de uso",
+      faq: "Preguntas",
+    },
   },
   hero: {
     badge: "Piloto en vivo · Base Sepolia (testnet)",
