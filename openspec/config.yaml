@@ -1,0 +1,66 @@
+schema: spec-driven
+
+context: |
+  Tech stack: pnpm monorepo, TypeScript everywhere. apps/api (NestJS, hexagonal
+  ports & adapters, Prisma/Postgres, pg-boss, viem); apps/web (Next.js 16 App
+  Router, Tailwind v4, shadcn/radix-ui, TanStack Query, Zod, BFF proxy with
+  httpOnly JWT cookie); packages/dtr-core (framework-free RFC 8785 canon +
+  hash + verify, shared by api/web); packages/utils (shared helpers);
+  smart-contracts (Foundry, AnchorRegistry deployed on Base Sepolia).
+  Architecture: Hexagonal (ports & adapters) in apps/api; App Router BFF in
+  apps/web. RNF-041: Spanish UI in MVP, all user-facing strings live in
+  apps/web/dictionaries/{locale}/*.ts modules (no hardcoded copy in
+  components). apps/web is light-mode only — no dark-mode toggle.
+  Testing: Vitest unit everywhere, Playwright e2e (apps/web), NestJS e2e specs
+  (apps/api, needs Docker: Postgres/Anvil/MinIO), Foundry unit/fuzz (contracts).
+
+strict_tdd: true
+
+testing:
+  apps/api:
+    unit: "pnpm --filter @trustai/api test"
+    e2e: "pnpm --filter @trustai/api test:e2e"
+    typecheck: "pnpm --filter @trustai/api typecheck"
+  apps/web:
+    unit: "pnpm --filter @trustai/web test"
+    e2e: "pnpm --filter @trustai/web test:e2e"
+    lint: "pnpm --filter @trustai/web lint"
+    typecheck: "pnpm --filter @trustai/web typecheck"
+  packages/dtr-core:
+    unit: "pnpm --filter @trustai/dtr-core test"
+    coverage: "pnpm --filter @trustai/dtr-core test:coverage"
+  packages/utils:
+    unit: "pnpm --filter @trustai/utils test"
+    coverage: "pnpm --filter @trustai/utils test:coverage"
+  smart-contracts:
+    unit: "forge test -vvv"
+    build: "forge build"
+  workspace:
+    unit_all: "pnpm -r test"
+    typecheck_all: "pnpm -r typecheck"
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - State which package(s)/domain the change touches (api, web, dtr-core, utils, smart-contracts)
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - User-facing string requirements MUST reference the dictionary module/key, never literal copy
+  design:
+    - Include sequence diagrams for complex flows (see docs/diagrams/sequence for existing style)
+    - Document architecture decisions with rationale; propose an ADR when a real tradeoff is made
+    - Respect hexagonal boundaries in apps/api (no adapter logic in ports/use-cases)
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns (dictionaries for copy, ports/adapters in api, shadcn/radix in web)
+    tdd: true
+    test_command: "pnpm -r test"
+  verify:
+    test_command: "pnpm -r test"
+    build_command: "pnpm -r build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas

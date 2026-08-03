@@ -1,12 +1,31 @@
+import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Wordmark } from "../../../components/brand/Wordmark";
+import { Footer } from "../../../components/landing/Footer";
 import { HashOnlyCard } from "../../../components/verify/HashOnlyCard";
 import { UploadVerdictPanel } from "../../../components/verify/UploadVerdictPanel";
+import { Button } from "../../../components/ui/button";
+import { landingDictionary } from "../../../dictionaries/es/landing";
 import { verifyDictionary } from "../../../dictionaries/es/verify";
 import { config } from "../../../lib/config";
 
 interface VerifyPageProps {
   params: Promise<{ id: string }>;
 }
+
+/**
+ * Landing section links reused as CROSS-PAGE anchors (`/#id`, not `#id`): those
+ * sections live on the landing, not here, so each link navigates to `/` and
+ * scrolls to the section. `verificacion` is deliberately omitted — pointing to
+ * the landing's *demo* verification section from a real verification page would
+ * be confusing. Labels come from the landing dictionary (single source, RNF-041).
+ */
+const sectionLinks = [
+  { href: "/#como-funciona", label: landingDictionary.nav.sectionLinks.howItWorks },
+  { href: "/#casos", label: landingDictionary.nav.sectionLinks.useCases },
+  { href: "/#faq", label: landingDictionary.nav.sectionLinks.faq },
+] as const;
 
 export async function generateMetadata({ params }: VerifyPageProps): Promise<Metadata> {
   await params;
@@ -31,20 +50,87 @@ export async function generateMetadata({ params }: VerifyPageProps): Promise<Met
  */
 export default async function VerifyPage({ params }: VerifyPageProps) {
   const { id } = await params;
-
-  if (!config.publicVerificationEnabled) {
-    return (
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-4 px-4 py-16">
-        <p role="status">{verifyDictionary.page.disabledMessage}</p>
-      </main>
-    );
-  }
+  const t = verifyDictionary.page;
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 py-10">
-      <h1 className="text-2xl font-semibold">{verifyDictionary.page.title}</h1>
-      <HashOnlyCard id={id} />
-      <UploadVerdictPanel id={id} />
-    </main>
+    <>
+      {/* Header reuses the landing's section nav (cross-page anchors) so a
+          visitor arriving from a shared link is never trapped. NO auth links —
+          this public page never shows a login prompt (spec: web-public-verify —
+          No-Auth Access; asserted by page.test.tsx). Wordmark links home. */}
+      <header className="sticky top-0 z-10 border-b border-border/60 bg-background/80 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-4">
+          <Link href="/">
+            <Wordmark />
+          </Link>
+          <nav aria-label="Secciones" className="hidden items-center gap-1 md:flex">
+            {sectionLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      </header>
+
+      <main className="relative flex-1 overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_-10%,var(--accent),transparent)]"
+        />
+        <div className="relative mx-auto w-full max-w-3xl px-6 py-14 sm:py-20">
+          {config.publicVerificationEnabled ? (
+            <>
+              <div className="flex flex-col items-center text-center">
+                <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
+                  <span className="size-2 rounded-full bg-emerald-500" />
+                  {t.badge}
+                </span>
+                <h1 className="mt-5 max-w-xl text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+                  {t.title}
+                </h1>
+                <p className="mt-3 max-w-lg text-muted-foreground text-pretty">{t.subtitle}</p>
+              </div>
+
+              <div className="mt-10">
+                <HashOnlyCard id={id} />
+              </div>
+              <div className="mt-8">
+                <UploadVerdictPanel id={id} />
+              </div>
+
+              {/* Single conversion point (spec: web-public-verify — No-Auth
+                  Access still holds: this is an optional invite to /register,
+                  not a login prompt). Highest-intent moment: the visitor just
+                  saw the proof work. */}
+              <div className="mt-10 rounded-2xl border border-border bg-gradient-to-b from-accent/50 to-background px-8 py-10 text-center shadow-sm">
+                <h2 className="text-2xl font-semibold tracking-tight text-balance">
+                  {verifyDictionary.cta.title}
+                </h2>
+                <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground text-pretty">
+                  {verifyDictionary.cta.subtitle}
+                </p>
+                <Button size="lg" asChild className="mt-6">
+                  <Link href="/register">
+                    {verifyDictionary.cta.button}
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </div>
+            </>
+          ) : (
+            <p role="status" className="text-center text-muted-foreground">
+              {t.disabledMessage}
+            </p>
+          )}
+        </div>
+      </main>
+
+      <Footer />
+    </>
   );
 }

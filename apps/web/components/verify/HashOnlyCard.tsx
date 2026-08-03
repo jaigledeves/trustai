@@ -1,12 +1,22 @@
+import { Check, ExternalLink, ShieldAlert, ShieldCheck } from "lucide-react";
 import { notFound } from "next/navigation";
 import { verifyDictionary } from "../../dictionaries/es/verify";
 import { getVerifyHash, NotFoundError } from "../../lib/api/public-verify-client";
-import type { VerifyHashResponse } from "../../lib/api/types";
-import { Badge } from "../ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import type { VerifyHashResponse, VerifyVerdict } from "../../lib/api/types";
+import { cn } from "../../lib/utils";
 
 interface HashOnlyCardProps {
   id: string;
+}
+
+/** True for the two "something is wrong" verdicts — mirrors `UploadVerdictPanel`. */
+function isErrorVerdict(verdict: VerifyVerdict): boolean {
+  return verdict === "ASSET_MISMATCH" || verdict === "INVALID_RECORD";
+}
+
+/** Short 0x…tail form for on-chain hashes, so the card stays compact. */
+function truncateHash(hash: string): string {
+  return hash.length > 12 ? `${hash.slice(0, 6)}…${hash.slice(-4)}` : hash;
 }
 
 /**
@@ -19,45 +29,92 @@ interface HashOnlyCardProps {
  */
 export async function HashOnlyCard({ id }: HashOnlyCardProps) {
   const result = await fetchHash(id);
+  const t = verifyDictionary.landing;
   const verdictCopy = verifyDictionary.verdicts[result.verdict];
+  const isError = isErrorVerdict(result.verdict);
+  const anchored = Boolean(result.chainAnchor?.anchored);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{verdictCopy.title}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <p>{verdictCopy.message}</p>
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-xl shadow-primary/5 sm:p-8">
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {t.recordLabel}
+        </span>
+        {anchored ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600">
+            <Check className="size-3.5" />
+            {t.anchoredBadge}
+          </span>
+        ) : null}
+      </div>
 
-        <Badge>
-          {result.documentIntegrity
-            ? verifyDictionary.landing.integrityValidLabel
-            : verifyDictionary.landing.integrityInvalidLabel}
-        </Badge>
-
-        <div>
-          <p className="font-medium">{verifyDictionary.landing.explanationLabel}</p>
-          <p className="text-muted-foreground">{result.explanation}</p>
-        </div>
-
-        {result.chainAnchor?.explorerUrl ? (
-          <a href={result.chainAnchor.explorerUrl} target="_blank" rel="noopener noreferrer">
-            {verifyDictionary.landing.anchorExplorerLinkLabel}
-          </a>
-        ) : (
-          <p className="text-muted-foreground">{verifyDictionary.landing.anchorNotAnchoredLabel}</p>
+      <h2
+        className={cn(
+          "mt-5 text-2xl font-semibold",
+          isError ? "text-destructive" : "text-emerald-600",
         )}
+      >
+        {verdictCopy.title}
+      </h2>
+      <p className="mt-1 text-pretty">{verdictCopy.message}</p>
 
+      <div
+        className={cn(
+          "mt-5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium",
+          result.documentIntegrity
+            ? "bg-emerald-50 text-emerald-600"
+            : "bg-destructive/10 text-destructive",
+        )}
+      >
+        {result.documentIntegrity ? (
+          <ShieldCheck className="size-4" />
+        ) : (
+          <ShieldAlert className="size-4" />
+        )}
+        {result.documentIntegrity ? t.integrityValidLabel : t.integrityInvalidLabel}
+      </div>
+
+      <dl className="mt-6 space-y-4 border-t border-border pt-6 text-sm">
         <div>
-          <p className="font-medium">{verifyDictionary.landing.disclaimerLabel}</p>
-          <p className="text-muted-foreground text-sm">{result.disclaimer}</p>
+          <dt className="font-medium">{t.explanationLabel}</dt>
+          <dd className="mt-1 text-muted-foreground text-pretty">{result.explanation}</dd>
         </div>
 
-        <p className="text-muted-foreground text-xs">
-          {verifyDictionary.landing.verifiedAtLabel} {formatVerifiedAt(result.verifiedAt)}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <dt className="text-muted-foreground">{t.txHashLabel}</dt>
+          <dd className="flex items-center gap-3">
+            {/* Kept OUTSIDE the link so the link's accessible name stays exactly
+                `anchorExplorerLinkLabel` (asserted by HashOnlyCard.test.tsx). */}
+            {result.chainAnchor?.txHash ? (
+              <span className="font-mono text-xs text-card-foreground">
+                {truncateHash(result.chainAnchor.txHash)}
+              </span>
+            ) : null}
+            {result.chainAnchor?.explorerUrl ? (
+              <a
+                href={result.chainAnchor.explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-medium text-primary underline-offset-2 hover:underline"
+              >
+                {t.anchorExplorerLinkLabel}
+                <ExternalLink className="size-4" />
+              </a>
+            ) : (
+              <span className="text-muted-foreground">{t.anchorNotAnchoredLabel}</span>
+            )}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-6 rounded-xl bg-muted/60 p-4 text-xs text-muted-foreground">
+        <p className="font-medium text-foreground">{t.disclaimerLabel}</p>
+        <p className="mt-1 text-pretty">{result.disclaimer}</p>
+        <p className="mt-3">
+          {t.verifiedAtLabel} {formatVerifiedAt(result.verifiedAt)}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }
 

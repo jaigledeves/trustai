@@ -17,19 +17,35 @@
 export const verifyDictionary = {
   page: {
     title: "Verificación pública de documento",
+    badge: "Verificación pública · Base Sepolia (testnet)",
+    subtitle:
+      "Nadie tiene que confiar. Se comprueba. Este es el resultado registrado en la blockchain para este documento — y abajo puedes comprobar tu propia copia.",
     disabledMessage: "La verificación pública no está disponible en este momento.",
   },
+  cta: {
+    title: "¿Quieres certificar tus propios documentos?",
+    subtitle:
+      "Crea una cuenta y obtén tu primer Registro Digital de Confianza verificable en minutos. Gratis durante el piloto.",
+    button: "Crear cuenta gratis",
+  },
   landing: {
+    recordLabel: "Registro Digital de Confianza (DTR)",
+    anchoredBadge: "Registrado en blockchain",
     integrityValidLabel: "Integridad confirmada",
     integrityInvalidLabel: "Integridad no confirmada",
     explanationLabel: "Explicación",
     disclaimerLabel: "Aviso legal",
     verifiedAtLabel: "Verificado el",
+    txHashLabel: "Transacción",
     anchorExplorerLinkLabel: "Ver transacción en el explorador",
     anchorNotAnchoredLabel: "Este registro todavía no fue anclado en la blockchain.",
   },
   upload: {
+    panelTitle: "Verifícalo tú mismo",
+    panelDescription:
+      "Sube tu copia del archivo. TrustAI la compara con el registro certificado y, en paralelo, tu navegador recalcula el hash de forma independiente del servidor.",
     fileLabel: "Elige el archivo a verificar",
+    dropzoneHint: "o arrástralo aquí",
     submitLabel: "Verificar documento",
     errorGeneric: "No pudimos verificar el documento. Prueba de nuevo.",
   },
