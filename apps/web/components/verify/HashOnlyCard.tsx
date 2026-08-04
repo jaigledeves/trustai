@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { verifyDictionary } from "../../dictionaries/es/verify";
 import { getVerifyHash, NotFoundError } from "../../lib/api/public-verify-client";
 import type { VerifyHashResponse, VerifyVerdict } from "../../lib/api/types";
+import { truncateId } from "../../lib/format";
 import { cn } from "../../lib/utils";
 
 interface HashOnlyCardProps {
@@ -12,11 +13,6 @@ interface HashOnlyCardProps {
 /** True for the two "something is wrong" verdicts — mirrors `UploadVerdictPanel`. */
 function isErrorVerdict(verdict: VerifyVerdict): boolean {
   return verdict === "ASSET_MISMATCH" || verdict === "INVALID_RECORD";
-}
-
-/** Short 0x…tail form for on-chain hashes, so the card stays compact. */
-function truncateHash(hash: string): string {
-  return hash.length > 12 ? `${hash.slice(0, 6)}…${hash.slice(-4)}` : hash;
 }
 
 /**
@@ -87,7 +83,7 @@ export async function HashOnlyCard({ id }: HashOnlyCardProps) {
                 `anchorExplorerLinkLabel` (asserted by HashOnlyCard.test.tsx). */}
             {result.chainAnchor?.txHash ? (
               <span className="font-mono text-xs text-card-foreground">
-                {truncateHash(result.chainAnchor.txHash)}
+                {truncateId(result.chainAnchor.txHash)}
               </span>
             ) : null}
             {result.chainAnchor?.explorerUrl ? (
