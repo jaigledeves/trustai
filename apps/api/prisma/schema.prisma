@@ -130,6 +130,11 @@ model TrustRecord {
   verificationAttempts VerificationAttempt[]
   @@index([assetId])
   @@index([anchorId])
+  // web-dtr-list: backs the list query's `state` filter + `createdAt desc`
+  // sort (findAllForOrganization). Equality column (state) first, sort key
+  // (createdAt) second. Filename `contains` search is intentionally NOT
+  // indexed here — it needs a pg_trgm GIN index (deferred, MVP scale).
+  @@index([state, createdAt])
   @@map("trust_records")
 }
 
