@@ -4,6 +4,21 @@
  * string comes from here, never an inline JSX literal.
  */
 export const certifyDictionary = {
+  stepper: {
+    uploadLabel: "Subida",
+    analysisLabel: "Análisis de IA",
+    reviewLabel: "Revisión",
+    anchorLabel: "Anclaje",
+    certifiedLabel: "Certificado",
+  },
+  documentContext: {
+    filenameFallback: "Documento sin nombre de archivo",
+    sizeLabel: "Tamaño",
+    uploadedAtLabel: "Subido el",
+  },
+  navigation: {
+    backToList: "Volver a mis DTR",
+  },
   upload: {
     title: "Certificar un documento",
     dropLabel: "Elige un archivo PDF para certificar",
@@ -45,6 +60,8 @@ export const certifyDictionary = {
     slowMessage:
       "El anclaje está tardando más de lo esperado y dejamos de actualizar esta página automáticamente. Recarga la página para comprobar si ya se completó.",
     errorGeneric: "No se pudo anclar en este momento.",
+    viewDetailAction: "Ver detalle",
+    backToListAction: "Volver a mis DTR",
   },
   discard: {
     action: "Descartar borrador",
@@ -55,5 +72,7 @@ export const certifyDictionary = {
       "¿Seguro que quieres descartar este borrador? Esta acción no se puede deshacer.",
     discardedMessage: "Este borrador fue descartado.",
     errorGeneric: "No se pudo descartar el borrador.",
+    certifyAnotherAction: "Certificar otro documento",
+    backToListAction: "Volver a mis DTR",
   },
 } as const;

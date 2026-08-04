@@ -28,6 +28,7 @@ function buildRecord(overrides: Partial<TrustRecordDetail> = {}): TrustRecordDet
     aiModelVersion: "1.0.0",
     reviewedByUserId: "user-1",
     anchor: null,
+    asset: { filename: "contrato.pdf", sizeBytes: 204_800, uploadedAt: "2026-01-01T00:00:00.000Z" },
     analysisFailureReason: null,
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
@@ -97,6 +98,35 @@ describe("AnchorPoller (spec: Anchor Submission and Polling — highest-risk log
     expect(link).toHaveAttribute("href", "https://sepolia.basescan.org/tx/0xabc123");
     // No submit/anchor button should reappear once certified.
     expect(screen.queryByRole("button", { name: "Anclar en blockchain" })).not.toBeInTheDocument();
+  });
+
+  it("Scenario: Certified panel offers detail and list exit actions — both new CTAs render beside the explorer link", async () => {
+    const queryClient = renderPoller(buildRecord({ state: "ANCHORING" }));
+
+    queryClient.setQueryData<TrustRecordDetail>(
+      trustRecordQueryKey("tr-1"),
+      buildRecord({
+        state: "CERTIFIED",
+        anchor: { txHash: "0xabc123", blockTimestamp: "2026-01-02T00:00:00.000Z", status: "CONFIRMED" },
+      }),
+    );
+
+    await screen.findByText("¡Documento certificado! Puedes inspeccionar la transacción on-chain.");
+
+    // The explorer link stays present alongside the new CTAs.
+    expect(
+      screen.getByRole("link", { name: "Ver transacción en el explorador" }),
+    ).toBeInTheDocument();
+
+    const viewDetail = screen.getByRole("link", {
+      name: certifyDictionary.anchor.viewDetailAction,
+    });
+    expect(viewDetail).toHaveAttribute("href", "/dtrs/tr-1");
+
+    const backToList = screen.getByRole("link", {
+      name: certifyDictionary.anchor.backToListAction,
+    });
+    expect(backToList).toHaveAttribute("href", "/dtrs");
   });
 
   it("Transitions through FAILED: shows a transient 'reintentando automáticamente' status (NOT a dead terminal alert) with NO retry button (RF-033)", async () => {
