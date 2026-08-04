@@ -25,17 +25,17 @@ Chain strategy: stacked-to-main
 
 ## Phase 1: Backend — Repository Port & Adapter
 
-- [ ] 1.1 RED: extend `trust-record.repository.spec.ts` — failing test for `findByIdForOrganizationWithAsset` (`{ trustRecord, asset }`; `null` cross-org)
-- [ ] 1.2 GREEN: add `findByIdForOrganizationWithAsset(organizationId, id)` to `trust-record-repository.port.ts`
-- [ ] 1.3 GREEN: implement in `trust-record.repository.ts` via `findFirst({ where: { id, asset: { organizationId } }, include: { asset: true } })`
+- [x] 1.1 RED: extend `trust-record.repository.spec.ts` — failing test for `findByIdForOrganizationWithAsset` (`{ trustRecord, asset }`; `null` cross-org)
+- [x] 1.2 GREEN: add `findByIdForOrganizationWithAsset(organizationId, id)` to `trust-record-repository.port.ts`
+- [x] 1.3 GREEN: implement in `trust-record.repository.ts` via `findFirst({ where: { id, asset: { organizationId } }, include: { asset: true } })`
 
 ## Phase 2: Backend — DTO & Controller
 
-- [ ] 2.1 Add `TrustRecordAssetDetailDto` (`filename`, `sizeBytes`, `uploadedAt`) + `asset` field to `trust-record-detail-response.dto.ts`
-- [ ] 2.2 RED: create `trust-records.controller.spec.ts` — `getById` maps `asset` into DTO (mocked repository)
-- [ ] 2.3 GREEN: swap `getById` to `findByIdForOrganizationWithAsset`, map `asset`
-- [ ] 2.4 Extend `certification-flow.e2e-spec.ts` to assert `asset.filename/sizeBytes/uploadedAt`
-- [ ] 2.5 Run `pnpm --filter @trustai/api test` and `typecheck` — green
+- [x] 2.1 Add `TrustRecordAssetDetailDto` (`filename`, `sizeBytes`, `uploadedAt`) + `asset` field to `trust-record-detail-response.dto.ts`
+- [x] 2.2 RED: create `trust-records.controller.spec.ts` — `getById` maps `asset` into DTO (mocked repository)
+- [x] 2.3 GREEN: swap `getById` to `findByIdForOrganizationWithAsset`, map `asset`
+- [ ] 2.4 Extend `certification-flow.e2e-spec.ts` to assert `asset.filename/sizeBytes/uploadedAt` — SKIPPED: requires a running anvil node (Foundry), not available in this environment. `isAnvilAvailable()` gates the whole suite via `describe.skipIf`. Unit coverage (1.1, 2.2) already exercises the mapping. Remains for the next batch or a CI run with anvil up.
+- [x] 2.5 Run `pnpm --filter @trustai/api test` and `typecheck` — green (176 passed, 1 skipped; typecheck clean)
 
 ## Phase 3: Frontend — Types & Step Helper
 

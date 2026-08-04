@@ -101,13 +101,14 @@ export class TrustRecordsController {
     @Param("id") id: string,
     @Request() req: { user: JwtPayload },
   ): Promise<TrustRecordDetailResponseDto> {
-    const record = await this.trustRecordRepository.findByIdForOrganization(
+    const found = await this.trustRecordRepository.findByIdForOrganizationWithAsset(
       req.user.organizationId,
       id,
     );
-    if (!record) {
+    if (!found) {
       throw new NotFoundException("Trust record not found");
     }
+    const { trustRecord: record, asset } = found;
 
     const anchor = record.anchorId ? await this.anchorRepository.findById(record.anchorId) : null;
 
@@ -139,6 +140,7 @@ export class TrustRecordsController {
       anchor: anchor
         ? { txHash: anchor.txHash, blockTimestamp: anchor.blockTimestamp, status: anchor.status }
         : null,
+      asset: { filename: asset.filename, sizeBytes: asset.sizeBytes, uploadedAt: asset.createdAt },
       analysisFailureReason,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,

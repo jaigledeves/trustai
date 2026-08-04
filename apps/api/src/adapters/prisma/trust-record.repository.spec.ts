@@ -5,13 +5,59 @@ import type { PrismaService } from "./prisma.service";
 function buildFakePrisma(overrides: {
   findMany?: ReturnType<typeof vi.fn>;
   count?: ReturnType<typeof vi.fn>;
+  findFirst?: ReturnType<typeof vi.fn>;
 } = {}): PrismaService {
   return {
     trustRecord: {
       findMany: overrides.findMany ?? vi.fn().mockResolvedValue([]),
       count: overrides.count ?? vi.fn().mockResolvedValue(0),
+      findFirst: overrides.findFirst ?? vi.fn().mockResolvedValue(null),
     },
   } as unknown as PrismaService;
+}
+
+/** Full Prisma-shaped TrustRecord row — matches every field `toDomain` reads. */
+function buildFakePrismaTrustRecordRow(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "tr-1",
+    schemaVersion: "1.0.0",
+    assetId: "asset-1",
+    assetHash: "hash-1",
+    canonicalHash: null,
+    state: "DRAFT",
+    versionNumber: 1,
+    aiSummary: null,
+    aiClassification: null,
+    aiLanguage: null,
+    aiProvider: null,
+    aiModel: null,
+    aiModelVersion: null,
+    aiPromptVersion: null,
+    aiTaxonomyVersion: null,
+    aiAnalyzedAt: null,
+    reviewedByUserId: null,
+    anchorId: null,
+    createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+    ...overrides,
+  };
+}
+
+/** Full Prisma-shaped DigitalAsset row — matches every field `assetToDomain` reads. */
+function buildFakePrismaAssetRow(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "asset-1",
+    sha256: "sha-1",
+    mimeType: "application/pdf",
+    sizeBytes: 1024,
+    filename: "doc.pdf",
+    storageRef: "s3://bucket/asset-1",
+    status: "READY",
+    organizationId: "org-1",
+    createdByUserId: "user-1",
+    createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    ...overrides,
+  };
 }
 
 describe("PrismaTrustRecordRepository.findAllForOrganization (RNF-004: org-scoped pagination)", () => {
@@ -141,5 +187,47 @@ describe("PrismaTrustRecordRepository.findAllForOrganization (RNF-004: org-scope
     const result = await repository.findAllForOrganization("org-empty", 1, 20);
 
     expect(result).toEqual({ items: [], total: 0 });
+  });
+});
+
+describe("PrismaTrustRecordRepository.findByIdForOrganizationWithAsset (ADR-007: org-scoped asset join)", () => {
+  it("scopes the query by DigitalAsset.organizationId at the query level and includes the asset", async () => {
+    const findFirst = vi.fn().mockResolvedValue(null);
+    const prisma = buildFakePrisma({ findFirst });
+    const repository = new PrismaTrustRecordRepository(prisma);
+
+    await repository.findByIdForOrganizationWithAsset("org-1", "tr-1");
+
+    expect(findFirst).toHaveBeenCalledWith({
+      where: { id: "tr-1", asset: { organizationId: "org-1" } },
+      include: { asset: true },
+    });
+  });
+
+  it("returns null (not a post-filtered leak) when findFirst finds no row for this org+id", async () => {
+    const findFirst = vi.fn().mockResolvedValue(null);
+    const prisma = buildFakePrisma({ findFirst });
+    const repository = new PrismaTrustRecordRepository(prisma);
+
+    const result = await repository.findByIdForOrganizationWithAsset("org-cross", "tr-1");
+
+    expect(result).toBeNull();
+  });
+
+  it("maps the joined record and asset into { trustRecord, asset } when found", async () => {
+    const trustRecordRow = buildFakePrismaTrustRecordRow({ id: "tr-1", assetId: "asset-1" });
+    const assetRow = buildFakePrismaAssetRow({ id: "asset-1", filename: "report.pdf", sizeBytes: 2048 });
+    const findFirst = vi.fn().mockResolvedValue({ ...trustRecordRow, asset: assetRow });
+    const prisma = buildFakePrisma({ findFirst });
+    const repository = new PrismaTrustRecordRepository(prisma);
+
+    const result = await repository.findByIdForOrganizationWithAsset("org-1", "tr-1");
+
+    expect(result).not.toBeNull();
+    expect(result?.trustRecord.id).toBe("tr-1");
+    expect(result?.trustRecord.assetId).toBe("asset-1");
+    expect(result?.asset.id).toBe("asset-1");
+    expect(result?.asset.filename).toBe("report.pdf");
+    expect(result?.asset.sizeBytes).toBe(2048);
   });
 });
