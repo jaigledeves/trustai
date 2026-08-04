@@ -77,6 +77,34 @@ describe("LoginForm (spec: Login and Session Establishment)", () => {
     expect(pushMock).not.toHaveBeenCalled();
   });
 
+  it("disables submit and shows pending feedback while the request is in flight", async () => {
+    const user = userEvent.setup();
+    let resolveResponse!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      resolveResponse = resolve;
+    });
+    server.use(
+      http.post("http://localhost:3000/api/auth/login", async () => {
+        await pending;
+        return HttpResponse.json({ ok: true });
+      }),
+    );
+
+    render(<LoginForm />);
+    await user.type(screen.getByLabelText("Email"), "user@example.com");
+    await user.type(screen.getByLabelText("Contraseña"), "correcthorse1");
+    await user.click(screen.getByRole("button", { name: "Ingresar" }));
+
+    const submitButton = await screen.findByRole("button", {
+      name: "Ingresar",
+    });
+    expect(submitButton).toBeDisabled();
+    expect(submitButton).toHaveAttribute("aria-busy", "true");
+
+    resolveResponse();
+    await vi.waitFor(() => expect(pushMock).toHaveBeenCalledWith("/dtrs"));
+  });
+
   it("shows the distinct unverified-email message on 403", async () => {
     const user = userEvent.setup();
     server.use(

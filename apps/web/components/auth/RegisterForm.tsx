@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { authDictionary } from "../../dictionaries/es/auth";
 import { shellDictionary } from "../../dictionaries/es/shell";
@@ -11,6 +12,7 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { StatusPanel } from "../ui/status-panel";
 
 /**
  * Register form (spec: web-auth-flow "Registration"). Submits through the
@@ -63,17 +65,17 @@ export function RegisterForm() {
 
   if (succeeded) {
     return (
-      <div
-        role="status"
-        className="flex flex-col gap-2 rounded-lg border border-border bg-accent/50 p-4 text-center"
+      <StatusPanel
+        variant="success"
+        title={authDictionary.register.successTitle}
+        action={
+          <Button size="lg" asChild>
+            <Link href="/login">{authDictionary.register.loginCta}</Link>
+          </Button>
+        }
       >
-        <h1 className="text-lg font-semibold">
-          {authDictionary.register.successTitle}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {authDictionary.register.successMessage}
-        </p>
-      </div>
+        {authDictionary.register.successMessage}
+      </StatusPanel>
     );
   }
 
@@ -110,14 +112,21 @@ export function RegisterForm() {
         ) : null}
       </div>
       {formError ? (
-        <p
-          role="alert"
-          className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
-        >
-          {formError}
-        </p>
+        <StatusPanel variant="error">{formError}</StatusPanel>
       ) : null}
-      <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={submitting}
+        aria-busy={submitting}
+      >
+        {submitting ? (
+          <span
+            aria-hidden="true"
+            className="size-4 shrink-0 animate-spin rounded-full border-2 border-primary border-t-transparent"
+          />
+        ) : null}
         {authDictionary.register.submit}
       </Button>
     </form>

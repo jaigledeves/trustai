@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Button } from "../../../components/ui/button";
+import { StatusPanel } from "../../../components/ui/status-panel";
 import { authDictionary } from "../../../dictionaries/es/auth";
 import { ApiError } from "../../../lib/api/errors";
 import { serverFetch } from "../../../lib/api/server-client";
@@ -11,7 +13,10 @@ interface VerifyEmailPageProps {
  * Server Component (spec: "Email Verification Landing"). Calls
  * `GET /auth/verify-email?token=` on load and renders a distinct outcome
  * for a valid vs. invalid/expired token — an expired link is an explicit
- * error state, never a silent redirect.
+ * error state, never a silent redirect. Renders under `(auth)/layout.tsx`,
+ * which already provides the gradient + Wordmark + Card-column wrapper, so
+ * this only needs the status content (spec: web-visual-coherence — "Auth
+ * Surface Cohesion").
  */
 export default async function VerifyEmailPage({
   searchParams,
@@ -21,25 +26,32 @@ export default async function VerifyEmailPage({
 
   if (verified) {
     return (
-      <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-4 px-4 py-16">
-        <h1 className="text-2xl font-semibold">
-          {authDictionary.verifyEmail.successTitle}
-        </h1>
-        <p>{authDictionary.verifyEmail.successMessage}</p>
-        <Link href="/login" className="underline">
-          {authDictionary.verifyEmail.successCta}
-        </Link>
-      </main>
+      <StatusPanel
+        variant="success"
+        title={authDictionary.verifyEmail.successTitle}
+        action={
+          <Button size="lg" asChild>
+            <Link href="/login">{authDictionary.verifyEmail.successCta}</Link>
+          </Button>
+        }
+      >
+        {authDictionary.verifyEmail.successMessage}
+      </StatusPanel>
     );
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-4 px-4 py-16">
-      <h1 className="text-2xl font-semibold">
-        {authDictionary.verifyEmail.errorTitle}
-      </h1>
-      <p role="alert">{authDictionary.verifyEmail.errorMessage}</p>
-    </main>
+    <StatusPanel
+      variant="error"
+      title={authDictionary.verifyEmail.errorTitle}
+      action={
+        <Button size="lg" variant="outline" asChild>
+          <Link href="/register">{authDictionary.login.registerCta}</Link>
+        </Button>
+      }
+    >
+      {authDictionary.verifyEmail.errorMessage}
+    </StatusPanel>
   );
 }
 

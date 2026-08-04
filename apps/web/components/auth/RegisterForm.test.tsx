@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { server } from "../../test/msw/server";
 import { RegisterForm } from "./RegisterForm";
 
@@ -48,6 +48,43 @@ describe("RegisterForm (spec: web-auth-flow Registration)", () => {
         "Revisa tu email para verificar tu cuenta antes de iniciar sesión.",
       ),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Iniciar sesión" }),
+    ).toHaveAttribute("href", "/login");
+  });
+
+  it("disables submit and shows pending feedback while the request is in flight", async () => {
+    const user = userEvent.setup();
+    let resolveResponse!: () => void;
+    const pending = new Promise<void>((resolve) => {
+      resolveResponse = resolve;
+    });
+    server.use(
+      http.post("http://localhost:3000/api/backend/auth/register", async () => {
+        await pending;
+        return HttpResponse.json({ userId: "u1", organizationId: "o1" });
+      }),
+    );
+
+    render(<RegisterForm />);
+    await user.type(screen.getByLabelText("Email"), "user@example.com");
+    await user.type(screen.getByLabelText("Contraseña"), "correcthorse1");
+    await user.click(screen.getByRole("button", { name: "Registrarme" }));
+
+    const submitButton = await screen.findByRole("button", {
+      name: "Registrarme",
+    });
+    expect(submitButton).toBeDisabled();
+    expect(submitButton).toHaveAttribute("aria-busy", "true");
+
+    resolveResponse();
+    await vi.waitFor(() =>
+      expect(
+        screen.getByText(
+          "Revisa tu email para verificar tu cuenta antes de iniciar sesión.",
+        ),
+      ).toBeInTheDocument(),
+    );
   });
 
   it("maps a 409 duplicate-email response to the exact spec copy", async () => {
