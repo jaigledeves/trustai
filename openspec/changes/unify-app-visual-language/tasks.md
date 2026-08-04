@@ -61,20 +61,20 @@ Chain strategy: feature-branch-chain
 
 ## Phase 4: Certify Wizard + Global (PR 4)
 
-- [ ] 4.1 `UploadStep.tsx`: `validationError`/`submitError`→`error`; `sizeWarning`→`info`. Check: `UploadStep.test.tsx` green.
-- [ ] 4.2 `ReviewStep.tsx`: analysis-failed→`error`(title); `formError`→`error`; `saved`→`success`. Check: `ReviewStep.test.tsx` green.
-- [ ] 4.3 `CertifyWizard.tsx`: discard/duplicate notices→`info`; polling status→`pending`/`info`. Check: `CertifyWizard.test.tsx` green.
-- [ ] 4.4 `ConfirmButton.tsx`: error→`error`. Check: `ConfirmButton.test.tsx` green.
-- [ ] 4.5 `AnchorPoller.tsx`: delete `ProgressStatus`/`SlowNotice`, consume `StatusPanel` (`READY`-error→error, in-progress→pending, cap-reached→info, `CERTIFIED`→success+explorer action). Check: `AnchorPoller.test.tsx` green.
-- [ ] 4.6 `certify.ts`: add `discard.dialogTitle/cancel/confirmAction` (distinct from `discard.action`).
-- [ ] 4.7 RED rewrite `DiscardDraftButton.test.tsx`: drop `window.confirm` spy entirely. Case 1: open→`getByRole("alertdialog")` w/ `confirmPrompt`→click "Sí, descartar"→MSW discard fired + `pushMock("/dtrs/new")`. Case 2: open→click "Cancelar"→no request, no push.
-- [ ] 4.8 GREEN `DiscardDraftButton.tsx` rewrite using `ui/alert-dialog.tsx` (1.6) + 4.6/4.7 keys.
-- [ ] 4.9 `app/error.tsx`: `<button>`→`Button`(`unstable_retry`) in `StatusPanel error` (keeps `role="alert"`); add gradient. Check: `error.test.tsx` green (exact text + "Reintentar" button preserved).
-- [ ] 4.10 `app/loading.tsx` (new): self-contained centered spinner. Check: presence test.
-- [ ] 4.11 `app/not-found.tsx` (new): self-contained gradient+`Wordmark`+recovery Link `/`. Check: presence test.
-- [ ] 4.12 RED `verify/[id]/layout.test.tsx` (new): header (`Wordmark`+section nav) renders once around `children`.
-- [ ] 4.13 GREEN — **Decision 7 (Option B, user-resolved)**: `app/verify/[id]/layout.tsx` (new) extracts the header from `page.tsx:56-78`; `page.tsx` drops inline `<header>`, keeps `<main>`+`<Footer/>`. Check: `verify/[id]/page.test.tsx` stays green (asserts text/absence-of-login-link only, not header markup) and 4.12 passes.
-- [ ] 4.14 `verify/[id]/loading.tsx` (new): renders under 4.13's layout — header free, content = card skeletons. Check: presence test asserts header + skeleton.
-- [ ] 4.15 `verify/[id]/not-found.tsx` (new): renders under 4.13's layout — header free, content = recovery message + Link `/`. Check: presence test asserts header + message.
-- [ ] 4.16 Dictionaries: confirm `discard.*` (4.6) is the only new key; run `dictionaries.test.ts`, confirm green.
-- [ ] 4.17 Verify PR4 (final): `pnpm --filter @trustai/web test/typecheck/lint/build`, then `pnpm -r build`. Confirm `DiscardDraftButton`/`DtrTable`/`verify/[id]/page`/`error` tests green; no new deps; no `dark:` additions.
+- [x] 4.1 `UploadStep.tsx`: `validationError`/`submitError`→`error`; `sizeWarning`→`info`. Check: `UploadStep.test.tsx` green.
+- [x] 4.2 `ReviewStep.tsx`: analysis-failed→`error`(title); `formError`→`error`; `saved`→`success`. Check: `ReviewStep.test.tsx` green.
+- [x] 4.3 `CertifyWizard.tsx`: discard/duplicate notices→`info`; polling status→`pending`/`info`. Check: `CertifyWizard.test.tsx` green.
+- [x] 4.4 `ConfirmButton.tsx`: error→`error`. Check: `ConfirmButton.test.tsx` green.
+- [x] 4.5 `AnchorPoller.tsx`: delete `ProgressStatus`/`SlowNotice`, consume `StatusPanel` (`READY`-error→error, in-progress→pending, cap-reached→info, `CERTIFIED`→success+explorer action). Check: `AnchorPoller.test.tsx` green.
+- [x] 4.6 `certify.ts`: add `discard.dialogTitle/cancel/confirmAction` (distinct from `discard.action`).
+- [x] 4.7 RED rewrite `DiscardDraftButton.test.tsx`: drop `window.confirm` spy entirely. Case 1: open→`getByRole("alertdialog")` w/ `confirmPrompt`→click "Sí, descartar"→MSW discard fired + `pushMock("/dtrs/new")`. Case 2: open→click "Cancelar"→no request, no push.
+- [x] 4.8 GREEN `DiscardDraftButton.tsx` rewrite using `ui/alert-dialog.tsx` (1.6) + 4.6/4.7 keys.
+- [x] 4.9 `app/error.tsx`: `<button>`→`Button`(`unstable_retry`) in `StatusPanel error` (keeps `role="alert"`); add gradient. Check: `error.test.tsx` green (exact text + "Reintentar" button preserved).
+- [x] 4.10 `app/loading.tsx` (new): self-contained centered spinner. Check: presence test.
+- [x] 4.11 `app/not-found.tsx` (new): self-contained gradient+`Wordmark`+recovery Link `/`. Check: presence test.
+- [x] 4.12 RED `verify/[id]/layout.test.tsx` (new): header (`Wordmark`+section nav) renders once around `children`.
+- [x] 4.13 GREEN — **Decision 7 (Option B, user-resolved)**: `app/verify/[id]/layout.tsx` (new) extracts the header from `page.tsx:56-78`; `page.tsx` drops inline `<header>`, keeps `<main>`+`<Footer/>`. Check: `verify/[id]/page.test.tsx` stays green (asserts text/absence-of-login-link only, not header markup) and 4.12 passes.
+- [x] 4.14 `verify/[id]/loading.tsx` (new): renders under 4.13's layout — header free, content = card skeletons. Check: presence test asserts header + skeleton.
+- [x] 4.15 `verify/[id]/not-found.tsx` (new): renders under 4.13's layout — header free, content = recovery message + Link `/`. Check: presence test asserts header + message.
+- [x] 4.16 Dictionaries: confirm `discard.*` (4.6) is the only new key; run `dictionaries.test.ts`, confirm green.
+- [x] 4.17 Verify PR4 (final): `pnpm --filter @trustai/web test/typecheck/lint/build`, then `pnpm -r build`. Confirm `DiscardDraftButton`/`DtrTable`/`verify/[id]/page`/`error` tests green; no new deps; no `dark:` additions.

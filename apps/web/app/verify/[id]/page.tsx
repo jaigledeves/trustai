@@ -1,31 +1,16 @@
 import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Wordmark } from "../../../components/brand/Wordmark";
 import { Footer } from "../../../components/landing/Footer";
 import { HashOnlyCard } from "../../../components/verify/HashOnlyCard";
 import { UploadVerdictPanel } from "../../../components/verify/UploadVerdictPanel";
 import { Button } from "../../../components/ui/button";
-import { landingDictionary } from "../../../dictionaries/es/landing";
 import { verifyDictionary } from "../../../dictionaries/es/verify";
 import { config } from "../../../lib/config";
 
 interface VerifyPageProps {
   params: Promise<{ id: string }>;
 }
-
-/**
- * Landing section links reused as CROSS-PAGE anchors (`/#id`, not `#id`): those
- * sections live on the landing, not here, so each link navigates to `/` and
- * scrolls to the section. `verificacion` is deliberately omitted — pointing to
- * the landing's *demo* verification section from a real verification page would
- * be confusing. Labels come from the landing dictionary (single source, RNF-041).
- */
-const sectionLinks = [
-  { href: "/#como-funciona", label: landingDictionary.nav.sectionLinks.howItWorks },
-  { href: "/#casos", label: landingDictionary.nav.sectionLinks.useCases },
-  { href: "/#faq", label: landingDictionary.nav.sectionLinks.faq },
-] as const;
 
 export async function generateMetadata({ params }: VerifyPageProps): Promise<Metadata> {
   await params;
@@ -47,6 +32,11 @@ export async function generateMetadata({ params }: VerifyPageProps): Promise<Met
  * of a failed fetch when the backend's public-verification module isn't
  * mounted (`NEXT_PUBLIC_PUBLIC_VERIFICATION_ENABLED=false` mirrors the
  * backend's own flag).
+ *
+ * The header/nav (section links, Wordmark) now lives in
+ * `verify/[id]/layout.tsx` (spec: web-visual-coherence — Decision 7): it
+ * must persist across this segment's `loading.tsx`/`not-found.tsx`, not
+ * just this page.
  */
 export default async function VerifyPage({ params }: VerifyPageProps) {
   const { id } = await params;
@@ -54,29 +44,6 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
 
   return (
     <>
-      {/* Header reuses the landing's section nav (cross-page anchors) so a
-          visitor arriving from a shared link is never trapped. NO auth links —
-          this public page never shows a login prompt (spec: web-public-verify —
-          No-Auth Access; asserted by page.test.tsx). Wordmark links home. */}
-      <header className="sticky top-0 z-10 border-b border-border/60 bg-background/80 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-4">
-          <Link href="/">
-            <Wordmark />
-          </Link>
-          <nav aria-label="Secciones" className="hidden items-center gap-1 md:flex">
-            {sectionLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </header>
-
       <main className="relative flex-1 overflow-hidden">
         <div
           aria-hidden="true"

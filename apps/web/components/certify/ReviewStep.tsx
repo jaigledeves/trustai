@@ -8,6 +8,7 @@ import type { ReviewEditPatch, TrustRecordDetail } from "../../lib/api/types";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { StatusPanel } from "../ui/status-panel";
 import { Textarea } from "../ui/textarea";
 
 interface ReviewStepProps {
@@ -45,10 +46,9 @@ export function ReviewStep({ id, record }: ReviewStepProps) {
 
   if (hasAnalysisFailed(record)) {
     return (
-      <div role="alert">
-        <h2 className="font-semibold">{certifyDictionary.review.analysisFailedTitle}</h2>
-        <p>{record.analysisFailureReason}</p>
-      </div>
+      <StatusPanel variant="error" title={certifyDictionary.review.analysisFailedTitle}>
+        {record.analysisFailureReason}
+      </StatusPanel>
     );
   }
 
@@ -107,9 +107,17 @@ export function ReviewStep({ id, record }: ReviewStepProps) {
           onChange={(event) => setLanguage(event.target.value)}
         />
       </div>
-      {formError ? <p role="alert">{formError}</p> : null}
-      {saved ? <p role="status">{certifyDictionary.review.saved}</p> : null}
-      <Button type="button" onClick={handleSave} disabled={reviewEdit.isPending}>
+      {formError ? <StatusPanel variant="error">{formError}</StatusPanel> : null}
+      {saved ? <StatusPanel variant="success">{certifyDictionary.review.saved}</StatusPanel> : null}
+      {/* Outline (not the default filled button) so Confirm — rendered by
+          the wizard shell right after this step — reads as the primary
+          action; Save is a secondary, in-place edit action. */}
+      <Button
+        type="button"
+        variant="outline"
+        onClick={handleSave}
+        disabled={reviewEdit.isPending}
+      >
         {certifyDictionary.review.save}
       </Button>
     </div>

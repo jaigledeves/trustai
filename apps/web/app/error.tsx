@@ -1,6 +1,9 @@
 "use client"; // Error boundaries must be Client Components.
 
 import { useEffect } from "react";
+import { Wordmark } from "../components/brand/Wordmark";
+import { Button } from "../components/ui/button";
+import { StatusPanel } from "../components/ui/status-panel";
 import { shellDictionary } from "../dictionaries/es/shell";
 
 /**
@@ -12,6 +15,11 @@ import { shellDictionary } from "../dictionaries/es/shell";
  * This Next version exposes `unstable_retry` (added in v16.2.0) as the
  * recommended recovery affordance — it re-fetches and re-renders the boundary's
  * children — so we use it rather than the older `reset`.
+ *
+ * Restyled (spec: web-visual-coherence — "Global error boundary offers a
+ * retry button") onto the shared gradient + `StatusPanel error` (keeps
+ * `role="alert"` via the panel itself) + `Button` recovery affordance.
+ * `app/layout.tsx` is a bare shell here too, so this stays self-contained.
  */
 export default function Error({
   error,
@@ -25,15 +33,25 @@ export default function Error({
   }, [error]);
 
   return (
-    <main
-      role="alert"
-      className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center gap-4 px-4 py-10 text-center"
-    >
-      <h1 className="text-xl font-semibold">{shellDictionary.errors.genericTitle}</h1>
-      <p>{shellDictionary.errors.generic}</p>
-      <button type="button" onClick={() => unstable_retry()}>
-        {shellDictionary.errors.retry}
-      </button>
+    <main className="relative flex w-full flex-1 flex-col items-center justify-center overflow-hidden px-6 py-16">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_-10%,var(--accent),transparent)]"
+      />
+      <div className="relative flex w-full max-w-md flex-col items-center gap-6 text-center">
+        <Wordmark />
+        <StatusPanel
+          variant="error"
+          title={shellDictionary.errors.genericTitle}
+          action={
+            <Button size="lg" onClick={() => unstable_retry()}>
+              {shellDictionary.errors.retry}
+            </Button>
+          }
+        >
+          {shellDictionary.errors.generic}
+        </StatusPanel>
+      </div>
     </main>
   );
 }

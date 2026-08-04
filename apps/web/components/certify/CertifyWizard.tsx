@@ -4,6 +4,7 @@ import { useState } from "react";
 import { certifyDictionary } from "../../dictionaries/es/certify";
 import { useTrustRecord } from "../../lib/api/hooks/useTrustRecord";
 import type { TrustRecordDetail } from "../../lib/api/types";
+import { StatusPanel } from "../ui/status-panel";
 import {
   MAX_ANALYSIS_POLL_ATTEMPTS,
   isAnalysisPending,
@@ -53,13 +54,13 @@ export function CertifyWizard({ id, initialRecord, showDuplicateNotice }: Certif
   const analysisPollCapReached = analysisPollAttempts >= MAX_ANALYSIS_POLL_ATTEMPTS;
 
   if (state === "DISCARDED") {
-    return <p role="status">{certifyDictionary.discard.discardedMessage}</p>;
+    return <StatusPanel variant="info">{certifyDictionary.discard.discardedMessage}</StatusPanel>;
   }
 
   return (
     <div className="flex flex-col gap-6">
       {showDuplicateNotice ? (
-        <p role="status">{certifyDictionary.upload.duplicateNotice}</p>
+        <StatusPanel variant="info">{certifyDictionary.upload.duplicateNotice}</StatusPanel>
       ) : null}
 
       {current.canonicalHash ? (
@@ -68,7 +69,9 @@ export function CertifyWizard({ id, initialRecord, showDuplicateNotice }: Certif
         // (not ConfirmButton) because confirm flips state to READY, which
         // unmounts the DRAFT branch — the hash must outlive that swap.
         <div role="status" className="flex flex-col gap-1.5">
-          <p className="font-medium">{certifyDictionary.confirm.frozenHashLabel}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {certifyDictionary.confirm.frozenHashLabel}
+          </p>
           <code className="block break-all rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-sm">
             {current.canonicalHash}
           </code>
@@ -78,11 +81,11 @@ export function CertifyWizard({ id, initialRecord, showDuplicateNotice }: Certif
       {state === "DRAFT" ? (
         isAnalysisPending(current) ? (
           <>
-            <p role="status">
+            <StatusPanel variant={analysisPollCapReached ? "info" : "pending"}>
               {analysisPollCapReached
                 ? certifyDictionary.review.analysisSlow
                 : certifyDictionary.review.analysisInProgress}
-            </p>
+            </StatusPanel>
             <DiscardDraftButton id={id} />
           </>
         ) : hasAnalysisFailed(current) ? (

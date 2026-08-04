@@ -1,5 +1,6 @@
 "use client";
 
+import { ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { certifyDictionary } from "../../dictionaries/es/certify";
 import { config } from "../../lib/config";
@@ -8,6 +9,7 @@ import { useAnchor } from "../../lib/api/hooks/useAnchor";
 import { useTrustRecord } from "../../lib/api/hooks/useTrustRecord";
 import type { TrustRecordDetail } from "../../lib/api/types";
 import { Button } from "../ui/button";
+import { StatusPanel } from "../ui/status-panel";
 import {
   MAX_ANCHOR_POLL_ATTEMPTS,
   resolveAnchorRefetchInterval,
@@ -67,7 +69,7 @@ export function AnchorPoller({ id, initialRecord }: AnchorPollerProps) {
   if (state === "READY") {
     return (
       <div className="flex flex-col gap-2">
-        {error ? <p role="alert">{error}</p> : null}
+        {error ? <StatusPanel variant="error">{error}</StatusPanel> : null}
         <Button type="button" onClick={handleAnchor} disabled={anchorMutation.isPending}>
           {certifyDictionary.anchor.submit}
         </Button>
@@ -77,11 +79,12 @@ export function AnchorPoller({ id, initialRecord }: AnchorPollerProps) {
 
   if (state === "ANCHORING") {
     // Cap reached = we stopped polling, so a spinner would be misleading;
-    // show the static "slow" notice instead of the in-progress spinner.
+    // show the static "slow" notice (info, no spinner) instead of the
+    // in-progress spinner (pending).
     return pollCapReached ? (
-      <SlowNotice message={certifyDictionary.anchor.slowMessage} />
+      <StatusPanel variant="info">{certifyDictionary.anchor.slowMessage}</StatusPanel>
     ) : (
-      <ProgressStatus message={certifyDictionary.anchor.anchoringMessage} />
+      <StatusPanel variant="pending">{certifyDictionary.anchor.anchoringMessage}</StatusPanel>
     );
   }
 
@@ -89,77 +92,38 @@ export function AnchorPoller({ id, initialRecord }: AnchorPollerProps) {
     const txHash = data?.anchor?.txHash;
     const explorerUrl = txHash ? `${config.chainExplorerBaseUrl}/tx/${txHash}` : null;
     return (
-      <div
-        role="status"
-        className="flex flex-col items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-6 text-center"
-      >
-        <span className="flex size-11 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
-          <svg viewBox="0 0 24 24" fill="none" className="size-6" aria-hidden="true">
-            <path
-              d="m5 12.5 4.5 4.5L19 7"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
-        <p className="font-medium">{certifyDictionary.anchor.certifiedMessage}</p>
-        {explorerUrl ? (
-          <Button variant="outline" asChild>
-            <a href={explorerUrl} target="_blank" rel="noopener noreferrer">
+      <StatusPanel
+        variant="success"
+        title={certifyDictionary.anchor.certifiedMessage}
+        action={
+          explorerUrl ? (
+            <a
+              href={explorerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-medium text-primary underline-offset-2 hover:underline"
+            >
               {certifyDictionary.anchor.explorerLinkLabel}
+              <ExternalLink className="size-4" />
             </a>
-          </Button>
-        ) : null}
-      </div>
+          ) : null
+        }
+      />
     );
   }
 
   if (state === "FAILED") {
     // FAILED is transient, not terminal: the backend immediately transitions
     // FAILED->ANCHORING and re-enqueues (confirm-anchor.handler). So this is a
-    // "reintentando automáticamente" status (role="status"), NOT a dead
-    // role="alert" — the poller keeps running to advance to CERTIFIED. If the
-    // attempt cap was reached, surface the distinct "slow" state instead.
+    // "reintentando automáticamente" status (pending, role="status"), NOT a
+    // dead role="alert" — the poller keeps running to advance to CERTIFIED.
+    // If the attempt cap was reached, surface the distinct "slow" (info) state.
     return pollCapReached ? (
-      <SlowNotice message={certifyDictionary.anchor.slowMessage} />
+      <StatusPanel variant="info">{certifyDictionary.anchor.slowMessage}</StatusPanel>
     ) : (
-      <ProgressStatus message={certifyDictionary.anchor.retryingMessage} />
+      <StatusPanel variant="pending">{certifyDictionary.anchor.retryingMessage}</StatusPanel>
     );
   }
 
   return null;
-}
-
-/**
- * In-progress status with an animated spinner (pure Tailwind, no icon dep).
- * Used while the anchor is actively being confirmed (ANCHORING) or the
- * backend is auto-retrying (FAILED) — never once polling has stopped.
- */
-function ProgressStatus({ message }: { message: string }) {
-  return (
-    <div
-      role="status"
-      className="flex items-center gap-3 rounded-lg border border-border bg-muted/40 p-4"
-    >
-      <span
-        className="size-4 shrink-0 animate-spin rounded-full border-2 border-primary border-t-transparent"
-        aria-hidden="true"
-      />
-      <p className="text-sm text-muted-foreground">{message}</p>
-    </div>
-  );
-}
-
-/** Static notice shown once polling gave up (no spinner — nothing is running). */
-function SlowNotice({ message }: { message: string }) {
-  return (
-    <p
-      role="status"
-      className="rounded-lg border border-border bg-muted/40 p-4 text-sm text-muted-foreground"
-    >
-      {message}
-    </p>
-  );
 }
