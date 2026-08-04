@@ -43,6 +43,27 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
     return record ? this.toDomain(record) : null;
   }
 
+  async findByIdForOrganizationWithAsset(
+    organizationId: string,
+    id: string,
+  ): Promise<{ trustRecord: TrustRecord; asset: DigitalAsset } | null> {
+    // ADR-007 / RNF-004: same org-scoping join pattern as
+    // findByIdForOrganization — filtered at the query level via the
+    // DigitalAsset relation, never by post-filtering an unscoped result.
+    const record = await this.prisma.trustRecord.findFirst({
+      where: { id, asset: { organizationId } },
+      include: { asset: true },
+    });
+    if (!record) {
+      return null;
+    }
+
+    return {
+      trustRecord: this.toDomain(record),
+      asset: this.assetToDomain(record.asset),
+    };
+  }
+
   async findAllForOrganization(
     organizationId: string,
     page: number,

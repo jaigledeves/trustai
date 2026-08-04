@@ -87,6 +87,26 @@ export interface TrustRecordRepositoryPort {
   findByIdForOrganization(organizationId: string, id: string): Promise<TrustRecord | null>;
 
   /**
+   * ADR-007 / web-certify-flow "Persistent Document Context": org-scoped
+   * detail lookup that ALSO joins `DigitalAsset` in the same query, for the
+   * HTTP-facing controller's `getById` — which needs `asset.filename` /
+   * `sizeBytes` / `createdAt` alongside the record. Deliberately a
+   * dedicated method rather than widening `findByIdForOrganization`
+   * (design.md "How to expose asset fields on the org-scoped detail path"):
+   * `ConfirmReviewUseCase`, `DiscardDraftUseCase`, and
+   * `SubmitForAnchoringUseCase` all depend on that method's plain
+   * `TrustRecord` return type and must not be forced through a fatter
+   * shape (ISP). Same org-scoping join pattern as `findByIdForOrganization`
+   * (RNF-004: filtered at the query level via `DigitalAsset.organizationId`,
+   * never post-filtered) — a cross-org id returns `null`, identical to a
+   * missing one.
+   */
+  findByIdForOrganizationWithAsset(
+    organizationId: string,
+    id: string,
+  ): Promise<{ trustRecord: TrustRecord; asset: DigitalAsset } | null>;
+
+  /**
    * web-history (Phase 2 companion slice): org-scoped, paginated list for
    * the frontend's `/dtrs` view. Same org-scoping join pattern as
    * `findByIdForOrganization` (RNF-004: filtered at the query level via

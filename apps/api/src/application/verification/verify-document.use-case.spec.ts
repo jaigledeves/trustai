@@ -97,6 +97,7 @@ function buildTrustRecordRepository(
   return {
     findById: vi.fn(),
     findByIdForOrganization: vi.fn(),
+    findByIdForOrganizationWithAsset: vi.fn(),
     findByIdWithAssetAndAnchor: vi.fn().mockResolvedValue(buildFound()),
     updateAiAnalysis: vi.fn(),
     updateReviewFields: vi.fn(),
