@@ -272,6 +272,18 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
       expect(typeof (certified["anchor"] as Record<string, unknown>)["txHash"]).toBe("string");
       expect((certified["anchor"] as Record<string, unknown>)["blockTimestamp"]).toBeTruthy();
 
+      // web-certify-flow "Persistent Document Context": the detail endpoint
+      // exposes the asset context (filename/size/upload date) end-to-end —
+      // proving the real HTTP + Prisma asset join, not just the mocked
+      // controller unit test. Filename is the one uploaded in
+      // uploadAndWaitForAnalysis ("<label>.pdf").
+      const assetContext = certified["asset"] as Record<string, unknown>;
+      expect(assetContext).toBeTruthy();
+      expect(assetContext["filename"]).toBe("S-GOLDEN-1.pdf");
+      expect(typeof assetContext["sizeBytes"]).toBe("number");
+      expect(assetContext["sizeBytes"] as number).toBeGreaterThan(0);
+      expect(assetContext["uploadedAt"]).toBeTruthy();
+
       const dbAnchor = await prisma.trustRecord.findUnique({
         where: { id: trustRecordId },
         include: { anchor: true },
