@@ -4,7 +4,7 @@ import { historyDictionary } from "../../dictionaries/es/history";
 import { DtrTable } from "./DtrTable";
 
 describe("DtrTable (spec: web-history — Org-Scoped DTR List)", () => {
-  it("renders id, state, and creation date per row when records exist", () => {
+  it("renders document, classification, state, and creation date per row when records exist", () => {
     render(
       <DtrTable
         total={2}
@@ -13,12 +13,14 @@ describe("DtrTable (spec: web-history — Org-Scoped DTR List)", () => {
             id: "tr-1",
             state: "CERTIFIED",
             filename: "doc1.pdf",
+            aiClassification: "Contrato",
             createdAt: "2026-01-01T00:00:00.000Z",
           },
           {
             id: "tr-2",
             state: "DRAFT",
             filename: null,
+            aiClassification: null,
             createdAt: "2026-01-02T00:00:00.000Z",
           },
         ]}
@@ -26,16 +28,77 @@ describe("DtrTable (spec: web-history — Org-Scoped DTR List)", () => {
     );
 
     expect(screen.getByRole("table")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "tr-1" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "doc1.pdf" })).toHaveAttribute(
       "href",
       "/dtrs/tr-1",
     );
+    expect(screen.getByText("Contrato")).toBeInTheDocument();
     expect(screen.getByText("Certificado")).toBeInTheDocument();
+    expect(screen.getByText("Borrador")).toBeInTheDocument();
+  });
+
+  it("links the document cell with the filename instead of the raw id (spec: web-visual-coherence)", () => {
+    render(
+      <DtrTable
+        total={1}
+        items={[
+          {
+            id: "tr-1",
+            state: "CERTIFIED",
+            filename: "informe-anual.pdf",
+            aiClassification: "Informe",
+            createdAt: "2026-01-01T00:00:00.000Z",
+          },
+        ]}
+      />,
+    );
+
+    const link = screen.getByRole("link", { name: "informe-anual.pdf" });
+    expect(link).toHaveAttribute("href", "/dtrs/tr-1");
+    expect(screen.queryByText("tr-1")).not.toBeInTheDocument();
+  });
+
+  it("falls back to the truncated id as the document link when filename is null", () => {
+    render(
+      <DtrTable
+        total={1}
+        items={[
+          {
+            id: "tr-2",
+            state: "DRAFT",
+            filename: null,
+            aiClassification: null,
+            createdAt: "2026-01-02T00:00:00.000Z",
+          },
+        ]}
+      />,
+    );
+
     expect(screen.getByRole("link", { name: "tr-2" })).toHaveAttribute(
       "href",
       "/dtrs/tr-2",
     );
-    expect(screen.getByText("Borrador")).toBeInTheDocument();
+  });
+
+  it("renders a muted placeholder when a record has no AI classification yet", () => {
+    render(
+      <DtrTable
+        total={1}
+        items={[
+          {
+            id: "tr-2",
+            state: "DRAFT",
+            filename: "borrador.pdf",
+            aiClassification: null,
+            createdAt: "2026-01-02T00:00:00.000Z",
+          },
+        ]}
+      />,
+    );
+
+    expect(
+      screen.getByText(historyDictionary.list.classificationPending),
+    ).toBeInTheDocument();
   });
 
   it("renders the empty-state message instead of a table when the org has zero trust records", () => {
