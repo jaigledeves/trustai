@@ -22,6 +22,7 @@ function baseRecord(overrides: Partial<TrustRecordDetail> = {}): TrustRecordDeta
       blockTimestamp: "2026-01-01T00:00:00.000Z",
       status: "CONFIRMED",
     },
+    asset: { filename: "contrato.pdf", sizeBytes: 204_800, uploadedAt: "2026-01-01T00:00:00.000Z" },
     analysisFailureReason: null,
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",

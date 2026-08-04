@@ -39,27 +39,27 @@ Chain strategy: stacked-to-main
 
 ## Phase 3: Frontend — Types & Step Helper
 
-- [ ] 3.1 Add `TrustRecordAssetDetail` + `asset` on `TrustRecordDetail` in `apps/web/lib/api/types.ts`
-- [ ] 3.2 RED: `wizard-step.test.ts` — table-driven per spec scenarios (steps 3/4/certified, ANCHORING in-progress, analysis-fail step2, anchor-fail step4)
-- [ ] 3.3 GREEN: create `wizard-step.ts` — `resolveWizardSteps`, reusing `hasAnalysisFailed` (`ReviewStep.tsx`) and `isAnalysisPending` (`analysis-poll-interval.ts`)
+- [x] 3.1 Add `TrustRecordAssetDetail` + `asset` on `TrustRecordDetail` in `apps/web/lib/api/types.ts`
+- [x] 3.2 RED: `wizard-step.test.ts` — table-driven per spec scenarios (steps 3/4/certified, ANCHORING in-progress, analysis-fail step2, anchor-fail step4)
+- [x] 3.3 GREEN: create `wizard-step.ts` — `resolveWizardSteps`, reusing `hasAnalysisFailed` (`ReviewStep.tsx`) and `isAnalysisPending` (`analysis-poll-interval.ts`)
 
 ## Phase 4: Frontend — Presentational Components & Dictionary
 
-- [ ] 4.1 RED: `WizardStepper.test.tsx` — completed/current/upcoming distinguishable
-- [ ] 4.2 GREEN: create `WizardStepper.tsx`, labels from `certifyDictionary.stepper`
-- [ ] 4.3 RED: `DocumentContextHeader.test.tsx` — filename/size/date render + null-filename fallback
-- [ ] 4.4 GREEN: create `DocumentContextHeader.tsx`, fallback via `.documentContext.filenameFallback`
-- [ ] 4.5 Add `stepper`, `documentContext` (incl. `filenameFallback`), `navigation.backToList` to `certify.ts`; update `dictionaries.test.ts` if needed
+- [x] 4.1 RED: `WizardStepper.test.tsx` — completed/current/upcoming distinguishable
+- [x] 4.2 GREEN: create `WizardStepper.tsx`, labels from `certifyDictionary.stepper`
+- [x] 4.3 RED: `DocumentContextHeader.test.tsx` — filename/size/date render + null-filename fallback
+- [x] 4.4 GREEN: create `DocumentContextHeader.tsx`, fallback via `.documentContext.filenameFallback`
+- [x] 4.5 Add `stepper`, `documentContext` (incl. `filenameFallback`), `navigation.backToList` to `certify.ts`; update `dictionaries.test.ts` if needed — no change needed, `dictionaries.test.ts`'s leaf-value guard walks the tree generically
 
 ## Phase 5: Frontend — Wizard Integration & Terminal CTAs
 
-- [ ] 5.1 RED: extend `CertifyWizard.test.tsx` — back-link incl. `ANCHORING`; header+stepper render above every branch incl. `DISCARDED`; `DISCARDED` CTAs present
-- [ ] 5.2 GREEN: restructure `CertifyWizard.tsx` — hoist back-link/header/stepper above all branches, remove `DISCARDED` early return, add its CTAs
-- [ ] 5.3 RED: extend `AnchorPoller.test.tsx` — `CERTIFIED` renders `viewDetailAction` + `.backToListAction` beside the explorer link
-- [ ] 5.4 GREEN: add CTAs to `AnchorPoller.tsx` `CERTIFIED` panel via `StatusPanel`'s `action` slot
-- [ ] 5.5 Add `discard.certifyAnotherAction/.backToListAction` and `anchor.viewDetailAction/.backToListAction` keys to `certify.ts`
+- [x] 5.1 RED: extend `CertifyWizard.test.tsx` — back-link incl. `ANCHORING`; header+stepper render above every branch incl. `DISCARDED`; `DISCARDED` CTAs present
+- [x] 5.2 GREEN: restructure `CertifyWizard.tsx` — hoist back-link/header/stepper above all branches, remove `DISCARDED` early return, add its CTAs
+- [x] 5.3 RED: extend `AnchorPoller.test.tsx` — `CERTIFIED` renders `viewDetailAction` + `.backToListAction` beside the explorer link
+- [x] 5.4 GREEN: add CTAs to `AnchorPoller.tsx` `CERTIFIED` panel via `StatusPanel`'s `action` slot
+- [x] 5.5 Add `discard.certifyAnotherAction/.backToListAction` and `anchor.viewDetailAction/.backToListAction` keys to `certify.ts`
 
 ## Phase 6: Verification
 
-- [ ] 6.1 Run `pnpm --filter @trustai/api test` and `typecheck`; `pnpm --filter @trustai/web test` and `typecheck` — all green
-- [ ] 6.2 Cross-check all 12 spec scenarios against tests in Phases 1-5
+- [x] 6.1 Run `pnpm --filter @trustai/api test` and `typecheck`; `pnpm --filter @trustai/web test` and `typecheck` — all green (api: 176 passed/1 skipped, typecheck clean; web: 49 files/205 tests passed, typecheck clean)
+- [x] 6.2 Cross-check all 12 spec scenarios against tests in Phases 1-5 — see apply-progress scenario matrix; all 12 covered

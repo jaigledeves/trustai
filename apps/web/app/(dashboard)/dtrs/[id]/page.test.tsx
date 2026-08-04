@@ -35,6 +35,7 @@ function buildRecord(state: TrustRecordState): TrustRecordDetail {
     aiModelVersion: null,
     reviewedByUserId: null,
     anchor: null,
+    asset: { filename: "contrato.pdf", sizeBytes: 204_800, uploadedAt: "2026-07-09T00:00:00.000Z" },
     analysisFailureReason: null,
     createdAt: "2026-07-09T00:00:00.000Z",
     updatedAt: "2026-07-09T00:00:00.000Z",

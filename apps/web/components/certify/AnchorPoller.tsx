@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { certifyDictionary } from "../../dictionaries/es/certify";
 import { config } from "../../lib/config";
@@ -96,17 +97,30 @@ export function AnchorPoller({ id, initialRecord }: AnchorPollerProps) {
         variant="success"
         title={certifyDictionary.anchor.certifiedMessage}
         action={
-          explorerUrl ? (
-            <a
-              href={explorerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-medium text-primary underline-offset-2 hover:underline"
-            >
-              {certifyDictionary.anchor.explorerLinkLabel}
-              <ExternalLink className="size-4" />
-            </a>
-          ) : null
+          // spec: web-certify-flow — "Terminal-State Exit CTAs": CERTIFIED
+          // MUST offer a primary "view detail" + secondary "back to /dtrs"
+          // action, alongside (not replacing) the existing explorer link.
+          <div className="flex flex-col items-center gap-2">
+            {explorerUrl ? (
+              <a
+                href={explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-medium text-primary underline-offset-2 hover:underline"
+              >
+                {certifyDictionary.anchor.explorerLinkLabel}
+                <ExternalLink className="size-4" />
+              </a>
+            ) : null}
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button asChild>
+                <Link href={`/dtrs/${id}`}>{certifyDictionary.anchor.viewDetailAction}</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/dtrs">{certifyDictionary.anchor.backToListAction}</Link>
+              </Button>
+            </div>
+          </div>
         }
       />
     );

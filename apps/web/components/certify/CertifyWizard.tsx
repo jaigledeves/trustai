@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { certifyDictionary } from "../../dictionaries/es/certify";
 import { useTrustRecord } from "../../lib/api/hooks/useTrustRecord";
 import type { TrustRecordDetail } from "../../lib/api/types";
+import { Button } from "../ui/button";
 import { StatusPanel } from "../ui/status-panel";
 import {
   MAX_ANALYSIS_POLL_ATTEMPTS,
@@ -13,7 +15,10 @@ import {
 import { AnchorPoller } from "./AnchorPoller";
 import { ConfirmButton } from "./ConfirmButton";
 import { DiscardDraftButton } from "./DiscardDraftButton";
+import { DocumentContextHeader } from "./DocumentContextHeader";
 import { hasAnalysisFailed, ReviewStep } from "./ReviewStep";
+import { resolveWizardSteps } from "./wizard-step";
+import { WizardStepper } from "./WizardStepper";
 
 interface CertifyWizardProps {
   id: string;
@@ -53,12 +58,25 @@ export function CertifyWizard({ id, initialRecord, showDuplicateNotice }: Certif
   const state = current.state;
   const analysisPollCapReached = analysisPollAttempts >= MAX_ANALYSIS_POLL_ATTEMPTS;
 
-  if (state === "DISCARDED") {
-    return <StatusPanel variant="info">{certifyDictionary.discard.discardedMessage}</StatusPanel>;
-  }
-
   return (
     <div className="flex flex-col gap-6">
+      {/* Persistent back navigation (spec: web-certify-flow — "Persistent
+          Back Navigation") — rendered above every branch, including
+          DISCARDED and ANCHORING, unlike the old per-branch early return. */}
+      <Link
+        href="/dtrs"
+        className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary underline-offset-2 hover:underline"
+      >
+        {certifyDictionary.navigation.backToList}
+      </Link>
+
+      {/* Persistent document context (spec: web-certify-flow — "Persistent
+          Document Context") + 5-step progress indicator (spec: "Five-Step
+          Progress Indicator") — both render unconditionally above the
+          phase branch below, in every state. */}
+      <DocumentContextHeader asset={current.asset} />
+      <WizardStepper steps={resolveWizardSteps(current)} />
+
       {showDuplicateNotice ? (
         <StatusPanel variant="info">{certifyDictionary.upload.duplicateNotice}</StatusPanel>
       ) : null}
@@ -78,7 +96,21 @@ export function CertifyWizard({ id, initialRecord, showDuplicateNotice }: Certif
         </div>
       ) : null}
 
-      {state === "DRAFT" ? (
+      {state === "DISCARDED" ? (
+        // spec: "Terminal-State Exit CTAs" — DISCARDED must offer "certify
+        // another" (-> /dtrs/new) and "back to /dtrs", never zero exits.
+        <>
+          <StatusPanel variant="info">{certifyDictionary.discard.discardedMessage}</StatusPanel>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link href="/dtrs/new">{certifyDictionary.discard.certifyAnotherAction}</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/dtrs">{certifyDictionary.discard.backToListAction}</Link>
+            </Button>
+          </div>
+        </>
+      ) : state === "DRAFT" ? (
         isAnalysisPending(current) ? (
           <>
             <StatusPanel variant={analysisPollCapReached ? "info" : "pending"}>

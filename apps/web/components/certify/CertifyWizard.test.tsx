@@ -34,6 +34,7 @@ function buildRecord(overrides: Partial<TrustRecordDetail> = {}): TrustRecordDet
     aiModelVersion: null,
     reviewedByUserId: null,
     anchor: null,
+    asset: { filename: "contrato.pdf", sizeBytes: 204_800, uploadedAt: "2026-01-01T00:00:00.000Z" },
     analysisFailureReason: null,
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
@@ -116,6 +117,9 @@ describe("CertifyWizard (spec: AI Analysis Display — never a silent DRAFT stal
     expect(screen.getByText("a".repeat(64))).toBeInTheDocument();
     // READY offers the anchor action at the same time.
     expect(screen.getByRole("button", { name: "Anclar en blockchain" })).toBeInTheDocument();
+    // Scenario: "Document context renders in every phase" — the anchor phase too.
+    expect(screen.getByText("contrato.pdf")).toBeInTheDocument();
+    expect(screen.getByText(certifyDictionary.stepper.anchorLabel)).toBeInTheDocument();
     // Confirm is done — its button is gone.
     expect(screen.queryByRole("button", { name: "Confirmar certificación" })).not.toBeInTheDocument();
   });
@@ -133,6 +137,8 @@ describe("CertifyWizard (spec: AI Analysis Display — never a silent DRAFT stal
       screen.queryByText("Analizando el documento… esto puede tardar unos segundos."),
     ).not.toBeInTheDocument();
     expect(screen.getByText("El PDF no tiene una capa de texto extraíble.")).toBeInTheDocument();
+    // Scenario: "Document context renders in every phase" — the error phase too.
+    expect(screen.getByText("contrato.pdf")).toBeInTheDocument();
   });
 
   it("does NOT render a dead-end ConfirmButton on a failed-analysis DRAFT (confirm would 409) — only the banner + discard", () => {
@@ -195,5 +201,85 @@ describe("CertifyWizard (spec: AI Analysis Display — never a silent DRAFT stal
     });
     expect(await screen.findByText(certifyDictionary.review.analysisSlow)).toBeInTheDocument();
     expect(resolveAnalysisRefetchInterval(pending(), MAX_ANALYSIS_POLL_ATTEMPTS)).toBe(false);
+  });
+});
+
+describe("CertifyWizard (spec: web-certify-flow — Persistent Back Navigation)", () => {
+  it("shows a usable link to /dtrs in the DRAFT phase", () => {
+    renderWizard(buildRecord({ state: "DRAFT", aiSummary: "Un resumen." }));
+
+    const backLinks = screen.getAllByRole("link", {
+      name: certifyDictionary.navigation.backToList,
+    });
+    expect(backLinks.some((link) => link.getAttribute("href") === "/dtrs")).toBe(true);
+  });
+
+  it("Scenario: Back navigation is available while anchoring — ANCHORING", () => {
+    renderWizard(buildRecord({ state: "ANCHORING", aiSummary: "Un resumen." }));
+
+    const backLinks = screen.getAllByRole("link", {
+      name: certifyDictionary.navigation.backToList,
+    });
+    expect(backLinks.some((link) => link.getAttribute("href") === "/dtrs")).toBe(true);
+  });
+});
+
+describe("CertifyWizard (spec: web-certify-flow — Persistent Document Context + Five-Step Progress Indicator)", () => {
+  it("renders the document context header and the 5-step indicator above the DRAFT branch", () => {
+    renderWizard(
+      buildRecord({
+        state: "DRAFT",
+        aiSummary: null,
+        analysisFailureReason: null,
+        asset: { filename: "contrato.pdf", sizeBytes: 204_800, uploadedAt: "2026-01-01T00:00:00.000Z" },
+      }),
+    );
+
+    expect(screen.getByText("contrato.pdf")).toBeInTheDocument();
+    expect(screen.getByText(certifyDictionary.stepper.reviewLabel)).toBeInTheDocument();
+    expect(screen.getByText(certifyDictionary.stepper.anchorLabel)).toBeInTheDocument();
+  });
+
+  it("Scenario: Document context renders in every phase — including DISCARDED (error/anchor/certified are covered by AnchorPoller.test.tsx)", () => {
+    renderWizard(
+      buildRecord({
+        state: "DISCARDED",
+        asset: { filename: "contrato.pdf", sizeBytes: 204_800, uploadedAt: "2026-01-01T00:00:00.000Z" },
+      }),
+    );
+
+    expect(screen.getByText("contrato.pdf")).toBeInTheDocument();
+    expect(screen.getByText(certifyDictionary.stepper.certifiedLabel)).toBeInTheDocument();
+  });
+
+  it("Scenario: Missing filename shows a fallback label — DRAFT with a legacy asset (filename null)", () => {
+    renderWizard(
+      buildRecord({
+        state: "DRAFT",
+        asset: { filename: null, sizeBytes: 1024, uploadedAt: "2026-01-01T00:00:00.000Z" },
+      }),
+    );
+
+    expect(
+      screen.getByText(certifyDictionary.documentContext.filenameFallback),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("CertifyWizard (spec: web-certify-flow — Terminal-State Exit CTAs, DISCARDED)", () => {
+  it("Scenario: Discarded state offers recovery actions — 'certify another' (-> /dtrs/new) and 'back to /dtrs'", () => {
+    renderWizard(buildRecord({ state: "DISCARDED" }));
+
+    expect(screen.getByText(certifyDictionary.discard.discardedMessage)).toBeInTheDocument();
+
+    const certifyAnother = screen.getByRole("link", {
+      name: certifyDictionary.discard.certifyAnotherAction,
+    });
+    expect(certifyAnother).toHaveAttribute("href", "/dtrs/new");
+
+    const backToList = screen.getAllByRole("link", {
+      name: certifyDictionary.discard.backToListAction,
+    });
+    expect(backToList.some((link) => link.getAttribute("href") === "/dtrs")).toBe(true);
   });
 });

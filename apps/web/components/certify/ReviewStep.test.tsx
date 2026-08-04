@@ -46,6 +46,7 @@ function buildRecord(overrides: Partial<TrustRecordDetail> = {}): TrustRecordDet
     aiModelVersion: "1.0.0",
     reviewedByUserId: null,
     anchor: null,
+    asset: { filename: "contrato.pdf", sizeBytes: 204_800, uploadedAt: "2026-01-01T00:00:00.000Z" },
     analysisFailureReason: null,
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",

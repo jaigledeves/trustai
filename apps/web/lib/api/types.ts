@@ -31,6 +31,19 @@ export interface TrustRecordAnchorDetail {
   status: "PENDING" | "CONFIRMED" | "FAILED";
 }
 
+/**
+ * Mirrors `TrustRecordAssetDetailDto` (apps/api/src/modules/trust-records/dto/trust-record-detail-response.dto.ts).
+ * Named `uploadedAt` (not `createdAt`) to sidestep the collision with
+ * `TrustRecordDetail`'s own `createdAt` — it's the asset's upload time, not
+ * the record's (design.md "DTO shape for the new asset fields"). Never
+ * null: every `TrustRecord` has exactly one asset.
+ */
+export interface TrustRecordAssetDetail {
+  filename: string | null;
+  sizeBytes: number;
+  uploadedAt: string;
+}
+
 /** Mirrors `TrustRecordDetailResponseDto`. */
 export interface TrustRecordDetail {
   id: string;
@@ -46,6 +59,7 @@ export interface TrustRecordDetail {
   aiModelVersion: string | null;
   reviewedByUserId: string | null;
   anchor: TrustRecordAnchorDetail | null;
+  asset: TrustRecordAssetDetail;
   analysisFailureReason: string | null;
   createdAt: string;
   updatedAt: string;
