@@ -117,4 +117,21 @@ describe("DtrTable (spec: web-history — Org-Scoped DTR List)", () => {
       screen.getByRole("link", { name: historyDictionary.list.emptyStateCta }),
     ).toHaveAttribute("href", "/dtrs/new");
   });
+
+  it("shows the no-matches message (not the onboarding CTA) when a filter is active and nothing matches (spec: web-dtr-list — Distinct Empty States)", () => {
+    render(<DtrTable total={0} items={[]} hasActiveFilter />);
+
+    expect(screen.getByText(historyDictionary.list.noMatches)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: historyDictionary.list.emptyStateCta }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(historyDictionary.list.emptyState)).not.toBeInTheDocument();
+  });
+
+  it("shows the onboarding CTA (not the no-matches message) when the org is truly empty", () => {
+    render(<DtrTable total={0} items={[]} hasActiveFilter={false} />);
+
+    expect(screen.getByText(historyDictionary.list.emptyState)).toBeInTheDocument();
+    expect(screen.queryByText(historyDictionary.list.noMatches)).not.toBeInTheDocument();
+  });
 });

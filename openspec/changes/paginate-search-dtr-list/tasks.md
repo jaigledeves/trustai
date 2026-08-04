@@ -34,37 +34,27 @@ Branch: `feat/dtr-list-filters-backend`. Gate: `pnpm --filter @trustai/api test`
 Branch: `feat/dtr-list-filters-web` (chained on PR1). Gate:
 `pnpm --filter @trustai/web test` + `typecheck` + `lint` + `next build`.
 
-- [ ] 2.1 Add copy keys to `apps/web/dictionaries/es/history.ts` under `list`:
-  `searchLabel`, `searchPlaceholder`, `stateFilterLabel`, `stateFilterAll`,
-  `noMatches`, `paginationPrevious`, `paginationNext`, `paginationPosition`
-  (template fn). Reuse existing `states` map for option labels.
-- [ ] 2.2 (test-first) `DtrListControls.test.tsx`: renders current `search`/`state`
-  from props; typing search pushes updated URL (mock `next/navigation`) and
-  resets page; selecting a state pushes `state` + resets page; clearing search
-  removes the param.
-- [ ] 2.3 Implement `components/history/DtrListControls.tsx` (`"use client"`,
-  props `{ search?, state? }`, `useRouter`+`usePathname`, debounced search
-  `router.replace`, state `<select>` `router.push`, page reset). shadcn/radix
-  primitives; labels from dictionary.
-- [ ] 2.4 (test-first) `DtrPagination.test.tsx`: Prev disabled at page 1; Next
-  disabled when `page*pageSize>=total`; position text; navigating preserves
-  `search`/`state`.
-- [ ] 2.5 Implement `components/history/DtrPagination.tsx` (`"use client"`,
-  props `{ page, pageSize, total, search?, state? }`, `useRouter`+`usePathname`).
-- [ ] 2.6 (test-first) Update `DtrTable.test.tsx`: add `hasActiveFilter` — empty
-  + filter → `noMatches`; empty + no filter → onboarding CTA (existing).
-- [ ] 2.7 Add `hasActiveFilter` prop to `components/history/DtrTable.tsx` and
-  branch the `total===0` message accordingly.
-- [ ] 2.8 (test-first) `dtrs/page.test.tsx`: awaits `searchParams`, forwards
-  `page`/`search`/`state` to `serverFetch` `query`, passes current values +
-  `hasActiveFilter` down. (Mirror `[id]/page.test.tsx` pattern.)
-- [ ] 2.9 Rewrite `app/(dashboard)/dtrs/page.tsx`: `PageProps<'/dtrs'>`,
-  `await searchParams`, parse `page`/`search`/`state` (`parseState` guard),
-  forward via `serverFetch`, render `DtrListControls` + `DtrTable` +
-  `DtrPagination`. Update the header doc comment.
-- [ ] 2.10 Sync `apps/web/lib/api/types.ts` if a query/param helper type is
-  needed (mirror any new backend shape; response type already has page/pageSize).
-- [ ] 2.11 Run web unit + typecheck + lint + `next build` green; open PR2.
+- [x] 2.1 Added copy keys under `list`. `paginationPosition` is a placeholder
+  STRING (`"Página {page} de {totalPages}"`), not a fn — the dictionaries.test
+  guard requires every leaf be a non-empty string; the component substitutes.
+- [x] 2.2 (test-first) `DtrListControls.test.tsx`: props reflected; debounced
+  search push (real timers + `waitFor`, not fake timers — userEvent+fake timers
+  hangs); state select push; page reset; clear removes param; state→all drops.
+- [x] 2.3 Implemented `DtrListControls.tsx` (`"use client"`, props from RSC not
+  `useSearchParams`, debounced `router.replace`, state `<select>` `router.push`).
+- [x] 2.4 (test-first) `DtrPagination.test.tsx`: Prev/Next disabled edges,
+  position text, filter preservation, back navigation.
+- [x] 2.5 Implemented `DtrPagination.tsx`.
+- [x] 2.6 (test-first) `DtrTable.test.tsx`: `hasActiveFilter` empty→noMatches vs
+  onboarding CTA.
+- [x] 2.7 Added `hasActiveFilter` prop + branch to `DtrTable.tsx`.
+- [x] 2.8 (test-first) `dtrs/page.test.tsx`: forwards page/search/state to the
+  backend query (MSW url capture), renders islands, hasActiveFilter threading.
+- [x] 2.9 Rewrote `dtrs/page.tsx`: explicit props type (repo convention, not
+  `PageProps`), `await searchParams`, guarded parse, forward, render islands.
+- [x] 2.10 No web type change needed (response type already has page/pageSize).
+- [x] 2.11 web unit 224 + typecheck + lint + `next build` green. `/dtrs` now
+  dynamic (ƒ) due to searchParams. Ready to open PR2.
 
 ## Phase 3 — Verify & archive
 
