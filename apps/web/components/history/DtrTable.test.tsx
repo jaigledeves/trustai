@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { historyDictionary } from "../../dictionaries/es/history";
 import { DtrTable } from "./DtrTable";
 
 describe("DtrTable (spec: web-history — Org-Scoped DTR List)", () => {
@@ -44,5 +45,13 @@ describe("DtrTable (spec: web-history — Org-Scoped DTR List)", () => {
       screen.getByText("Todavía no certificaste ningún documento."),
     ).toBeInTheDocument();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
+  });
+
+  it("renders a create-DTR CTA linking to /dtrs/new alongside the empty-state message (spec: web-visual-coherence — History Navigation Affordances)", () => {
+    render(<DtrTable total={0} items={[]} />);
+
+    expect(
+      screen.getByRole("link", { name: historyDictionary.list.emptyStateCta }),
+    ).toHaveAttribute("href", "/dtrs/new");
   });
 });

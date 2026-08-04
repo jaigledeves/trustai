@@ -1,6 +1,10 @@
+import { FileText } from "lucide-react";
 import Link from "next/link";
 import { historyDictionary } from "../../dictionaries/es/history";
+import { truncateId } from "../../lib/format";
 import type { TrustRecordListItem } from "../../lib/api/types";
+import { Button } from "../ui/button";
+import { StatusPanel } from "../ui/status-panel";
 import { StateBadge } from "./StateBadge";
 import {
   Table,
@@ -18,12 +22,25 @@ interface DtrTableProps {
 
 /**
  * Org-scoped DTR list table (spec: web-history — "Org-Scoped DTR List").
- * Renders id/state/creation date per row; `total === 0` renders the
- * empty-state copy instead of a blank table (spec scenario: "Empty state").
+ * Renders id/state/creation date per row; `total === 0` renders an empty
+ * state with a CTA into `/dtrs/new` instead of a blank table (spec:
+ * web-visual-coherence — "History Navigation Affordances").
  */
 export function DtrTable({ items, total }: DtrTableProps) {
   if (total === 0) {
-    return <p role="status">{historyDictionary.list.emptyState}</p>;
+    return (
+      <StatusPanel
+        variant="info"
+        className="flex flex-col items-center gap-3 py-10 text-center"
+        icon={<FileText className="size-8 text-muted-foreground" aria-hidden="true" />}
+        title={historyDictionary.list.emptyState}
+        action={
+          <Button asChild size="sm">
+            <Link href="/dtrs/new">{historyDictionary.list.emptyStateCta}</Link>
+          </Button>
+        }
+      />
+    );
   }
 
   return (
@@ -41,9 +58,10 @@ export function DtrTable({ items, total }: DtrTableProps) {
             <TableCell>
               <Link
                 href={`/dtrs/${item.id}`}
-                className="font-medium text-primary underline-offset-4 hover:underline"
+                className="font-mono text-sm font-medium text-primary underline-offset-4 hover:underline"
+                aria-label={item.id}
               >
-                {item.id}
+                {truncateId(item.id)}
               </Link>
             </TableCell>
             <TableCell>

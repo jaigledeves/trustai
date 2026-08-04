@@ -46,18 +46,18 @@ Chain strategy: feature-branch-chain
 
 ## Phase 3: Dashboard + History (PR 3)
 
-- [ ] 3.1 `dtrs/page.tsx`: wrap `DtrTable` in `Card`.
-- [ ] 3.2 RED extend `DtrTable.test.tsx` empty-state: assert CTA `link` to `/dtrs/new`.
-- [ ] 3.3 GREEN `DtrTable.tsx`: add CTA (new `historyDictionary.list` key); apply `truncateId` + `font-mono` + `aria-label={item.id}` to row link. Check: existing id-render case stays green (fixtures under 12-char threshold; `aria-label` is the UUID safety net).
-- [ ] 3.4 `DtrDetailCard.tsx`: verdict moment (`StatusPanel success` on `CERTIFIED`) + back-link to `/dtrs`. Check: extend `DtrDetailCard.test.tsx` with a new back-link assertion, no rewrite.
-- [ ] 3.5 `StateBadge.tsx`: `CERTIFIED`→`bg-emerald-50 text-emerald-600`, drop unreachable `dark:` pair. Check: no test asserts classNames.
-- [ ] 3.6 RED `PublicVerifyShare.test.tsx` (new): mock `navigator.clipboard.writeText`; copy writes `verifyUrl`, label swaps to `copiedLabel`.
-- [ ] 3.7 GREEN `PublicVerifyShare.tsx`: copy button (`Copy`/`Check` icons). New keys: `historyDictionary.publicShare.copyLabel/copiedLabel`.
-- [ ] 3.8 `dtrs/loading.tsx` (new): Card-wrapped skeleton (header + 5 rows). Check: presence test.
-- [ ] 3.9 `dtrs/[id]/loading.tsx` (new): skeleton mimicking `DtrDetailCard`. Check: presence test.
-- [ ] 3.10 `dtrs/[id]/not-found.tsx` (new): message + recovery Link to `/dtrs` (dashboard header persists). Check: presence test.
-- [ ] 3.11 Dictionaries: add list CTA key (3.3) + `publicShare.copyLabel/copiedLabel` (3.7). Run `dictionaries.test.ts` — leaf-guard is generic, confirm green, no manual edit expected.
-- [ ] 3.12 Verify PR3: `pnpm --filter @trustai/web test/typecheck/lint`. Confirm both `DtrTable.test.tsx` cases green.
+- [x] 3.1 `dtrs/page.tsx`: wrap `DtrTable` in `Card`.
+- [x] 3.2 RED extend `DtrTable.test.tsx` empty-state: assert CTA `link` to `/dtrs/new`.
+- [x] 3.3 GREEN `DtrTable.tsx`: add CTA (new `historyDictionary.list` key); apply `truncateId` + `font-mono` + `aria-label={item.id}` to row link. Check: existing id-render case stays green (fixtures under 12-char threshold; `aria-label` is the UUID safety net).
+- [x] 3.4 `DtrDetailCard.tsx`: verdict moment (`StatusPanel success` on `CERTIFIED`) + back-link to `/dtrs`. Check: extend `DtrDetailCard.test.tsx` with a new back-link assertion, no rewrite.
+- [x] 3.5 `StateBadge.tsx`: `CERTIFIED`→`bg-emerald-50 text-emerald-600`, drop unreachable `dark:` pair. Check: no test asserts classNames.
+- [x] 3.6 RED `PublicVerifyShare.test.tsx` (new): mock `navigator.clipboard.writeText`; copy writes `verifyUrl`, label swaps to `copiedLabel`.
+- [x] 3.7 GREEN `PublicVerifyShare.tsx`: copy button (`Copy`/`Check` icons). New keys: `historyDictionary.publicShare.copyLabel/copiedLabel`.
+- [x] 3.8 `dtrs/loading.tsx` (new): Card-wrapped skeleton (header + 5 rows). Check: presence test.
+- [x] 3.9 `dtrs/[id]/loading.tsx` (new): skeleton mimicking `DtrDetailCard`. Check: presence test.
+- [x] 3.10 `dtrs/[id]/not-found.tsx` (new): message + recovery Link to `/dtrs` (dashboard header persists). Check: presence test.
+- [x] 3.11 Dictionaries: add list CTA key (3.3) + `publicShare.copyLabel/copiedLabel` (3.7). Run `dictionaries.test.ts` — leaf-guard is generic, confirm green, no manual edit expected.
+- [x] 3.12 Verify PR3: `pnpm --filter @trustai/web test/typecheck/lint`. Confirm both `DtrTable.test.tsx` cases green.
 
 ## Phase 4: Certify Wizard + Global (PR 4)
 
