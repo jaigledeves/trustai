@@ -34,7 +34,7 @@ Chain strategy: stacked-to-main
 - [x] 2.1 Add `TrustRecordAssetDetailDto` (`filename`, `sizeBytes`, `uploadedAt`) + `asset` field to `trust-record-detail-response.dto.ts`
 - [x] 2.2 RED: create `trust-records.controller.spec.ts` — `getById` maps `asset` into DTO (mocked repository)
 - [x] 2.3 GREEN: swap `getById` to `findByIdForOrganizationWithAsset`, map `asset`
-- [ ] 2.4 Extend `certification-flow.e2e-spec.ts` to assert `asset.filename/sizeBytes/uploadedAt` — SKIPPED: requires a running anvil node (Foundry), not available in this environment. `isAnvilAvailable()` gates the whole suite via `describe.skipIf`. Unit coverage (1.1, 2.2) already exercises the mapping. Remains for the next batch or a CI run with anvil up.
+- [x] 2.4 Extend `certification-flow.e2e-spec.ts` to assert `asset.filename/sizeBytes/uploadedAt` — DONE in follow-up branch `test/certify-flow-asset-e2e`: asserts the asset context on the CERTIFIED detail body in S-GOLDEN-1, verified end-to-end against a real local anvil node (both golden-path tests green).
 - [x] 2.5 Run `pnpm --filter @trustai/api test` and `typecheck` — green (176 passed, 1 skipped; typecheck clean)
 
 ## Phase 3: Frontend — Types & Step Helper
