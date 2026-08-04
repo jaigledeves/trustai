@@ -53,6 +53,14 @@ describe("DtrDetailCard (spec: web-history — DTR Detail View)", () => {
     expect(
       screen.getByTitle("Código QR de verificación pública"),
     ).toBeInTheDocument();
+
+    // Back-link into the history list (spec: web-visual-coherence —
+    // "History Navigation Affordances", "Detail view links back to the
+    // list"). Reuses the existing shellDictionary.nav.dtrs label.
+    expect(screen.getByRole("link", { name: "Mis DTR" })).toHaveAttribute(
+      "href",
+      "/dtrs",
+    );
   });
 
   it("renders pending copy instead of a hash/AI/anchor value for a fresh DRAFT record with none of them yet", () => {

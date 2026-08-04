@@ -12,6 +12,7 @@ export const historyDictionary = {
     columnState: "Estado",
     columnCreatedAt: "Fecha de creación",
     emptyState: "Todavía no certificaste ningún documento.",
+    emptyStateCta: "Certificar mi primer documento",
   },
   detail: {
     title: "Detalle del DTR",
@@ -33,6 +34,8 @@ export const historyDictionary = {
     urlLabel: "Enlace de verificación",
     openLinkLabel: "Abrir verificación pública",
     qrTitle: "Código QR de verificación pública",
+    copyLabel: "Copiar enlace",
+    copiedLabel: "¡Copiado!",
   },
   /** Mirrors `TrustRecordState` (lib/api/types.ts) 1:1 — every state must have a label. */
   states: {
