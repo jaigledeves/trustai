@@ -22,9 +22,13 @@ interface DtrTableProps {
 
 /**
  * Org-scoped DTR list table (spec: web-history — "Org-Scoped DTR List").
- * Renders id/state/creation date per row; `total === 0` renders an empty
- * state with a CTA into `/dtrs/new` instead of a blank table (spec:
- * web-visual-coherence — "History Navigation Affordances").
+ * Renders document/classification/state/creation date per row. The
+ * document cell links to the detail using the human-meaningful filename;
+ * a truncated id is only a fallback for legacy rows with no filename
+ * (spec: web-visual-coherence — "Truncated Yet Accessible Record IDs").
+ * `total === 0` renders an empty state with a CTA into `/dtrs/new`
+ * instead of a blank table (spec: web-visual-coherence — "History
+ * Navigation Affordances").
  */
 export function DtrTable({ items, total }: DtrTableProps) {
   if (total === 0) {
@@ -47,7 +51,8 @@ export function DtrTable({ items, total }: DtrTableProps) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>{historyDictionary.list.columnId}</TableHead>
+          <TableHead>{historyDictionary.list.columnDocument}</TableHead>
+          <TableHead>{historyDictionary.list.columnClassification}</TableHead>
           <TableHead>{historyDictionary.list.columnState}</TableHead>
           <TableHead>{historyDictionary.list.columnCreatedAt}</TableHead>
         </TableRow>
@@ -58,11 +63,22 @@ export function DtrTable({ items, total }: DtrTableProps) {
             <TableCell>
               <Link
                 href={`/dtrs/${item.id}`}
-                className="font-mono text-sm font-medium text-primary underline-offset-4 hover:underline"
-                aria-label={item.id}
+                className={
+                  item.filename
+                    ? "text-sm font-medium text-primary underline-offset-4 hover:underline"
+                    : "font-mono text-sm font-medium text-primary underline-offset-4 hover:underline"
+                }
+                aria-label={item.filename ?? item.id}
               >
-                {truncateId(item.id)}
+                {item.filename ?? truncateId(item.id)}
               </Link>
+            </TableCell>
+            <TableCell>
+              {item.aiClassification ?? (
+                <span className="text-muted-foreground">
+                  {historyDictionary.list.classificationPending}
+                </span>
+              )}
             </TableCell>
             <TableCell>
               <StateBadge state={item.state} />

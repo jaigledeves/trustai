@@ -93,7 +93,7 @@ describe("PrismaTrustRecordRepository.findAllForOrganization (RNF-004: org-scope
     );
   });
 
-  it("orders by createdAt desc and selects only list-view fields (no AI/anchor joins)", async () => {
+  it("orders by createdAt desc and selects only list-view fields (no anchor joins)", async () => {
     const findMany = vi.fn().mockResolvedValue([]);
     const prisma = buildFakePrisma({ findMany });
     const repository = new PrismaTrustRecordRepository(prisma);
@@ -106,6 +106,7 @@ describe("PrismaTrustRecordRepository.findAllForOrganization (RNF-004: org-scope
         select: {
           id: true,
           state: true,
+          aiClassification: true,
           createdAt: true,
           asset: { select: { filename: true } },
         },
@@ -113,11 +114,23 @@ describe("PrismaTrustRecordRepository.findAllForOrganization (RNF-004: org-scope
     );
   });
 
-  it("maps the joined asset.filename onto each list item and returns the total count", async () => {
+  it("maps the joined asset.filename and aiClassification onto each list item and returns the total count", async () => {
     const createdAt = new Date("2026-01-01T00:00:00.000Z");
     const findMany = vi.fn().mockResolvedValue([
-      { id: "tr-1", state: "DRAFT", createdAt, asset: { filename: "doc.pdf" } },
-      { id: "tr-2", state: "READY", createdAt, asset: { filename: null } },
+      {
+        id: "tr-1",
+        state: "DRAFT",
+        aiClassification: "Contrato",
+        createdAt,
+        asset: { filename: "doc.pdf" },
+      },
+      {
+        id: "tr-2",
+        state: "READY",
+        aiClassification: null,
+        createdAt,
+        asset: { filename: null },
+      },
     ]);
     const count = vi.fn().mockResolvedValue(2);
     const prisma = buildFakePrisma({ findMany, count });
@@ -127,8 +140,20 @@ describe("PrismaTrustRecordRepository.findAllForOrganization (RNF-004: org-scope
 
     expect(result).toEqual({
       items: [
-        { id: "tr-1", state: "DRAFT", filename: "doc.pdf", createdAt },
-        { id: "tr-2", state: "READY", filename: null, createdAt },
+        {
+          id: "tr-1",
+          state: "DRAFT",
+          filename: "doc.pdf",
+          aiClassification: "Contrato",
+          createdAt,
+        },
+        {
+          id: "tr-2",
+          state: "READY",
+          filename: null,
+          aiClassification: null,
+          createdAt,
+        },
       ],
       total: 2,
     });

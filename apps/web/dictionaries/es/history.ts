@@ -8,9 +8,11 @@
 export const historyDictionary = {
   list: {
     title: "Mis DTR",
-    columnId: "ID",
+    columnDocument: "Documento",
+    columnClassification: "Clasificación",
     columnState: "Estado",
     columnCreatedAt: "Fecha de creación",
+    classificationPending: "Sin clasificar",
     emptyState: "Todavía no certificaste ningún documento.",
     emptyStateCta: "Certificar mi primer documento",
   },

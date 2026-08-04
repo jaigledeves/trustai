@@ -47,11 +47,17 @@ export interface ConfirmToReadyFields {
   issuedAt: string;
 }
 
-/** web-history (Phase 2 companion slice): list-view fields only — no AI/anchor joins. */
+/**
+ * web-history (Phase 2 companion slice): list-view fields only — no anchor
+ * joins. `aiClassification` is the one AI field included: it lives on the
+ * TrustRecord row itself (no extra join) and lets the list act as an
+ * organizing/browsing surface instead of a bare id table.
+ */
 export interface TrustRecordListItem {
   id: string;
   state: TrustRecordState;
   filename: string | null;
+  aiClassification: string | null;
   createdAt: Date;
 }
 

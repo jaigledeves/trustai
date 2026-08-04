@@ -66,6 +66,7 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
         select: {
           id: true,
           state: true,
+          aiClassification: true,
           createdAt: true,
           asset: { select: { filename: true } },
         },
@@ -81,6 +82,7 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
         id: record.id,
         state: this.toDomainState(record.state),
         filename: record.asset.filename,
+        aiClassification: record.aiClassification,
         createdAt: record.createdAt,
       })),
       total,
