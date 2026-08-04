@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { server } from "../../test/msw/server";
 
 const pushMock = vi.fn();
@@ -22,15 +22,16 @@ function renderWithQueryClient(ui: ReactNode) {
   );
 }
 
+/**
+ * Rewritten for the AlertDialog-based confirmation (spec:
+ * web-visual-coherence — "Dialog-Based Discard Confirmation", design.md
+ * Decision 3). No more `window.confirm` spy: the trigger opens an
+ * accessible `role="alertdialog"`, and confirm/cancel are distinct,
+ * separately queryable buttons.
+ */
 describe("DiscardDraftButton (spec: Discard a Draft (SHOULD))", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-    pushMock.mockClear();
-  });
-
-  it("asks for confirmation, discards on confirm, and returns to the upload step", async () => {
+  it("opens an accessible dialog and discards the draft when confirmed", async () => {
     const user = userEvent.setup();
-    vi.spyOn(window, "confirm").mockReturnValue(true);
     let requestMade = false;
     server.use(
       http.post("http://localhost:3000/api/backend/trust-records/tr-1/discard", () => {
@@ -42,16 +43,20 @@ describe("DiscardDraftButton (spec: Discard a Draft (SHOULD))", () => {
     renderWithQueryClient(<DiscardDraftButton id="tr-1" />);
     await user.click(screen.getByRole("button", { name: "Descartar borrador" }));
 
-    expect(window.confirm).toHaveBeenCalledWith(
+    const dialog = await screen.findByRole("alertdialog");
+    expect(dialog).toHaveTextContent(
       "¿Seguro que quieres descartar este borrador? Esta acción no se puede deshacer.",
     );
+
+    await user.click(screen.getByRole("button", { name: "Sí, descartar" }));
+
     await vi.waitFor(() => expect(requestMade).toBe(true));
     await vi.waitFor(() => expect(pushMock).toHaveBeenCalledWith("/dtrs/new"));
   });
 
-  it("does nothing when the confirmation is dismissed", async () => {
+  it("keeps the draft and sends no request when the dialog is cancelled", async () => {
     const user = userEvent.setup();
-    vi.spyOn(window, "confirm").mockReturnValue(false);
+    pushMock.mockClear();
     let requestMade = false;
     server.use(
       http.post("http://localhost:3000/api/backend/trust-records/tr-1/discard", () => {
@@ -62,6 +67,9 @@ describe("DiscardDraftButton (spec: Discard a Draft (SHOULD))", () => {
 
     renderWithQueryClient(<DiscardDraftButton id="tr-1" />);
     await user.click(screen.getByRole("button", { name: "Descartar borrador" }));
+    await screen.findByRole("alertdialog");
+
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
 
     expect(requestMade).toBe(false);
     expect(pushMock).not.toHaveBeenCalled();

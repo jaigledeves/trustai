@@ -48,6 +48,9 @@ export const certifyDictionary = {
   },
   discard: {
     action: "Descartar borrador",
+    dialogTitle: "¿Descartar este borrador?",
+    cancel: "Cancelar",
+    confirmAction: "Sí, descartar",
     confirmPrompt:
       "¿Seguro que quieres descartar este borrador? Esta acción no se puede deshacer.",
     discardedMessage: "Este borrador fue descartado.",

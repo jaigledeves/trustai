@@ -5,6 +5,7 @@ import { certifyDictionary } from "../../dictionaries/es/certify";
 import { ApiError, mapApiError } from "../../lib/api/errors";
 import { useConfirm } from "../../lib/api/hooks/useConfirm";
 import { Button } from "../ui/button";
+import { StatusPanel } from "../ui/status-panel";
 
 /**
  * Confirm step (spec: "Confirm (DRAFT -> READY)"). On success `useConfirm`
@@ -33,8 +34,10 @@ export function ConfirmButton({ id }: { id: string }) {
 
   return (
     <div className="flex flex-col gap-2">
-      {error ? <p role="alert">{error}</p> : null}
-      <Button type="button" onClick={handleConfirm} disabled={confirm.isPending}>
+      {error ? <StatusPanel variant="error">{error}</StatusPanel> : null}
+      {/* size="lg" — this is the wizard's primary action, ahead of Save
+          (ReviewStep) and Discard in visual weight. */}
+      <Button type="button" size="lg" onClick={handleConfirm} disabled={confirm.isPending}>
         {certifyDictionary.confirm.submit}
       </Button>
     </div>
