@@ -66,6 +66,17 @@ export interface TrustRecordListResult {
   total: number;
 }
 
+/**
+ * web-dtr-list: optional filters for the paginated org list. Both are
+ * merged into the same query-level `where` as the org scope (RNF-004),
+ * never post-filtered. `search` matches `DigitalAsset.filename`
+ * case-insensitively (`contains`); `state` is an exact enum match.
+ */
+export interface TrustRecordListFilters {
+  search?: string;
+  state?: TrustRecordState;
+}
+
 export interface TrustRecordRepositoryPort {
   /**
    * Unscoped by organizationId: `TrustRecord` has no `organizationId`
@@ -113,11 +124,17 @@ export interface TrustRecordRepositoryPort {
    * `DigitalAsset.organizationId`, never by post-filtering an unscoped
    * result). List-view fields only — no AI/anchor joins (those are the
    * detail view's job via `findByIdForOrganization` + the anchor repo).
+   *
+   * web-dtr-list: optional `filters` (filename `search` + `state`) are
+   * merged into the same query-level `where`, so filtering stays
+   * org-scoped and never post-filters. Omitting `filters` preserves the
+   * prior unfiltered behaviour byte-for-byte.
    */
   findAllForOrganization(
     organizationId: string,
     page: number,
     pageSize: number,
+    filters?: TrustRecordListFilters,
   ): Promise<TrustRecordListResult>;
 
   /**

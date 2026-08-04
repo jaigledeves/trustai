@@ -11,6 +11,7 @@ import type {
   AiAnalysisUpdateFields,
   ConfirmToReadyFields,
   ReviewFieldsUpdate,
+  TrustRecordListFilters,
   TrustRecordListResult,
   TrustRecordRepositoryPort,
   TrustRecordWithAssetAndAnchor,
@@ -68,11 +69,24 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
     organizationId: string,
     page: number,
     pageSize: number,
+    filters?: TrustRecordListFilters,
   ): Promise<TrustRecordListResult> {
     // RNF-004: same org-scoping join pattern as findByIdForOrganization —
     // filtered at the query level via the DigitalAsset relation, never by
-    // post-filtering an unscoped result.
-    const where = { asset: { organizationId } };
+    // post-filtering an unscoped result. web-dtr-list: optional filters
+    // (state + case-insensitive filename search) are merged into the SAME
+    // where, so they stay org-scoped and never post-filter. When no filter
+    // is present the spreads collapse to nothing — the where is byte-for-byte
+    // the prior `{ asset: { organizationId } }`.
+    const where = {
+      ...(filters?.state ? { state: filters.state } : {}),
+      asset: {
+        organizationId,
+        ...(filters?.search
+          ? { filename: { contains: filters.search, mode: "insensitive" as const } }
+          : {}),
+      },
+    };
 
     // Defensive lower-bound clamp: even though the controller already
     // normalizes these, this port is the last line before Prisma — a

@@ -1,14 +1,12 @@
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Get,
   HttpCode,
   HttpStatus,
   Inject,
   NotFoundException,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -33,12 +31,10 @@ import {
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { AnchorTrustRecordResponseDto } from "./dto/anchor-trust-record-response.dto";
 import { ConfirmTrustRecordResponseDto } from "./dto/confirm-trust-record-response.dto";
+import { ListTrustRecordsQueryDto } from "./dto/list-trust-records-query.dto";
 import { ReviewTrustRecordDto } from "./dto/review-trust-record.dto";
 import { TrustRecordDetailResponseDto } from "./dto/trust-record-detail-response.dto";
 import { TrustRecordListResponseDto } from "./dto/trust-record-list-response.dto";
-
-/** No spec-stated limit exists — a design guess (Task Decision, sdd/web-frontend/tasks) capping list responses to a sane page size. */
-const MAX_PAGE_SIZE = 100;
 
 /** pg-boss job states that represent a visible, not-yet-succeeded analyze-document outcome. */
 const JOB_FAILURE_STATES = new Set(["failed", "retry"]);
@@ -62,30 +58,28 @@ export class TrustRecordsController {
 
   @Get()
   @ApiOperation({
-    summary: "List trust records for the caller's organization (paginated)",
+    summary: "List trust records for the caller's organization (paginated + filtered)",
     description:
-      "web-history (Phase 2 companion slice): RNF-004 org-scoping at the query level (never " +
-      "post-filtered). An org with zero records returns { items: [], total: 0 }, never a 404. " +
-      "`pageSize` is capped at 100 regardless of the requested value.",
+      "web-dtr-list: RNF-004 org-scoping at the query level (never post-filtered). Optional " +
+      "`search` (case-insensitive filename contains) and `state` (exact lifecycle-state) filters " +
+      "are validated by ListTrustRecordsQueryDto — a bogus `state` yields 400, never 500 (ADR-008). " +
+      "An org with zero matches returns { items: [], total: 0 }, never a 404. `pageSize` is capped " +
+      "at 100 (@Max) and defaults to 20; `page` defaults to 1.",
   })
   async list(
-    @Query("page", new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query("pageSize", new DefaultValuePipe(20), ParseIntPipe) pageSize: number,
+    @Query() query: ListTrustRecordsQueryDto,
     @Request() req: { user: JwtPayload },
   ): Promise<TrustRecordListResponseDto> {
-    // Lower-bound clamp so a hostile/typo'd `page<=0` never produces a
-    // negative Prisma `skip` (a DB error surfaced as 500) and `pageSize<=0`
-    // never yields a zero/negative `take`. Upper bound caps the page size.
-    const clampedPage = Math.max(1, page);
-    const clampedPageSize = Math.max(1, Math.min(pageSize, MAX_PAGE_SIZE));
+    const { page, pageSize, search, state } = query;
 
     const { items, total } = await this.trustRecordRepository.findAllForOrganization(
       req.user.organizationId,
-      clampedPage,
-      clampedPageSize,
+      page,
+      pageSize,
+      { ...(search !== undefined ? { search } : {}), ...(state !== undefined ? { state } : {}) },
     );
 
-    return { items, total, page: clampedPage, pageSize: clampedPageSize };
+    return { items, total, page, pageSize };
   }
 
   @Get(":id")

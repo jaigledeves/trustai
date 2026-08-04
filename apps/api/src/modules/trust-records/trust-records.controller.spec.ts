@@ -5,6 +5,7 @@ import { TrustRecord, TrustRecordState } from "../../domain/trust-record.entity"
 import type { AnchorRepositoryPort } from "../../ports/anchor-repository.port";
 import type { QueuePort } from "../../ports/queue.port";
 import type { TrustRecordRepositoryPort } from "../../ports/trust-record-repository.port";
+import type { ListTrustRecordsQueryDto } from "./dto/list-trust-records-query.dto";
 import { TrustRecordsController } from "./trust-records.controller";
 
 function buildTrustRecord(overrides: Partial<TrustRecord> = {}): TrustRecord {
@@ -51,12 +52,15 @@ function buildDigitalAsset(overrides: Partial<DigitalAsset> = {}): DigitalAsset 
 
 function buildController(overrides: {
   findByIdForOrganizationWithAsset?: ReturnType<typeof vi.fn>;
+  findAllForOrganization?: ReturnType<typeof vi.fn>;
   anchorFindById?: ReturnType<typeof vi.fn>;
   findLatestJobByTrustRecordId?: ReturnType<typeof vi.fn>;
 } = {}): TrustRecordsController {
   const trustRecordRepository = {
     findByIdForOrganizationWithAsset:
       overrides.findByIdForOrganizationWithAsset ?? vi.fn().mockResolvedValue(null),
+    findAllForOrganization:
+      overrides.findAllForOrganization ?? vi.fn().mockResolvedValue({ items: [], total: 0 }),
   } as unknown as TrustRecordRepositoryPort;
 
   const anchorRepository = {
@@ -123,5 +127,51 @@ describe("TrustRecordsController.getById (web-certify-flow: Persistent Document 
     await expect(
       controller.getById("tr-missing", { user: { organizationId: "org-1", sub: "user-1" } as never }),
     ).rejects.toThrow(NotFoundException);
+  });
+});
+
+describe("TrustRecordsController.list (web-dtr-list: filtered pagination)", () => {
+  function query(overrides: Partial<ListTrustRecordsQueryDto> = {}): ListTrustRecordsQueryDto {
+    return { page: 1, pageSize: 20, ...overrides };
+  }
+
+  it("passes the org id, page/pageSize and an empty filter object through to the port, echoing page/pageSize", async () => {
+    const findAllForOrganization = vi.fn().mockResolvedValue({ items: [], total: 0 });
+    const controller = buildController({ findAllForOrganization });
+
+    const result = await controller.list(query(), {
+      user: { organizationId: "org-1", sub: "user-1" } as never,
+    });
+
+    expect(findAllForOrganization).toHaveBeenCalledWith("org-1", 1, 20, {});
+    expect(result).toEqual({ items: [], total: 0, page: 1, pageSize: 20 });
+  });
+
+  it("forwards search + state filters to the port when present", async () => {
+    const findAllForOrganization = vi.fn().mockResolvedValue({ items: [], total: 0 });
+    const controller = buildController({ findAllForOrganization });
+
+    await controller.list(query({ page: 2, pageSize: 10, search: "contrato", state: TrustRecordState.CERTIFIED }), {
+      user: { organizationId: "org-1", sub: "user-1" } as never,
+    });
+
+    expect(findAllForOrganization).toHaveBeenCalledWith("org-1", 2, 10, {
+      search: "contrato",
+      state: TrustRecordState.CERTIFIED,
+    });
+  });
+
+  it("returns the port's items/total under the response envelope", async () => {
+    const items = [
+      { id: "tr-1", state: TrustRecordState.DRAFT, filename: "a.pdf", aiClassification: null, createdAt: new Date() },
+    ];
+    const findAllForOrganization = vi.fn().mockResolvedValue({ items, total: 1 });
+    const controller = buildController({ findAllForOrganization });
+
+    const result = await controller.list(query({ pageSize: 20 }), {
+      user: { organizationId: "org-1", sub: "user-1" } as never,
+    });
+
+    expect(result).toEqual({ items, total: 1, page: 1, pageSize: 20 });
   });
 });
