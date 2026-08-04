@@ -18,6 +18,12 @@ import {
 interface DtrTableProps {
   items: TrustRecordListItem[];
   total: number;
+  /**
+   * True when a search/state filter is active. Distinguishes a filtered
+   * no-match (show "no matches") from a truly empty org (show the onboarding
+   * CTA) — spec: web-dtr-list — "Distinct Empty States".
+   */
+  hasActiveFilter?: boolean;
 }
 
 /**
@@ -30,8 +36,21 @@ interface DtrTableProps {
  * instead of a blank table (spec: web-visual-coherence — "History
  * Navigation Affordances").
  */
-export function DtrTable({ items, total }: DtrTableProps) {
+export function DtrTable({ items, total, hasActiveFilter = false }: DtrTableProps) {
   if (total === 0) {
+    // A filtered no-match must not nudge the user to "certify your first
+    // document" — they already have records, just none matching the filter.
+    if (hasActiveFilter) {
+      return (
+        <StatusPanel
+          variant="info"
+          className="flex flex-col items-center gap-3 py-10 text-center"
+          icon={<FileText className="size-8 text-muted-foreground" aria-hidden="true" />}
+          title={historyDictionary.list.noMatches}
+        />
+      );
+    }
+
     return (
       <StatusPanel
         variant="info"

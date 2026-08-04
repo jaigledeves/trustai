@@ -15,6 +15,15 @@ export const historyDictionary = {
     classificationPending: "Sin clasificar",
     emptyState: "Todavía no certificaste ningún documento.",
     emptyStateCta: "Certificar mi primer documento",
+    searchLabel: "Buscar por documento",
+    searchPlaceholder: "Buscar por nombre de documento…",
+    stateFilterLabel: "Filtrar por estado",
+    stateFilterAll: "Todos los estados",
+    noMatches: "Ningún documento coincide con tu búsqueda.",
+    paginationPrevious: "Anterior",
+    paginationNext: "Siguiente",
+    /** Template — `{page}`/`{totalPages}` are substituted in the component. */
+    paginationPosition: "Página {page} de {totalPages}",
   },
   detail: {
     title: "Detalle del DTR",
