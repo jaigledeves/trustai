@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { TrustRecordState } from "../../domain/trust-record.entity";
 import { PrismaTrustRecordRepository } from "./trust-record.repository";
 import type { PrismaService } from "./prisma.service";
 
@@ -212,6 +213,77 @@ describe("PrismaTrustRecordRepository.findAllForOrganization (RNF-004: org-scope
     const result = await repository.findAllForOrganization("org-empty", 1, 20);
 
     expect(result).toEqual({ items: [], total: 0 });
+  });
+
+  it("leaves the where untouched (org scope only) when no filters are passed", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const count = vi.fn().mockResolvedValue(0);
+    const prisma = buildFakePrisma({ findMany, count });
+    const repository = new PrismaTrustRecordRepository(prisma);
+
+    await repository.findAllForOrganization("org-1", 1, 20, {});
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { asset: { organizationId: "org-1" } } }),
+    );
+    expect(count).toHaveBeenCalledWith({ where: { asset: { organizationId: "org-1" } } });
+  });
+
+  it("adds a top-level state predicate to the where when `state` is filtered", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const count = vi.fn().mockResolvedValue(0);
+    const prisma = buildFakePrisma({ findMany, count });
+    const repository = new PrismaTrustRecordRepository(prisma);
+
+    await repository.findAllForOrganization("org-1", 1, 20, { state: TrustRecordState.CERTIFIED });
+
+    const expectedWhere = {
+      state: TrustRecordState.CERTIFIED,
+      asset: { organizationId: "org-1" },
+    };
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expectedWhere }));
+    expect(count).toHaveBeenCalledWith({ where: expectedWhere });
+  });
+
+  it("adds a case-insensitive filename `contains` under the asset relation when `search` is filtered", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const count = vi.fn().mockResolvedValue(0);
+    const prisma = buildFakePrisma({ findMany, count });
+    const repository = new PrismaTrustRecordRepository(prisma);
+
+    await repository.findAllForOrganization("org-1", 1, 20, { search: "contrato" });
+
+    const expectedWhere = {
+      asset: {
+        organizationId: "org-1",
+        filename: { contains: "contrato", mode: "insensitive" },
+      },
+    };
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expectedWhere }));
+    expect(count).toHaveBeenCalledWith({ where: expectedWhere });
+  });
+
+  it("combines state + search filters, both merged into the same org-scoped where", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const prisma = buildFakePrisma({ findMany });
+    const repository = new PrismaTrustRecordRepository(prisma);
+
+    await repository.findAllForOrganization("org-1", 1, 20, {
+      state: TrustRecordState.READY,
+      search: "informe",
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          state: TrustRecordState.READY,
+          asset: {
+            organizationId: "org-1",
+            filename: { contains: "informe", mode: "insensitive" },
+          },
+        },
+      }),
+    );
   });
 });
 

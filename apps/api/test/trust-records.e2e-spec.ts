@@ -460,5 +460,83 @@ describe.skipIf(!dbAvailable || !storageAvailable)(
       expect(overCapped.status).toBe(200);
       expect(overCapped.body.pageSize).toBe(100);
     });
+
+    it("S-DTR-12: state filter returns only matching records (query-level, filtered total)", async () => {
+      const userA = await createAuthenticatedUser("dtr-list-state-filter");
+      await uploadAsset(userA.accessToken, "S-DTR-12-1");
+      await uploadAsset(userA.accessToken, "S-DTR-12-2");
+
+      // Freshly uploaded records are DRAFT — filtering by CERTIFIED must
+      // return zero even though the unfiltered list has two.
+      const draftList = await request(app.getHttpServer())
+        .get("/trust-records?state=DRAFT")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+      expect(draftList.status).toBe(200);
+      expect(draftList.body.total).toBe(2);
+
+      const certifiedList = await request(app.getHttpServer())
+        .get("/trust-records?state=CERTIFIED")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+      expect(certifiedList.status).toBe(200);
+      expect(certifiedList.body).toEqual({ items: [], total: 0, page: 1, pageSize: 20 });
+    });
+
+    it("S-DTR-13: filename search is case-insensitive and narrows the result set", async () => {
+      const userA = await createAuthenticatedUser("dtr-list-search");
+      const { trustRecordId: contrato } = await uploadAsset(userA.accessToken, "Contrato-Alpha");
+      await uploadAsset(userA.accessToken, "Factura-Beta");
+
+      const res = await request(app.getHttpServer())
+        // lowercase query against a mixed-case "Contrato-Alpha.pdf" filename
+        .get("/trust-records?search=contrato-alpha")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+
+      expect(res.status).toBe(200);
+      expect(res.body.total).toBe(1);
+      expect((res.body.items as Array<{ id: string }>).map((i) => i.id)).toEqual([contrato]);
+    });
+
+    it("S-DTR-14: a bogus state value is rejected with 400 (ADR-008), never a 500", async () => {
+      const userA = await createAuthenticatedUser("dtr-list-bad-state");
+
+      const res = await request(app.getHttpServer())
+        .get("/trust-records?state=BOGUS")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+
+      expect(res.status).toBe(400);
+    });
+
+    it("S-DTR-15: search never leaks across organizations (RNF-004)", async () => {
+      const userA = await createAuthenticatedUser("dtr-list-search-org-a");
+      const userB = await createAuthenticatedUser("dtr-list-search-org-b");
+      const { trustRecordId: secretoA } = await uploadAsset(userA.accessToken, "Secreto-Alpha");
+      await uploadAsset(userB.accessToken, "Secreto-Bravo");
+
+      const res = await request(app.getHttpServer())
+        .get("/trust-records?search=secreto")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+
+      expect(res.status).toBe(200);
+      expect(res.body.total).toBe(1);
+      expect((res.body.items as Array<{ id: string }>).map((i) => i.id)).toEqual([secretoA]);
+    });
+
+    it("S-DTR-16: a search with no match returns an empty page, not a 404", async () => {
+      const userA = await createAuthenticatedUser("dtr-list-no-match");
+      await uploadAsset(userA.accessToken, "S-DTR-16-doc");
+
+      const res = await request(app.getHttpServer())
+        .get("/trust-records?search=zzz-nonexistent")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ items: [], total: 0, page: 1, pageSize: 20 });
+    });
   },
 );
