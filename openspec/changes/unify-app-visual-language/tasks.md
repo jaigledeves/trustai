@@ -37,12 +37,12 @@ Chain strategy: feature-branch-chain
 
 ## Phase 2: Auth (PR 2)
 
-- [ ] 2.1 RED `(auth)/layout.test.tsx`: gradient+`Wordmark` render once around `children`.
-- [ ] 2.2 GREEN `app/(auth)/layout.tsx` (new, gradient `70%_60%_at_50%_-10%`); login/register/verify-email drop own wrapper, keep only `Card`/content.
-- [ ] 2.3 `verify-email/page.tsx`: success→`StatusPanel success` (action=Link `/login`); error `p role="alert"`→`StatusPanel error`. Check: `page.test.tsx` green, no rewrite.
-- [ ] 2.4 `LoginForm.tsx`: `formError`→`StatusPanel error`; disable submit + pending feedback in flight. Check: `LoginForm.test.tsx` green.
-- [ ] 2.5 `RegisterForm.tsx`: success block (fixes double-heading)→`StatusPanel success` action=Link `/login`; form error→`error`. Check: `RegisterForm.test.tsx` green.
-- [ ] 2.6 Verify PR2: `pnpm --filter @trustai/web test/typecheck/lint`. No new dictionary keys.
+- [x] 2.1 RED `(auth)/layout.test.tsx`: gradient+`Wordmark` render once around `children`.
+- [x] 2.2 GREEN `app/(auth)/layout.tsx` (new, gradient `70%_60%_at_50%_-10%`); login/register/verify-email drop own wrapper, keep only `Card`/content.
+- [x] 2.3 `verify-email/page.tsx`: success→`StatusPanel success` (action=Link `/login`); error `p role="alert"`→`StatusPanel error`. Check: `page.test.tsx` green, no rewrite.
+- [x] 2.4 `LoginForm.tsx`: `formError`→`StatusPanel error`; disable submit + pending feedback in flight. Check: `LoginForm.test.tsx` green.
+- [x] 2.5 `RegisterForm.tsx`: success block (fixes double-heading)→`StatusPanel success` action=Link `/login`; form error→`error`. Check: `RegisterForm.test.tsx` green.
+- [x] 2.6 Verify PR2: `pnpm --filter @trustai/web test/typecheck/lint`. No new dictionary keys.
 
 ## Phase 3: Dashboard + History (PR 3)
 

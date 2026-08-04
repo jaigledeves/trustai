@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
+import { authDictionary } from "../../../dictionaries/es/auth";
 import { server } from "../../../test/msw/server";
 
 vi.mock("next/headers", () => ({
@@ -52,5 +53,8 @@ describe("VerifyEmailPage (spec: Email Verification Landing)", () => {
       screen.getByText("El enlace es inválido o venció. Regístrate de nuevo para recibir uno nuevo."),
     ).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Ir a iniciar sesión" })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: authDictionary.login.registerCta }),
+    ).toHaveAttribute("href", "/register");
   });
 });

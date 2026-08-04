@@ -8,6 +8,7 @@ import { validateLoginForm, type LoginFormErrors } from "../../lib/validation/au
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { StatusPanel } from "../ui/status-panel";
 
 /** Login form (spec: "Login and Session Establishment"). Submits to the
  * dedicated `/api/auth/login` route handler — the only place a session
@@ -90,14 +91,21 @@ export function LoginForm() {
         ) : null}
       </div>
       {formError ? (
-        <p
-          role="alert"
-          className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
-        >
-          {formError}
-        </p>
+        <StatusPanel variant="error">{formError}</StatusPanel>
       ) : null}
-      <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={submitting}
+        aria-busy={submitting}
+      >
+        {submitting ? (
+          <span
+            aria-hidden="true"
+            className="size-4 shrink-0 animate-spin rounded-full border-2 border-primary border-t-transparent"
+          />
+        ) : null}
         {authDictionary.login.submit}
       </Button>
     </form>
