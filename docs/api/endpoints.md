@@ -33,6 +33,8 @@ Documentación interactiva: Swagger/OpenAPI vía `@nestjs/swagger` en `main.ts`.
 | POST | `/auth/register` | No | Crea `Organization` + usuario admin; dispara email de verificación (adaptador stub en MVP). |
 | GET | `/auth/verify-email?token=` | No | Verifica el email con el token enviado. |
 | POST | `/auth/login` | No | Login con email+password (Argon2). Devuelve JWT. |
+| POST | `/auth/forgot-password` | No | Solicita el email de restablecimiento. Responde **siempre** `200 { ok: true }` exista o no el email (defensa anti-enumeración). Si el usuario existe, genera un token (TTL 24h), guarda solo su SHA-256 y dispara el email de reset (adaptador stub en MVP → logs). |
+| POST | `/auth/reset-password` | No | Restablece la contraseña con `{ token, newPassword }`. Token de un solo uso; además marca `emailVerified = true` (poseer un reset válido prueba propiedad del email). **400** si el token es inválido o caducó. |
 | GET | `/auth/me` | JWT | Perfil del usuario autenticado (echo del payload del JWT). |
 
 ## `assets`
@@ -46,7 +48,7 @@ Documentación interactiva: Swagger/OpenAPI vía `@nestjs/swagger` en `main.ts`.
 
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
-| GET | `/trust-records?page=&pageSize=` | JWT | Lista paginada (RNF-004, escopado en la query, nunca post-filtrado). `pageSize` clamp a 100. Org sin registros devuelve `{ items: [], total: 0 }`, nunca 404. |
+| GET | `/trust-records?page=&pageSize=&search=&state=` | JWT | Lista paginada y filtrada (RNF-004, escopado en la query, nunca post-filtrado). Filtros opcionales validados por `ListTrustRecordsQueryDto`: `search` (nombre de fichero, *contains* case-insensitive) y `state` (estado del ciclo de vida, valor exacto). Un `state` inválido devuelve **400**, nunca 500 (ADR-008). `page` default 1; `pageSize` default 20, clamp a 100. Org sin coincidencias devuelve `{ items: [], total: 0 }`, nunca 404. |
 | GET | `/trust-records/:id` | JWT | Detalle completo: estado, `canonicalHash`, campos IA, anchor (txHash/blockTimestamp/status) si existe, y `analysisFailureReason` si el job `analyze-document` falló. |
 | PATCH | `/trust-records/:id/review` | JWT | Edita campos IA (`summary`/`classification`/`language`) mientras el registro está en `DRAFT`. 409 fuera de `DRAFT` (INV-21). Patch parcial. |
 | POST | `/trust-records/:id/confirm` | JWT | Ensambla y canonicaliza el DTR (RFC 8785 + SHA-256 vía `dtr-core`), fija `canonicalHash` una única vez (INV-22/24). `DRAFT -> READY`. 409 si no está en `DRAFT`, ya confirmado, o falta análisis/procedencia (RF-025/INV-26). |

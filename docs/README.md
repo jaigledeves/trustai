@@ -47,6 +47,9 @@ con una ADR nueva.
 | [ADR-004](adr/ADR-004-doble-adaptador-ia.md) | Doble adaptador IA (enmendado a 1 real + stub en el MVP) |
 | [ADR-005](adr/ADR-005-frontend-app-router-tailwind-tanstack.md) | Frontend: Next.js App Router + Tailwind + TanStack |
 | [ADR-006](adr/ADR-006-stack-de-despliegue-mvp.md) | Stack de despliegue del MVP (Vercel + Railway + R2) |
+| [ADR-007](adr/ADR-007-metodo-repo-dedicado-para-join-de-asset-org-scoped.md) | Método de repositorio dedicado para el join de asset org-scoped |
+| [ADR-008](adr/ADR-008-dto-de-query-validado-para-filtros-de-lista.md) | DTO de query validado para filtros de lista |
+| [ADR-009](adr/ADR-009-web-dueno-del-copy-de-veredictos-y-aviso-eidas.md) | La web es dueña del copy de veredictos y del aviso eIDAS |
 
 ## Índice maestro / estado
 

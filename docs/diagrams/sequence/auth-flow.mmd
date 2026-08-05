@@ -60,4 +60,36 @@ sequenceDiagram
             W-->>B: se maneja el 401 (re-login)
         end
     end
+    Note over U,M: Fase 4 — Recuperación de contraseña (NO crea sesión: al terminar se entra por Fase 2)
+    U->>B: Introduce su email en /forgot-password
+    B->>W: POST /api/backend/auth/forgot-password (proxy catch-all)
+    W->>API: POST /auth/forgot-password
+    alt El email existe
+        API->>API: Genera token (uuid) + su SHA-256
+        API->>DB: Guarda SHA-256 + expiración (TTL 24h)
+        API->>M: Envía enlace /reset-password?token=<raw>
+    else El email no existe
+        API->>API: No hace nada (respuesta idéntica, anti-enumeración)
+    end
+    API-->>W: 200 { ok: true }
+    W-->>B: "Si el email existe, te enviamos un enlace"
+    U->>B: Abre /reset-password?token=... (Server Component lee ?token=)
+    alt Falta el token
+        W-->>B: Panel de error + enlace a /forgot-password (no monta el form)
+    else Hay token
+        U->>B: Nueva contraseña + confirmación
+        B->>W: POST /api/backend/auth/reset-password { token, newPassword }
+        W->>API: POST /auth/reset-password
+        API->>DB: Busca por SHA-256 del token y valida expiración
+        alt Token válido y no caducado
+            API->>DB: Actualiza hash (argon2), limpia columnas de reset (un solo uso), emailVerified = true
+            API-->>W: 200 { ok: true }
+            W-->>B: "Contraseña cambiada" → /login (NO se setea cookie)
+        else Token inválido o caducado
+            API-->>W: 400
+            W-->>B: Error + enlace para pedir uno nuevo
+        end
+    end
+    Note over API,DB: El token de reset nunca se guarda en claro (solo su SHA-256), igual que el de verificación de email
+
     Note over U,W: Logout = borrar la cookie (clearSessionCookie). El JWT es stateless: no hace falta avisar a la API

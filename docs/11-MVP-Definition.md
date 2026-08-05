@@ -121,7 +121,7 @@ Verificado directamente contra `apps/api`, `apps/web` y `smart-contracts`:
 
 | Capacidad del alcance | Estado |
 |---|---|
-| Auth simple (UC-07) | Implementado: `auth.controller.ts` (register/verify-email/login/me), JWT + Argon2, `app/(auth)/{login,register,verify-email}` |
+| Auth simple (UC-07) | Implementado, incluida recuperación de contraseña (RF-003): `auth.controller.ts` (register/verify-email/login/forgot-password/reset-password/me), JWT + Argon2, tokens de reset hasheados (SHA-256, TTL 24h, un solo uso), `app/(auth)/{login,register,verify-email,forgot-password,reset-password}` |
 | Certificar (UC-01) | Implementado end-to-end: `assets.controller.ts` (upload) → job `analyze-document` (IA) → `trust-records.controller.ts` (review/confirm/anchor) → jobs `anchor-dtr`/`confirm-anchor` → `CERTIFIED`. UI: `components/certify/{UploadStep,ReviewStep,ConfirmButton,AnchorPoller}` |
 | Verificar público (UC-02) | Implementado: `public-verification.controller.ts` (GET hash-only + POST upload), página `app/verify/[id]`, componentes `HashOnlyCard`/`UploadVerdictPanel`/`ClientHashRecompute` |
 | Historial básico (UC-03) | Implementado: `GET /trust-records` paginado + `app/(dashboard)/dtrs` (lista y detalle) |

@@ -140,6 +140,76 @@ renderizar páginas privadas a un usuario anónimo. La validación real (firma
 y expiración del JWT) la hace **siempre** la API en cada llamada. Nunca se
 confía en la mera presencia de la cookie para servir datos reales.
 
+## 4bis. Flujo 4 — Recuperación de contraseña
+
+Recuperar la contraseña **no** crea sesión: al terminar, el usuario inicia
+sesión por el flujo normal (§3). Se apoya en las mismas garantías que el
+registro (token hasheado, entregado por el notificador stub).
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Usuario
+    participant B as Navegador (JS)
+    participant W as Next.js (servidor)
+    participant API as API NestJS
+    participant DB as PostgreSQL
+    participant M as Email (stub → logs)
+
+    Note over U,M: Paso 1 — Solicitud (siempre responde igual, exista o no el email)
+    U->>B: Introduce su email en /forgot-password
+    B->>W: POST /api/backend/auth/forgot-password (proxy catch-all)
+    W->>API: POST /auth/forgot-password
+    alt El email existe
+        API->>API: Genera token (uuid) y su SHA-256
+        API->>DB: Guarda SHA-256 + expiración (TTL 24h)
+        API->>M: Envía enlace /reset-password?token=<raw>
+    else El email no existe
+        API->>API: No hace nada (mismo tiempo de respuesta)
+    end
+    API-->>W: 200 { ok: true }
+    W-->>B: "Si el email existe, te enviamos un enlace" (copy anti-enumeración)
+
+    Note over U,DB: Paso 2 — Restablecimiento
+    U->>B: Abre /reset-password?token=...
+    B->>W: GET /reset-password (Server Component lee ?token=)
+    alt Falta el token
+        W-->>B: Panel de error + enlace a /forgot-password (nunca monta el form)
+    else Hay token
+        W-->>B: Formulario de nueva contraseña (ResetPasswordForm)
+        U->>B: Nueva contraseña + confirmación
+        B->>W: POST /api/backend/auth/reset-password { token, newPassword }
+        W->>API: POST /auth/reset-password
+        API->>DB: Busca por SHA-256 del token y valida expiración
+        alt Token válido y no caducado
+            API->>API: Hashea la nueva contraseña (argon2)
+            API->>DB: Actualiza hash, limpia columnas de reset (un solo uso), emailVerified = true
+            API-->>W: 200 { ok: true }
+            W-->>B: "Contraseña cambiada" → a /login (NO se setea cookie)
+        else Token inválido o caducado
+            API-->>W: 400
+            W-->>B: Error + enlace para pedir uno nuevo en /forgot-password
+        end
+    end
+    Note over API,DB: La BD nunca guarda el token en claro (solo su SHA-256), igual que el token de verificación de email
+```
+
+Notas de diseño verificadas contra el código:
+
+- **Respuesta constante en `forgot-password`.** La API responde `200 { ok:
+  true }` exista o no el email; todo el trabajo condicional (token, guardado,
+  envío) ocurre dentro del caso de uso solo si hay usuario. No se filtra qué
+  emails están registrados (misma política anti-enumeración que el login).
+- **El token vive hasheado.** Solo su SHA-256 se persiste; el token en claro
+  únicamente viaja al notificador (stub → logs en el MVP). Es de un solo uso
+  y caduca a las 24h.
+- **`emailVerified = true` al restablecer.** Poseer un enlace de reset que
+  llegó al buzón demuestra propiedad del email, así que el reset también
+  verifica la cuenta.
+- **El shell de `/reset-password` es Server Component.** Lee `?token=` antes
+  de montar el formulario: si falta el token, muestra un panel de error y
+  nunca deja enviar un reset sin token.
+
 ## 5. Resumen de piezas
 
 | Pieza | Rol | Archivo |
@@ -167,5 +237,9 @@ confía en la mera presencia de la cookie para servir datos reales.
   "contraseña incorrecta".
 - **Contraseñas con argon2.** Nunca se almacenan en claro; se guarda solo el
   hash.
+- **Recuperación de contraseña sin filtrar información.** `forgot-password`
+  responde igual exista o no el email; el token de reset se guarda hasheado
+  (SHA-256), es de un solo uso y caduca a las 24h. Restablecer también marca
+  el email como verificado.
 - **Logout = borrar la cookie.** El JWT es stateless: no requiere una
   llamada a la API para invalidar la sesión del lado del servidor.
