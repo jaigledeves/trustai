@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ExternalLink, ShieldAlert, UploadCloud } from "lucide-react";
-import { useState, type ChangeEvent } from "react";
+import { useState, type ChangeEvent, type DragEvent } from "react";
 import { verifyDictionary } from "../../dictionaries/es/verify";
 import { postVerifyUpload } from "../../lib/api/public-verify-client";
 import type { VerifyUploadResponse } from "../../lib/api/types";
@@ -28,15 +28,43 @@ export function UploadVerdictPanel({ id }: UploadVerdictPanelProps) {
   const [result, setResult] = useState<VerifyUploadResponse | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    setFile(event.target.files?.[0] ?? null);
+  /** Shared by file-picker and drag-and-drop paths. */
+  function selectFile(selected: File | null) {
+    setFile(selected);
     setResult(null);
     setError(null);
-    // Also drop the previously-submitted file: otherwise, after a verdict,
-    // selecting a NEW file would keep rendering the OLD file's recomputed
-    // hash until the next submit.
+    // Drop the previously-submitted file so the old hash recompute panel
+    // doesn't linger after the user picks a new file.
     setSubmittedFile(null);
+  }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    selectFile(event.target.files?.[0] ?? null);
+  }
+
+  function handleDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+    selectFile(event.dataTransfer.files[0] ?? null);
+  }
+
+  function handleDragOver(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault(); // required — browsers reject drops without this
+    setIsDragging(true);
+  }
+
+  function handleDragEnter(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(event: DragEvent<HTMLLabelElement>) {
+    // dragleave fires on child-boundary crossings too — only treat it as a
+    // real "left the zone" when the cursor didn't move to a child element.
+    if (event.currentTarget.contains(event.relatedTarget as Node)) return;
+    setIsDragging(false);
   }
 
   async function handleSubmit() {
@@ -71,7 +99,16 @@ export function UploadVerdictPanel({ id }: UploadVerdictPanelProps) {
           aria-label is what keeps the test's exact lookup unambiguous. */}
       <label
         htmlFor="verify-upload-file"
-        className="mt-5 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/40 px-6 py-10 text-center transition-colors hover:border-primary/40 hover:bg-accent/40"
+        className={cn(
+          "mt-5 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors",
+          isDragging
+            ? "border-primary bg-accent/40"
+            : "border-border bg-muted/40 hover:border-primary/40 hover:bg-accent/40",
+        )}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
       >
         <span
           aria-hidden="true"

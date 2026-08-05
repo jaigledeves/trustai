@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { verifyDictionary } from "../../dictionaries/es/verify";
@@ -111,5 +111,29 @@ describe("UploadVerdictPanel (spec: web-public-verify — Upload Verdict, All Fo
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent(verifyDictionary.verdicts.INVALID_RECORD.message);
+  });
+
+  it("accepts a file via drag-and-drop and shows the filename", () => {
+    render(<UploadVerdictPanel id="rec-1" />);
+    // The input is a sibling of the label (not a child), so closest("label")
+    // returns null. Query the label directly via its for/id association.
+    const dropzone = document.querySelector('label[for="verify-upload-file"]') as HTMLElement;
+    const droppedFile = new File(["content"], "verified.pdf", { type: "application/pdf" });
+
+    fireEvent.drop(dropzone, { dataTransfer: { files: [droppedFile] } });
+
+    expect(screen.getByText("verified.pdf")).toBeInTheDocument();
+  });
+
+  it("applies drag-over visual feedback on dragenter and removes it on dragleave", () => {
+    render(<UploadVerdictPanel id="rec-1" />);
+    const dropzone = document.querySelector('label[for="verify-upload-file"]') as HTMLElement;
+
+    fireEvent.dragEnter(dropzone);
+    expect(dropzone.classList.contains("border-primary")).toBe(true);
+
+    // Simulate leaving the zone boundary (relatedTarget outside the label).
+    fireEvent.dragLeave(dropzone, { relatedTarget: document.body });
+    expect(dropzone.classList.contains("border-primary")).toBe(false);
   });
 });
