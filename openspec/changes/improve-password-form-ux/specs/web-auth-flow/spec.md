@@ -50,3 +50,26 @@ always visible — not conditional on any error state.
 - GIVEN a user opens the register form for the first time
 - WHEN the form renders, before typing or submitting anything
 - THEN `authDictionary.register.passwordHint` text is visible below the password field
+
+### Requirement: Register Password Fields Expose Hints and Errors to Assistive Technology
+
+The register password and confirm-password inputs MUST be programmatically
+associated with their helper/error text so assistive technology announces
+them. The password input MUST reference its policy-hint text via
+`aria-describedby` at all times; when a field has a validation error, that
+input MUST set `aria-invalid` and also reference its error text via
+`aria-describedby`.
+
+#### Scenario: Password hint is part of the field's accessible description on mount
+
+- GIVEN a user opens the register form for the first time
+- WHEN the form renders, before typing or submitting anything
+- THEN the password input's accessible description includes `authDictionary.register.passwordHint`
+- AND the password input is not marked invalid
+
+#### Scenario: A field error is exposed via aria-invalid and the accessible description
+
+- GIVEN a user submits with a policy-violating password and/or a mismatched confirmation
+- WHEN the inline errors render
+- THEN each errored input is marked `aria-invalid`
+- AND that input's accessible description includes its error message

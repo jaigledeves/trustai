@@ -22,7 +22,12 @@ endpoints — this is client-side form UX and copy.
 - `RegisterForm` and `ResetPasswordForm`: static helper text below the
   password field stating the policy proactively (visible before any
   submit), sourced from new dictionary key(s) — no hardcoded copy (RNF-041)
-- TDD: failing tests first for both mismatch validation and hint rendering
+- Accessibility: on the password-creation fields these two forms touch,
+  wire `aria-describedby` (hint always + error when present) and
+  `aria-invalid` (on error) so assistive tech announces the policy and any
+  validation error — additive, no `Input` component change
+- TDD: failing tests first for mismatch validation, hint rendering, and the
+  a11y association
 
 ### Out of Scope
 - Changing `PASSWORD_POLICY` itself (`apps/web/lib/validation/auth.ts:5`) —
@@ -32,6 +37,10 @@ endpoints — this is client-side form UX and copy.
   nothing to mirror server-side
 - Backfilling a full spec for existing register/login/verify-email
   behavior — only the two new guarantees this change adds are specified
+- Retrofitting `aria-describedby`/`aria-invalid` onto email fields,
+  `LoginForm`, or other forms — the a11y wiring is scoped to the
+  password-creation fields these two forms already touch; a site-wide
+  consistency pass is deferred
 
 ## Capabilities
 
@@ -93,5 +102,8 @@ dictionary.
       `register.errorPasswordMismatch`, no network call
 - [ ] Register and reset forms show the password-policy hint before any
       submit attempt (no error state required)
+- [ ] On the touched password fields, the hint is part of the input's
+      accessible description on mount, and errors surface via `aria-invalid`
+      + the accessible description
 - [ ] All new copy lives in `dictionaries/es/auth.ts`, none hardcoded
 - [ ] `pnpm --filter @trustai/web test` and `typecheck` pass

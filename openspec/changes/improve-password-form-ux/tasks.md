@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| Estimated changed lines | ~150–200 (frontend-only: 1 dictionary file, 1 validation module + test, 2 form components + tests) |
+| Estimated changed lines | ~180–230 (frontend-only: 1 dictionary file, 1 validation module + test, 2 form components + tests, incl. aria-invalid/aria-describedby wiring + a11y assertions) |
 | 400-line budget risk | Low |
 | Chained PRs recommended | No |
 | Suggested split | Single PR — `feat/password-form-ux` → `main` |
@@ -35,12 +35,14 @@ Chain strategy: pending
 ## Phase 3: RegisterForm (RED → GREEN)
 
 - [ ] 3.1 RED: in `apps/web/components/auth/RegisterForm.test.tsx`, fill the confirm-password field with a matching value in the existing happy-path tests; add a mismatch-blocks-submit test (differing confirm value → no request sent, inline `errorPasswordMismatch` text shown); add a hint-visible-on-first-render test (render, assert `register.passwordHint` text present before typing/submitting)
-- [ ] 3.2 GREEN: in `apps/web/components/auth/RegisterForm.tsx`, add `confirmPassword` state, the confirm-password `Input` block (mirror `ResetPasswordForm.tsx:133-148`, `id="register-confirm-password"`, `confirmPasswordLabel`), the static hint `<p>` under the password `Input` before its conditional error `<p>` (between lines 107–108), and update the `handleSubmit` call to `validateRegisterForm(email, password, confirmPassword)`
+- [ ] 3.2 RED (a11y): add two assertions per `design.md`'s a11y decision — (a) on mount, the password input's accessible description includes `register.passwordHint` and it is not `aria-invalid` (use `toHaveAccessibleDescription`, not raw attribute strings); (b) after a failed submit, each errored input (`password`, `confirmPassword`) is `aria-invalid` and its accessible description includes its error message
+- [ ] 3.3 GREEN: in `apps/web/components/auth/RegisterForm.tsx`, add `confirmPassword` state; the confirm-password `Input` block (mirror `ResetPasswordForm.tsx:133-148`, `id="register-confirm-password"`, `confirmPasswordLabel`); the static hint `<p id="register-password-hint">` under the password `Input` before its conditional error `<p id="register-password-error">`; wire `aria-invalid`/`aria-describedby` on the password and confirm inputs exactly per `design.md`'s block; and update the `handleSubmit` call to `validateRegisterForm(email, password, confirmPassword)`
 
 ## Phase 4: ResetPasswordForm (RED → GREEN)
 
 - [ ] 4.1 RED: in `apps/web/components/auth/ResetPasswordForm.test.tsx`, add a hint-visible-on-first-render test (render with a valid token, assert `resetPassword.passwordHint` text present before typing/submitting)
-- [ ] 4.2 GREEN: in `apps/web/components/auth/ResetPasswordForm.tsx`, add the static hint `<p>` under the new-password `Input`, before its conditional error `<p>` (between lines 126–127)
+- [ ] 4.2 RED (a11y): add assertions — (a) on mount, the new-password input's accessible description includes `resetPassword.passwordHint` and it is not `aria-invalid`; (b) after a failed submit, each errored input (new-password, confirm) is `aria-invalid` with its error message in its accessible description
+- [ ] 4.3 GREEN: in `apps/web/components/auth/ResetPasswordForm.tsx`, add the static hint `<p id="reset-password-hint">` under the new-password `Input` before its conditional error `<p id="reset-password-new-error">`; wire `aria-invalid`/`aria-describedby` on the new-password input (hint always + error when present) and error-only wiring on the existing confirm input (`id="reset-password-confirm-error"`) per `design.md`
 
 ## Phase 5: Verification Gate
 
