@@ -2,9 +2,10 @@
 
 import { UploadCloud } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type ChangeEvent } from "react";
+import { useState, type ChangeEvent, type DragEvent } from "react";
 import { certifyDictionary } from "../../dictionaries/es/certify";
 import { useUploadAsset } from "../../lib/api/hooks/useUploadAsset";
+import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import { StatusPanel } from "../ui/status-panel";
 
@@ -12,6 +13,20 @@ const PDF_MIME_TYPE = "application/pdf";
 // Soft warning only — the backend enforces no hard maximum (design.md
 // Grounding Correction #5), so the client must never hard-block on size.
 const SIZE_WARNING_THRESHOLD_BYTES = 20 * 1024 * 1024;
+
+const KB = 1024;
+const MB = KB * 1024;
+
+/**
+ * Local copy, mirroring `DocumentContextHeader.tsx`'s `formatSizeBytes` —
+ * not extracted into a shared util per design.md's "Out of Scope" note
+ * (keeps this change's diff scoped to this component).
+ */
+function formatFileSize(bytes: number): string {
+  if (bytes < KB) return `${bytes} B`;
+  if (bytes < MB) return `${(bytes / KB).toFixed(1)} KB`;
+  return `${(bytes / MB).toFixed(1)} MB`;
+}
 
 /** Upload step (spec: "PDF Upload", RF-012 duplicate handling). */
 export function UploadStep() {
@@ -21,9 +36,10 @@ export function UploadStep() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [sizeWarning, setSizeWarning] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const selected = event.target.files?.[0] ?? null;
+  /** Shared by the file-picker (`onChange`) and drag-and-drop (`onDrop`) paths. */
+  function validateAndSetFile(selected: File | null) {
     setValidationError(null);
     setSizeWarning(null);
     setSubmitError(null);
@@ -40,6 +56,37 @@ export function UploadStep() {
       setSizeWarning(certifyDictionary.upload.errorSizeWarning);
     }
     setFile(selected);
+  }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    validateAndSetFile(event.target.files?.[0] ?? null);
+  }
+
+  function handleDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+    validateAndSetFile(event.dataTransfer.files[0] ?? null);
+  }
+
+  function handleDragOver(event: DragEvent<HTMLLabelElement>) {
+    // preventDefault is required — browsers reject drops on elements that
+    // don't cancel dragover.
+    event.preventDefault();
+    setIsDragging(true);
+  }
+
+  function handleDragEnter(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(event: DragEvent<HTMLLabelElement>) {
+    // dragleave fires for every child boundary crossing too — only treat it
+    // as a real "left the zone" when the cursor didn't move to a child.
+    if (event.currentTarget.contains(event.relatedTarget as Node)) {
+      return;
+    }
+    setIsDragging(false);
   }
 
   async function handleSubmit() {
@@ -69,7 +116,16 @@ export function UploadStep() {
           hint text inside the label. */}
       <label
         htmlFor="upload-file"
-        className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/40 px-6 py-10 text-center transition-colors hover:border-primary/40 hover:bg-accent/40"
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        className={cn(
+          "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors",
+          isDragging
+            ? "border-primary bg-accent/40"
+            : "border-border bg-muted/40 hover:border-primary/40 hover:bg-accent/40",
+        )}
       >
         <span
           aria-hidden="true"
@@ -78,6 +134,7 @@ export function UploadStep() {
           <UploadCloud className="size-6" />
         </span>
         <span className="text-sm font-medium">{certifyDictionary.upload.dropLabel}</span>
+        <span className="text-xs text-muted-foreground">{certifyDictionary.upload.dropHint}</span>
       </label>
       <input
         id="upload-file"
@@ -91,6 +148,8 @@ export function UploadStep() {
       {file ? (
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{file.name}</span>
+          <br />
+          {certifyDictionary.upload.fileSizeLabel.replace("{size}", formatFileSize(file.size))}
         </p>
       ) : null}
 

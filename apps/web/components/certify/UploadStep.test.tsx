@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
@@ -24,6 +24,29 @@ function renderWithQueryClient(ui: ReactNode) {
 
 function pdfFile(name = "doc.pdf") {
   return new File(["%PDF-1.4 fake bytes"], name, { type: "application/pdf" });
+}
+
+function docxFile(name = "doc.docx") {
+  return new File(["not a pdf"], name, {
+    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  });
+}
+
+/** The dropzone is the `<label>` wrapping the visible drop-label span. */
+function getDropzone() {
+  const label = screen.getByText("Elige un archivo PDF para certificar").closest("label");
+  if (!label) {
+    throw new Error("Dropzone <label> not found");
+  }
+  return label;
+}
+
+// jsdom does not implement the `DataTransfer` constructor (verified: jsdom
+// 25, per apps/web/package.json) — `handleDrop` only reads
+// `event.dataTransfer.files[0]`, so a plain object with a `files` array
+// satisfies the component under test without needing the real DOM type.
+function dataTransferWith(file: File) {
+  return { files: [file] };
 }
 
 describe("UploadStep (spec: PDF Upload)", () => {
@@ -91,5 +114,55 @@ describe("UploadStep (spec: PDF Upload)", () => {
     await vi.waitFor(() =>
       expect(pushMock).toHaveBeenCalledWith("/dtrs/tr-existing?notice=duplicate"),
     );
+  });
+
+  it("accepts a PDF via drag-and-drop and shows the filename", () => {
+    renderWithQueryClient(<UploadStep />);
+    const dropzone = getDropzone();
+
+    fireEvent.drop(dropzone, { dataTransfer: dataTransferWith(pdfFile("dropped.pdf")) });
+
+    expect(screen.getByText("dropped.pdf")).toBeInTheDocument();
+  });
+
+  it("rejects a non-PDF file via drag-and-drop with the validation error", () => {
+    renderWithQueryClient(<UploadStep />);
+    const dropzone = getDropzone();
+
+    fireEvent.drop(dropzone, { dataTransfer: dataTransferWith(docxFile()) });
+
+    expect(screen.getByText("Solo se aceptan archivos PDF.")).toBeInTheDocument();
+    expect(screen.queryByText("doc.docx")).not.toBeInTheDocument();
+  });
+
+  it("shows the file size alongside the filename after selection", async () => {
+    const user = userEvent.setup();
+    renderWithQueryClient(<UploadStep />);
+    const input = screen.getByLabelText("Elige un archivo PDF para certificar");
+
+    await user.upload(input, pdfFile());
+
+    expect(screen.getByText(/Tamaño: /)).toBeInTheDocument();
+  });
+
+  it("applies drag-over visual class when dragging over the dropzone", () => {
+    renderWithQueryClient(<UploadStep />);
+    const dropzone = getDropzone();
+
+    fireEvent.dragOver(dropzone);
+
+    expect(dropzone.classList.contains("border-primary")).toBe(true);
+  });
+
+  it("removes drag-over visual when drag leaves the dropzone boundary", () => {
+    renderWithQueryClient(<UploadStep />);
+    const dropzone = getDropzone();
+
+    fireEvent.dragEnter(dropzone);
+    expect(dropzone.classList.contains("border-primary")).toBe(true);
+
+    fireEvent.dragLeave(dropzone, { relatedTarget: document.body });
+
+    expect(dropzone.classList.contains("border-primary")).toBe(false);
   });
 });

@@ -22,6 +22,8 @@ export const certifyDictionary = {
   upload: {
     title: "Certificar un documento",
     dropLabel: "Elige un archivo PDF para certificar",
+    dropHint: "o arrástralo aquí",
+    fileSizeLabel: "Tamaño: {size}",
     submit: "Subir documento",
     errorNotPdf: "Solo se aceptan archivos PDF.",
     errorSizeWarning:
