@@ -39,6 +39,12 @@ describe("mapApiError (pure — spec: no enumeration on login, distinct unverifi
   it("maps 409 in the anchor context to the anchor-blocked message", () => {
     expect(mapApiError(409, "anchor")).toBe(certifyDictionary.anchor.errorGeneric);
   });
+
+  it("maps 400 in the resetPassword context to the invalid/expired token message", () => {
+    expect(mapApiError(400, "resetPassword")).toBe(
+      authDictionary.resetPassword.errorInvalidToken,
+    );
+  });
 });
 
 describe("ApiError", () => {

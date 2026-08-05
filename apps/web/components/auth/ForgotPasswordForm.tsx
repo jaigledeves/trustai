@@ -1,34 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { authDictionary } from "../../dictionaries/es/auth";
 import { shellDictionary } from "../../dictionaries/es/shell";
-import { validateLoginForm, type LoginFormErrors } from "../../lib/validation/auth";
+import { mapApiError } from "../../lib/api/errors";
+import {
+  validateForgotPasswordForm,
+  type ForgotPasswordFormErrors,
+} from "../../lib/validation/auth";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { StatusPanel } from "../ui/status-panel";
 
-/** Login form (spec: "Login and Session Establishment"). Submits to the
- * dedicated `/api/auth/login` route handler — the only place a session
- * cookie is ever set — then does a full navigation to `/dtrs` so
- * `middleware.ts` and every RSC on that page see the freshly-set cookie.
+/**
+ * Forgot-password form (spec: auth-password-recovery "Forgot-Password
+ * Enumeration Defense"). Always shows the same success panel once the
+ * request completes, regardless of whether the email is registered — the
+ * backend enforces this by always returning `200 { ok: true }`, so the
+ * client has nothing enumeration-unsafe to branch on.
  */
-export function LoginForm() {
-  const router = useRouter();
+export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<LoginFormErrors>({});
+  const [fieldErrors, setFieldErrors] = useState<ForgotPasswordFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [succeeded, setSucceeded] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
 
-    const errors = validateLoginForm(email, password);
+    const errors = validateForgotPasswordForm(email);
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) {
       return;
@@ -36,22 +40,23 @@ export function LoginForm() {
 
     setSubmitting(true);
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/backend/auth/forgot-password", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email }),
       });
 
       if (response.ok) {
-        router.push("/dtrs");
-        router.refresh();
+        setSucceeded(true);
         return;
       }
 
       const body = (await response.json().catch(() => null)) as
-        | { message?: string }
+        | { status?: number }
         | null;
-      setFormError(body?.message ?? shellDictionary.errors.generic);
+      setFormError(
+        mapApiError(body?.status ?? response.status, "forgotPassword"),
+      );
     } catch {
       setFormError(shellDictionary.errors.generic);
     } finally {
@@ -59,12 +64,30 @@ export function LoginForm() {
     }
   }
 
+  if (succeeded) {
+    return (
+      <StatusPanel
+        variant="success"
+        title={authDictionary.forgotPassword.successTitle}
+        action={
+          <Button size="lg" asChild>
+            <Link href="/login">{authDictionary.forgotPassword.loginCta}</Link>
+          </Button>
+        }
+      >
+        {authDictionary.forgotPassword.successMessage}
+      </StatusPanel>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="login-email">{authDictionary.login.emailLabel}</Label>
+        <Label htmlFor="forgot-password-email">
+          {authDictionary.forgotPassword.emailLabel}
+        </Label>
         <Input
-          id="login-email"
+          id="forgot-password-email"
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
@@ -75,30 +98,6 @@ export function LoginForm() {
           </p>
         ) : null}
       </div>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="login-password">
-          {authDictionary.login.passwordLabel}
-        </Label>
-        <Input
-          id="login-password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-        />
-        {fieldErrors.password ? (
-          <p role="alert" className="text-sm text-destructive">
-            {fieldErrors.password}
-          </p>
-        ) : null}
-      </div>
-      <p className="text-right text-sm">
-        <Link
-          href="/forgot-password"
-          className="font-medium text-primary underline-offset-4 hover:underline"
-        >
-          {authDictionary.login.forgotPasswordLink}
-        </Link>
-      </p>
       {formError ? (
         <StatusPanel variant="error">{formError}</StatusPanel>
       ) : null}
@@ -115,7 +114,7 @@ export function LoginForm() {
             className="size-4 shrink-0 animate-spin rounded-full border-2 border-primary border-t-transparent"
           />
         ) : null}
-        {authDictionary.login.submit}
+        {authDictionary.forgotPassword.submit}
       </Button>
     </form>
   );

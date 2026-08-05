@@ -39,5 +39,38 @@ export const authDictionary = {
     errorUnverifiedEmail: "Verifica tu email antes de iniciar sesión.",
     errorInvalidEmail: "Ingresa un email válido.",
     errorPasswordRequired: "Ingresa tu contraseña.",
+    forgotPasswordLink: "¿Olvidaste tu contraseña?",
+  },
+  forgotPassword: {
+    title: "Recupera tu contraseña",
+    subtitle: "Te enviaremos un enlace para restablecer tu contraseña.",
+    emailLabel: "Email",
+    submit: "Enviar enlace",
+    successTitle: "Revisa tu email",
+    successMessage:
+      "Si existe una cuenta con ese email, te enviamos un enlace para restablecer tu contraseña.",
+    loginPrompt: "¿Ya recordaste tu contraseña?",
+    loginCta: "Iniciar sesión",
+    errorInvalidEmail: "Ingresa un email válido.",
+  },
+  resetPassword: {
+    title: "Elige una nueva contraseña",
+    subtitle: "Ingresa tu nueva contraseña para continuar.",
+    newPasswordLabel: "Nueva contraseña",
+    confirmPasswordLabel: "Confirmar contraseña",
+    submit: "Cambiar contraseña",
+    successTitle: "Contraseña actualizada",
+    successMessage:
+      "Tu contraseña se actualizó correctamente. Ya puedes iniciar sesión.",
+    successCta: "Iniciar sesión",
+    errorTitle: "Enlace inválido",
+    errorMessage:
+      "El enlace de restablecimiento no es válido. Solicita uno nuevo para continuar.",
+    errorCta: "Solicitar un enlace nuevo",
+    errorPasswordPolicy:
+      "La contraseña debe tener al menos 8 caracteres, con una letra y un número.",
+    errorPasswordMismatch: "Las contraseñas no coinciden.",
+    errorInvalidToken:
+      "El enlace es inválido o venció. Solicita uno nuevo para continuar.",
   },
 } as const;

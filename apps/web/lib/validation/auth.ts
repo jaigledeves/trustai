@@ -52,3 +52,46 @@ export function validateLoginForm(
 
   return errors;
 }
+
+export interface ForgotPasswordFormErrors {
+  email?: string;
+}
+
+/** Client-side pre-validation before any network call (spec: "Forgot-Password Enumeration Defense"). */
+export function validateForgotPasswordForm(
+  email: string,
+): ForgotPasswordFormErrors {
+  const errors: ForgotPasswordFormErrors = {};
+
+  if (!isValidEmail(email)) {
+    errors.email = authDictionary.forgotPassword.errorInvalidEmail;
+  }
+
+  return errors;
+}
+
+export interface ResetPasswordFormErrors {
+  newPassword?: string;
+  confirmPassword?: string;
+}
+
+/**
+ * Client-side pre-validation before any network call (spec: "Reset Form
+ * Confirms Password Match"). Both checks run independently so a weak
+ * password AND a mismatch can be flagged together.
+ */
+export function validateResetPasswordForm(
+  newPassword: string,
+  confirmPassword: string,
+): ResetPasswordFormErrors {
+  const errors: ResetPasswordFormErrors = {};
+
+  if (!PASSWORD_POLICY.test(newPassword)) {
+    errors.newPassword = authDictionary.resetPassword.errorPasswordPolicy;
+  }
+  if (newPassword !== confirmPassword) {
+    errors.confirmPassword = authDictionary.resetPassword.errorPasswordMismatch;
+  }
+
+  return errors;
+}

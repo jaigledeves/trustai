@@ -17,7 +17,14 @@ export class ApiError extends Error {
  * Contexts this mapper knows about. Extended per-slice (3.2 adds
  * review/confirm/anchor context-specific 409 copy per design.md).
  */
-export type ApiErrorContext = "login" | "register" | "review" | "confirm" | "anchor";
+export type ApiErrorContext =
+  | "login"
+  | "register"
+  | "review"
+  | "confirm"
+  | "anchor"
+  | "forgotPassword"
+  | "resetPassword";
 
 /**
  * Maps an HTTP status to Spanish, spec-grounded copy. `context` matters
@@ -46,6 +53,14 @@ export function mapApiError(status: number, context: ApiErrorContext): string {
 
   if (context === "anchor") {
     if (status === 409) return certifyDictionary.anchor.errorGeneric;
+  }
+
+  // A 400 here means the reset token didn't match a stored hash or its
+  // expiry passed (spec: "Password Reset Token Single-Use and Expiry") —
+  // never a validation-shape error, since the client already enforces the
+  // password policy before submitting.
+  if (context === "resetPassword") {
+    if (status === 400) return authDictionary.resetPassword.errorInvalidToken;
   }
 
   return shellDictionary.errors.generic;

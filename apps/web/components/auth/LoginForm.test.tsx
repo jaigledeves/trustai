@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { authDictionary } from "../../dictionaries/es/auth";
 import { server } from "../../test/msw/server";
 
 const pushMock = vi.fn();
@@ -125,5 +126,13 @@ describe("LoginForm (spec: Login and Session Establishment)", () => {
       await screen.findByText("Verifica tu email antes de iniciar sesión."),
     ).toBeInTheDocument();
     expect(pushMock).not.toHaveBeenCalled();
+  });
+
+  it("renders a link to /forgot-password (spec: Login Page Forgot-Password Entry Point)", () => {
+    render(<LoginForm />);
+
+    expect(
+      screen.getByRole("link", { name: authDictionary.login.forgotPasswordLink }),
+    ).toHaveAttribute("href", "/forgot-password");
   });
 });

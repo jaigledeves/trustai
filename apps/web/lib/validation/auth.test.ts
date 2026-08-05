@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { validateLoginForm, validateRegisterForm } from "./auth";
+import {
+  validateForgotPasswordForm,
+  validateLoginForm,
+  validateRegisterForm,
+  validateResetPasswordForm,
+} from "./auth";
 
 describe("validateRegisterForm (pure — spec: Client-side validation error)", () => {
   it("returns no errors for a valid email and a policy-compliant password", () => {
@@ -47,5 +52,40 @@ describe("validateLoginForm (pure)", () => {
     expect(validateLoginForm("user@example.com", "").password).toBe(
       "Ingresa tu contraseña.",
     );
+  });
+});
+
+describe("validateForgotPasswordForm (pure — spec: Forgot-Password Enumeration Defense)", () => {
+  it("returns no errors for a valid email", () => {
+    expect(validateForgotPasswordForm("user@example.com")).toEqual({});
+  });
+
+  it("flags an invalid email format", () => {
+    expect(validateForgotPasswordForm("nope").email).toBe(
+      "Ingresa un email válido.",
+    );
+  });
+});
+
+describe("validateResetPasswordForm (pure — spec: Reset Form Confirms Password Match)", () => {
+  it("returns no errors for a policy-compliant, matching password pair", () => {
+    expect(
+      validateResetPasswordForm("correcthorse1", "correcthorse1"),
+    ).toEqual({});
+  });
+
+  it("flags a password below the 8-char/letter+digit policy (mirrors ResetPasswordDto's backend regex)", () => {
+    const errors = validateResetPasswordForm("short1", "short1");
+
+    expect(errors.newPassword).toBe(
+      "La contraseña debe tener al menos 8 caracteres, con una letra y un número.",
+    );
+  });
+
+  it("flags a mismatch between newPassword and confirmPassword without a network call", () => {
+    const errors = validateResetPasswordForm("correcthorse1", "different1");
+
+    expect(errors.confirmPassword).toBe("Las contraseñas no coinciden.");
+    expect(errors.newPassword).toBeUndefined();
   });
 });
