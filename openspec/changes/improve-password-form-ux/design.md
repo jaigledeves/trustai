@@ -15,7 +15,7 @@ is unchanged.
 | Hint copy storage | Two independent dictionary keys (`register.passwordHint`, `resetPassword.passwordHint`), literal string duplicated | One shared TS constant referenced by both | Precedent exists: `register.errorPasswordPolicy`/`resetPassword.errorPasswordPolicy` already hold the exact same string as two independent literals, not a shared constant — every `auth.ts` key is per-surface even when identical. The two objects have no cross-imports today; a shared constant would be the first such coupling and could entangle copy that may reasonably diverge later. Duplication (2 lines) beats hidden coupling. |
 | Hint element markup | `<p className="text-sm text-muted-foreground">{hint}</p>`, no `role="alert"`, after `Input`, before the conditional error `<p>` | New `<HelperText>` component | No helper-text primitive exists under `apps/web/components/ui/`; the app-wide muted-copy convention (`status-panel.tsx:22`, `card.tsx:53`, `alert-dialog.tsx:98`) is exactly this class on a plain `<p>`. Mirrors the sibling error pattern (`text-sm text-destructive`) but omits `role="alert"` since it's static, not a validation result. A component for one string is unwarranted abstraction. |
 | `validateRegisterForm` signature | Add required 3rd param `confirmPassword: string`, mirroring `validateResetPasswordForm` | Optional param defaulting to `""` | `validateResetPasswordForm` treats both params as required, no default; matching keeps the two validators structurally identical. Single production call site (`RegisterForm.tsx:36`, grep-confirmed) plus existing `auth.test.ts` 2-arg calls (lines 11, 17, 24, 32) — both updated in the same commit (RED phase). |
-| Assistive-tech association for hints/errors | Complete wiring on the **password-creation fields this change touches** only (register password + confirm, reset new-password + confirm): `aria-invalid` on error, `aria-describedby` linking the static hint (always) and the conditional error. | (a) Minimal: hint-only `aria-describedby`, no `aria-invalid`; (b) Retrofit every field/form site-wide | Minimal inverts the a11y priority — a screen-reader user most needs to know a field is *invalid* and *why*, not just hear a static hint; wiring the hint but not the error is half-done. The `Input` primitive already spreads `{...props}` (`input.tsx:14`) and ships `aria-invalid:` styling variants (`input.tsx:11`), so this is additive with zero component change and no test breakage (existing tests query `getByLabelText`/`getByRole`, which `aria-describedby` does not alter). Scoped to password fields (the subject of recs 8/10) — email/login fields keep today's `role="alert"`-only pattern and are left for a future consistency pass, keeping this PR focused. No prior form uses `aria-describedby`; this establishes the complete pattern where we already work. |
+| Assistive-tech association for hints/errors | Complete wiring on the **password-creation fields this change touches** only (register password + confirm, reset new-password + confirm): `aria-invalid` on error, `aria-describedby` pointing to the static hint on mount and switching to the error id on failure. | (a) Minimal: hint-only `aria-describedby`, no `aria-invalid`; (b) Retrofit every field/form site-wide | Minimal inverts the a11y priority — a screen-reader user most needs to know a field is *invalid* and *why*, not just hear a static hint; wiring the hint but not the error is half-done. The `Input` primitive already spreads `{...props}` (`input.tsx:14`) and ships `aria-invalid:` styling variants (`input.tsx:11`), so this is additive with zero component change and no test breakage (existing tests query `getByLabelText`/`getByRole`, which `aria-describedby` does not alter). Scoped to password fields (the subject of recs 8/10) — email/login fields keep today's `role="alert"`-only pattern and are left for a future consistency pass, keeping this PR focused. No prior form uses `aria-describedby`; this establishes the complete pattern where we already work. **On error, `aria-describedby` points ONLY to the error id (not hint + error): the hint and the policy-error copy are byte-identical, so referencing both would make a screen reader announce the same sentence twice — the error text alone conveys the policy.** |
 
 ## Data Flow
 
@@ -93,8 +93,8 @@ resetPassword: {
 `RegisterForm.tsx` password field — full block after the a11y wiring
 (replaces the current password `div`, `RegisterForm.tsx:98-113`). The hint
 `<p>` gets a stable `id`; the error `<p>` gets a stable `id`; the `Input`
-gains `aria-invalid` (error only) and `aria-describedby` (hint always +
-error when present):
+gains `aria-invalid` (error only) and `aria-describedby` (hint id on mount,
+switching to the error id on failure):
 
 ```tsx
 <div className="flex flex-col gap-1.5">
@@ -109,7 +109,7 @@ error when present):
     aria-invalid={fieldErrors.password ? true : undefined}
     aria-describedby={
       fieldErrors.password
-        ? "register-password-hint register-password-error"
+        ? "register-password-error"
         : "register-password-hint"
     }
   />

@@ -23,7 +23,7 @@ endpoints — this is client-side form UX and copy.
   password field stating the policy proactively (visible before any
   submit), sourced from new dictionary key(s) — no hardcoded copy (RNF-041)
 - Accessibility: on the password-creation fields these two forms touch,
-  wire `aria-describedby` (hint always + error when present) and
+  wire `aria-describedby` (hint id on mount, error id on failure) and
   `aria-invalid` (on error) so assistive tech announces the policy and any
   validation error — additive, no `Input` component change
 - TDD: failing tests first for mismatch validation, hint rendering, and the
