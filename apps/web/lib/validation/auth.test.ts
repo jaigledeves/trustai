@@ -8,20 +8,32 @@ import {
 
 describe("validateRegisterForm (pure — spec: Client-side validation error)", () => {
   it("returns no errors for a valid email and a policy-compliant password", () => {
-    expect(validateRegisterForm("user@example.com", "correcthorse1")).toEqual(
-      {},
-    );
+    expect(
+      validateRegisterForm(
+        "user@example.com",
+        "correcthorse1",
+        "correcthorse1",
+      ),
+    ).toEqual({});
   });
 
   it("flags an invalid email format", () => {
-    const errors = validateRegisterForm("not-an-email", "correcthorse1");
+    const errors = validateRegisterForm(
+      "not-an-email",
+      "correcthorse1",
+      "correcthorse1",
+    );
 
     expect(errors.email).toBe("Ingresa un email válido.");
     expect(errors.password).toBeUndefined();
   });
 
   it("flags a password below the 8-char/letter+digit policy (mirrors RegisterDto's backend regex)", () => {
-    const errors = validateRegisterForm("user@example.com", "short1");
+    const errors = validateRegisterForm(
+      "user@example.com",
+      "short1",
+      "short1",
+    );
 
     expect(errors.password).toBe(
       "La contraseña debe tener al menos 8 caracteres, con una letra y un número.",
@@ -29,11 +41,36 @@ describe("validateRegisterForm (pure — spec: Client-side validation error)", (
   });
 
   it("flags a password with 8+ chars but no digit", () => {
-    const errors = validateRegisterForm("user@example.com", "onlyletters");
+    const errors = validateRegisterForm(
+      "user@example.com",
+      "onlyletters",
+      "onlyletters",
+    );
 
     expect(errors.password).toBe(
       "La contraseña debe tener al menos 8 caracteres, con una letra y un número.",
     );
+  });
+
+  it("returns no mismatch error for a matching confirm-password pair (spec: Register Form Confirms Password Match)", () => {
+    const errors = validateRegisterForm(
+      "user@example.com",
+      "correcthorse1",
+      "correcthorse1",
+    );
+
+    expect(errors.confirmPassword).toBeUndefined();
+  });
+
+  it("flags a mismatch between password and confirmPassword independent of the weak-password flag", () => {
+    const errors = validateRegisterForm(
+      "user@example.com",
+      "correcthorse1",
+      "different1",
+    );
+
+    expect(errors.confirmPassword).toBe("Las contraseñas no coinciden.");
+    expect(errors.password).toBeUndefined();
   });
 });
 

@@ -123,9 +123,18 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           type="password"
           value={newPassword}
           onChange={(event) => setNewPassword(event.target.value)}
+          aria-invalid={fieldErrors.newPassword ? true : undefined}
+          aria-describedby={
+            fieldErrors.newPassword
+              ? "reset-password-new-error"
+              : "reset-password-hint"
+          }
         />
+        <p id="reset-password-hint" className="text-sm text-muted-foreground">
+          {authDictionary.resetPassword.passwordHint}
+        </p>
         {fieldErrors.newPassword ? (
-          <p role="alert" className="text-sm text-destructive">
+          <p id="reset-password-new-error" role="alert" className="text-sm text-destructive">
             {fieldErrors.newPassword}
           </p>
         ) : null}
@@ -139,9 +148,15 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           type="password"
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}
+          aria-invalid={fieldErrors.confirmPassword ? true : undefined}
+          aria-describedby={
+            fieldErrors.confirmPassword
+              ? "reset-password-confirm-error"
+              : undefined
+          }
         />
         {fieldErrors.confirmPassword ? (
-          <p role="alert" className="text-sm text-destructive">
+          <p id="reset-password-confirm-error" role="alert" className="text-sm text-destructive">
             {fieldErrors.confirmPassword}
           </p>
         ) : null}

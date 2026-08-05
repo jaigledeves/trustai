@@ -12,12 +12,19 @@ function isValidEmail(email: string): boolean {
 export interface RegisterFormErrors {
   email?: string;
   password?: string;
+  confirmPassword?: string;
 }
 
-/** Client-side pre-validation before any network call (spec: "Client-side validation error"). */
+/**
+ * Client-side pre-validation before any network call (spec:
+ * "Client-side validation error", "Register Form Confirms Password
+ * Match"). The policy check and the mismatch check run independently so
+ * a weak password AND a mismatch can be flagged together.
+ */
 export function validateRegisterForm(
   email: string,
   password: string,
+  confirmPassword: string,
 ): RegisterFormErrors {
   const errors: RegisterFormErrors = {};
 
@@ -26,6 +33,9 @@ export function validateRegisterForm(
   }
   if (!PASSWORD_POLICY.test(password)) {
     errors.password = authDictionary.register.errorPasswordPolicy;
+  }
+  if (password !== confirmPassword) {
+    errors.confirmPassword = authDictionary.register.errorPasswordMismatch;
   }
 
   return errors;
