@@ -117,21 +117,27 @@ with `verifyDictionary.recompute.caveat`.
 
 ### Requirement: Accurate Anchoring Copy
 
-Any "what is anchored" claim (hero card, HowItWorks step 3, FAQ) MUST state
-that the SHA-256 hash of the DTR's RFC 8785 canonical serialization is
-anchored on-chain. Copy MUST NOT state or imply that "the file's hash" is
-anchored.
+Any "what is anchored" claim (hero card, HowItWorks, FAQ) MUST state that
+the SHA-256 hash of the DTR's RFC 8785 canonical serialization is anchored
+on-chain. Copy MUST NOT state or imply that "the file's hash" is anchored.
+The claim MAY live within `landingDictionary.how.technicalDetail` (a
+structured technical-detail block — e.g. an `intro` string plus
+`items: { term, desc }[]` — rather than a single string) instead of
+`landingDictionary.how.steps[2].description`; wherever it lives, the
+accuracy invariant below MUST hold.
 
-#### Scenario: HowItWorks step 3 states canonical-serialization hash
+#### Scenario: HowItWorks states canonical-serialization hash accurately
 
-- GIVEN `landingDictionary.how.steps[2]`
-- WHEN its description is rendered
+- GIVEN `landingDictionary.how.technicalDetail` and
+  `landingDictionary.how.steps[2].description`
+- WHEN whichever of the two carries the anchoring claim is rendered
 - THEN it describes anchoring the SHA-256 hash of the DTR's canonical
   (RFC 8785) serialization, not the raw file's hash
 
 #### Scenario: No "file hash is anchored" claim anywhere
 
-- GIVEN all anchoring-related copy (hero, how, faq groups)
+- GIVEN all anchoring-related copy (hero, how groups including
+  `how.technicalDetail`, faq groups)
 - WHEN scanned for "the file's hash is anchored" or equivalent phrasing
 - THEN no such claim is present
 
@@ -140,8 +146,11 @@ anchored.
 `useCases` items MUST assert only integrity and timestamp claims
 ("existed unmodified since timestamp X") and MUST NOT assert authorship,
 ownership, or issuer legitimacy. `faq` items MUST NOT promise pricing or
-future paid plans. HowItWorks step 1 MUST state storage is encrypted with
-AES-256-GCM (matches `apps/api/src/adapters/crypto/aes-gcm.adapter.ts`).
+future paid plans. HowItWorks copy MUST state storage is encrypted with
+AES-256-GCM (matches `apps/api/src/adapters/crypto/aes-gcm.adapter.ts`);
+this statement MAY live within `landingDictionary.how.technicalDetail`
+(a structured technical-detail block, not necessarily a single string)
+instead of `landingDictionary.how.steps[0].description`.
 
 #### Scenario: Use-case copy avoids authorship/ownership claims
 
@@ -156,11 +165,12 @@ AES-256-GCM (matches `apps/api/src/adapters/crypto/aes-gcm.adapter.ts`).
 - WHEN scanned for pricing/roadmap language
 - THEN no item promises future paid plans or pricing commitments
 
-#### Scenario: Step 1 names the real encryption algorithm
+#### Scenario: HowItWorks names the real encryption algorithm
 
-- GIVEN `landingDictionary.how.steps[0]`
-- WHEN its description is rendered
-- THEN it states storage is encrypted with AES-256-GCM
+- GIVEN `landingDictionary.how.technicalDetail` and
+  `landingDictionary.how.steps[0].description`
+- WHEN whichever of the two carries the encryption claim is rendered
+- THEN it states storage is encrypted with exactly AES-256-GCM
 
 ### Requirement: Config-Driven Navigation & Links
 
