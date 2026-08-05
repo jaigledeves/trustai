@@ -129,13 +129,33 @@ describe("dictionaries/es", () => {
       }
     });
 
-    it("6. HowItWorks step 1 names the real encryption algorithm", () => {
-      expect(how.steps[0].description).toMatch(/AES-256-GCM/);
+    it("6. HowItWorks technical detail names the real encryption algorithm", () => {
+      const combined = (collectLeafValues(how.technicalDetail) as string[]).join(
+        " ",
+      );
+      expect(combined).toMatch(/AES-256-GCM/);
     });
 
-    it("7. HowItWorks step 3 states the canonical-serialization hash is anchored", () => {
-      expect(how.steps[2].description).toMatch(/canónic/i);
-      expect(how.steps[2].description).toMatch(/SHA-256/);
+    it("7. HowItWorks technical detail states the canonical-serialization hash is anchored", () => {
+      const combined = (collectLeafValues(how.technicalDetail) as string[]).join(
+        " ",
+      );
+      expect(combined).toMatch(/canónic/i);
+      expect(combined).toMatch(/SHA-256/);
+    });
+
+    it("10. technicalDetail.items is a non-empty array of complete term/desc entries", () => {
+      expect(how.technicalDetail.items.length).toBeGreaterThan(0);
+      for (const item of how.technicalDetail.items) {
+        expect(item.term.trim().length).toBeGreaterThan(0);
+        expect(item.desc.trim().length).toBeGreaterThan(0);
+      }
+    });
+
+    it("11. technicalDetail.contractLabel is a non-empty string", () => {
+      expect(how.technicalDetail.contractLabel.trim().length).toBeGreaterThan(
+        0,
+      );
     });
 
     it("8. the recompute caveat honestly discloses it does not reconstruct/verify the anchored hash", () => {

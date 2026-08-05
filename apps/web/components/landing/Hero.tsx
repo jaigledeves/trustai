@@ -32,6 +32,10 @@ export function Hero() {
             {t.badge}
           </a>
 
+          <p className="text-sm font-medium text-muted-foreground">
+            {t.eyebrow}
+          </p>
+
           <h1 className="max-w-xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
             {t.title}
           </h1>
@@ -52,6 +56,8 @@ export function Hero() {
               </Button>
             ) : null}
           </div>
+
+          <p className="text-xs text-muted-foreground">{t.ctaMicrocopy}</p>
 
           <ul className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
             {t.valueProps.map((valueProp) => (
