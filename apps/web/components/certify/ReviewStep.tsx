@@ -30,6 +30,28 @@ export function hasAnalysisFailed(
 }
 
 /**
+ * Maps `record.analysisFailureReason` — a raw, untranslated string sourced
+ * from a backend pg-boss job's `output.message` — to a localized Spanish
+ * message (RNF-041: never render the raw API string). Only the two known
+ * literal failure messages get an exact mapping; everything else (dynamic
+ * Zod-issue text, defensive not-found errors, or a missing reason) falls
+ * back to a generic message, matching the exploration's own finding that
+ * those cannot be mapped 1:1.
+ */
+export function localizeFailureReason(reason: string | null | undefined): string {
+  if (!reason) {
+    return certifyDictionary.analysisError.generic;
+  }
+  if (reason.includes("no extractable text layer")) {
+    return certifyDictionary.analysisError.noTextLayer;
+  }
+  if (reason.includes("returned no content")) {
+    return certifyDictionary.analysisError.noContent;
+  }
+  return certifyDictionary.analysisError.generic;
+}
+
+/**
  * Review step (spec: "AI Analysis Display, Including Failure Visibility" +
  * "Review Edit"). Two mutually exclusive render paths: a failure banner
  * (no extractable text layer, etc — never a silent DRAFT stall) OR the
@@ -47,7 +69,7 @@ export function ReviewStep({ id, record }: ReviewStepProps) {
   if (hasAnalysisFailed(record)) {
     return (
       <StatusPanel variant="error" title={certifyDictionary.review.analysisFailedTitle}>
-        {record.analysisFailureReason}
+        {localizeFailureReason(record.analysisFailureReason)}
       </StatusPanel>
     );
   }

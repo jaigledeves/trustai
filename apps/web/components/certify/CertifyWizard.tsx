@@ -90,6 +90,25 @@ export function CertifyWizard({ id, initialRecord, showDuplicateNotice }: Certif
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {certifyDictionary.confirm.frozenHashLabel}
           </p>
+          {/* Optional technical disclosure (spec: web-certify-flow —
+              "Frozen-Hash Disclosure"): native <details>/<summary>, same
+              zero-JS pattern as Faq.tsx/HowItWorks.tsx. Preserves the
+              "frozen evidence" nuance for users who want it without
+              forcing it into the main label. */}
+          <details className="group">
+            <summary className="flex w-fit cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-primary marker:content-none">
+              {certifyDictionary.confirm.frozenHashDisclosureLabel}
+              <span
+                aria-hidden="true"
+                className="flex size-4 shrink-0 items-center justify-center text-muted-foreground transition-transform group-open:rotate-45"
+              >
+                +
+              </span>
+            </summary>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              {certifyDictionary.confirm.frozenHashDisclosure}
+            </p>
+          </details>
           <code className="block break-all rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-sm">
             {current.canonicalHash}
           </code>

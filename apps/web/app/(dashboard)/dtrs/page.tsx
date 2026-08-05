@@ -63,7 +63,10 @@ export default async function DtrsListPage({ searchParams }: DtrsListPageProps) 
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-6 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{historyDictionary.list.title}</h1>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">{historyDictionary.list.title}</h1>
+        <p className="text-sm text-muted-foreground">{historyDictionary.list.subtitle}</p>
+      </div>
       <Card className="flex flex-col gap-6 p-6">
         <DtrListControls search={search} state={state} />
         <DtrTable items={list.items} total={list.total} hasActiveFilter={hasActiveFilter} />

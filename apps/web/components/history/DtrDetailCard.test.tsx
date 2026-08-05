@@ -86,7 +86,7 @@ describe("DtrDetailCard (spec: web-history — DTR Detail View)", () => {
       screen.getByText("El análisis de IA todavía no está disponible."),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Este documento todavía no fue anclado."),
+      screen.getByText("Este documento todavía no fue registrado."),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Ver transacción en el explorador" }),

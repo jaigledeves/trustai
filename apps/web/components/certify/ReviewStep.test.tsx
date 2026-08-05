@@ -63,17 +63,60 @@ describe("ReviewStep (spec: AI Analysis Display + Review Edit)", () => {
     expect(screen.getByLabelText("Idioma")).toHaveValue("es");
   });
 
-  it("renders a non-dismissible failure banner (no edit form) when aiSummary is null and a failure reason exists — no spinner-forever state", () => {
+  it("renders a non-dismissible failure banner (no edit form) when aiSummary is null and a failure reason exists — localized, never the raw API string (RNF-041)", () => {
     renderWithQueryClient(
       <ReviewStep
         id="tr-1"
-        record={buildRecord({ aiSummary: null, analysisFailureReason: "no extractable text layer" })}
+        record={buildRecord({
+          aiSummary: null,
+          analysisFailureReason:
+            "PDF has no extractable text layer (scanned PDFs are not supported in MVP — no OCR)",
+        })}
       />,
     );
 
     expect(screen.getByText("No pudimos analizar este documento")).toBeInTheDocument();
-    expect(screen.getByText("no extractable text layer")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "El documento no tiene texto extraíble. Por ahora solo se admiten PDFs con texto, no imágenes escaneadas.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/no extractable text layer/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Resumen")).not.toBeInTheDocument();
+  });
+
+  it("localizes the 'returned no content' known API failure to the dedicated Spanish message", () => {
+    renderWithQueryClient(
+      <ReviewStep
+        id="tr-1"
+        record={buildRecord({
+          aiSummary: null,
+          analysisFailureReason: "OpenAI returned no content for the analysis request",
+        })}
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        "El proveedor de IA no devolvió contenido para este documento. Inténtalo de nuevo.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("falls back to the generic Spanish message for an unrecognized/dynamic failure reason — never renders the raw string", () => {
+    renderWithQueryClient(
+      <ReviewStep
+        id="tr-1"
+        record={buildRecord({
+          aiSummary: null,
+          analysisFailureReason:
+            "AI provider returned schema-invalid analysis: summary: Required",
+        })}
+      />,
+    );
+
+    expect(screen.getByText("No se pudo analizar el documento.")).toBeInTheDocument();
+    expect(screen.queryByText(/schema-invalid/i)).not.toBeInTheDocument();
   });
 
   it("submits only the changed field(s) to PATCH .../review and shows a saved confirmation after 204", async () => {
