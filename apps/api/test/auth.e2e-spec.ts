@@ -15,10 +15,11 @@ const dbAvailable = await isDatabaseAvailable();
 // (e.g. this sandbox has no running Docker Postgres container), the whole
 // suite is skipped rather than failing the run — see README.md and
 // apply-progress notes for the rationale.
-describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..13 + GET /auth/me)", () => {
+describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..18 + GET /auth/me)", () => {
   let app: INestApplication;
   let prisma: PrismaService;
   const sentEmails = new Map<string, string>();
+  const sentResetTokens = new Map<string, string>();
 
   function uniqueEmail(label: string): string {
     return `${label}-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
@@ -32,6 +33,9 @@ describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..13 + GET /auth/me)", () => {
       .useValue({
         sendVerificationEmail: vi.fn(async (email: string, rawToken: string) => {
           sentEmails.set(email, rawToken);
+        }),
+        sendPasswordResetEmail: vi.fn(async (email: string, rawToken: string) => {
+          sentResetTokens.set(email, rawToken);
         }),
       })
       .compile();
@@ -237,5 +241,153 @@ describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..13 + GET /auth/me)", () => {
       .set("Authorization", `Bearer ${accessToken}`);
     expect(meRes.status).toBe(200);
     expect(meRes.body).toMatchObject({ email, role: "ADMIN" });
+  });
+
+  // ─── S-AUTH-14..18: forgot-password / reset-password ───────────────────
+
+  it("S-AUTH-14: full round-trip — forgot then reset then login with the new password", async () => {
+    const email = uniqueEmail("forgot-reset-roundtrip");
+    const originalPassword = "OriginalPass1";
+    const newPassword = "BrandNewPass2";
+
+    await request(app.getHttpServer())
+      .post("/auth/register")
+      .send({ email, password: originalPassword });
+
+    const forgotResponse = await request(app.getHttpServer())
+      .post("/auth/forgot-password")
+      .send({ email });
+
+    expect(forgotResponse.status).toBe(200);
+    expect(forgotResponse.body).toEqual({ ok: true });
+
+    const resetToken = sentResetTokens.get(email);
+    expect(resetToken).toBeDefined();
+
+    const resetResponse = await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ token: resetToken, newPassword });
+
+    expect(resetResponse.status).toBe(200);
+    expect(resetResponse.body).toEqual({ ok: true });
+
+    const loginResponse = await request(app.getHttpServer())
+      .post("/auth/login")
+      .send({ email, password: newPassword });
+
+    expect(loginResponse.status).toBe(200);
+    expect(typeof loginResponse.body.accessToken).toBe("string");
+  });
+
+  it("S-AUTH-15: forgot-password returns 200 { ok: true } for an unknown email (enumeration defense)", async () => {
+    const response = await request(app.getHttpServer())
+      .post("/auth/forgot-password")
+      .send({ email: uniqueEmail("never-registered") });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ ok: true });
+  });
+
+  it("S-AUTH-16a: expired reset token is rejected with 400", async () => {
+    const email = uniqueEmail("reset-expired");
+    await request(app.getHttpServer())
+      .post("/auth/register")
+      .send({ email, password: "password123" });
+    await request(app.getHttpServer()).post("/auth/forgot-password").send({ email });
+
+    const resetToken = sentResetTokens.get(email);
+    // Force expiry directly in the DB — the real 24h TTL can't be waited out.
+    await prisma.user.update({
+      where: { email },
+      data: { passwordResetExpiresAt: new Date(Date.now() - 60_000) },
+    });
+
+    const response = await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ token: resetToken, newPassword: "newPassword123" });
+
+    expect(response.status).toBe(400);
+  });
+
+  it("S-AUTH-16b: a reused reset token is rejected with 400 (single-use)", async () => {
+    const email = uniqueEmail("reset-reused");
+    await request(app.getHttpServer())
+      .post("/auth/register")
+      .send({ email, password: "password123" });
+    await request(app.getHttpServer()).post("/auth/forgot-password").send({ email });
+
+    const resetToken = sentResetTokens.get(email);
+    await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ token: resetToken, newPassword: "firstNewPass1" });
+
+    const secondAttempt = await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ token: resetToken, newPassword: "secondNewPass2" });
+
+    expect(secondAttempt.status).toBe(400);
+  });
+
+  it("S-AUTH-16c: an unknown reset token is rejected with 400", async () => {
+    const response = await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ token: "not-a-real-reset-token", newPassword: "newPassword123" });
+
+    expect(response.status).toBe(400);
+  });
+
+  it("S-AUTH-17: a weak new password is rejected with 400 and the password is unchanged", async () => {
+    const email = uniqueEmail("reset-weak-pw");
+    const originalPassword = "password123";
+    await request(app.getHttpServer())
+      .post("/auth/register")
+      .send({ email, password: originalPassword });
+    await request(app.getHttpServer()).post("/auth/forgot-password").send({ email });
+
+    const resetToken = sentResetTokens.get(email);
+    const response = await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ token: resetToken, newPassword: "short1" });
+
+    expect(response.status).toBe(400);
+
+    const loginResponse = await request(app.getHttpServer())
+      .post("/auth/login")
+      .send({ email, password: originalPassword });
+    // Original account is unverified at this point (never verified), so a
+    // correct-password login returns 403, not 401 — either way, this
+    // proves the (weak) reset attempt did not change the password to
+    // something that would produce a *different* status.
+    expect(loginResponse.status).toBe(403);
+  });
+
+  it("S-AUTH-18: a successful reset sets emailVerified = true even for a previously unverified account", async () => {
+    const email = uniqueEmail("reset-verifies-email");
+    await request(app.getHttpServer())
+      .post("/auth/register")
+      .send({ email, password: "password123" });
+
+    const beforeReset = await prisma.user.findUnique({ where: { email } });
+    expect(beforeReset?.emailVerified).toBe(false);
+
+    await request(app.getHttpServer()).post("/auth/forgot-password").send({ email });
+    const resetToken = sentResetTokens.get(email);
+
+    const resetResponse = await request(app.getHttpServer())
+      .post("/auth/reset-password")
+      .send({ token: resetToken, newPassword: "newPassword123" });
+
+    expect(resetResponse.status).toBe(200);
+
+    const afterReset = await prisma.user.findUnique({ where: { email } });
+    expect(afterReset?.emailVerified).toBe(true);
+    expect(afterReset?.passwordResetToken).toBeNull();
+    expect(afterReset?.passwordResetExpiresAt).toBeNull();
+
+    // Previously unverified account can now log in with the new password.
+    const loginResponse = await request(app.getHttpServer())
+      .post("/auth/login")
+      .send({ email, password: "newPassword123" });
+    expect(loginResponse.status).toBe(200);
   });
 });

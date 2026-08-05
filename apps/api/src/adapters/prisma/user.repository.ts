@@ -25,6 +25,15 @@ export class PrismaUserRepository implements UserRepositoryPort {
     return record ? this.toDomain(record) : null;
   }
 
+  async findByPasswordResetToken(tokenHash: string): Promise<User | null> {
+    // Unscoped findFirst, same pre-auth-lookup rationale as
+    // findByVerificationToken above — no organizationId is known yet.
+    const record = await this.prisma.user.findFirst({
+      where: { passwordResetToken: tokenHash },
+    });
+    return record ? this.toDomain(record) : null;
+  }
+
   async existsByEmail(email: string): Promise<boolean> {
     const count = await this.prisma.user.count({ where: { email } });
     return count > 0;
@@ -63,6 +72,31 @@ export class PrismaUserRepository implements UserRepositoryPort {
         emailVerified: true,
         emailVerificationToken: null,
         emailVerificationExpiresAt: null,
+      },
+    });
+  }
+
+  async setPasswordResetToken(
+    userId: string,
+    tokenHash: string,
+    expiresAt: Date,
+  ): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordResetToken: tokenHash, passwordResetExpiresAt: expiresAt },
+    });
+  }
+
+  async resetPassword(userId: string, newPasswordHash: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash: newPasswordHash,
+        passwordResetToken: null,
+        passwordResetExpiresAt: null,
+        // Possessing a working reset link proves email ownership — see
+        // design.md "isVerified on reset" decision.
+        emailVerified: true,
       },
     });
   }
@@ -111,6 +145,8 @@ export class PrismaUserRepository implements UserRepositoryPort {
       record.createdAt,
       record.emailVerificationToken,
       record.emailVerificationExpiresAt,
+      record.passwordResetToken,
+      record.passwordResetExpiresAt,
     );
   }
 

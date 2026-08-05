@@ -16,4 +16,10 @@ export class StubNotificationAdapter implements NotificationPort {
       `[STUB NotificationPort] Verification email for ${email}: token=${rawToken}`,
     );
   }
+
+  async sendPasswordResetEmail(email: string, rawToken: string): Promise<void> {
+    this.logger.log(
+      `[STUB NotificationPort] Password reset email for ${email}: token=${rawToken}`,
+    );
+  }
 }

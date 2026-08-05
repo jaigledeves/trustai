@@ -6,8 +6,10 @@ import { Argon2HasherAdapter } from "../../adapters/argon2/argon2-hasher.adapter
 import { StubNotificationAdapter } from "../../adapters/notification/stub-notification.adapter";
 import { PrismaService } from "../../adapters/prisma/prisma.service";
 import { PrismaUserRepository } from "../../adapters/prisma/user.repository";
+import { ForgotPasswordUseCase } from "../../application/auth/forgot-password.use-case";
 import { LoginUseCase } from "../../application/auth/login.use-case";
 import { RegisterUseCase } from "../../application/auth/register.use-case";
+import { ResetPasswordUseCase } from "../../application/auth/reset-password.use-case";
 import { VerifyEmailUseCase } from "../../application/auth/verify-email.use-case";
 import { NOTIFICATION_PORT } from "../../ports/notification.port";
 import { PASSWORD_HASHER_PORT } from "../../ports/password-hasher.port";
@@ -42,6 +44,8 @@ import { JwtStrategy } from "./jwt.strategy";
     RegisterUseCase,
     VerifyEmailUseCase,
     LoginUseCase,
+    ForgotPasswordUseCase,
+    ResetPasswordUseCase,
     JwtStrategy,
     JwtAuthGuard,
   ],

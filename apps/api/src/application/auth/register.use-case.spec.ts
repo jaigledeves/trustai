@@ -13,9 +13,12 @@ function buildUserRepository(
   return {
     findByEmail: vi.fn(),
     findByVerificationToken: vi.fn(),
+    findByPasswordResetToken: vi.fn(),
     existsByEmail: vi.fn().mockResolvedValue(false),
     save: vi.fn(),
     markEmailVerified: vi.fn(),
+    setPasswordResetToken: vi.fn(),
+    resetPassword: vi.fn(),
     createOrgWithAdmin: vi.fn().mockResolvedValue({
       org: new Organization("org-1", "user's Organization", "starter", new Date()),
       user: new User(
@@ -49,6 +52,7 @@ function buildNotificationPort(
 ): NotificationPort {
   return {
     sendVerificationEmail: vi.fn().mockResolvedValue(undefined),
+    sendPasswordResetEmail: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }

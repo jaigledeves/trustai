@@ -14,6 +14,8 @@ export class User {
     public readonly createdAt: Date,
     public readonly emailVerificationToken: string | null = null,
     public readonly emailVerificationExpiresAt: Date | null = null,
+    public readonly passwordResetToken: string | null = null,
+    public readonly passwordResetExpiresAt: Date | null = null,
   ) {}
 
   isVerified(): boolean {
@@ -27,6 +29,16 @@ export class User {
     return (
       this.emailVerificationToken === token &&
       this.emailVerificationExpiresAt > new Date()
+    );
+  }
+
+  hasValidPasswordResetToken(tokenHash: string): boolean {
+    if (!this.passwordResetToken || !this.passwordResetExpiresAt) {
+      return false;
+    }
+    return (
+      this.passwordResetToken === tokenHash &&
+      this.passwordResetExpiresAt > new Date()
     );
   }
 }

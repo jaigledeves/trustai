@@ -15,9 +15,12 @@ function buildUserRepository(
   return {
     findByEmail: vi.fn(),
     findByVerificationToken: vi.fn(),
+    findByPasswordResetToken: vi.fn(),
     existsByEmail: vi.fn(),
     save: vi.fn(),
     markEmailVerified: vi.fn().mockResolvedValue(undefined),
+    setPasswordResetToken: vi.fn(),
+    resetPassword: vi.fn(),
     createOrgWithAdmin: vi.fn(),
     ...overrides,
   };

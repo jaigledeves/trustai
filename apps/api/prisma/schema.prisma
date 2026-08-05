@@ -69,6 +69,8 @@ model User {
   emailVerified               Boolean   @default(false)
   emailVerificationToken      String?
   emailVerificationExpiresAt  DateTime?
+  passwordResetToken          String?
+  passwordResetExpiresAt      DateTime?
   organizationId              String
   createdAt                   DateTime  @default(now())
   updatedAt                   DateTime  @updatedAt
