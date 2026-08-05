@@ -65,19 +65,19 @@ describe("AnchorPoller (spec: Anchor Submission and Polling — highest-risk log
     );
 
     renderPoller(buildRecord({ state: "READY" }));
-    expect(screen.getByRole("button", { name: "Anclar en blockchain" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Finalizar certificación" })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Anclar en blockchain" }));
+    await user.click(screen.getByRole("button", { name: "Finalizar certificación" }));
 
     expect(
-      await screen.findByText("Anclando en la blockchain… esto puede tardar unos minutos."),
+      await screen.findByText("Registrando tu documento en la blockchain… esto puede tardar unos minutos."),
     ).toBeInTheDocument();
   });
 
   it("Reaches CERTIFIED: stops polling and renders the tx hash link to the explorer", async () => {
     const queryClient = renderPoller(buildRecord({ state: "ANCHORING" }));
     expect(
-      screen.getByText("Anclando en la blockchain… esto puede tardar unos minutos."),
+      screen.getByText("Registrando tu documento en la blockchain… esto puede tardar unos minutos."),
     ).toBeInTheDocument();
 
     // Simulates the poll tick TanStack Query would perform on its own —
@@ -92,12 +92,12 @@ describe("AnchorPoller (spec: Anchor Submission and Polling — highest-risk log
     );
 
     expect(
-      await screen.findByText("¡Documento certificado! Puedes inspeccionar la transacción on-chain."),
+      await screen.findByText("¡Documento certificado! Puedes inspeccionar la transacción en la blockchain."),
     ).toBeInTheDocument();
     const link = screen.getByRole("link", { name: "Ver transacción en el explorador" });
     expect(link).toHaveAttribute("href", "https://sepolia.basescan.org/tx/0xabc123");
     // No submit/anchor button should reappear once certified.
-    expect(screen.queryByRole("button", { name: "Anclar en blockchain" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Finalizar certificación" })).not.toBeInTheDocument();
   });
 
   it("Scenario: Certified panel offers detail and list exit actions — both new CTAs render beside the explorer link", async () => {
@@ -111,7 +111,7 @@ describe("AnchorPoller (spec: Anchor Submission and Polling — highest-risk log
       }),
     );
 
-    await screen.findByText("¡Documento certificado! Puedes inspeccionar la transacción on-chain.");
+    await screen.findByText("¡Documento certificado! Puedes inspeccionar la transacción en la blockchain.");
 
     // The explorer link stays present alongside the new CTAs.
     expect(
@@ -150,7 +150,7 @@ describe("AnchorPoller (spec: Anchor Submission and Polling — highest-risk log
   });
 
   it("counts ONLY real poll fetches toward the give-up cap — setQueryData cache writes (Anchor clicks / hydration) never advance it; real polls eventually stop polling and show 'slow'", async () => {
-    const anchoringMessage = "Anclando en la blockchain… esto puede tardar unos minutos.";
+    const anchoringMessage = "Registrando tu documento en la blockchain… esto puede tardar unos minutos.";
     server.use(
       http.get("http://localhost:3000/api/backend/trust-records/tr-1", () =>
         HttpResponse.json(buildRecord({ state: "ANCHORING" })),

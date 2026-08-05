@@ -92,7 +92,7 @@ test.describe("Public verify (register -> certify -> confirm -> unauthenticated 
 
     await expect(page.getByLabel("Resumen")).not.toHaveValue("", { timeout: 20_000 });
     await page.getByRole("button", { name: "Confirmar certificación" }).click();
-    await expect(page.getByText("Hash canónico (evidencia congelada)")).toBeVisible({
+    await expect(page.getByText("Huella del registro")).toBeVisible({
       timeout: 10_000,
     });
 
@@ -156,9 +156,9 @@ test.describe("Public verify (register -> certify -> confirm -> unauthenticated 
     // here rather than asserting a state this environment cannot reach;
     // in a fully chain-configured environment this test exercises the
     // real VALID verdict end-to-end.
-    await page.getByRole("button", { name: "Anclar en blockchain" }).click();
+    await page.getByRole("button", { name: "Finalizar certificación" }).click();
     await expect(
-      page.getByText("Anclando en la blockchain… esto puede tardar unos minutos."),
+      page.getByText("Registrando tu documento en la blockchain… esto puede tardar unos minutos."),
     ).toBeVisible();
 
     let certified = false;

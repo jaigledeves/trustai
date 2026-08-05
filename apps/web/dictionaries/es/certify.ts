@@ -8,7 +8,7 @@ export const certifyDictionary = {
     uploadLabel: "Subida",
     analysisLabel: "Análisis de IA",
     reviewLabel: "Revisión",
-    anchorLabel: "Anclaje",
+    anchorLabel: "Registro",
     certifiedLabel: "Certificado",
   },
   documentContext: {
@@ -46,16 +46,33 @@ export const certifyDictionary = {
     editConflict:
       "El estado del documento cambió mientras editabas. Actualizamos la vista con los datos más recientes.",
   },
+  /**
+   * Localized replacements for `record.analysisFailureReason` (RNF-041):
+   * that field is sourced from a backend job's raw `output.message`
+   * (untranslated, English) and MUST never be rendered directly. Only
+   * `noTextLayer`/`noContent` map known literal API strings 1:1; anything
+   * else (dynamic Zod-issue messages, defensive not-found errors, or a
+   * missing reason) resolves to `generic`.
+   */
+  analysisError: {
+    noTextLayer:
+      "El documento no tiene texto extraíble. Por ahora solo se admiten PDFs con texto, no imágenes escaneadas.",
+    noContent: "El proveedor de IA no devolvió contenido para este documento. Inténtalo de nuevo.",
+    generic: "No se pudo analizar el documento.",
+  },
   confirm: {
     submit: "Confirmar certificación",
-    frozenHashLabel: "Hash canónico (evidencia congelada)",
+    frozenHashLabel: "Huella del registro",
+    frozenHashDisclosureLabel: "¿Qué es esta huella?",
+    frozenHashDisclosure:
+      "Es el hash SHA-256 de la serialización canónica (RFC 8785) del Registro Digital de Confianza. Queda anclado en la blockchain y sirve como evidencia irrefutable de que el contenido no fue alterado.",
     errorGeneric:
       "Todavía no se puede certificar: falta completar el análisis o el estado no lo permite.",
   },
   anchor: {
-    submit: "Anclar en blockchain",
-    anchoringMessage: "Anclando en la blockchain… esto puede tardar unos minutos.",
-    certifiedMessage: "¡Documento certificado! Puedes inspeccionar la transacción on-chain.",
+    submit: "Finalizar certificación",
+    anchoringMessage: "Registrando tu documento en la blockchain… esto puede tardar unos minutos.",
+    certifiedMessage: "¡Documento certificado! Puedes inspeccionar la transacción en la blockchain.",
     explorerLinkLabel: "Ver transacción en el explorador",
     retryingMessage:
       "El anclaje no se confirmó en el tiempo previsto y se está reintentando automáticamente. No hace falta que hagas nada.",

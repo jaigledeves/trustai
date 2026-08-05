@@ -97,7 +97,7 @@ test.describe("Certify golden path (register -> verify -> login -> certify -> an
 
     // 6. Confirm — DRAFT -> READY, canonicalHash frozen as evidence.
     await page.getByRole("button", { name: "Confirmar certificación" }).click();
-    await expect(page.getByText("Hash canónico (evidencia congelada)")).toBeVisible({
+    await expect(page.getByText("Huella del registro")).toBeVisible({
       timeout: 10_000,
     });
 
@@ -110,9 +110,9 @@ test.describe("Certify golden path (register -> verify -> login -> certify -> an
     // env-gated chain-integration e2e, not this frontend flow — here we prove
     // the full wizard: register -> verify -> login -> upload -> analyze ->
     // review -> confirm(frozen hash) -> anchor(submit + poll).
-    await page.getByRole("button", { name: "Anclar en blockchain" }).click();
+    await page.getByRole("button", { name: "Finalizar certificación" }).click();
     await expect(
-      page.getByText("Anclando en la blockchain… esto puede tardar unos minutos."),
+      page.getByText("Registrando tu documento en la blockchain… esto puede tardar unos minutos."),
     ).toBeVisible();
   });
 });

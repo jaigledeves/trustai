@@ -42,7 +42,7 @@ describe("ConfirmButton (spec: Confirm (DRAFT -> READY))", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     // The hash is rendered by CertifyWizard's shell (frozen evidence must
     // outlive this button's DRAFT -> READY unmount), never by ConfirmButton.
-    expect(screen.queryByText("Hash canónico (evidencia congelada)")).not.toBeInTheDocument();
+    expect(screen.queryByText("Huella del registro")).not.toBeInTheDocument();
   });
 
   it("surfaces a 409 as a blocking error and never renders a hash", async () => {
@@ -61,6 +61,6 @@ describe("ConfirmButton (spec: Confirm (DRAFT -> READY))", () => {
         "Todavía no se puede certificar: falta completar el análisis o el estado no lo permite.",
       ),
     ).toBeInTheDocument();
-    expect(screen.queryByText("Hash canónico (evidencia congelada)")).not.toBeInTheDocument();
+    expect(screen.queryByText("Huella del registro")).not.toBeInTheDocument();
   });
 });

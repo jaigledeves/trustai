@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 import { certifyDictionary } from "../../dictionaries/es/certify";
@@ -113,10 +114,10 @@ describe("CertifyWizard (spec: AI Analysis Display — never a silent DRAFT stal
 
     // Frozen evidence survives the DRAFT -> READY swap because it lives in the
     // shell, not ConfirmButton (which is now unmounted in READY).
-    expect(screen.getByText("Hash canónico (evidencia congelada)")).toBeInTheDocument();
+    expect(screen.getByText("Huella del registro")).toBeInTheDocument();
     expect(screen.getByText("a".repeat(64))).toBeInTheDocument();
     // READY offers the anchor action at the same time.
-    expect(screen.getByRole("button", { name: "Anclar en blockchain" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Finalizar certificación" })).toBeInTheDocument();
     // Scenario: "Document context renders in every phase" — the anchor phase too.
     expect(screen.getByText("contrato.pdf")).toBeInTheDocument();
     expect(screen.getByText(certifyDictionary.stepper.anchorLabel)).toBeInTheDocument();
@@ -124,19 +125,48 @@ describe("CertifyWizard (spec: AI Analysis Display — never a silent DRAFT stal
     expect(screen.queryByRole("button", { name: "Confirmar certificación" })).not.toBeInTheDocument();
   });
 
-  it("shows the failure banner (not a perpetual 'analizando' spinner) when analysis fails with no text layer", () => {
+  it("Scenario: Disclosure reveals the technical explanation on demand — the frozen-hash label stays static and the disclosure body is hidden until activated", async () => {
+    const user = userEvent.setup();
+    renderWizard(
+      buildRecord({
+        state: "READY",
+        canonicalHash: "a".repeat(64),
+        aiSummary: "Un resumen generado por IA.",
+      }),
+    );
+
+    // The disclosure trigger is present; the native <details> starts closed.
+    const trigger = screen.getByText(certifyDictionary.confirm.frozenHashDisclosureLabel);
+    const details = trigger.closest("details");
+    expect(details).not.toHaveAttribute("open");
+
+    await user.click(trigger);
+
+    expect(details).toHaveAttribute("open");
+    expect(
+      screen.getByText(certifyDictionary.confirm.frozenHashDisclosure),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the failure banner (not a perpetual 'analizando' spinner) when analysis fails with no text layer — localized, never the raw API string (RNF-041)", () => {
     renderWizard(
       buildRecord({
         state: "DRAFT",
         aiSummary: null,
-        analysisFailureReason: "El PDF no tiene una capa de texto extraíble.",
+        analysisFailureReason:
+          "PDF has no extractable text layer (scanned PDFs are not supported in MVP — no OCR)",
       }),
     );
 
     expect(
       screen.queryByText("Analizando el documento… esto puede tardar unos segundos."),
     ).not.toBeInTheDocument();
-    expect(screen.getByText("El PDF no tiene una capa de texto extraíble.")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "El documento no tiene texto extraíble. Por ahora solo se admiten PDFs con texto, no imágenes escaneadas.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/no extractable text layer/i)).not.toBeInTheDocument();
     // Scenario: "Document context renders in every phase" — the error phase too.
     expect(screen.getByText("contrato.pdf")).toBeInTheDocument();
   });
@@ -146,7 +176,8 @@ describe("CertifyWizard (spec: AI Analysis Display — never a silent DRAFT stal
       buildRecord({
         state: "DRAFT",
         aiSummary: null,
-        analysisFailureReason: "El PDF no tiene una capa de texto extraíble.",
+        analysisFailureReason:
+          "PDF has no extractable text layer (scanned PDFs are not supported in MVP — no OCR)",
       }),
     );
 

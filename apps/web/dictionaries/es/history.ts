@@ -8,6 +8,8 @@
 export const historyDictionary = {
   list: {
     title: "Mis DTR",
+    subtitle:
+      "Tus Registros Digitales de Confianza — documentos que certificaste con inteligencia artificial y anclados en blockchain para comprobar su autenticidad.",
     columnDocument: "Documento",
     columnClassification: "Clasificación",
     columnState: "Estado",
@@ -28,14 +30,14 @@ export const historyDictionary = {
   detail: {
     title: "Detalle del DTR",
     stateLabel: "Estado",
-    canonicalHashLabel: "Hash canónico",
+    canonicalHashLabel: "Huella del registro",
     canonicalHashPending: "Todavía no se generó (el documento no fue confirmado).",
     aiSummaryLabel: "Resumen",
     aiClassificationLabel: "Clasificación",
     aiLanguageLabel: "Idioma",
     aiPending: "El análisis de IA todavía no está disponible.",
-    anchorTitle: "Anclaje en blockchain",
-    anchorNotAnchored: "Este documento todavía no fue anclado.",
+    anchorTitle: "Registro en blockchain",
+    anchorNotAnchored: "Este documento todavía no fue registrado.",
     anchorExplorerLinkLabel: "Ver transacción en el explorador",
   },
   publicShare: {

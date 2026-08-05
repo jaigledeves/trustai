@@ -91,4 +91,13 @@ describe("DtrsListPage (spec: web-dtr-list — filtered & paginated list)", () =
 
     expect(screen.getByText(historyDictionary.list.emptyState)).toBeInTheDocument();
   });
+
+  it("Scenario: List page shows the DTR expansion subtitle below the heading, regardless of list state", async () => {
+    stubList({ items: [], total: 0, page: 1, pageSize: 20 });
+
+    render(await renderPage({}));
+
+    expect(screen.getByText(historyDictionary.list.title)).toBeInTheDocument();
+    expect(screen.getByText(historyDictionary.list.subtitle)).toBeInTheDocument();
+  });
 });
