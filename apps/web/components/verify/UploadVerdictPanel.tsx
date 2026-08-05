@@ -2,6 +2,15 @@
 
 import { Check, ExternalLink, ShieldAlert, UploadCloud } from "lucide-react";
 import { useState, type ChangeEvent, type DragEvent } from "react";
+
+const KB = 1024;
+const MB = KB * 1024;
+
+function formatFileSize(bytes: number): string {
+  if (bytes < KB) return `${bytes} B`;
+  if (bytes < MB) return `${(bytes / KB).toFixed(1)} KB`;
+  return `${(bytes / MB).toFixed(1)} MB`;
+}
 import { verifyDictionary } from "../../dictionaries/es/verify";
 import { postVerifyUpload } from "../../lib/api/public-verify-client";
 import type { VerifyUploadResponse } from "../../lib/api/types";
@@ -130,6 +139,8 @@ export function UploadVerdictPanel({ id }: UploadVerdictPanelProps) {
       {file ? (
         <p className="mt-3 text-sm text-muted-foreground">
           <span className="font-medium text-foreground">{file.name}</span>
+          {" · "}
+          {t.fileSizeLabel.replace("{size}", formatFileSize(file.size))}
         </p>
       ) : null}
 

@@ -113,6 +113,17 @@ describe("UploadVerdictPanel (spec: web-public-verify — Upload Verdict, All Fo
     expect(alert).toHaveTextContent(verifyDictionary.verdicts.INVALID_RECORD.message);
   });
 
+  it("shows the filename and file size after selection via the file picker", async () => {
+    const user = userEvent.setup();
+    render(<UploadVerdictPanel id="rec-1" />);
+    const input = screen.getByLabelText("Elige el archivo a verificar");
+    const file = new File(["x".repeat(1536)], "contrato.pdf", { type: "application/pdf" });
+    await user.upload(input, file);
+
+    expect(screen.getByText("contrato.pdf")).toBeInTheDocument();
+    expect(screen.getByText(/Tamaño:/)).toBeInTheDocument();
+  });
+
   it("accepts a file via drag-and-drop and shows the filename", () => {
     render(<UploadVerdictPanel id="rec-1" />);
     // The input is a sibling of the label (not a child), so closest("label")

@@ -56,6 +56,7 @@ export const verifyDictionary = {
       "Sube tu copia del archivo. TrustAI la compara con el registro certificado y, en paralelo, tu navegador recalcula el hash de forma independiente del servidor.",
     fileLabel: "Elige el archivo a verificar",
     dropzoneHint: "o arrástralo aquí",
+    fileSizeLabel: "Tamaño: {size}",
     submitLabel: "Verificar documento",
     errorGeneric: "No pudimos verificar el documento. Prueba de nuevo.",
   },
