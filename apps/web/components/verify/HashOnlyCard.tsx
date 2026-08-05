@@ -19,9 +19,13 @@ function isErrorVerdict(verdict: VerifyVerdict): boolean {
  * Hash-only landing card (spec: "Hash-Only Card Without Analysis", INV-41).
  * Server Component — `GET /public/verify/:id` is fetched directly (no
  * auth, design.md), and ONLY verdict/documentIntegrity/chainAnchor/
- * explanation/disclaimer/verifiedAt are rendered. `VerifyHashResponse`
- * structurally has no AI analysis field, so INV-41 is enforced at the type
- * level, not just by omission here.
+ * verifiedAt are rendered from the server response. Verdict copy and the
+ * legal disclaimer are web-owned (`verifyDictionary`, spec: "Web-Owned
+ * Verdict & Legal Copy" — ADR-009/Option W): the server's own
+ * `explanation`/`disclaimer` DTO fields are legacy-only on the wire and are
+ * never rendered. `VerifyHashResponse` structurally has no AI analysis
+ * field, so INV-41 is enforced at the type level, not just by omission
+ * here.
  */
 export async function HashOnlyCard({ id }: HashOnlyCardProps) {
   const result = await fetchHash(id);
@@ -71,11 +75,6 @@ export async function HashOnlyCard({ id }: HashOnlyCardProps) {
       </div>
 
       <dl className="mt-6 space-y-4 border-t border-border pt-6 text-sm">
-        <div>
-          <dt className="font-medium">{t.explanationLabel}</dt>
-          <dd className="mt-1 text-muted-foreground text-pretty">{result.explanation}</dd>
-        </div>
-
         <div className="flex flex-wrap items-center justify-between gap-2">
           <dt className="text-muted-foreground">{t.txHashLabel}</dt>
           <dd className="flex items-center gap-3">
@@ -104,8 +103,8 @@ export async function HashOnlyCard({ id }: HashOnlyCardProps) {
       </dl>
 
       <div className="mt-6 rounded-xl bg-muted/60 p-4 text-xs text-muted-foreground">
-        <p className="font-medium text-foreground">{t.disclaimerLabel}</p>
-        <p className="mt-1 text-pretty">{result.disclaimer}</p>
+        <p className="font-medium text-foreground">{verifyDictionary.legal.disclaimerLabel}</p>
+        <p className="mt-1 text-pretty">{verifyDictionary.legal.disclaimer}</p>
         <p className="mt-3">
           {t.verifiedAtLabel} {formatVerifiedAt(result.verifiedAt)}
         </p>

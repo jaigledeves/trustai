@@ -169,4 +169,50 @@ describe("dictionaries/es", () => {
       expect(combined).not.toMatch(/coincide/i);
     });
   });
+
+  /**
+   * Copy-audit for `verifyDictionary` (spec: web-public-verify — Refocus
+   * Verify Page Copy, ADR-009/Option W). Covers the reworded verdict
+   * messages, the new `legal` disclaimer group, the honest testnet badge,
+   * and the shared-surface constraint with `landingDictionary`'s
+   * `verificationDemo` (design.md's confirmed cross-read).
+   */
+  describe("verifyDictionary copy audit (spec: web-public-verify)", () => {
+    it("verdict messages never use bare jargon (DTR, SHA-256, hash canónico)", () => {
+      for (const verdict of Object.values(verifyDictionary.verdicts)) {
+        expect(verdict.message).not.toMatch(/\bDTR\b/i);
+        expect(verdict.message).not.toMatch(/SHA-256/i);
+        expect(verdict.message).not.toMatch(/hash canónico/i);
+      }
+    });
+
+    it("legal.disclaimer references eIDAS/firma electrónica cualificada, never an authorship/ownership claim", () => {
+      expect(verifyDictionary.legal.disclaimer).toMatch(
+        /eIDAS|firma electrónica cualificada/i,
+      );
+      expect(verifyDictionary.legal.disclaimer).not.toMatch(
+        /autor|pertenece|propiedad/i,
+      );
+      expect(verifyDictionary.legal.disclaimer).not.toMatch(/autoría|author/i);
+    });
+
+    it("recompute.caveat still asserts only independent file-hash computation, never on-chain reconstruction", () => {
+      expect(verifyDictionary.recompute.caveat).toMatch(
+        /no\s+(reconstru\w*|verific\w*).*(canónic\w*|blockchain|anclad\w*)/i,
+      );
+    });
+
+    it("page.badge names Base Sepolia honestly, drops the demoted '(testnet)' phrasing, never implies mainnet/production", () => {
+      expect(verifyDictionary.page.badge).toMatch(/Base Sepolia/);
+      expect(verifyDictionary.page.badge).not.toMatch(/\(testnet\)/i);
+      expect(verifyDictionary.page.badge).not.toMatch(/mainnet|producci[oó]n/i);
+    });
+
+    it("verdicts.* stay non-empty for the shared VerificationDemo cross-read (public-landing)", () => {
+      for (const verdict of Object.values(verifyDictionary.verdicts)) {
+        expect(verdict.title.trim().length).toBeGreaterThan(0);
+        expect(verdict.message.trim().length).toBeGreaterThan(0);
+      }
+    });
+  });
 });

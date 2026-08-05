@@ -90,9 +90,15 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
               </div>
             </>
           ) : (
-            <p role="status" className="text-center text-muted-foreground">
-              {t.disabledMessage}
-            </p>
+            <div role="status" className="flex flex-col items-center gap-3 text-center">
+              <p className="text-muted-foreground">{t.disabled.message}</p>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1.5 font-medium text-primary underline-offset-2 hover:underline"
+              >
+                {t.disabled.homeLinkLabel}
+              </Link>
+            </div>
           )}
         </div>
       </main>

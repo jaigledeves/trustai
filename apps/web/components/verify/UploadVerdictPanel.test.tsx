@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { verifyDictionary } from "../../dictionaries/es/verify";
 import type { VerifyUploadResponse } from "../../lib/api/types";
 
 const postVerifyUploadMock = vi.fn<(id: string, file: File) => Promise<VerifyUploadResponse>>();
@@ -74,7 +75,7 @@ describe("UploadVerdictPanel (spec: web-public-verify — Upload Verdict, All Fo
     await uploadAndSubmit(baseResult({ verdict: "ASSET_MISMATCH", analysis: null, chainAnchor: null }));
 
     expect(
-      await screen.findByText("El documento no corresponde a este DTR o fue alterado."),
+      await screen.findByText(verifyDictionary.verdicts.ASSET_MISMATCH.message),
     ).toBeInTheDocument();
     expect(screen.queryByText(/Resumen:/)).not.toBeInTheDocument();
   });
@@ -109,8 +110,6 @@ describe("UploadVerdictPanel (spec: web-public-verify — Upload Verdict, All Fo
     await uploadAndSubmit(baseResult({ verdict: "INVALID_RECORD", analysis: null, chainAnchor: null }));
 
     const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent(
-      "No existe un registro certificado válido para este identificador.",
-    );
+    expect(alert).toHaveTextContent(verifyDictionary.verdicts.INVALID_RECORD.message);
   });
 });

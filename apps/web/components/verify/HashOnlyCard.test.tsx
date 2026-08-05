@@ -1,13 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
+import { verifyDictionary } from "../../dictionaries/es/verify";
 import { server } from "../../test/msw/server";
 import { HashOnlyCard } from "./HashOnlyCard";
 
 const BASE_URL = "http://localhost:3000";
 
 describe("HashOnlyCard (spec: web-public-verify — Hash-Only Card Without Analysis, INV-41)", () => {
-  it("renders the verdict, explanation, and disclaimer with no AI analysis field anywhere on screen", async () => {
+  it("renders verdict + legal.disclaimer from verifyDictionary, never the server's explanation/disclaimer strings, with no AI analysis field anywhere on screen", async () => {
     server.use(
       http.get(`${BASE_URL}/public/verify/rec-1`, () =>
         HttpResponse.json({
@@ -20,8 +21,8 @@ describe("HashOnlyCard (spec: web-public-verify — Hash-Only Card Without Analy
             explorerUrl: "https://sepolia.basescan.org/tx/0xabc123",
             chainReadUnavailable: false,
           },
-          explanation: "This document's content matches the certified Trust Record.",
-          disclaimer: "This verification does not constitute a qualified electronic signature.",
+          explanation: "SERVER_EXPLANATION_SHOULD_NOT_RENDER",
+          disclaimer: "SERVER_DISCLAIMER_SHOULD_NOT_RENDER",
           verifiedAt: "2026-07-09T12:30:00.000Z",
         }),
       ),
@@ -31,12 +32,12 @@ describe("HashOnlyCard (spec: web-public-verify — Hash-Only Card Without Analy
     render(jsx);
 
     expect(screen.getByText("Válido")).toBeInTheDocument();
-    expect(
-      screen.getByText("This document's content matches the certified Trust Record."),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("This verification does not constitute a qualified electronic signature."),
-    ).toBeInTheDocument();
+    expect(screen.getByText(verifyDictionary.verdicts.VALID.message)).toBeInTheDocument();
+    expect(screen.getByText(verifyDictionary.legal.disclaimerLabel)).toBeInTheDocument();
+    expect(screen.getByText(verifyDictionary.legal.disclaimer)).toBeInTheDocument();
+    // Web-owned copy (spec: "Web-Owned Verdict & Legal Copy") — server strings never render.
+    expect(screen.queryByText("SERVER_EXPLANATION_SHOULD_NOT_RENDER")).not.toBeInTheDocument();
+    expect(screen.queryByText("SERVER_DISCLAIMER_SHOULD_NOT_RENDER")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ver transacción en el explorador" })).toHaveAttribute(
       "href",
       "https://sepolia.basescan.org/tx/0xabc123",

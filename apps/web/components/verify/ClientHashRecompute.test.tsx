@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { verifyDictionary } from "../../dictionaries/es/verify";
 
 const sha256HexMock = vi.fn<(data: string | Uint8Array) => Promise<string>>();
 vi.mock("@trustai/dtr-core", () => ({
@@ -55,13 +56,17 @@ describe("ClientHashRecompute (spec: Client-Side Independent Hash Recompute — 
     expect(Array.from(calledWith as Uint8Array)).toEqual([9, 8, 7]);
   });
 
-  it("never claims full on-chain hash re-derivation in its copy (docs/11 criterion 5 caveat)", async () => {
+  it("collapses the caveat inside a native <details>/<summary>, never claiming full on-chain hash re-derivation (docs/11 criterion 5)", async () => {
     sha256HexMock.mockResolvedValueOnce("c".repeat(64));
     render(<ClientHashRecompute file={fileWithArrayBuffer(new Uint8Array([1]))} />);
 
     await waitFor(() => expect(screen.getByText("c".repeat(64))).toBeInTheDocument());
 
-    expect(screen.getByText(/no reconstruye ni verifica el hash canónico anclado/)).toBeInTheDocument();
+    const caveatText = /no reconstruye ni verifica el hash canónico anclado/;
+    const summary = screen.getByText(verifyDictionary.recompute.caveatLabel);
+    const details = summary.closest("details");
+    expect(details).not.toBeNull();
+    expect(details).toContainElement(screen.getByText(caveatText));
   });
 
   it("renders an explicit error state (never blank forever) when the recompute rejects (e.g. crypto.subtle unavailable)", async () => {

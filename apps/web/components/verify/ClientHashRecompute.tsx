@@ -74,9 +74,20 @@ export function ClientHashRecompute({ file }: ClientHashRecomputeProps) {
           </code>
         </div>
       ) : null}
-      <p className="text-muted-foreground text-sm text-pretty">
-        {verifyDictionary.recompute.caveat}
-      </p>
+      <details className="group">
+        <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-muted-foreground marker:content-none">
+          {verifyDictionary.recompute.caveatLabel}
+          <span
+            aria-hidden="true"
+            className="flex size-4 shrink-0 items-center justify-center text-xs transition-transform group-open:rotate-45"
+          >
+            +
+          </span>
+        </summary>
+        <p className="mt-1 text-muted-foreground text-sm text-pretty">
+          {verifyDictionary.recompute.caveat}
+        </p>
+      </details>
     </div>
   );
 }
