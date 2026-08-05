@@ -19,6 +19,10 @@ export const authDictionary = {
     errorInvalidEmail: "Ingresa un email válido.",
     errorPasswordPolicy:
       "La contraseña debe tener al menos 8 caracteres, con una letra y un número.",
+    confirmPasswordLabel: "Confirmar contraseña",
+    errorPasswordMismatch: "Las contraseñas no coinciden.",
+    passwordHint:
+      "La contraseña debe tener al menos 8 caracteres, con una letra y un número.",
   },
   verifyEmail: {
     successTitle: "Cuenta verificada",
@@ -72,5 +76,7 @@ export const authDictionary = {
     errorPasswordMismatch: "Las contraseñas no coinciden.",
     errorInvalidToken:
       "El enlace es inválido o venció. Solicita uno nuevo para continuar.",
+    passwordHint:
+      "La contraseña debe tener al menos 8 caracteres, con una letra y un número.",
   },
 } as const;

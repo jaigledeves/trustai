@@ -24,6 +24,7 @@ import { StatusPanel } from "../ui/status-panel";
 export function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<RegisterFormErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -33,7 +34,7 @@ export function RegisterForm() {
     event.preventDefault();
     setFormError(null);
 
-    const errors = validateRegisterForm(email, password);
+    const errors = validateRegisterForm(email, password, confirmPassword);
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) {
       return;
@@ -104,10 +105,41 @@ export function RegisterForm() {
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
+          aria-invalid={fieldErrors.password ? true : undefined}
+          aria-describedby={
+            fieldErrors.password
+              ? "register-password-error"
+              : "register-password-hint"
+          }
         />
+        <p id="register-password-hint" className="text-sm text-muted-foreground">
+          {authDictionary.register.passwordHint}
+        </p>
         {fieldErrors.password ? (
-          <p role="alert" className="text-sm text-destructive">
+          <p id="register-password-error" role="alert" className="text-sm text-destructive">
             {fieldErrors.password}
+          </p>
+        ) : null}
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="register-confirm-password">
+          {authDictionary.register.confirmPasswordLabel}
+        </Label>
+        <Input
+          id="register-confirm-password"
+          type="password"
+          value={confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+          aria-invalid={fieldErrors.confirmPassword ? true : undefined}
+          aria-describedby={
+            fieldErrors.confirmPassword
+              ? "register-confirm-password-error"
+              : undefined
+          }
+        />
+        {fieldErrors.confirmPassword ? (
+          <p id="register-confirm-password-error" role="alert" className="text-sm text-destructive">
+            {fieldErrors.confirmPassword}
           </p>
         ) : null}
       </div>
