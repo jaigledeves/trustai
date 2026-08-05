@@ -1,7 +1,26 @@
-import { Boxes, FileCheck, Sparkles, Upload } from "lucide-react";
+import {
+  Anchor,
+  ArrowUpRight,
+  Boxes,
+  Braces,
+  FileCheck,
+  FileJson,
+  Hash,
+  Lock,
+  ShieldCheck,
+  Sparkles,
+  Upload,
+} from "lucide-react";
 import { landingDictionary } from "@/dictionaries/es/landing";
+import { ANCHOR_CONTRACT, contractUrl } from "./contractUrl";
 
 const STEP_ICONS = [Upload, Sparkles, FileCheck, Boxes];
+
+/** Order matches `how.technicalDetail.items` (Cifrado, DTR contents,
+ * canonical serialization, hash, on-chain anchor, independent verification). */
+const DETAIL_ICONS = [Lock, FileJson, Braces, Hash, Anchor, ShieldCheck];
+
+const TRUNCATED_CONTRACT = `${ANCHOR_CONTRACT.slice(0, 6)}…${ANCHOR_CONTRACT.slice(-4)}`;
 
 /**
  * "How it works" section (spec: public-landing — Landing Composition,
@@ -42,6 +61,69 @@ export function HowItWorks() {
           );
         })}
       </ol>
+
+      <details className="group mt-10 rounded-2xl border border-border bg-card px-6">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-medium text-card-foreground marker:content-none">
+          {t.technicalDetailLabel}
+          <span
+            aria-hidden="true"
+            className="flex size-6 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground transition-transform group-open:rotate-45"
+          >
+            +
+          </span>
+        </summary>
+        <div className="pb-5 text-sm leading-relaxed text-muted-foreground">
+          <p>{t.technicalDetail.intro}</p>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {t.technicalDetail.items.map((item, i) => {
+              const Icon = DETAIL_ICONS[i]!;
+              return (
+                <div
+                  key={item.term}
+                  className="rounded-xl border border-border bg-background p-4"
+                >
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-accent text-primary">
+                    <Icon className="size-4" />
+                  </span>
+                  <p className="mt-3 text-sm font-medium text-card-foreground">
+                    {item.term}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {item.desc}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-3 flex flex-col gap-3 rounded-xl border border-border bg-muted/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent text-primary">
+                <Anchor className="size-4" />
+              </span>
+              <div>
+                <p className="text-sm font-medium text-card-foreground">
+                  {t.technicalDetail.contractLabel}
+                </p>
+                <p className="font-mono text-xs text-muted-foreground">
+                  {TRUNCATED_CONTRACT}
+                </p>
+              </div>
+            </div>
+
+            <a
+              href={contractUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 self-start rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-foreground transition-colors hover:text-primary sm:self-auto"
+            >
+              {t.technicalDetail.contractLinkLabel}
+              <ArrowUpRight className="size-3.5" />
+            </a>
+          </div>
+        </div>
+      </details>
     </section>
   );
 }

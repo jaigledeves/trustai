@@ -33,12 +33,15 @@ export const landingDictionary = {
     },
   },
   hero: {
-    badge: "Piloto en vivo · Base Sepolia (testnet)",
-    title: "Demuestra que tus documentos son auténticos.",
+    eyebrow:
+      "Hoy, probar que un documento no fue alterado depende de que crean en tu palabra.",
+    badge: "Anclado en una blockchain pública · Piloto sin costos en Base Sepolia",
+    title: "Nadie tiene que creerte. Pueden comprobarlo.",
     subtitle:
-      "TrustAI analiza cada archivo con inteligencia artificial y genera su Registro Digital de Confianza (DTR): una huella criptográfica registrada en blockchain. Cualquier persona puede comprobar que el documento no fue alterado, sin tener que confiar en ti ni en nosotros.",
+      "TrustAI certifica tus documentos para que cualquiera confirme, por su cuenta, que no fueron alterados. Sin depender de tu palabra ni de la nuestra.",
     primaryCta: "Certificar mi primer documento",
     secondaryCta: "Ver una verificación",
+    ctaMicrocopy: "Gratis · Sin tarjeta · Sin instalar nada",
     valueProps: [
       "Sin instalar nada",
       "Verificación pública y gratuita",
@@ -49,10 +52,10 @@ export const landingDictionary = {
       statusBadge: "Registrado en blockchain",
       fileName: "contrato-servicios-2026.pdf",
       fileMeta: "Contrato · Español · 3 páginas",
-      hashLabel: "Huella del DTR · SHA-256",
+      hashLabel: "Huella del DTR",
       hashValue: "9f2c…a17b",
       networkLabel: "Red",
-      network: "Base Sepolia",
+      network: "Blockchain pública",
       txLabel: "Transacción",
       txValue: "0x…607C22",
       footerNote: "Verificado · Anclaje confirmado en la blockchain.",
@@ -65,7 +68,7 @@ export const landingDictionary = {
       {
         title: "Subes tu documento",
         description:
-          "Se almacena cifrado (AES-256-GCM). Nunca se publica ni sale de tu control.",
+          "Se guarda cifrado y protegido. Nunca se publica ni sale de tu control.",
       },
       {
         title: "La IA lo entiende",
@@ -75,18 +78,51 @@ export const landingDictionary = {
       {
         title: "Se genera el DTR",
         description:
-          "Se crea tu Registro Digital de Confianza y se calcula el hash SHA-256 de su serialización canónica.",
+          "Se crea tu Registro Digital de Confianza (DTR): una huella única e irrepetible de tu documento.",
       },
       {
         title: "Se ancla en blockchain",
         description:
-          "Ese hash queda registrado de forma permanente e inalterable en Base Sepolia.",
+          "Esa huella queda registrada de forma permanente e inalterable en una blockchain pública (Base Sepolia).",
       },
     ],
+    technicalDetailLabel: "Ver el detalle técnico",
+    technicalDetail: {
+      intro:
+        "Cada certificación produce un DTR: un registro estructurado y versionado (esquema dtr-1).",
+      items: [
+        {
+          term: "Cifrado en reposo",
+          desc: "el archivo se cifra con AES-256-GCM antes de tocar el almacenamiento. Su contenido nunca se publica.",
+        },
+        {
+          term: "Qué contiene el DTR",
+          desc: "el SHA-256 del documento, sus metadatos (tipo, tamaño, nombre), el análisis de la IA (resumen, clasificación, idioma) y la procedencia (modelo, versión, fecha) — nunca el documento en sí.",
+        },
+        {
+          term: "Serialización canónica (RFC 8785)",
+          desc: "el DTR se serializa de forma determinista y reproducible byte a byte, con implementación propia y sin dependencias.",
+        },
+        {
+          term: "Hash SHA-256",
+          desc: "se calcula sobre esa serialización canónica. Ese es el hash del DTR.",
+        },
+        {
+          term: "Anclaje on-chain",
+          desc: "ese hash se escribe como bytes32 en el contrato AnchorRegistry (permissionless, inmutable, sin owner) en Base Sepolia, que registra su timestamp de bloque.",
+        },
+        {
+          term: "Verificable de forma independiente",
+          desc: "dtr-core es una librería abierta (MIT), sin framework. Cualquiera puede recalcular el hash canónico y consultar su anclaje en cualquier nodo RPC, sin confiar en nosotros.",
+        },
+      ],
+      contractLinkLabel: "Ver contrato en Basescan",
+      contractLabel: "AnchorRegistry · Base Sepolia",
+    },
   },
   verificationDemo: {
     badge: "No hace falta confiar. Se comprueba.",
-    title: "Nadie tiene que creerte. Pueden comprobarlo.",
+    title: "Cualquiera puede comprobarlo en segundos.",
     description:
       "Compartes un enlace. Quien lo recibe sube el archivo y TrustAI responde con un veredicto claro sobre su integridad y su anclaje en la blockchain.",
     verdictGroupLabel: "Selecciona un veredicto de ejemplo",
