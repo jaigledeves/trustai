@@ -55,6 +55,6 @@ first for each new behavior. Gate: `pnpm --filter @trustai/web test`,
 - [x] 3.4 `pnpm --filter @trustai/web build` — succeeds.
 - [x] 3.5 Write `verify-report.md`; confirm all success criteria in
   `proposal.md`.
-- [ ] 3.6 Open PR on `feat/upload-drag-and-drop`; archive the change after
+- [x] 3.6 Open PR on `feat/upload-drag-and-drop`; archive the change after
   merge (promote `specs/web-upload-step/spec.md` →
   `openspec/specs/web-upload-step/spec.md`).
