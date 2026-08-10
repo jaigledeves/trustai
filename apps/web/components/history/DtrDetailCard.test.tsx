@@ -109,7 +109,7 @@ describe("DtrDetailCard (spec: web-history — DTR Detail View)", () => {
     const user = userEvent.setup();
     render(<DtrDetailCard record={baseRecord()} />);
 
-    const trigger = screen.getByRole("button", { name: glossaryDictionary.anclar.term });
+    const trigger = screen.getByRole("button", { name: glossaryDictionary.anclar.title });
     await user.click(trigger);
 
     expect(screen.getByText(glossaryDictionary.anclar.definition)).toBeInTheDocument();

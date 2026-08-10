@@ -87,7 +87,7 @@ export function DtrDetailCard({ record }: DtrDetailCardProps) {
               <dt className={labelClassName}>
                 {historyDictionary.detail.anchorTitle}{" "}
                 <QuickHelp
-                  term={glossaryDictionary.anclar.term}
+                  title={glossaryDictionary.anclar.title}
                   definition={glossaryDictionary.anclar.definition}
                 />
               </dt>

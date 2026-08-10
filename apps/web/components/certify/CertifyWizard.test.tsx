@@ -243,7 +243,7 @@ describe("CertifyWizard (spec: web-plain-language — Plain-Language Framing for
 
     expect(screen.getByText(certifyDictionary.anchor.anchoringMessage)).toBeInTheDocument();
 
-    const trigger = screen.getByRole("button", { name: glossaryDictionary.anclar.term });
+    const trigger = screen.getByRole("button", { name: glossaryDictionary.anclar.title });
     await user.click(trigger);
 
     expect(screen.getByText(glossaryDictionary.anclar.definition)).toBeInTheDocument();
