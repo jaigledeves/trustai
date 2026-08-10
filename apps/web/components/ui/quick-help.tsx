@@ -74,10 +74,15 @@ export function QuickHelp({ title, definition, className }: QuickHelpProps) {
         <div
           id={contentId}
           role="note"
-          className="mt-2 max-w-sm rounded-lg border border-border bg-card p-3 text-sm text-muted-foreground shadow-sm"
+          // The panel owns its own typography so it looks right wherever it is
+          // dropped — including inside an uppercase/tracked field label (e.g.
+          // the DTR detail `<dt>`), whose `text-transform`/`letter-spacing`
+          // would otherwise be inherited. `normal-case` + `tracking-normal`
+          // + `text-left` reset those inherited label styles.
+          className="mt-2 max-w-xs rounded-lg border border-border bg-card p-3.5 text-left text-sm font-normal normal-case tracking-normal text-muted-foreground shadow-md"
         >
-          <p className="font-medium text-card-foreground">{title}</p>
-          <p className="mt-1 leading-relaxed">{definition}</p>
+          <p className="text-sm font-semibold text-card-foreground">{title}</p>
+          <p className="mt-1.5 leading-relaxed">{definition}</p>
         </div>
       ) : null}
     </details>
