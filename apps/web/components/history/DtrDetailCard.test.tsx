@@ -100,6 +100,11 @@ describe("DtrDetailCard (spec: web-history — DTR Detail View)", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("labels the on-chain section with the canonical 'anclaje' term (verb-coherent, so the adjacent QuickHelp matches the visible word)", () => {
+    render(<DtrDetailCard record={baseRecord()} />);
+    expect(screen.getByText(/anclaje en blockchain/i)).toBeInTheDocument();
+  });
+
   it("pairs the on-chain section title with a QuickHelp explanation for 'anclar' (spec: web-plain-language — Plain-Language Framing for Unavoidable Terms)", async () => {
     const user = userEvent.setup();
     render(<DtrDetailCard record={baseRecord()} />);
