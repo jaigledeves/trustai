@@ -1,5 +1,6 @@
 "use client";
 
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { shellDictionary } from "../../dictionaries/es/shell";
 import { Button } from "../ui/button";
@@ -14,8 +15,13 @@ export function LogoutButton() {
   }
 
   return (
-    <Button variant="ghost" onClick={handleLogout}>
-      {shellDictionary.nav.logout}
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      aria-label={shellDictionary.nav.logout}
+      onClick={handleLogout}
+    >
+      <LogOut />
     </Button>
   );
 }
