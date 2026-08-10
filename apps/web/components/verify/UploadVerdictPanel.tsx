@@ -185,7 +185,7 @@ function VerdictOutcome({ result }: { result: VerifyUploadResponse }) {
         role={isError ? "alert" : "status"}
         className={cn(
           "rounded-xl p-4",
-          isError ? "bg-destructive/10 text-destructive" : "bg-emerald-50 text-emerald-600",
+          isError ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success",
         )}
       >
         <div className="flex items-center gap-2">

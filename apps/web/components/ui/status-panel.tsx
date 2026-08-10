@@ -17,7 +17,7 @@ interface StatusPanelProps {
 const containerClassName: Record<StatusPanelVariant, string> = {
   pending: "flex items-center gap-3 rounded-lg border border-border bg-muted/40 p-4",
   success:
-    "flex flex-col items-center gap-3 rounded-xl bg-emerald-50 p-4 text-center text-emerald-600",
+    "flex flex-col items-center gap-3 rounded-xl bg-success/10 p-4 text-center text-success",
   error: "rounded-xl bg-destructive/10 p-4 text-destructive",
   info: "rounded-lg border border-border bg-muted/40 p-4 text-sm text-muted-foreground",
 }

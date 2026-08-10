@@ -54,7 +54,7 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
             <>
               <div className="flex flex-col items-center text-center">
                 <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
-                  <span className="size-2 rounded-full bg-emerald-500" />
+                  <span className="size-2 rounded-full bg-success" />
                   {t.badge}
                 </span>
                 <h1 className="mt-5 max-w-xl text-3xl font-semibold tracking-tight text-balance sm:text-4xl">

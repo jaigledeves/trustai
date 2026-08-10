@@ -43,7 +43,7 @@ export async function HashOnlyCard({ id }: HashOnlyCardProps) {
           {t.recordLabel}
         </span>
         {anchored ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs font-semibold text-success">
             <Check className="size-3.5" />
             {t.anchoredBadge}
           </span>
@@ -53,7 +53,7 @@ export async function HashOnlyCard({ id }: HashOnlyCardProps) {
       <h2
         className={cn(
           "mt-5 text-2xl font-semibold",
-          isError ? "text-destructive" : "text-emerald-600",
+          isError ? "text-destructive" : "text-success",
         )}
       >
         {verdictCopy.title}
@@ -64,7 +64,7 @@ export async function HashOnlyCard({ id }: HashOnlyCardProps) {
         className={cn(
           "mt-5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium",
           result.documentIntegrity
-            ? "bg-emerald-50 text-emerald-600"
+            ? "bg-success/10 text-success"
             : "bg-destructive/10 text-destructive",
         )}
       >

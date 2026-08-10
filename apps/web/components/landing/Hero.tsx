@@ -28,7 +28,7 @@ export function Hero() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm transition-colors hover:text-foreground"
           >
-            <span className="size-2 rounded-full bg-emerald-500" />
+            <span className="size-2 rounded-full bg-success" />
             {t.badge}
           </a>
 
@@ -62,7 +62,7 @@ export function Hero() {
           <ul className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
             {t.valueProps.map((valueProp) => (
               <li key={valueProp} className="inline-flex items-center gap-1.5">
-                <Check className="size-4 text-emerald-600" />
+                <Check className="size-4 text-success" />
                 {valueProp}
               </li>
             ))}
@@ -79,7 +79,7 @@ export function Hero() {
               <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {t.card.label}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs font-semibold text-success">
                 <Check className="size-3.5" />
                 {t.card.statusBadge}
               </span>
@@ -115,7 +115,7 @@ export function Hero() {
             </dl>
 
             <div className="mt-5 rounded-xl bg-muted/60 p-3 text-xs text-muted-foreground">
-              <span className="font-medium text-emerald-600">{t.card.footerNote}</span>
+              <span className="font-medium text-success">{t.card.footerNote}</span>
             </div>
           </div>
         </div>
