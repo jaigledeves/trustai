@@ -109,7 +109,7 @@ describe("HashOnlyCard (spec: web-public-verify — Hash-Only Card Without Analy
     render(jsx);
     const user = userEvent.setup();
 
-    const trigger = screen.getByRole("button", { name: glossaryDictionary.redDePrueba.term });
+    const trigger = screen.getByRole("button", { name: glossaryDictionary.redDePrueba.title });
     await user.click(trigger);
 
     expect(screen.getByText(glossaryDictionary.redDePrueba.definition)).toBeInTheDocument();

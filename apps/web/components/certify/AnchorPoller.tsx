@@ -90,7 +90,7 @@ export function AnchorPoller({ id, initialRecord }: AnchorPollerProps) {
       <StatusPanel variant="pending">
         {certifyDictionary.anchor.anchoringMessage}{" "}
         <QuickHelp
-          term={glossaryDictionary.anclar.term}
+          title={glossaryDictionary.anclar.title}
           definition={glossaryDictionary.anclar.definition}
         />
       </StatusPanel>

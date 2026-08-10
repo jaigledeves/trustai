@@ -67,7 +67,7 @@ export function HowItWorks() {
               {i === 3 ? (
                 <div className="mt-2 text-sm text-muted-foreground">
                   <QuickHelp
-                    term={glossaryDictionary.blockchain.term}
+                    title={glossaryDictionary.blockchain.title}
                     definition={glossaryDictionary.blockchain.definition}
                   />
                 </div>

@@ -118,7 +118,7 @@ export async function HashOnlyCard({ id }: HashOnlyCardProps) {
         <div className="mt-1 text-pretty">
           {verifyDictionary.legal.networkNote}{" "}
           <QuickHelp
-            term={glossaryDictionary.redDePrueba.term}
+            title={glossaryDictionary.redDePrueba.title}
             definition={glossaryDictionary.redDePrueba.definition}
           />
         </div>

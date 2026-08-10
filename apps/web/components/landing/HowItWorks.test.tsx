@@ -14,7 +14,7 @@ describe("HowItWorks (spec: web-plain-language — Plain-Language Framing for Un
     // a layperson reading the four steps meets "blockchain" here first.
     // Exactly one blockchain help exists, and it lives in the visible flow.
     const triggers = screen.getAllByRole("button", {
-      name: glossaryDictionary.blockchain.term,
+      name: glossaryDictionary.blockchain.title,
     });
     expect(triggers).toHaveLength(1);
 
