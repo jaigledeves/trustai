@@ -112,7 +112,7 @@ test.describe("Certify golden path (register -> verify -> login -> certify -> an
     // review -> confirm(frozen hash) -> anchor(submit + poll).
     await page.getByRole("button", { name: "Finalizar certificación" }).click();
     await expect(
-      page.getByText("Registrando tu documento en la blockchain… esto puede tardar unos minutos."),
+      page.getByText("Anclando tu documento en la blockchain… esto puede tardar unos minutos."),
     ).toBeVisible();
   });
 });

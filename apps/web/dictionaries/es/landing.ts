@@ -35,7 +35,7 @@ export const landingDictionary = {
   hero: {
     eyebrow:
       "Hoy, probar que un documento no fue alterado depende de que crean en tu palabra.",
-    badge: "Anclado en una blockchain pública · Piloto sin costos en Base Sepolia",
+    badge: "Protección permanente y verificable por cualquiera · Gratis durante el piloto",
     title: "Nadie tiene que creerte. Pueden comprobarlo.",
     subtitle:
       "TrustAI certifica tus documentos para que cualquiera confirme, por su cuenta, que no fueron alterados. Sin depender de tu palabra ni de la nuestra.",
@@ -49,10 +49,10 @@ export const landingDictionary = {
     ] as [string, string, string],
     card: {
       label: "Registro Digital de Confianza (DTR)",
-      statusBadge: "Registrado en blockchain",
+      statusBadge: "Anclado en blockchain",
       fileName: "contrato-servicios-2026.pdf",
       fileMeta: "Contrato · Español · 3 páginas",
-      hashLabel: "Huella del DTR",
+      hashLabel: "Huella del registro",
       hashValue: "9f2c…a17b",
       networkLabel: "Red",
       network: "Blockchain pública",
@@ -83,7 +83,7 @@ export const landingDictionary = {
       {
         title: "Se ancla en blockchain",
         description:
-          "Esa huella queda registrada de forma permanente e inalterable en una blockchain pública (Base Sepolia).",
+          "Esa huella queda guardada para siempre y ya nadie puede modificarla, en una blockchain pública.",
       },
     ],
     technicalDetailLabel: "Ver el detalle técnico",
@@ -128,9 +128,9 @@ export const landingDictionary = {
     verdictGroupLabel: "Selecciona un veredicto de ejemplo",
     recompute: {
       statement:
-        "Además, tu propio navegador recalcula el hash SHA-256 del archivo de forma independiente del servidor.",
+        "Además, tu propio navegador recalcula la huella (SHA-256) del archivo de forma independiente del servidor.",
       caveat:
-        "Esto demuestra el cálculo independiente del hash del archivo — no reconstruye ni verifica el hash canónico anclado en la blockchain.",
+        "Esto demuestra el cálculo independiente de la huella del archivo — no reconstruye ni verifica la huella canónica anclada en la blockchain.",
     },
   },
   useCases: {
@@ -176,12 +176,12 @@ export const landingDictionary = {
       {
         title: "Verificación independiente",
         description:
-          "El veredicto se apoya en un hash anclado en una blockchain pública y en la especificación abierta de dtr-core. La confianza no recae en TrustAI.",
+          "El veredicto se apoya en una huella anclada en una blockchain pública y en un estándar abierto que cualquiera puede revisar. No tienes que confiar en TrustAI: puedes comprobarlo por tu cuenta.",
       },
       {
-        title: "Integridad criptográfica",
+        title: "Imposible de falsificar",
         description:
-          "Si cambia un solo byte, su hash cambia y la verificación falla. No hay forma de falsificarlo.",
+          "Si cambia una sola letra, su huella cambia y la verificación falla al instante. No hay forma de falsificarlo.",
       },
       {
         title: "Inteligencia real",
@@ -197,7 +197,7 @@ export const landingDictionary = {
       {
         question: "¿Se publica mi documento en la blockchain?",
         answer:
-          "No. Solo queda el hash del DTR (una huella SHA-256 que representa al registro sin revelar su contenido). Tu documento se almacena cifrado y nunca se hace público.",
+          "No. Solo queda la huella del DTR (un código único que representa al registro, calculado a partir de él, sin revelar su contenido). Tu documento se almacena cifrado y nunca se hace público.",
       },
       {
         question: "¿Qué pasa si alguien modifica el archivo?",

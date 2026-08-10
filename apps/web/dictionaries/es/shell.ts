@@ -6,6 +6,10 @@
  */
 export const shellDictionary = {
   appName: "TrustAI",
+  meta: {
+    description:
+      "Certifica tus documentos y demuestra, con evidencia pública y comprobable, que no fueron alterados.",
+  },
   nav: {
     dtrs: "Mis DTR",
     newCertification: "Certificar documento",

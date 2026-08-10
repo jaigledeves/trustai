@@ -1,5 +1,6 @@
 import { ExternalLink, ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { glossaryDictionary } from "../../dictionaries/es/glossary";
 import { historyDictionary } from "../../dictionaries/es/history";
 import { shellDictionary } from "../../dictionaries/es/shell";
 import { config } from "../../lib/config";
@@ -7,6 +8,7 @@ import type { TrustRecordDetail } from "../../lib/api/types";
 import { PublicVerifyShare } from "./PublicVerifyShare";
 import { StateBadge } from "./StateBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { QuickHelp } from "../ui/quick-help";
 import { StatusPanel } from "../ui/status-panel";
 
 interface DtrDetailCardProps {
@@ -82,7 +84,13 @@ export function DtrDetailCard({ record }: DtrDetailCardProps) {
             </div>
 
             <div>
-              <dt className={labelClassName}>{historyDictionary.detail.anchorTitle}</dt>
+              <dt className={labelClassName}>
+                {historyDictionary.detail.anchorTitle}{" "}
+                <QuickHelp
+                  term={glossaryDictionary.anclar.term}
+                  definition={glossaryDictionary.anclar.definition}
+                />
+              </dt>
               <dd className="mt-1.5">
                 {explorerUrl ? (
                   <a

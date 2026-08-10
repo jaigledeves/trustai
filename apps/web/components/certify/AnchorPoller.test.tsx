@@ -70,14 +70,14 @@ describe("AnchorPoller (spec: Anchor Submission and Polling — highest-risk log
     await user.click(screen.getByRole("button", { name: "Finalizar certificación" }));
 
     expect(
-      await screen.findByText("Registrando tu documento en la blockchain… esto puede tardar unos minutos."),
+      await screen.findByText("Anclando tu documento en la blockchain… esto puede tardar unos minutos."),
     ).toBeInTheDocument();
   });
 
   it("Reaches CERTIFIED: stops polling and renders the tx hash link to the explorer", async () => {
     const queryClient = renderPoller(buildRecord({ state: "ANCHORING" }));
     expect(
-      screen.getByText("Registrando tu documento en la blockchain… esto puede tardar unos minutos."),
+      screen.getByText("Anclando tu documento en la blockchain… esto puede tardar unos minutos."),
     ).toBeInTheDocument();
 
     // Simulates the poll tick TanStack Query would perform on its own —
@@ -92,7 +92,7 @@ describe("AnchorPoller (spec: Anchor Submission and Polling — highest-risk log
     );
 
     expect(
-      await screen.findByText("¡Documento certificado! Puedes inspeccionar la transacción en la blockchain."),
+      await screen.findByText("¡Documento certificado! Puedes ver el comprobante en la blockchain."),
     ).toBeInTheDocument();
     const link = screen.getByRole("link", { name: "Ver transacción en el explorador" });
     expect(link).toHaveAttribute("href", "https://sepolia.basescan.org/tx/0xabc123");
@@ -111,7 +111,7 @@ describe("AnchorPoller (spec: Anchor Submission and Polling — highest-risk log
       }),
     );
 
-    await screen.findByText("¡Documento certificado! Puedes inspeccionar la transacción en la blockchain.");
+    await screen.findByText("¡Documento certificado! Puedes ver el comprobante en la blockchain.");
 
     // The explorer link stays present alongside the new CTAs.
     expect(
@@ -150,7 +150,7 @@ describe("AnchorPoller (spec: Anchor Submission and Polling — highest-risk log
   });
 
   it("counts ONLY real poll fetches toward the give-up cap — setQueryData cache writes (Anchor clicks / hydration) never advance it; real polls eventually stop polling and show 'slow'", async () => {
-    const anchoringMessage = "Registrando tu documento en la blockchain… esto puede tardar unos minutos.";
+    const anchoringMessage = "Anclando tu documento en la blockchain… esto puede tardar unos minutos.";
     server.use(
       http.get("http://localhost:3000/api/backend/trust-records/tr-1", () =>
         HttpResponse.json(buildRecord({ state: "ANCHORING" })),

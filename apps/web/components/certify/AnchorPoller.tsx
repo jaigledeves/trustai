@@ -4,12 +4,14 @@ import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { certifyDictionary } from "../../dictionaries/es/certify";
+import { glossaryDictionary } from "../../dictionaries/es/glossary";
 import { config } from "../../lib/config";
 import { ApiError, mapApiError } from "../../lib/api/errors";
 import { useAnchor } from "../../lib/api/hooks/useAnchor";
 import { useTrustRecord } from "../../lib/api/hooks/useTrustRecord";
 import type { TrustRecordDetail } from "../../lib/api/types";
 import { Button } from "../ui/button";
+import { QuickHelp } from "../ui/quick-help";
 import { StatusPanel } from "../ui/status-panel";
 import {
   MAX_ANCHOR_POLL_ATTEMPTS,
@@ -85,7 +87,13 @@ export function AnchorPoller({ id, initialRecord }: AnchorPollerProps) {
     return pollCapReached ? (
       <StatusPanel variant="info">{certifyDictionary.anchor.slowMessage}</StatusPanel>
     ) : (
-      <StatusPanel variant="pending">{certifyDictionary.anchor.anchoringMessage}</StatusPanel>
+      <StatusPanel variant="pending">
+        {certifyDictionary.anchor.anchoringMessage}{" "}
+        <QuickHelp
+          term={glossaryDictionary.anclar.term}
+          definition={glossaryDictionary.anclar.definition}
+        />
+      </StatusPanel>
     );
   }
 

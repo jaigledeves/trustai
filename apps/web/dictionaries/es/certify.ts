@@ -8,7 +8,7 @@ export const certifyDictionary = {
     uploadLabel: "Subida",
     analysisLabel: "Análisis de IA",
     reviewLabel: "Revisión",
-    anchorLabel: "Registro",
+    anchorLabel: "Anclaje",
     certifiedLabel: "Certificado",
   },
   documentContext: {
@@ -71,8 +71,8 @@ export const certifyDictionary = {
   },
   anchor: {
     submit: "Finalizar certificación",
-    anchoringMessage: "Registrando tu documento en la blockchain… esto puede tardar unos minutos.",
-    certifiedMessage: "¡Documento certificado! Puedes inspeccionar la transacción en la blockchain.",
+    anchoringMessage: "Anclando tu documento en la blockchain… esto puede tardar unos minutos.",
+    certifiedMessage: "¡Documento certificado! Puedes ver el comprobante en la blockchain.",
     explorerLinkLabel: "Ver transacción en el explorador",
     retryingMessage:
       "El anclaje no se confirmó en el tiempo previsto y se está reintentando automáticamente. No hace falta que hagas nada.",

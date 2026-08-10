@@ -62,7 +62,7 @@ describe("ClientHashRecompute (spec: Client-Side Independent Hash Recompute — 
 
     await waitFor(() => expect(screen.getByText("c".repeat(64))).toBeInTheDocument());
 
-    const caveatText = /no reconstruye ni verifica el hash canónico anclado/;
+    const caveatText = /no reconstruye ni verifica la huella canónica anclada/;
     const summary = screen.getByText(verifyDictionary.recompute.caveatLabel);
     const details = summary.closest("details");
     expect(details).not.toBeNull();
@@ -76,7 +76,7 @@ describe("ClientHashRecompute (spec: Client-Side Independent Hash Recompute — 
 
     await waitFor(() =>
       expect(
-        screen.getByText(/No pudimos calcular el hash en tu navegador/),
+        screen.getByText(/No pudimos calcular la huella en tu navegador/),
       ).toBeInTheDocument(),
     );
     // The error state is announced (role="alert"), not silently swallowed.

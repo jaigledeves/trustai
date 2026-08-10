@@ -6,7 +6,7 @@
 export const authDictionary = {
   register: {
     title: "Crea tu cuenta",
-    subtitle: "Empieza a certificar tus documentos con IA y blockchain.",
+    subtitle: "Empieza a certificar tus documentos y demostrar que no fueron alterados.",
     loginPrompt: "¿Ya tienes una cuenta?",
     loginCta: "Iniciar sesión",
     emailLabel: "Email",
@@ -33,7 +33,7 @@ export const authDictionary = {
   },
   login: {
     title: "Inicia sesión",
-    subtitle: "Accede a tus certificaciones y Digital Trust Records.",
+    subtitle: "Accede a tus certificaciones y Registros Digitales de Confianza.",
     registerPrompt: "¿No tienes una cuenta?",
     registerCta: "Crear cuenta",
     emailLabel: "Email",

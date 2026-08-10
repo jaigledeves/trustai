@@ -11,7 +11,9 @@ import {
   Sparkles,
   Upload,
 } from "lucide-react";
+import { glossaryDictionary } from "@/dictionaries/es/glossary";
 import { landingDictionary } from "@/dictionaries/es/landing";
+import { QuickHelp } from "../ui/quick-help";
 import { ANCHOR_CONTRACT, contractUrl } from "./contractUrl";
 
 const STEP_ICONS = [Upload, Sparkles, FileCheck, Boxes];
@@ -73,7 +75,16 @@ export function HowItWorks() {
           </span>
         </summary>
         <div className="pb-5 text-sm leading-relaxed text-muted-foreground">
-          <p>{t.technicalDetail.intro}</p>
+          {/* A <div>, not a <p>: QuickHelp renders a <details> internally,
+              which is flow (block-level) content and invalid inside <p>
+              (phrasing-content only). */}
+          <div>
+            {t.technicalDetail.intro}{" "}
+            <QuickHelp
+              term={glossaryDictionary.blockchain.term}
+              definition={glossaryDictionary.blockchain.definition}
+            />
+          </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {t.technicalDetail.items.map((item, i) => {

@@ -1,10 +1,12 @@
 import { Check, ExternalLink, ShieldAlert, ShieldCheck } from "lucide-react";
 import { notFound } from "next/navigation";
+import { glossaryDictionary } from "../../dictionaries/es/glossary";
 import { verifyDictionary } from "../../dictionaries/es/verify";
 import { getVerifyHash, NotFoundError } from "../../lib/api/public-verify-client";
 import type { VerifyHashResponse, VerifyVerdict } from "../../lib/api/types";
 import { truncateId } from "../../lib/format";
 import { cn } from "../../lib/utils";
+import { QuickHelp } from "../ui/quick-help";
 
 interface HashOnlyCardProps {
   id: string;
@@ -104,7 +106,28 @@ export async function HashOnlyCard({ id }: HashOnlyCardProps) {
 
       <div className="mt-6 rounded-xl bg-muted/60 p-4 text-xs text-muted-foreground">
         <p className="font-medium text-foreground">{verifyDictionary.legal.disclaimerLabel}</p>
-        <p className="mt-1 text-pretty">{verifyDictionary.legal.disclaimer}</p>
+        {/* Plain-language summary + network note are always visible (spec:
+            web-public-verify — "Plain-Language Summary Visible by
+            Default"); the full legal text moves behind a native
+            <details>/<summary> disclosure so it stays one interaction away
+            without overwhelming a non-technical reader. */}
+        <p className="mt-1 text-pretty">{verifyDictionary.legal.disclaimerSummary}</p>
+        {/* A <div>, not a <p>: QuickHelp renders a <details> internally,
+            which is flow (block-level) content and invalid inside <p>
+            (phrasing-content only). */}
+        <div className="mt-1 text-pretty">
+          {verifyDictionary.legal.networkNote}{" "}
+          <QuickHelp
+            term={glossaryDictionary.redDePrueba.term}
+            definition={glossaryDictionary.redDePrueba.definition}
+          />
+        </div>
+        <details className="group mt-2">
+          <summary className="cursor-pointer list-none font-medium text-foreground underline decoration-dotted underline-offset-2 marker:content-none">
+            {verifyDictionary.legal.disclaimerFullLabel}
+          </summary>
+          <p className="mt-1 text-pretty">{verifyDictionary.legal.disclaimer}</p>
+        </details>
         <p className="mt-3">
           {t.verifiedAtLabel} {formatVerifiedAt(result.verifiedAt)}
         </p>

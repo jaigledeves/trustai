@@ -50,6 +50,7 @@ con una ADR nueva.
 | [ADR-007](adr/ADR-007-metodo-repo-dedicado-para-join-de-asset-org-scoped.md) | Método de repositorio dedicado para el join de asset org-scoped |
 | [ADR-008](adr/ADR-008-dto-de-query-validado-para-filtros-de-lista.md) | DTO de query validado para filtros de lista |
 | [ADR-009](adr/ADR-009-web-dueno-del-copy-de-veredictos-y-aviso-eidas.md) | La web es dueña del copy de veredictos y del aviso eIDAS |
+| [ADR-010](adr/ADR-010-verbo-canonico-anclar-vs-registrar.md) | Verbo canónico on-chain: "anclar" sobre "registrar" (incl. stepper de certify) |
 
 ## Índice maestro / estado
 

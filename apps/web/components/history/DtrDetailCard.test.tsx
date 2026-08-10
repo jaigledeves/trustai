@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { glossaryDictionary } from "../../dictionaries/es/glossary";
 import type { TrustRecordDetail } from "../../lib/api/types";
 import { DtrDetailCard } from "./DtrDetailCard";
 
@@ -86,7 +88,7 @@ describe("DtrDetailCard (spec: web-history — DTR Detail View)", () => {
       screen.getByText("El análisis de IA todavía no está disponible."),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Este documento todavía no fue registrado."),
+      screen.getByText("Este documento todavía no fue anclado en la blockchain."),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Ver transacción en el explorador" }),
@@ -96,5 +98,15 @@ describe("DtrDetailCard (spec: web-history — DTR Detail View)", () => {
     expect(
       screen.queryByRole("link", { name: "Abrir verificación pública" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("pairs the on-chain section title with a QuickHelp explanation for 'anclar' (spec: web-plain-language — Plain-Language Framing for Unavoidable Terms)", async () => {
+    const user = userEvent.setup();
+    render(<DtrDetailCard record={baseRecord()} />);
+
+    const trigger = screen.getByRole("button", { name: glossaryDictionary.anclar.term });
+    await user.click(trigger);
+
+    expect(screen.getByText(glossaryDictionary.anclar.definition)).toBeInTheDocument();
   });
 });

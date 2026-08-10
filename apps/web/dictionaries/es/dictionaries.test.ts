@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { authDictionary } from "./auth";
 import { certifyDictionary } from "./certify";
+import { glossaryDictionary } from "./glossary";
 import { historyDictionary } from "./history";
 import { landingDictionary } from "./landing";
 import { shellDictionary } from "./shell";
@@ -29,6 +30,7 @@ describe("dictionaries/es", () => {
     ["historyDictionary", historyDictionary],
     ["verifyDictionary", verifyDictionary],
     ["landingDictionary", landingDictionary],
+    ["glossaryDictionary", glossaryDictionary],
   ])(
     "every leaf value in %s is a non-empty string (guards against accidental English/blank literals — RNF-041)",
     (_name, dictionary) => {
@@ -202,16 +204,112 @@ describe("dictionaries/es", () => {
       );
     });
 
-    it("page.badge names Base Sepolia honestly, drops the demoted '(testnet)' phrasing, never implies mainnet/production", () => {
-      expect(verifyDictionary.page.badge).toMatch(/Base Sepolia/);
-      expect(verifyDictionary.page.badge).not.toMatch(/\(testnet\)/i);
+    it("page.badge describes public checkable verification in plain language, naming neither the network nor 'testnet', never implying mainnet/production (spec: web-public-verify — Honest Page Badge)", () => {
+      expect(verifyDictionary.page.badge).not.toMatch(/Base Sepolia/i);
+      expect(verifyDictionary.page.badge).not.toMatch(/testnet/i);
       expect(verifyDictionary.page.badge).not.toMatch(/mainnet|producci[oó]n/i);
+    });
+
+    it("always-visible upload prose uses 'huella', never bare 'hash' (spec: web-plain-language — One Fingerprint Term Site-Wide; the panel renders ungated in UploadVerdictPanel)", () => {
+      const alwaysVisibleProse = [
+        verifyDictionary.upload.panelTitle,
+        verifyDictionary.upload.panelDescription,
+      ];
+
+      for (const value of alwaysVisibleProse) {
+        expect(value.toLowerCase()).not.toMatch(/\bhash\b/);
+      }
     });
 
     it("verdicts.* stay non-empty for the shared VerificationDemo cross-read (public-landing)", () => {
       for (const verdict of Object.values(verifyDictionary.verdicts)) {
         expect(verdict.title.trim().length).toBeGreaterThan(0);
         expect(verdict.message.trim().length).toBeGreaterThan(0);
+      }
+    });
+  });
+
+  /**
+   * Cross-dictionary consistency assertions (spec: web-plain-language — One
+   * Fingerprint Term Site-Wide, One Canonical On-Chain Verb Site-Wide, One
+   * Canonical DTR Name With Expand-on-First-Use). These compare strings
+   * ACROSS dictionary modules, so they live at the top level rather than
+   * inside a single dictionary's own copy-audit `describe` block.
+   */
+  describe("cross-dictionary consistency (spec: web-plain-language)", () => {
+    it("uses one canonical on-chain verb lemma ('ancl') across every on-chain-action/state string; no string re-introduces 'registrar' as a synonym verb", () => {
+      const onChainActionStrings = [
+        certifyDictionary.stepper.anchorLabel,
+        certifyDictionary.anchor.anchoringMessage,
+        certifyDictionary.anchor.retryingMessage,
+        certifyDictionary.anchor.slowMessage,
+        certifyDictionary.anchor.errorGeneric,
+        historyDictionary.states.ANCHORING,
+        historyDictionary.detail.anchorNotAnchored,
+        verifyDictionary.landing.anchorNotAnchoredLabel,
+        verifyDictionary.verdicts.PENDING_ANCHOR.message,
+      ];
+
+      for (const value of onChainActionStrings) {
+        expect(value.toLowerCase()).toMatch(/ancl/);
+        // "registro"/"registros" (the DTR-artifact noun) stays legal; only the
+        // "registrar" verb family ("registra", "registrando", "registrado")
+        // is forbidden here — every one of those forms contains "registra".
+        expect(value.toLowerCase()).not.toMatch(/registra/);
+      }
+
+      // `certifiedMessage` is user-approved verbatim copy that describes the
+      // COMPLETED state ("Puedes ver el comprobante en la blockchain") rather
+      // than the in-progress on-chain action, so it legitimately doesn't
+      // repeat the "ancl" verb — it's still checked for the forbidden
+      // "registrar" synonym alongside the others.
+      expect(certifyDictionary.anchor.certifiedMessage.toLowerCase()).not.toMatch(/registra/);
+    });
+
+    it("no dictionary module contains the English DTR name 'Digital Trust Records'", () => {
+      const dictionaries: Record<string, unknown> = {
+        shellDictionary,
+        authDictionary,
+        certifyDictionary,
+        historyDictionary,
+        verifyDictionary,
+        landingDictionary,
+        glossaryDictionary,
+      };
+
+      for (const [name, dictionary] of Object.entries(dictionaries)) {
+        expect(JSON.stringify(dictionary), `${name} must not contain "Digital Trust Records"`).not.toContain(
+          "Digital Trust Records",
+        );
+      }
+    });
+
+    it("landing's hero badge and hero card never name the network/testnet (spec: public-landing — Testnet Naming Confined to FAQ)", () => {
+      const heroStrings = [
+        landingDictionary.hero.badge,
+        landingDictionary.hero.card.statusBadge,
+        landingDictionary.hero.card.network,
+        landingDictionary.hero.card.footerNote,
+      ];
+
+      for (const value of heroStrings) {
+        expect(value).not.toMatch(/Base Sepolia/i);
+        expect(value).not.toMatch(/testnet/i);
+      }
+    });
+
+    it("uses 'huella' (not bare 'hash') as the fingerprint noun in every hero/primary-flow fingerprint label outside a technical disclosure", () => {
+      const fingerprintLabels = [
+        landingDictionary.hero.card.hashLabel,
+        certifyDictionary.confirm.frozenHashLabel,
+        historyDictionary.detail.canonicalHashLabel,
+        verifyDictionary.recompute.title,
+        verifyDictionary.recompute.hashLabel,
+      ];
+
+      for (const label of fingerprintLabels) {
+        expect(label.toLowerCase()).toMatch(/huella/);
+        expect(label.toLowerCase()).not.toMatch(/\bhash\b/);
       }
     });
   });

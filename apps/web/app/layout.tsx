@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { shellDictionary } from "@/dictionaries/es/shell";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -14,8 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TrustAI",
-  description: "Certificación de documentos digitales con IA y blockchain",
+  title: shellDictionary.appName,
+  // RNF-041: sourced from the dictionary, never a hardcoded literal.
+  description: shellDictionary.meta.description,
 };
 
 export default function RootLayout({

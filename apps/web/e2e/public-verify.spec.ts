@@ -135,7 +135,7 @@ test.describe("Public verify (register -> certify -> confirm -> unauthenticated 
       // spec: analysis is absent for ASSET_MISMATCH.
       await expect(publicPage.getByText(/^Resumen:/)).not.toBeVisible();
       // spec: the client-side hash recompute panel still renders independently.
-      await expect(publicPage.getByText("Hash calculado en tu navegador")).toBeVisible();
+      await expect(publicPage.getByText("Huella calculada en tu navegador")).toBeVisible();
     } finally {
       await publicContext.close();
     }
@@ -158,7 +158,7 @@ test.describe("Public verify (register -> certify -> confirm -> unauthenticated 
     // real VALID verdict end-to-end.
     await page.getByRole("button", { name: "Finalizar certificación" }).click();
     await expect(
-      page.getByText("Registrando tu documento en la blockchain… esto puede tardar unos minutos."),
+      page.getByText("Anclando tu documento en la blockchain… esto puede tardar unos minutos."),
     ).toBeVisible();
 
     let certified = false;
