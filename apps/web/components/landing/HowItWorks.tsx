@@ -59,6 +59,19 @@ export function HowItWorks() {
               <p className="mt-2 text-sm text-muted-foreground">
                 {step.description}
               </p>
+              {/* Step 4 ("Se ancla en blockchain") is where a non-technical
+                  reader meets "blockchain" in the default-visible flow, so the
+                  quick-help lives HERE — not buried inside "Ver el detalle
+                  técnico", whose readers already know the term. A <div>, not a
+                  <p>: QuickHelp renders a <details> (flow content) internally. */}
+              {i === 3 ? (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  <QuickHelp
+                    term={glossaryDictionary.blockchain.term}
+                    definition={glossaryDictionary.blockchain.definition}
+                  />
+                </div>
+              ) : null}
             </li>
           );
         })}
@@ -75,16 +88,7 @@ export function HowItWorks() {
           </span>
         </summary>
         <div className="pb-5 text-sm leading-relaxed text-muted-foreground">
-          {/* A <div>, not a <p>: QuickHelp renders a <details> internally,
-              which is flow (block-level) content and invalid inside <p>
-              (phrasing-content only). */}
-          <div>
-            {t.technicalDetail.intro}{" "}
-            <QuickHelp
-              term={glossaryDictionary.blockchain.term}
-              definition={glossaryDictionary.blockchain.definition}
-            />
-          </div>
+          <p>{t.technicalDetail.intro}</p>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {t.technicalDetail.items.map((item, i) => {
