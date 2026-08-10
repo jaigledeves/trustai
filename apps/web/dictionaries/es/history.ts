@@ -36,7 +36,7 @@ export const historyDictionary = {
     aiClassificationLabel: "Clasificación",
     aiLanguageLabel: "Idioma",
     aiPending: "El análisis de IA todavía no está disponible.",
-    anchorTitle: "Registro en blockchain",
+    anchorTitle: "Anclaje en blockchain",
     anchorNotAnchored: "Este documento todavía no fue anclado en la blockchain.",
     anchorExplorerLinkLabel: "Ver transacción en el explorador",
   },
