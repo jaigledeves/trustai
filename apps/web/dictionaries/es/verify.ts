@@ -15,7 +15,7 @@
 export const verifyDictionary = {
   page: {
     title: "Verificación pública de documento",
-    badge: "Verificación pública · Anclado en Base Sepolia",
+    badge: "Verificación pública · Cualquiera puede comprobarlo",
     subtitle:
       "Nadie tiene que confiar. Se comprueba. Este es el resultado registrado en la blockchain para este documento — y abajo puedes comprobar tu propia copia.",
     disabled: {
@@ -31,7 +31,7 @@ export const verifyDictionary = {
   },
   landing: {
     recordLabel: "Registro Digital de Confianza (DTR)",
-    anchoredBadge: "Registrado en blockchain",
+    anchoredBadge: "Anclado en blockchain",
     integrityValidLabel: "Integridad confirmada",
     integrityInvalidLabel: "Integridad no confirmada",
     verifiedAtLabel: "Verificado el",
@@ -46,14 +46,27 @@ export const verifyDictionary = {
    */
   legal: {
     disclaimerLabel: "Nota legal",
+    // Always-visible plain-language summary (spec: web-public-verify —
+    // "Corrected eIDAS Disclaimer... Plain-Language Summary Visible by
+    // Default"). The full legal text below moves behind a `<details>`
+    // disclosure triggered by `disclaimerFullLabel`.
+    disclaimerSummary:
+      "Esto comprueba que el documento no fue alterado y desde cuándo existe. No es una firma electrónica con validez legal por sí sola.",
+    disclaimerFullLabel: "Ver nota legal completa",
     // PENDING legal sign-off before mainnet/production — see ADR-009
     disclaimer:
       "Esta verificación no constituye una firma electrónica cualificada según el Reglamento eIDAS (UE 910/2014). TrustAI certifica únicamente la integridad del documento y los metadatos de procesamiento registrados en el momento de la certificación.",
+    // Always-visible, non-badge honesty disclosure (design.md decision #8 —
+    // "Testnet honesty on verify"): the network name moves out of the
+    // prominent `page.badge` per spec, but pilot/testnet status must not go
+    // silent — it stays one supporting line away, never gated behind a click.
+    networkNote:
+      "Durante el piloto, el anclaje se realiza en una red de prueba (Base Sepolia).",
   },
   upload: {
     panelTitle: "Verifícalo tú mismo",
     panelDescription:
-      "Sube tu copia del archivo. TrustAI la compara con el registro certificado y, en paralelo, tu navegador recalcula el hash de forma independiente del servidor.",
+      "Sube tu copia del archivo. TrustAI la compara con el registro certificado y, en paralelo, tu navegador recalcula la huella de forma independiente del servidor.",
     fileLabel: "Elige el archivo a verificar",
     dropzoneHint: "o arrástralo aquí",
     fileSizeLabel: "Tamaño: {size}",
@@ -75,7 +88,7 @@ export const verifyDictionary = {
     PENDING_ANCHOR: {
       title: "Anclaje pendiente",
       message:
-        "El archivo coincide con el documento certificado, pero su registro en la blockchain todavía está siendo procesado.",
+        "El archivo coincide con el documento certificado, pero su anclaje en la blockchain todavía está siendo procesado.",
     },
     INVALID_RECORD: {
       title: "Registro inválido",
@@ -88,13 +101,13 @@ export const verifyDictionary = {
     languageLabel: "Idioma",
   },
   recompute: {
-    title: "Hash calculado en tu navegador",
-    hashLabel: "Hash SHA-256 del archivo subido",
+    title: "Huella calculada en tu navegador",
+    hashLabel: "Huella del archivo subido",
     caveatLabel: "¿Qué comprueba este cálculo?",
     caveat:
-      "Esto demuestra el cálculo independiente del hash del archivo en tu navegador — no reconstruye ni verifica el hash canónico anclado en la blockchain. Para una verificación completa y reproducible, consulta la documentación de dtr-core.",
+      "Esto demuestra el cálculo independiente de la huella del archivo en tu navegador — no reconstruye ni verifica la huella canónica anclada en la blockchain. Para una verificación completa y reproducible, consulta la documentación de dtr-core.",
     error:
-      "No pudimos calcular el hash en tu navegador. Es posible que el cálculo criptográfico no esté disponible en este contexto (por ejemplo, fuera de una conexión segura).",
+      "No pudimos calcular la huella en tu navegador. Es posible que el cálculo criptográfico no esté disponible en este contexto (por ejemplo, fuera de una conexión segura).",
   },
   /** Link-specific "broken/expired" copy for `/verify/[id]`, replacing the generic `shellDictionary.errors.notFound`. */
   notFound: {

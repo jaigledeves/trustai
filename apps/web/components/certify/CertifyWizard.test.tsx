@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 import { certifyDictionary } from "../../dictionaries/es/certify";
+import { glossaryDictionary } from "../../dictionaries/es/glossary";
 import { server } from "../../test/msw/server";
 import { trustRecordQueryKey } from "../../lib/api/hooks/useTrustRecord";
 import type { TrustRecordDetail } from "../../lib/api/types";
@@ -232,6 +233,20 @@ describe("CertifyWizard (spec: AI Analysis Display — never a silent DRAFT stal
     });
     expect(await screen.findByText(certifyDictionary.review.analysisSlow)).toBeInTheDocument();
     expect(resolveAnalysisRefetchInterval(pending(), MAX_ANALYSIS_POLL_ATTEMPTS)).toBe(false);
+  });
+});
+
+describe("CertifyWizard (spec: web-plain-language — Plain-Language Framing for Unavoidable Terms)", () => {
+  it("pairs the anchoring status message with a QuickHelp explanation for 'anclar'", async () => {
+    const user = userEvent.setup();
+    renderWizard(buildRecord({ state: "ANCHORING", aiSummary: "Un resumen." }));
+
+    expect(screen.getByText(certifyDictionary.anchor.anchoringMessage)).toBeInTheDocument();
+
+    const trigger = screen.getByRole("button", { name: glossaryDictionary.anclar.term });
+    await user.click(trigger);
+
+    expect(screen.getByText(glossaryDictionary.anclar.definition)).toBeInTheDocument();
   });
 });
 
