@@ -77,21 +77,53 @@ export function ThemeToggle({ initialPreference }: ThemeToggleProps) {
     return () => mediaQueryList.removeEventListener("change", handleChange);
   }, [preference]);
 
+  // Mobile: single cycle button (sm breakpoint and below).
+  // Cycle order: light → dark → system → light …
+  const currentIndex = OPTIONS.findIndex((o) => o.value === preference);
+  const { Icon: CurrentIcon } = OPTIONS[currentIndex]!;
+  const nextOption = OPTIONS[(currentIndex + 1) % OPTIONS.length]!;
+
+  function cyclePreference() {
+    selectPreference(nextOption.value);
+  }
+
   return (
-    <div role="group" aria-label={t.groupLabel} className="flex items-center gap-0.5">
-      {OPTIONS.map(({ value, Icon }) => (
-        <Button
-          key={value}
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          aria-pressed={preference === value}
-          aria-label={t[value]}
-          onClick={() => selectPreference(value)}
-        >
-          <Icon />
-        </Button>
-      ))}
-    </div>
+    <>
+      {/* Mobile — single cycling icon button. aria-label uses groupLabel
+          ("Tema") rather than the per-option label to avoid a name collision
+          with the same-named desktop button when that option is active
+          (jsdom renders both regardless of Tailwind responsive classes). */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        aria-label={t.groupLabel}
+        onClick={cyclePreference}
+        className="sm:hidden"
+      >
+        <CurrentIcon />
+      </Button>
+
+      {/* Desktop — 3-button group, one per option */}
+      <div
+        role="group"
+        aria-label={t.groupLabel}
+        className="hidden sm:flex items-center gap-0.5"
+      >
+        {OPTIONS.map(({ value, Icon }) => (
+          <Button
+            key={value}
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-pressed={preference === value}
+            aria-label={t[value]}
+            onClick={() => selectPreference(value)}
+          >
+            <Icon />
+          </Button>
+        ))}
+      </div>
+    </>
   );
 }

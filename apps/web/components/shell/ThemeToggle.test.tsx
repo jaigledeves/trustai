@@ -22,18 +22,35 @@ afterEach(() => {
 });
 
 describe("ThemeToggle (spec: web-theme — Theme Toggle Control)", () => {
-  it('renders a role="group" with the dictionary-sourced accessible name', () => {
+  it('renders a role="group" with the dictionary-sourced accessible name (desktop 3-button strip)', () => {
     render(<ThemeToggle initialPreference="system" />);
 
     expect(screen.getByRole("group", { name: groupLabel })).toBeInTheDocument();
   });
 
-  it("renders exactly 3 buttons with accessible names from the dictionary", () => {
+  it("renders exactly 3 per-option buttons inside the group + 1 mobile cycle button", () => {
     render(<ThemeToggle initialPreference="system" />);
 
+    // Desktop 3-button group: each option has its own accessible name.
+    const group = screen.getByRole("group", { name: groupLabel });
     for (const name of [light, dark, system]) {
-      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+      expect(group.querySelector(`[aria-label="${name}"]`)).toBeInTheDocument();
     }
+
+    // Mobile cycle button: aria-label = groupLabel ("Tema") to avoid
+    // a name collision with the active desktop button in jsdom.
+    expect(screen.getByRole("button", { name: groupLabel })).toBeInTheDocument();
+  });
+
+  it("mobile cycle button cycles light→dark→system→light", async () => {
+    render(<ThemeToggle initialPreference="light" />);
+
+    const cycleBtn = screen.getByRole("button", { name: groupLabel });
+
+    // light → dark
+    await userEvent.click(cycleBtn);
+    expect(document.cookie).toMatch(/^theme=dark/);
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
   });
 
   it('initialPreference="dark" renders the Dark button pressed, others not', () => {
