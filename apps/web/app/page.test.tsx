@@ -10,6 +10,25 @@ vi.mock("@/components/landing/VerificationDemo", () => ({
   VerificationDemo: () => <div>VERIFICATION_DEMO_MARKER</div>,
 }));
 
+// `Nav` is now an async Server Component (spec: web-theme — it reads the
+// `theme` cookie to mount `ThemeToggle`) and has its own dedicated test
+// suite (components/landing/Nav.test.tsx). `@testing-library/react`'s
+// client `render()` can't resolve an async component nested under this
+// sync `LandingPage` the way the real Next.js RSC renderer does, so it's
+// mocked here — this suite only cares about section ORDERING, same
+// rationale as the `VerificationDemo` mock above.
+vi.mock("@/components/landing/Nav", async () => {
+  const { landingDictionary } = await import("@/dictionaries/es/landing");
+  return {
+    Nav: () => (
+      <header>
+        <a href="/login">{landingDictionary.nav.login}</a>
+        <a href="/register">{landingDictionary.nav.register}</a>
+      </header>
+    ),
+  };
+});
+
 describe("LandingPage (spec: public-landing — Landing Composition, Config-Driven Navigation & Links)", () => {
   beforeEach(() => {
     vi.resetModules();

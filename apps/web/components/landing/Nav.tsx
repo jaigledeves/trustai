@@ -1,7 +1,10 @@
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { Wordmark } from "@/components/brand/Wordmark";
+import { ThemeToggle } from "@/components/shell/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { landingDictionary } from "@/dictionaries/es/landing";
+import { parseThemePreference, THEME_COOKIE_NAME } from "@/lib/theme";
 
 /**
  * In-page anchor links. Hrefs are structural (they target each section's
@@ -20,11 +23,17 @@ const sectionLinks = [
 ] as const;
 
 /**
- * Landing nav (spec: public-landing — Landing Composition). Server
- * Component — no client JS needed for the wordmark, in-page anchors, and
- * the two auth links.
+ * Landing nav (spec: public-landing — Landing Composition; web-theme —
+ * "Theme Toggle Control"). Server Component — reads the `theme` cookie to
+ * SSR-resolve `ThemeToggle`'s `initialPreference` (design.md decision #4:
+ * landing reuses `shellDictionary.theme`, not its own dictionary group).
  */
-export function Nav() {
+export async function Nav() {
+  const cookieStore = await cookies();
+  const themePreference = parseThemePreference(
+    cookieStore.get(THEME_COOKIE_NAME)?.value,
+  );
+
   return (
     <header className="sticky top-0 z-10 border-b border-border/60 bg-background/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
@@ -44,6 +53,7 @@ export function Nav() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle initialPreference={themePreference} />
           <Button variant="ghost" size="lg" asChild>
             <Link href="/login">{landingDictionary.nav.login}</Link>
           </Button>
