@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { FilePlus } from "lucide-react";
 import Link from "next/link";
 import { Wordmark } from "../../components/brand/Wordmark";
 import { LogoutButton } from "../../components/shell/LogoutButton";
@@ -43,8 +44,20 @@ export default async function DashboardLayout({
             <Button variant="ghost" size="lg" asChild>
               <Link href="/dtrs">{shellDictionary.nav.dtrs}</Link>
             </Button>
-            <Button size="lg" asChild>
-              <Link href="/dtrs/new">{shellDictionary.nav.newCertification}</Link>
+            {/* Icon only on mobile; icon + short label on sm+ to keep the
+                button recognisable without crowding the nav. Full label
+                stays in aria-label for screen readers at every width. */}
+            <Button
+              size="lg"
+              aria-label={shellDictionary.nav.newCertification}
+              asChild
+            >
+              <Link href="/dtrs/new" className="flex items-center gap-1.5">
+                <FilePlus className="size-4 shrink-0" />
+                <span className="hidden sm:inline">
+                  {shellDictionary.nav.newCertificationShort}
+                </span>
+              </Link>
             </Button>
             <ThemeToggle initialPreference={themePreference} />
             <LogoutButton />

@@ -1,3 +1,4 @@
+import { LogIn } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Wordmark } from "@/components/brand/Wordmark";
@@ -54,8 +55,11 @@ export async function Nav() {
         </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle initialPreference={themePreference} />
-          <Button variant="ghost" size="lg" asChild>
-            <Link href="/login">{landingDictionary.nav.login}</Link>
+          {/* "Iniciar sesión" is the secondary auth action; "Crear cuenta"
+              is the primary CTA. Reducing login to an icon keeps the nav
+              uncluttered on all widths while preserving clear hierarchy. */}
+          <Button variant="ghost" size="icon-sm" aria-label={landingDictionary.nav.login} asChild>
+            <Link href="/login"><LogIn /></Link>
           </Button>
           <Button size="lg" asChild>
             <Link href="/register">{landingDictionary.nav.register}</Link>

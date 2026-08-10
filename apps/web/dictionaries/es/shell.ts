@@ -13,6 +13,8 @@ export const shellDictionary = {
   nav: {
     dtrs: "Mis DTR",
     newCertification: "Certificar documento",
+    /** Abbreviated label shown beside the icon on constrained nav widths. */
+    newCertificationShort: "Certificar",
     logout: "Cerrar sesión",
   },
   /**
