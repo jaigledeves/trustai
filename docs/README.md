@@ -51,6 +51,7 @@ con una ADR nueva.
 | [ADR-008](adr/ADR-008-dto-de-query-validado-para-filtros-de-lista.md) | DTO de query validado para filtros de lista |
 | [ADR-009](adr/ADR-009-web-dueno-del-copy-de-veredictos-y-aviso-eidas.md) | La web es dueña del copy de veredictos y del aviso eIDAS |
 | [ADR-010](adr/ADR-010-verbo-canonico-anclar-vs-registrar.md) | Verbo canónico on-chain: "anclar" sobre "registrar" (incl. stepper de certify) |
+| [ADR-011](adr/ADR-011-cookie-server-component-theming-sobre-next-themes.md) | Theming con cookie + Server Component en vez de `next-themes` (SSR sin FOUC) |
 
 ## Índice maestro / estado
 
