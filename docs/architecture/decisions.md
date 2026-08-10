@@ -28,6 +28,7 @@ Las ADR viven en [`docs/adr/`](../adr/). El formato de cada archivo es
 | [ADR-008](../adr/ADR-008-dto-de-query-validado-para-filtros-de-lista.md) | DTO de query validado para los filtros de la lista de DTR | Aceptada | 2026-08-04 |
 | [ADR-009](../adr/ADR-009-web-dueno-del-copy-de-veredictos-y-aviso-eidas.md) | Web es dueña del copy de veredictos y del aviso eIDAS (Opción W) | Aceptada | 2026-08-05 |
 | [ADR-010](../adr/ADR-010-verbo-canonico-anclar-vs-registrar.md) | Verbo canónico para la acción on-chain — "anclar" sobre "registrar" (incluye el stepper de certify) | Aceptada | 2026-08-10 |
+| [ADR-011](../adr/ADR-011-cookie-server-component-theming-sobre-next-themes.md) | Theming con cookie + Server Component en vez de `next-themes` (SSR sin FOUC) | Aceptada | 2026-08-10 |
 
 ## Cómo añadir una ADR
 

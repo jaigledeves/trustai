@@ -10,7 +10,9 @@ context: |
   Architecture: Hexagonal (ports & adapters) in apps/api; App Router BFF in
   apps/web. RNF-041: Spanish UI in MVP, all user-facing strings live in
   apps/web/dictionaries/{locale}/*.ts modules (no hardcoded copy in
-  components). apps/web is light-mode only — no dark-mode toggle.
+  components). apps/web ships a light/dark/system theme toggle (cookie +
+  Server Component SSR, no next-themes — see ADR-011), backed by a
+  `--success`/`--success-foreground` semantic token pair.
   Testing: Vitest unit everywhere, Playwright e2e (apps/web), NestJS e2e specs
   (apps/api, needs Docker: Postgres/Anvil/MinIO), Foundry unit/fuzz (contracts).
 

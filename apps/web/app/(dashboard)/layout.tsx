@@ -1,10 +1,13 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Wordmark } from "../../components/brand/Wordmark";
 import { LogoutButton } from "../../components/shell/LogoutButton";
+import { ThemeToggle } from "../../components/shell/ThemeToggle";
 import { Button } from "../../components/ui/button";
 import { shellDictionary } from "../../dictionaries/es/shell";
 import { getSession } from "../../lib/session";
+import { parseThemePreference, THEME_COOKIE_NAME } from "../../lib/theme";
 
 /**
  * Authenticated shell (spec: web-app-shell). `middleware.ts` already
@@ -23,6 +26,12 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  // spec: web-theme — "Theme Toggle Control" (authenticated shell nav).
+  const cookieStore = await cookies();
+  const themePreference = parseThemePreference(
+    cookieStore.get(THEME_COOKIE_NAME)?.value,
+  );
+
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
       <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur">
@@ -37,6 +46,7 @@ export default async function DashboardLayout({
             <Button size="lg" asChild>
               <Link href="/dtrs/new">{shellDictionary.nav.newCertification}</Link>
             </Button>
+            <ThemeToggle initialPreference={themePreference} />
             <LogoutButton />
           </nav>
         </div>

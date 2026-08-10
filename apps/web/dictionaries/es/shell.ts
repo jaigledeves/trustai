@@ -15,6 +15,17 @@ export const shellDictionary = {
     newCertification: "Certificar documento",
     logout: "Cerrar sesión",
   },
+  /**
+   * Theme toggle copy (spec: web-theme). Shared by the authenticated shell
+   * nav and the public landing/verify nav — one copy avoids drift between
+   * the two surfaces (design.md decision #4).
+   */
+  theme: {
+    groupLabel: "Tema",
+    light: "Claro",
+    dark: "Oscuro",
+    system: "Sistema",
+  },
   session: {
     expired: "Tu sesión expiró, inicia sesión de nuevo.",
   },

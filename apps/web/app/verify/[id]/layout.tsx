@@ -1,10 +1,13 @@
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { Wordmark } from "../../../components/brand/Wordmark";
 import { Button } from "../../../components/ui/button";
 import { LogoutButton } from "../../../components/shell/LogoutButton";
+import { ThemeToggle } from "../../../components/shell/ThemeToggle";
 import { landingDictionary } from "../../../dictionaries/es/landing";
 import { shellDictionary } from "../../../dictionaries/es/shell";
 import { getSession } from "../../../lib/session";
+import { parseThemePreference, THEME_COOKIE_NAME } from "../../../lib/theme";
 
 /**
  * Landing section links reused as CROSS-PAGE anchors (`/#id`, not `#id`): those
@@ -40,6 +43,14 @@ export default async function VerifyIdLayout({
   const session = await getSession();
   const isAuthenticated = !!session;
 
+  // spec: web-theme — "Theme Toggle Control" is required on this public
+  // verify nav too (scenario explicitly names `/verify/[id]`), regardless
+  // of auth state — this page never gates on login (No-Auth Access).
+  const cookieStore = await cookies();
+  const themePreference = parseThemePreference(
+    cookieStore.get(THEME_COOKIE_NAME)?.value,
+  );
+
   return (
     <>
       <header className="sticky top-0 z-10 border-b border-border/60 bg-background/80 backdrop-blur">
@@ -51,31 +62,37 @@ export default async function VerifyIdLayout({
             <Wordmark />
           </Link>
 
-          {isAuthenticated ? (
-            /* Authenticated: show app nav so the user can return to their dashboard */
-            <nav className="flex items-center gap-1.5">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/dtrs">{shellDictionary.nav.dtrs}</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/dtrs/new">{shellDictionary.nav.newCertification}</Link>
-              </Button>
-              <LogoutButton />
-            </nav>
-          ) : (
-            /* Public: landing section links (desktop only) */
-            <nav aria-label="Secciones" className="hidden items-center gap-1 md:flex">
-              {sectionLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          )}
+          <div className="flex items-center gap-2">
+            {isAuthenticated ? (
+              /* Authenticated: show app nav so the user can return to their dashboard */
+              <nav className="flex items-center gap-1.5">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/dtrs">{shellDictionary.nav.dtrs}</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href="/dtrs/new">{shellDictionary.nav.newCertification}</Link>
+                </Button>
+                <ThemeToggle initialPreference={themePreference} />
+                <LogoutButton />
+              </nav>
+            ) : (
+              <>
+                {/* Public: landing section links (desktop only) */}
+                <nav aria-label="Secciones" className="hidden items-center gap-1 md:flex">
+                  {sectionLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+                <ThemeToggle initialPreference={themePreference} />
+              </>
+            )}
+          </div>
         </div>
       </header>
       {children}

@@ -44,6 +44,15 @@ describe("dictionaries/es", () => {
     },
   );
 
+  it("shellDictionary.theme has non-empty groupLabel/light/dark/system keys (spec: web-theme — dictionary-sourced accessible names)", () => {
+    const { theme } = shellDictionary;
+
+    for (const key of ["groupLabel", "light", "dark", "system"] as const) {
+      expect(typeof theme[key]).toBe("string");
+      expect(theme[key].trim().length).toBeGreaterThan(0);
+    }
+  });
+
   it("authDictionary carries the exact spec-grounded error copy (no enumeration, distinct unverified message)", () => {
     expect(authDictionary.login.errorInvalidCredentials).toBe(
       "Email o contraseña incorrectos.",

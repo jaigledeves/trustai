@@ -85,7 +85,7 @@ export function VerificationDemo() {
               "rounded-lg p-4",
               isErrorVerdict(verdict)
                 ? "bg-destructive/10 text-destructive"
-                : "bg-emerald-50 text-emerald-600",
+                : "bg-success/10 text-success",
             )}
           >
             <h3 className="font-semibold">{copy.title}</h3>

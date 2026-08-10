@@ -3,9 +3,11 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 // Mock next/headers so getSession() works in the Vitest environment.
-// Default: no cookie → unauthenticated (public nav).
+// Default: no cookie → unauthenticated (public nav), "system" theme.
 vi.mock("next/headers", () => ({
-  cookies: vi.fn(async () => ({ get: () => undefined })),
+  cookies: vi.fn(async () => ({
+    get: (name: string) => (name === "theme" ? { value: "system" } : undefined),
+  })),
 }));
 
 // LogoutButton is a client island; stub it so the async Server Component
@@ -58,5 +60,22 @@ describe("verify/[id] layout (spec: web-visual-coherence — Decision 7, persist
       screen.getByRole("link", { name: /certificar/i }),
     ).toBeInTheDocument();
     expect(screen.getByText("CHILD_CONTENT")).toBeInTheDocument();
+  });
+
+  it("mounts ThemeToggle for an unauthenticated visitor too (spec: web-theme — toggle present on /verify/[id])", async () => {
+    render(await VerifyIdLayout({ children: <p>CHILD_CONTENT</p> }));
+
+    expect(screen.getByRole("group", { name: "Tema" })).toBeInTheDocument();
+  });
+
+  it("mounts ThemeToggle for an authenticated visitor too (spec: web-theme — toggle present regardless of auth state)", async () => {
+    vi.mocked(cookies).mockResolvedValueOnce({
+      get: (name: string) =>
+        name === "theme" ? { value: "system" } : { value: "test-token" },
+    } as never);
+
+    render(await VerifyIdLayout({ children: <p>CHILD_CONTENT</p> }));
+
+    expect(screen.getByRole("group", { name: "Tema" })).toBeInTheDocument();
   });
 });
