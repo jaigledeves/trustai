@@ -557,7 +557,7 @@
   <!-- SLIDE — DTR-CORE -->
   <section class="slide dense">
     <span class="kicker">Paquete central</span>
-    <h2><code style="font-size:0.85em">@trustai/dtr-core</code></h2>
+    <h2><code style="font-size:0.85em">dtr-core</code></h2>
     <p class="head-lead">TypeScript puro — sin framework, sin base de datos, sin IA. La única fuente de verdad del protocolo DTR, reproducible en cualquier lenguaje.</p>
     <div class="grid2">
       <div>
@@ -706,7 +706,7 @@ provenance: {
           <tbody>
             <tr><td><span class="em">Web</span></td><td class="mut">Next.js 16 · App Router · Tailwind v4</td></tr>
             <tr><td><span class="em">API</span></td><td class="mut">NestJS · pg-boss · Prisma</td></tr>
-            <tr><td><span class="em">Core</span></td><td class="mut">@trustai/dtr-core (TS puro)</td></tr>
+            <tr><td><span class="em">Core</span></td><td class="mut">dtr-core (TS puro)</td></tr>
             <tr><td><span class="em">Base de datos</span></td><td class="mut">PostgreSQL (datos + cola)</td></tr>
             <tr><td><span class="em">Almacenamiento</span></td><td class="mut">Cloudflare R2 · AES-256-GCM</td></tr>
             <tr><td><span class="em">Blockchain</span></td><td class="mut">Base Sepolia · viem</td></tr>
@@ -750,29 +750,6 @@ provenance: {
     <div class="grid2" style="margin-top:16px">
       <div class="callout"><b>Contrato (Foundry):</b> unit + fuzz tests sobre <code>anchor()</code> y <code>isAnchored()</code>. Superficie de ataque mínima verificada.</div>
       <div class="callout"><b>dtr-core:</b> casos límite cubiertos — orden de claves, nulos, normalización numérica y re-hashing idempotente bajo cualquier permutación.</div>
-    </div>
-  </section>
-
-  <!-- SLIDE 4 — DEMO -->
-  <section class="slide">
-    <div class="cols">
-      <div class="stack">
-        <span class="kicker"><span class="dot"></span>Demo en vivo</span>
-        <h2>Escanea y <span class="green">compruébalo</span> tú mismo</h2>
-        <p class="lead">No hace falta creer en la diapositiva. Abre la verificación pública, sube el documento y observa cómo la huella coincide con la registrada en blockchain.</p>
-        <div class="steps" style="margin-top:8px">
-          <div class="fragment step"><span class="num">1</span><div><div class="st">Escanea el QR</div><div class="ss">Abre la página de verificación de Ancrux.</div></div></div>
-          <div class="fragment step"><span class="num">2</span><div><div class="st">Vuelve a calcular la huella</div><div class="ss">Tu navegador recalcula el SHA-256 localmente.</div></div></div>
-          <div class="fragment step"><span class="num">3</span><div><div class="st">Compara con la cadena</div><div class="ss"><span class="green">Coinciden → auténtico.</span> Cambia un byte → falla.</div></div></div>
-        </div>
-      </div>
-      <div class="stack" style="align-items:center">
-        <div class="qrcard fragment">
-          <svg class="qr" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 37" shape-rendering="crispEdges"><path fill="none" d="M0 0h37v37H0z"/><path stroke="currentColor" d="M2 2.5h7m2 0h1m1 0h2m3 0h1m1 0h4m1 0h1m2 0h7M2 3.5h1m5 0h1m2 0h2m1 0h1m2 0h1m2 0h1m1 0h2m2 0h1m1 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m4 0h1m1 0h2m3 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m1 0h1m1 0h2m3 0h1m2 0h2m2 0h1m1 0h1m1 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m1 0h3m3 0h2m1 0h1m2 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m1 0h1m1 0h2m1 0h1m4 0h2m1 0h1m4 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M10 9.5h1m2 0h2m1 0h1m1 0h1m2 0h6M2 10.5h1m1 0h5m5 0h3m1 0h2m1 0h1m2 0h1m3 0h5M5 11.5h1m4 0h2m1 0h3m2 0h2m1 0h3m1 0h1m2 0h2m1 0h2m1 0h1M2 12.5h1m2 0h2m1 0h1m1 0h1m2 0h7m2 0h1m4 0h1m2 0h1m1 0h2M3 13.5h1m2 0h2m4 0h4m1 0h4m1 0h6m2 0h3m1 0h1M2 14.5h1m4 0h4m2 0h2m1 0h3m2 0h2m1 0h1m1 0h2m1 0h3m1 0h2M3 15.5h1m2 0h1m4 0h2m4 0h1m2 0h1m4 0h1m1 0h2m3 0h3M5 16.5h2m1 0h3m1 0h1m1 0h2m1 0h2m1 0h1m1 0h2m3 0h7M3 17.5h3m1 0h1m3 0h1m2 0h2m1 0h1m2 0h1m2 0h2m1 0h3m2 0h2M2 18.5h1m3 0h1m1 0h1m1 0h1m2 0h5m1 0h1m5 0h1m1 0h1m1 0h3m2 0h1M2 19.5h1m2 0h1m1 0h1m1 0h2m1 0h4m2 0h1m2 0h1m3 0h1m1 0h3m1 0h2m1 0h1M8 20.5h1m3 0h3m2 0h1m2 0h1m2 0h1m5 0h2m1 0h1M3 21.5h1m5 0h5m1 0h2m1 0h1m2 0h1m1 0h2m3 0h5M2 22.5h2m3 0h5m1 0h1m3 0h1m2 0h1m3 0h1m1 0h2m2 0h2m1 0h2M2 23.5h3m1 0h2m3 0h1m1 0h1m2 0h3m3 0h1m2 0h1m2 0h1m3 0h1m1 0h1M2 24.5h1m2 0h1m2 0h1m1 0h1m2 0h4m3 0h2m1 0h2m1 0h2m2 0h1m1 0h2M2 25.5h1m1 0h1m2 0h1m1 0h2m1 0h2m1 0h2m1 0h1m1 0h6m4 0h4M2 26.5h1m1 0h2m2 0h1m1 0h2m1 0h1m2 0h1m1 0h2m1 0h1m2 0h1m1 0h6M10 27.5h1m1 0h1m5 0h5m1 0h3m3 0h1m1 0h1m1 0h1M2 28.5h7m3 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h3m1 0h1m1 0h1m1 0h2M2 29.5h1m5 0h1m1 0h3m1 0h1m3 0h3m1 0h5m3 0h4M2 30.5h1m1 0h3m1 0h1m1 0h2m1 0h2m1 0h1m1 0h1m5 0h1m1 0h6m1 0h1M2 31.5h1m1 0h3m1 0h1m1 0h3m1 0h4m2 0h1m2 0h1m3 0h1m2 0h1m1 0h3M2 32.5h1m1 0h3m1 0h1m1 0h1m3 0h1m2 0h2m1 0h1m3 0h1m1 0h4m2 0h1M2 33.5h1m5 0h1m3 0h1m1 0h1m1 0h2m3 0h4m3 0h1m1 0h1m1 0h1M2 34.5h7m1 0h1m4 0h1m1 0h1m1 0h3m2 0h4m1 0h1m3 0h1"/></svg>
-          <div class="cap">Verificación pública de Ancrux</div>
-          <div class="url">ancrux.vercel.app/verify/&lt;id&gt;</div>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -830,6 +807,29 @@ provenance: {
     </div>
   </section>
 
+  <!-- SLIDE 4 — DEMO -->
+  <section class="slide">
+    <div class="cols">
+      <div class="stack">
+        <span class="kicker"><span class="dot"></span>Demo en vivo</span>
+        <h2>Escanea y <span class="green">compruébalo</span> tú mismo</h2>
+        <p class="lead">No hace falta creer en la diapositiva. Abre la verificación pública, sube el documento y observa cómo la huella coincide con la registrada en blockchain.</p>
+        <div class="steps" style="margin-top:8px">
+          <div class="fragment step"><span class="num">1</span><div><div class="st">Escanea el QR</div><div class="ss">Abre la página de verificación de Ancrux.</div></div></div>
+          <div class="fragment step"><span class="num">2</span><div><div class="st">Vuelve a calcular la huella</div><div class="ss">Tu navegador recalcula el SHA-256 localmente.</div></div></div>
+          <div class="fragment step"><span class="num">3</span><div><div class="st">Compara con la cadena</div><div class="ss"><span class="green">Coinciden → auténtico.</span> Cambia un byte → falla.</div></div></div>
+        </div>
+      </div>
+      <div class="stack" style="align-items:center">
+        <div class="qrcard fragment">
+          <svg class="qr" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 37" shape-rendering="crispEdges"><path fill="none" d="M0 0h37v37H0z"/><path stroke="currentColor" d="M2 2.5h7m2 0h1m1 0h2m3 0h1m1 0h4m1 0h1m2 0h7M2 3.5h1m5 0h1m2 0h2m1 0h1m2 0h1m2 0h1m1 0h2m2 0h1m1 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m4 0h1m1 0h2m3 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m1 0h1m1 0h2m3 0h1m2 0h2m2 0h1m1 0h1m1 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m1 0h3m3 0h2m1 0h1m2 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m1 0h1m1 0h2m1 0h1m4 0h2m1 0h1m4 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M10 9.5h1m2 0h2m1 0h1m1 0h1m2 0h6M2 10.5h1m1 0h5m5 0h3m1 0h2m1 0h1m2 0h1m3 0h5M5 11.5h1m4 0h2m1 0h3m2 0h2m1 0h3m1 0h1m2 0h2m1 0h2m1 0h1M2 12.5h1m2 0h2m1 0h1m1 0h1m2 0h7m2 0h1m4 0h1m2 0h1m1 0h2M3 13.5h1m2 0h2m4 0h4m1 0h4m1 0h6m2 0h3m1 0h1M2 14.5h1m4 0h4m2 0h2m1 0h3m2 0h2m1 0h1m1 0h2m1 0h3m1 0h2M3 15.5h1m2 0h1m4 0h2m4 0h1m2 0h1m4 0h1m1 0h2m3 0h3M5 16.5h2m1 0h3m1 0h1m1 0h2m1 0h2m1 0h1m1 0h2m3 0h7M3 17.5h3m1 0h1m3 0h1m2 0h2m1 0h1m2 0h1m2 0h2m1 0h3m2 0h2M2 18.5h1m3 0h1m1 0h1m1 0h1m2 0h5m1 0h1m5 0h1m1 0h1m1 0h3m2 0h1M2 19.5h1m2 0h1m1 0h1m1 0h2m1 0h4m2 0h1m2 0h1m3 0h1m1 0h3m1 0h2m1 0h1M8 20.5h1m3 0h3m2 0h1m2 0h1m2 0h1m5 0h2m1 0h1M3 21.5h1m5 0h5m1 0h2m1 0h1m2 0h1m1 0h2m3 0h5M2 22.5h2m3 0h5m1 0h1m3 0h1m2 0h1m3 0h1m1 0h2m2 0h2m1 0h2M2 23.5h3m1 0h2m3 0h1m1 0h1m2 0h3m3 0h1m2 0h1m2 0h1m3 0h1m1 0h1M2 24.5h1m2 0h1m2 0h1m1 0h1m2 0h4m3 0h2m1 0h2m1 0h2m2 0h1m1 0h2M2 25.5h1m1 0h1m2 0h1m1 0h2m1 0h2m1 0h2m1 0h1m1 0h6m4 0h4M2 26.5h1m1 0h2m2 0h1m1 0h2m1 0h1m2 0h1m1 0h2m1 0h1m2 0h1m1 0h6M10 27.5h1m1 0h1m5 0h5m1 0h3m3 0h1m1 0h1m1 0h1M2 28.5h7m3 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h3m1 0h1m1 0h1m1 0h2M2 29.5h1m5 0h1m1 0h3m1 0h1m3 0h3m1 0h5m3 0h4M2 30.5h1m1 0h3m1 0h1m1 0h2m1 0h2m1 0h1m1 0h1m5 0h1m1 0h6m1 0h1M2 31.5h1m1 0h3m1 0h1m1 0h3m1 0h4m2 0h1m2 0h1m3 0h1m2 0h1m1 0h3M2 32.5h1m1 0h3m1 0h1m1 0h1m3 0h1m2 0h2m1 0h1m3 0h1m1 0h4m2 0h1M2 33.5h1m5 0h1m3 0h1m1 0h1m1 0h2m3 0h4m3 0h1m1 0h1m1 0h1M2 34.5h7m1 0h1m4 0h1m1 0h1m1 0h3m2 0h4m1 0h1m3 0h1"/></svg>
+          <div class="cap">Verificación pública de Ancrux</div>
+          <div class="url">ancrux.vercel.app/verify/&lt;id&gt;</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- SLIDE — PRÓXIMOS PASOS -->
   <section class="slide dense">
     <span class="kicker">Roadmap</span>
@@ -880,7 +880,7 @@ provenance: {
 <div class="chrome">
   <div class="nav-hint">Usa <kbd>←</kbd> <kbd>→</kbd> o <kbd>espacio</kbd></div>
   <div class="dots" id="dots"></div>
-  <div class="counter" id="counter">01 / 04</div>
+  <div class="counter" id="counter">01 / 16</div>
 </div>
 
 <script>
