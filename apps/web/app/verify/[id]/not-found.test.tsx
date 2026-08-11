@@ -36,7 +36,7 @@ describe("verify/[id] not-found fallback (spec: web-visual-coherence — Decisio
     expect(recoveryLink).toHaveAttribute("href", "/");
 
     // Layout's persistent wordmark also points home (public/unauthenticated).
-    const brandLinks = screen.getAllByRole("link", { name: /trust\s*ai/i });
+    const brandLinks = screen.getAllByRole("link", { name: /ancrux/i });
     expect(brandLinks.length).toBeGreaterThanOrEqual(1);
     for (const link of brandLinks) {
       expect(link).toHaveAttribute("href", "/");

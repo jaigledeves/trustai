@@ -55,7 +55,7 @@ export const verifyDictionary = {
     disclaimerFullLabel: "Ver nota legal completa",
     // PENDING legal sign-off before mainnet/production — see ADR-009
     disclaimer:
-      "Esta verificación no constituye una firma electrónica cualificada según el Reglamento eIDAS (UE 910/2014). TrustAI certifica únicamente la integridad del documento y los metadatos de procesamiento registrados en el momento de la certificación.",
+      "Esta verificación no constituye una firma electrónica cualificada según el Reglamento eIDAS (UE 910/2014). Ancrux certifica únicamente la integridad del documento y los metadatos de procesamiento registrados en el momento de la certificación.",
     // Always-visible, non-badge honesty disclosure (design.md decision #8 —
     // "Testnet honesty on verify"): the network name moves out of the
     // prominent `page.badge` per spec, but pilot/testnet status must not go
@@ -66,7 +66,7 @@ export const verifyDictionary = {
   upload: {
     panelTitle: "Verifícalo tú mismo",
     panelDescription:
-      "Sube tu copia del archivo. TrustAI la compara con el registro certificado y, en paralelo, tu navegador recalcula la huella de forma independiente del servidor.",
+      "Sube tu copia del archivo. Ancrux la compara con el registro certificado y, en paralelo, tu navegador recalcula la huella de forma independiente del servidor.",
     fileLabel: "Elige el archivo a verificar",
     dropzoneHint: "o arrástralo aquí",
     fileSizeLabel: "Tamaño: {size}",
@@ -113,6 +113,6 @@ export const verifyDictionary = {
   notFound: {
     title: "No encontramos este registro de verificación.",
     description: "El enlace puede ser incorrecto o el registro ya no está disponible.",
-    homeLinkLabel: "Ir a TrustAI",
+    homeLinkLabel: "Ir a Ancrux",
   },
 } as const;

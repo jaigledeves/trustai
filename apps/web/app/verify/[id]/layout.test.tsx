@@ -25,7 +25,7 @@ describe("verify/[id] layout (spec: web-visual-coherence — Decision 7, persist
     render(await VerifyIdLayout({ children: <p>CHILD_CONTENT</p> }));
 
     // Wordmark links back to the landing.
-    expect(screen.getByRole("link", { name: /trust\s*ai/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /ancr\s*ux/i })).toHaveAttribute(
       "href",
       "/",
     );
@@ -45,7 +45,7 @@ describe("verify/[id] layout (spec: web-visual-coherence — Decision 7, persist
     render(await VerifyIdLayout({ children: <p>CHILD_CONTENT</p> }));
 
     // Wordmark now links to the authenticated dashboard.
-    expect(screen.getByRole("link", { name: /trust\s*ai/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /ancr\s*ux/i })).toHaveAttribute(
       "href",
       "/dtrs",
     );

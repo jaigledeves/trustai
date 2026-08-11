@@ -11,7 +11,7 @@ describe("AuthLayout (spec: web-visual-coherence — Auth Surface Cohesion)", ()
     );
 
     expect(screen.getByText("Contenido del formulario")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /trust\s*ai/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /ancr\s*ux/i })).toHaveAttribute(
       "href",
       "/",
     );
@@ -25,7 +25,7 @@ describe("AuthLayout (spec: web-visual-coherence — Auth Surface Cohesion)", ()
       </AuthLayout>,
     );
 
-    expect(screen.getAllByRole("link", { name: /trust\s*ai/i })).toHaveLength(
+    expect(screen.getAllByRole("link", { name: /ancr\s*ux/i })).toHaveLength(
       1,
     );
     expect(
