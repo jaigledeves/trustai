@@ -7,4 +7,4 @@
  */
 export const EIDAS_DISCLAIMER =
   "This verification does not constitute a qualified electronic signature under eIDAS; " +
-  "it certifies document integrity and authorship metadata recorded by TrustAI.";
+  "it certifies document integrity and authorship metadata recorded by Ancrux.";

@@ -15,7 +15,7 @@ interface VerifyPageProps {
 export async function generateMetadata({ params }: VerifyPageProps): Promise<Metadata> {
   await params;
   return {
-    title: `${verifyDictionary.page.title} — TrustAI`,
+    title: `${verifyDictionary.page.title} — Ancrux`,
     description: verifyDictionary.page.title,
     openGraph: {
       title: verifyDictionary.page.title,
