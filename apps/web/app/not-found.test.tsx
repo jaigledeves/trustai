@@ -8,6 +8,6 @@ describe("root not-found fallback (spec: web-visual-coherence — Dead record re
     render(<NotFound />);
 
     expect(screen.getByText(shellDictionary.errors.notFound)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /trust\s*ai/i })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: /ancrux/i })).toHaveAttribute("href", "/");
   });
 });

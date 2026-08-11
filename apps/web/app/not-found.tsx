@@ -18,7 +18,7 @@ export default function NotFound() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_-10%,var(--accent),transparent)]"
       />
       <div className="relative flex flex-col items-center gap-4">
-        <Link href="/">
+        <Link href="/" aria-label={shellDictionary.appName}>
           <Wordmark />
         </Link>
         <h1 className="text-2xl font-semibold tracking-tight">

@@ -38,7 +38,7 @@ export const landingDictionary = {
     badge: "Protección permanente y verificable por cualquiera · Gratis durante el piloto",
     title: "Nadie tiene que creerte. Pueden comprobarlo.",
     subtitle:
-      "TrustAI certifica tus documentos para que cualquiera confirme, por su cuenta, que no fueron alterados. Sin depender de tu palabra ni de la nuestra.",
+      "Ancrux certifica tus documentos para que cualquiera confirme, por su cuenta, que no fueron alterados. Sin depender de tu palabra ni de la nuestra.",
     primaryCta: "Certificar mi primer documento",
     secondaryCta: "Ver una verificación",
     ctaMicrocopy: "Gratis · Sin tarjeta · Sin instalar nada",
@@ -124,7 +124,7 @@ export const landingDictionary = {
     badge: "No hace falta confiar. Se comprueba.",
     title: "Cualquiera puede comprobarlo en segundos.",
     description:
-      "Compartes un enlace. Quien lo recibe sube el archivo y TrustAI responde con un veredicto claro sobre su integridad y su anclaje en la blockchain.",
+      "Compartes un enlace. Quien lo recibe sube el archivo y Ancrux responde con un veredicto claro sobre su integridad y su anclaje en la blockchain.",
     verdictGroupLabel: "Selecciona un veredicto de ejemplo",
     recompute: {
       statement:
@@ -136,7 +136,7 @@ export const landingDictionary = {
   useCases: {
     title: "Para cada documento cuya integridad importa",
     subtitle:
-      "Si necesitas demostrar que un archivo no cambió desde que lo registraste, TrustAI lo vuelve comprobable.",
+      "Si necesitas demostrar que un archivo no cambió desde que lo registraste, Ancrux lo vuelve comprobable.",
     items: [
       {
         title: "Contratos y acuerdos",
@@ -176,7 +176,7 @@ export const landingDictionary = {
       {
         title: "Verificación independiente",
         description:
-          "El veredicto se apoya en una huella anclada en una blockchain pública y en un estándar abierto que cualquiera puede revisar. No tienes que confiar en TrustAI: puedes comprobarlo por tu cuenta.",
+          "El veredicto se apoya en una huella anclada en una blockchain pública y en un estándar abierto que cualquiera puede revisar. No tienes que confiar en Ancrux: puedes comprobarlo por tu cuenta.",
       },
       {
         title: "Imposible de falsificar",
@@ -192,7 +192,7 @@ export const landingDictionary = {
   },
   faq: {
     title: "Preguntas frecuentes",
-    subtitle: "Todo lo que necesitas saber antes de confiar en TrustAI.",
+    subtitle: "Todo lo que necesitas saber antes de confiar en Ancrux.",
     items: [
       {
         question: "¿Se publica mi documento en la blockchain?",
@@ -202,17 +202,17 @@ export const landingDictionary = {
       {
         question: "¿Qué pasa si alguien modifica el archivo?",
         answer:
-          "Al verificar, TrustAI detecta que ya no corresponde al registro certificado y devuelve el veredicto 'No coincide'. Cualquier manipulación queda en evidencia.",
+          "Al verificar, Ancrux detecta que ya no corresponde al registro certificado y devuelve el veredicto 'No coincide'. Cualquier manipulación queda en evidencia.",
       },
       {
         question: "¿Necesito saber de blockchain para usarlo?",
         answer:
-          "No. Subes tu documento y TrustAI se encarga del resto. Verificar es tan simple como abrir un enlace.",
+          "No. Subes tu documento y Ancrux se encarga del resto. Verificar es tan simple como abrir un enlace.",
       },
       {
         question: "¿Tiene validez legal?",
         answer:
-          "TrustAI aporta evidencia técnica de integridad y de la fecha de registro. Su peso legal depende de la jurisdicción y del caso; es un respaldo, no un reemplazo del asesoramiento legal.",
+          "Ancrux aporta evidencia técnica de integridad y de la fecha de registro. Su peso legal depende de la jurisdicción y del caso; es un respaldo, no un reemplazo del asesoramiento legal.",
       },
       {
         question: "¿Por qué usan Base Sepolia?",
@@ -234,6 +234,6 @@ export const landingDictionary = {
   footer: {
     tagline: "Certificación inteligente de activos digitales.",
     contractLabel: "Contrato AnchorRegistry en Base Sepolia",
-    copyright: "© 2026 TrustAI",
+    copyright: "© 2026 Ancrux",
   },
 } as const;

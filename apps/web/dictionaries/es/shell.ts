@@ -5,7 +5,7 @@
  * an inline JSX literal.
  */
 export const shellDictionary = {
-  appName: "TrustAI",
+  appName: "Ancrux",
   meta: {
     description:
       "Certifica tus documentos y demuestra, con evidencia pública y comprobable, que no fueron alterados.",

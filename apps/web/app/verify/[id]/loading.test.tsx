@@ -18,7 +18,7 @@ describe("verify/[id] loading fallback (spec: web-visual-coherence — Decision 
     );
 
     expect(
-      screen.getByRole("link", { name: /trust\s*ai/i }),
+      screen.getByRole("link", { name: /ancr\s*ux/i }),
     ).toBeInTheDocument();
     expect(
       container.querySelectorAll('[data-slot="skeleton"]').length,
