@@ -1,919 +1,991 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TrustAI — Presentación TFM</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
-  <style>
-    /* ------------------------------------------------------------------ */
-    /* TrustAI brand theme — mirrors globals.css dark mode palette         */
-    /* primary:  oklch(0.62 0.19 264) ≈ #6366F1                           */
-    /* bg dark:  oklch(0.145 0 0)     ≈ #121218                           */
-    /* ------------------------------------------------------------------ */
-    :root {
-      --primary:      #6366F1;
-      --primary-dark: #4338CA;
-      --primary-dim:  rgba(99, 102, 241, 0.12);
-      --background:   #0f0f1a;
-      --card:         #1a1a2e;
-      --card-border:  rgba(255, 255, 255, 0.08);
-      --foreground:   #f8fafc;
-      --muted:        #a5b4fc;
-      --muted-2:      #64748b;
-      --accent:       #818cf8;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ancrux — Presentación</title>
+<style>
+  :root {
+    --bg: #0a1120;
+    --bg-2: #0d1a33;
+    --panel: #101d38;
+    --panel-2: #13233f;
+    --fg: #e8eefb;
+    --muted: #93a4c0;
+    --primary: #4d84f5;
+    --primary-soft: #7aa6ff;
+    --success: #34d399;
+    --success-dim: rgba(52, 211, 153, 0.14);
+    --border: rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
 
-    .reveal-viewport { background: var(--background); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    .reveal {
-      font-family: 'Inter', system-ui, sans-serif;
-      color: var(--foreground);
-      font-size: 22px;
-    }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    overflow: hidden;
+  }
 
-    /* Headings */
-    .reveal h1, .reveal h2, .reveal h3 {
-      font-family: 'Inter', system-ui, sans-serif;
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      color: var(--foreground);
-      text-transform: none;
-      margin: 0 0 0.4em;
-    }
-    .reveal h1 { font-size: 2.2em; line-height: 1.1; }
-    .reveal h2 { font-size: 1.5em; line-height: 1.2; }
-    .reveal h3 { font-size: 0.9em; color: var(--muted); font-weight: 500; margin: 0 0 0.6em; }
+  #deck {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+  }
 
-    .reveal p { margin: 0.3em 0; }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6vh 8vw;
+    opacity: 0;
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    transform: translateY(18px);
+    background:
+      radial-gradient(1200px 700px at 78% -8%, rgba(77, 132, 245, 0.16), transparent 60%),
+      radial-gradient(900px 600px at 5% 108%, rgba(52, 211, 153, 0.08), transparent 55%),
+      linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 100%);
+  }
+  .slide.active {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+  }
 
-    /* Slide layout */
-    .reveal .slides section {
-      text-align: left;
-      padding: 0 1.8em;
-      height: 100%;
-      box-sizing: border-box;
-    }
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--primary-soft);
+    background: rgba(77, 132, 245, 0.1);
+    border: 1px solid rgba(77, 132, 245, 0.28);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .kicker .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 0 rgba(52,211,153,.6);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(52,211,153,.5); }
+    70% { box-shadow: 0 0 0 8px rgba(52,211,153,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+  }
 
-    /* Helpers */
-    .center { text-align: center; }
-    .accent { color: var(--primary); }
-    .dim    { color: var(--muted-2); }
+  h1 { font-size: clamp(2.6rem, 6vw, 5rem); line-height: 1.02; letter-spacing: -0.03em; font-weight: 800; }
+  h2 { font-size: clamp(1.9rem, 3.6vw, 3rem); line-height: 1.08; letter-spacing: -0.02em; font-weight: 750; }
+  .lead { font-size: clamp(1.05rem, 1.5vw, 1.35rem); color: var(--muted); line-height: 1.55; max-width: 46ch; }
+  .accent { color: var(--primary-soft); }
+  .green { color: var(--success); }
 
-    /* Badge (slide category label) */
-    .badge {
-      display: inline-block;
-      padding: 0.18em 0.7em;
-      border-radius: 999px;
-      background: var(--primary-dim);
-      border: 1px solid rgba(99, 102, 241, 0.35);
-      color: var(--accent);
-      font-size: 0.55em;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      vertical-align: middle;
-      margin-bottom: 0.3em;
-    }
+  .brand {
+    display: inline-flex; align-items: center; gap: 12px; margin-bottom: 28px; align-self: flex-start;
+  }
+  .brand .mark {
+    width: 40px; height: 40px; border-radius: 11px;
+    background: linear-gradient(140deg, var(--primary), #2f57c9);
+    display: grid; place-items: center;
+    box-shadow: 0 8px 30px rgba(77,132,245,.4);
+  }
+  .brand .mark svg { width: 22px; height: 22px; color: #fff; }
+  .brand .name { font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; }
+  .brand .name b { color: var(--primary-soft); }
 
-    /* Card */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 0.65rem;
-      padding: 0.75em 1em;
-      margin: 0.3em 0;
-    }
-    .card.accent-border { border-color: rgba(99, 102, 241, 0.45); }
-    .card.green-border  { border-color: rgba(34, 197, 94, 0.45); }
+  /* ---- Hash motif ---- */
+  .hashwrap {
+    margin-top: 34px;
+    display: flex; flex-direction: column; gap: 14px;
+    max-width: 720px;
+  }
+  .hashrow {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .hashrow .ico {
+    width: 34px; height: 34px; flex: 0 0 34px; border-radius: 9px;
+    display: grid; place-items: center;
+    background: rgba(77,132,245,.14); color: var(--primary-soft);
+  }
+  .hashrow .ico svg { width: 18px; height: 18px; }
+  .hashrow .txt { min-width: 0; }
+  .hashrow .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 4px; }
+  .hashrow .val {
+    font-family: var(--mono); font-size: clamp(0.72rem, 1.05vw, 0.95rem);
+    color: var(--fg); word-break: break-all; letter-spacing: 0.02em;
+  }
+  .hashrow.matched { border-color: rgba(52,211,153,.45); background: linear-gradient(90deg, var(--success-dim), var(--panel) 60%); }
+  .hashrow .status {
+    margin-left: auto; flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px;
+    font-size: 0.8rem; font-weight: 650; color: var(--muted);
+  }
+  .hashrow.matched .status { color: var(--success); }
+  .hashrow .status svg { width: 16px; height: 16px; }
+  .connector {
+    margin-left: 34px; width: 2px; height: 10px;
+    background: linear-gradient(var(--border-strong), transparent);
+  }
 
-    /* Grids */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8em; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.7em; }
+  /* ---- Fragments ---- */
+  .fragment { opacity: 0; transform: translateY(10px); transition: opacity .4s ease, transform .4s ease; }
+  .fragment.visible { opacity: 1; transform: translateY(0); }
 
-    /* Flow diagram */
-    .flow {
-      display: flex;
-      align-items: center;
-      gap: 0.35em;
-      flex-wrap: wrap;
-      font-size: 0.65em;
-    }
-    .flow-step {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 0.45rem;
-      padding: 0.45em 0.7em;
-      text-align: center;
-      min-width: 80px;
-      line-height: 1.3;
-    }
-    .flow-step.hl {
-      border-color: rgba(99, 102, 241, 0.5);
-      background: var(--primary-dim);
-    }
-    .flow-step.ok {
-      border-color: rgba(34, 197, 94, 0.5);
-      background: rgba(34, 197, 94, 0.08);
-      color: #86efac;
-    }
-    .flow-arrow { color: var(--muted-2); font-size: 1.1em; }
+  /* ---- Two column ---- */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 5vw; align-items: center; width: 100%; }
+  .stack { display: flex; flex-direction: column; gap: 20px; }
 
-    /* Inline code */
-    .reveal code {
-      font-family: 'JetBrains Mono', monospace;
-      background: var(--primary-dim);
-      border-radius: 0.25em;
-      padding: 0.1em 0.35em;
-      color: var(--accent);
-      font-size: 0.82em;
-    }
+  /* ---- DTR anatomy card ---- */
+  .dtr {
+    background: linear-gradient(160deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--border-strong);
+    border-radius: 20px; padding: 26px; box-shadow: 0 30px 80px rgba(0,0,0,.4);
+  }
+  .dtr .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .dtr .head .t { font-size: 0.72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .badge-ok {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 650;
+    color: var(--success); background: var(--success-dim); border: 1px solid rgba(52,211,153,.35);
+    padding: 5px 11px; border-radius: 999px;
+  }
+  .badge-ok svg { width: 13px; height: 13px; }
+  .field { padding: 13px 0; border-top: 1px solid var(--border); }
+  .field:first-of-type { border-top: none; }
+  .field .k { font-size: 0.68rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 5px; }
+  .field .v { font-size: 0.95rem; }
+  .field .v.mono { font-family: var(--mono); font-size: 0.8rem; color: var(--primary-soft); word-break: break-all; }
 
-    /* Code block */
-    .reveal pre {
-      background: #09090f;
-      border: 1px solid var(--card-border);
-      border-radius: 0.5em;
-      font-size: 0.5em;
-      margin: 0.4em 0;
-      box-shadow: none;
-      width: 100%;
-    }
-    .reveal pre code {
-      background: transparent;
-      padding: 0.9em 1.1em;
-      color: #e2e8f0;
-      font-size: 1em;
-      line-height: 1.55;
-      max-height: 280px;
-      overflow: auto;
-    }
+  /* ---- Architecture layers ---- */
+  .arch { display: flex; flex-direction: column; gap: 0; width: 100%; max-width: 560px; }
+  .layer {
+    position: relative; display: flex; align-items: center; gap: 16px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .layer + .layer { margin-top: 30px; }
+  .layer + .layer::before {
+    content: ""; position: absolute; top: -26px; left: 33px; width: 2px; height: 22px;
+    background: linear-gradient(var(--primary), rgba(77,132,245,.2));
+  }
+  .layer + .layer::after {
+    content: ""; position: absolute; top: -10px; left: 29px; width: 0; height: 0;
+    border-left: 5px solid transparent; border-right: 5px solid transparent;
+    border-top: 6px solid var(--primary);
+  }
+  .layer .n {
+    width: 34px; height: 34px; flex: 0 0 34px; border-radius: 9px; display: grid; place-items: center;
+    background: rgba(77,132,245,.14); color: var(--primary-soft);
+  }
+  .layer .n svg { width: 18px; height: 18px; }
+  .layer .body .lt { font-weight: 650; font-size: 0.98rem; }
+  .layer .body .ls { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+  .layer.anchor { border-color: rgba(52,211,153,.4); background: linear-gradient(90deg, var(--success-dim), var(--panel) 70%); }
+  .layer.anchor .n { background: rgba(52,211,153,.16); color: var(--success); }
 
-    /* Lists */
-    .reveal ul {
-      margin-left: 0;
-      list-style: none;
-      padding: 0;
-    }
-    .reveal ul li {
-      margin: 0.25em 0;
-      font-size: 0.78em;
-      padding-left: 1.2em;
-      position: relative;
-    }
-    .reveal ul li::before {
-      content: '▸';
-      color: var(--primary);
-      position: absolute;
-      left: 0;
-    }
+  /* ---- Demo / QR ---- */
+  .qrcard {
+    background: #fff; border-radius: 20px; padding: 22px; width: 300px; align-self: center;
+    box-shadow: 0 30px 80px rgba(0,0,0,.45); text-align: center;
+  }
+  .qrcard .qr { width: 240px; height: 240px; color: #0b1220; display: block; margin: 0 auto; }
+  .qrcard .cap { margin-top: 14px; font-size: 0.8rem; color: #334; font-weight: 600; }
+  .qrcard .url { font-family: var(--mono); font-size: 0.7rem; color: #6b7a90; margin-top: 4px; word-break: break-all; }
 
-    /* Big stat number */
-    .stat {
-      font-size: 2.4em;
-      font-weight: 800;
-      color: var(--primary);
-      line-height: 1;
-      letter-spacing: -0.03em;
-    }
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+  .step { display: flex; gap: 14px; align-items: flex-start; }
+  .step .num {
+    width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%; display: grid; place-items: center;
+    font-weight: 700; font-size: 0.85rem; background: rgba(77,132,245,.16); color: var(--primary-soft);
+    border: 1px solid rgba(77,132,245,.3);
+  }
+  .step .st { font-weight: 600; }
+  .step .ss { font-size: 0.85rem; color: var(--muted); margin-top: 2px; line-height: 1.45; }
 
-    /* Divider */
-    hr {
-      border: none;
-      border-top: 1px solid var(--card-border);
-      margin: 0.7em 0;
-    }
+  /* ---- Chrome ---- */
+  .chrome {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px; pointer-events: none;
+  }
+  .dots { display: flex; gap: 9px; pointer-events: auto; }
+  .dots button {
+    width: 9px; height: 9px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--border-strong); transition: all .25s ease; padding: 0;
+  }
+  .dots button.on { background: var(--primary); width: 26px; border-radius: 5px; }
+  .counter { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
+  .nav-hint { font-size: 0.72rem; color: var(--muted); pointer-events: auto; }
+  .nav-hint kbd {
+    font-family: var(--mono); background: var(--panel); border: 1px solid var(--border);
+    border-radius: 5px; padding: 1px 6px; font-size: 0.7rem; color: var(--fg);
+  }
 
-    /* Tag pill */
-    .tag {
-      display: inline-block;
-      padding: 0.12em 0.45em;
-      border-radius: 0.3em;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--card-border);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.6em;
-      margin: 0.1em;
-      color: var(--muted);
-    }
+  .progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--primary), var(--success)); z-index: 50; transition: width .4s ease; }
 
-    /* Highlight box (left-border callout) */
-    .callout {
-      border-left: 3px solid var(--primary);
-      background: var(--primary-dim);
-      padding: 0.5em 0.9em;
-      border-radius: 0 0.45rem 0.45rem 0;
-      font-size: 0.72em;
-      margin: 0.4em 0;
-    }
+  /* ---- Dense content slides ---- */
+  .slide.dense { justify-content: flex-start; padding-top: 7vh; padding-bottom: 11vh; overflow-y: auto; }
+  .slide.dense h2 { margin-top: 14px; }
+  .head-lead { color: var(--muted); font-size: clamp(0.95rem, 1.3vw, 1.15rem); line-height: 1.5; max-width: 68ch; margin-top: 12px; }
 
-    /* Table */
-    .reveal table {
-      border-collapse: collapse;
-      width: 100%;
-      font-size: 0.65em;
-    }
-    .reveal table th {
-      background: var(--primary-dim);
-      color: var(--accent);
-      padding: 0.45em 0.8em;
-      text-align: left;
-      font-weight: 600;
-      border: none;
-    }
-    .reveal table td {
-      padding: 0.38em 0.8em;
-      border-bottom: 1px solid var(--card-border);
-      color: var(--foreground);
-      border-left: none;
-      border-right: none;
-    }
-    .reveal table tr:last-child td { border-bottom: none; }
+  /* ---- Generic grids ---- */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; width: 100%; align-items: start; margin-top: 26px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; margin-top: 26px; }
 
-    /* Reveal.js chrome */
-    .reveal .progress { background: rgba(99, 102, 241, 0.2); height: 3px; }
-    .reveal .progress span { background: var(--primary); }
-    .reveal .controls { color: var(--primary); }
-    .reveal .slide-number {
-      background: transparent;
-      color: var(--muted-2);
-      font-size: 0.55em;
-      font-family: 'JetBrains Mono', monospace;
-    }
+  /* ---- Cards ---- */
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px;
+  }
+  .card + .card { margin-top: 12px; }
+  .card .ct { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 10px; font-weight: 650; }
+  .card .ctitle { font-weight: 700; font-size: 0.98rem; color: var(--primary-soft); margin-bottom: 6px; }
+  .card .ctitle.mono { font-family: var(--mono); font-size: 0.9rem; }
+  .card p.desc { font-size: 0.86rem; color: var(--muted); line-height: 1.5; }
+  .card.bad { border-color: rgba(248, 113, 113, 0.28); }
+  .card.bad .ct { color: #f4a7a7; }
+  .card.good { border-color: rgba(52, 211, 153, 0.4); background: linear-gradient(150deg, var(--success-dim), var(--panel) 70%); }
+  .card.good .ct { color: var(--success); }
+  .card.blue { border-color: rgba(77, 132, 245, 0.4); background: linear-gradient(150deg, rgba(77,132,245,.1), var(--panel) 70%); }
 
-    /* Cover logo box */
-    .logo-box {
-      width: 72px; height: 72px;
-      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-      border-radius: 1.1rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.2em;
-      margin-bottom: 0.5em;
-      box-shadow: 0 0 40px rgba(99, 102, 241, 0.4);
-    }
+  .clist { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+  .clist li { position: relative; padding-left: 24px; font-size: 0.9rem; line-height: 1.45; color: var(--fg); }
+  .clist li::before {
+    content: ""; position: absolute; left: 0; top: 6px; width: 13px; height: 13px;
+    background: no-repeat center / contain;
+  }
+  .clist.ok li::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2334d399' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"); }
+  .clist.no li::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f87171' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E"); }
+  .clist b { color: var(--fg); }
 
-    /* Hexagonal arch boxes */
-    .hex-layer {
-      border: 1px dashed rgba(99,102,241,0.3);
-      border-radius: 0.5rem;
-      padding: 0.4em 0.6em;
-      margin: 0.3em 0;
-      font-size: 0.65em;
-    }
-    .hex-layer-label {
-      font-size: 0.6em;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 0.2em;
-    }
-  </style>
+  /* ---- Callout ---- */
+  .callout {
+    background: rgba(77, 132, 245, 0.08); border: 1px solid rgba(77, 132, 245, 0.22);
+    border-radius: 12px; padding: 14px 16px; font-size: 0.88rem; line-height: 1.5; color: var(--fg); margin-top: 16px;
+  }
+  .callout b { color: var(--primary-soft); }
+  .callout.green { background: var(--success-dim); border-color: rgba(52, 211, 153, 0.3); }
+  .callout.green b { color: var(--success); }
+
+  /* ---- Inline code + code blocks ---- */
+  code { font-family: var(--mono); font-size: 0.86em; color: var(--primary-soft); background: rgba(77,132,245,.1); border: 1px solid rgba(77,132,245,.18); border-radius: 5px; padding: 1px 6px; }
+  pre { background: #081120; border: 1px solid var(--border); border-radius: 13px; padding: 18px; overflow: auto; margin-top: 8px; }
+  pre code { color: #cfe0ff; background: none; border: none; padding: 0; font-size: 0.78rem; line-height: 1.55; white-space: pre; }
+  pre code .k { color: #7aa6ff; }
+  pre code .s { color: #86efac; }
+  pre code .c { color: var(--muted); }
+
+  /* ---- Lifecycle chips ---- */
+  .lifecycle { display: flex; align-items: stretch; gap: 8px; margin-top: 22px; flex-wrap: wrap; }
+  .chip { flex: 1; min-width: 120px; border: 1px solid var(--border); background: var(--panel); border-radius: 12px; padding: 12px 10px; text-align: center; }
+  .chip .cn { font-family: var(--mono); font-weight: 700; font-size: 0.82rem; letter-spacing: 0.06em; }
+  .chip .cs { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+  .chip.s1 .cn { color: var(--muted); }
+  .chip.s2 .cn { color: #fbbf24; }
+  .chip.s3 .cn { color: var(--primary-soft); }
+  .chip.s4 { border-color: rgba(52,211,153,.45); background: var(--success-dim); }
+  .chip.s4 .cn { color: var(--success); }
+  .arrow { align-self: center; color: var(--border-strong); font-size: 1.1rem; }
+
+  /* ---- Flow timeline ---- */
+  .flowline { display: flex; align-items: stretch; gap: 6px; margin-top: 18px; flex-wrap: wrap; }
+  .fstep { flex: 1; min-width: 92px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 8px; text-align: center; }
+  .fstep .fi { width: 30px; height: 30px; margin: 0 auto 8px; border-radius: 8px; display: grid; place-items: center; background: rgba(77,132,245,.13); color: var(--primary-soft); }
+  .fstep .fi svg { width: 16px; height: 16px; }
+  .fstep .ft { font-weight: 650; font-size: 0.82rem; }
+  .fstep .fs { font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
+  .fstep.hl { border-color: rgba(77,132,245,.4); }
+  .fstep.ok { border-color: rgba(52,211,153,.45); background: var(--success-dim); }
+  .fstep.ok .fi { background: rgba(52,211,153,.16); color: var(--success); }
+  .flabel { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 650; margin-top: 22px; }
+
+  /* ---- Stats ---- */
+  .statbig { font-family: var(--sans); font-size: clamp(2.4rem, 4vw, 3.4rem); font-weight: 800; letter-spacing: -0.03em; color: var(--primary-soft); line-height: 1; }
+  .card.center { text-align: center; }
+  .card.center .sl { font-size: 0.8rem; color: var(--fg); margin-top: 10px; font-weight: 600; }
+  .card.center .ssl { font-size: 0.74rem; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+  /* ---- Table ---- */
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin-top: 20px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead th { color: var(--muted); text-transform: uppercase; letter-spacing: 0.09em; font-size: 0.68rem; font-weight: 650; }
+  tbody td:first-child code { font-weight: 700; }
+  td .em { color: var(--fg); font-weight: 600; }
+  td .mut { color: var(--muted); }
+
+  /* ---- Tags ---- */
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .tag { display: inline-block; font-family: var(--mono); font-size: 0.72rem; background: rgba(77,132,245,.1); color: var(--primary-soft); border: 1px solid rgba(77,132,245,.22); border-radius: 7px; padding: 4px 9px; }
+  .tag.core { background: rgba(52,211,153,.12); color: var(--success); border-color: rgba(52,211,153,.3); }
+
+  /* ---- Stack tiers ---- */
+  .tier { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 15px; }
+  .tier + .tier { margin-top: 9px; }
+  .tier .tk { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); flex: 0 0 92px; }
+  .tier.core { border-color: rgba(52,211,153,.4); }
+
+  /* ---- Closing cards ---- */
+  .concl { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; max-width: 860px; }
+  .concl .card p { font-size: 1rem; line-height: 1.5; }
+  .concl .card b { color: var(--primary-soft); }
+  .concl .card.good b { color: var(--success); }
+
+  /* ---- Q&A slide ---- */
+  .qa { align-items: center; text-align: center; }
+  .qa .bigmark {
+    width: 72px; height: 72px; border-radius: 20px; margin-bottom: 26px;
+    background: linear-gradient(140deg, var(--primary), #2f57c9); display: grid; place-items: center;
+    box-shadow: 0 20px 60px rgba(77,132,245,.45);
+  }
+  .qa .bigmark svg { width: 38px; height: 38px; color: #fff; }
+  .qa h1 { max-width: none; }
+  .qa .sub { font-size: 1.4rem; color: var(--muted); margin-top: 10px; font-weight: 600; }
+  .qa .rule { width: 220px; height: 1px; background: var(--border-strong); margin: 26px 0; }
+  .qa .meta { font-size: 0.9rem; color: var(--muted); }
+  .qa .link { font-family: var(--mono); color: var(--primary-soft); margin-top: 6px; font-size: 0.95rem; }
+  .qa .author { font-size: 0.85rem; color: var(--muted); margin-top: 24px; }
+
+  @media (max-width: 820px) {
+    .cols { grid-template-columns: 1fr; gap: 30px; }
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+    .slide { padding: 5vh 7vw 12vh; }
+    .nav-hint { display: none; }
+  }
+</style>
 </head>
 <body>
-<div class="reveal">
-  <div class="slides">
+<div class="progress" id="progress"></div>
+<div id="deck">
 
-    <!-- ===================== SLIDE 1: COVER ===================== -->
-    <section class="center" style="padding-top: 1.2em; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
-      <div class="logo-box">🔐</div>
-      <h1 style="font-size:2.8em; margin-bottom:0.1em;"><span class="accent">Trust</span>AI</h1>
-      <p style="font-size:0.85em; color:var(--muted); margin:0 0 0.6em;">Certificación inteligente de activos digitales</p>
-      <hr style="width:320px; margin:0.6em auto;">
-      <p style="font-size:0.7em; color:var(--muted-2);">
-        La IA comprende el contenido &nbsp;·&nbsp; la blockchain certifica su integridad
-      </p>
-      <p style="font-size:0.62em; color:var(--muted-2); margin-top:1.4em;">
-        Trabajo Fin de Máster &nbsp;·&nbsp; Jose Aguilera &nbsp;·&nbsp; 2026
-      </p>
-    </section>
+  <!-- SLIDE 1 — PORTADA -->
+  <section class="slide active">
+    <div class="brand">
+      <span class="mark">
+        <!-- A3.2: ring · shank · block node (blockchain crux) · arc arms -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="4.9" r="1.9" fill="none"/><line x1="12" y1="6.8" x2="12" y2="21"/><rect x="9.8" y="10.1" width="4.4" height="4.4" rx="1.3" fill="currentColor" stroke="none"/><path d="M6.6 14.6H4.7a7.3 7.3 0 0 0 14.6 0h-1.9" fill="none"/></svg>
+      </span>
+      <span class="name">Ancr<b>ux</b></span>
+    </div>
+    <span class="kicker"><span class="dot"></span>Piloto en vivo · Base Sepolia</span>
+    <h1 style="margin-top:22px;max-width:16ch">Confianza <span class="accent">verificable</span> para documentos digitales</h1>
+    <p class="lead" style="margin-top:22px">Cada archivo recibe una huella única e imposible de falsificar, anclada en blockchain. Cualquiera puede comprobar que es el original — sin confiar en nadie.</p>
 
-    <!-- ===================== SLIDE 2: PROBLEMA ===================== -->
-    <section>
-      <span class="badge">Motivación</span>
-      <h2>El problema</h2>
-      <div class="grid-2" style="margin-top:0.6em;">
+    <div class="hashwrap">
+      <div class="hashrow">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+        <div class="txt">
+          <div class="label">Documento original</div>
+          <div class="val">contrato-marco-v3.pdf · 842 KB</div>
+        </div>
+      </div>
+      <div class="connector"></div>
+      <div class="hashrow" id="motif-hash">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg></span>
+        <div class="txt">
+          <div class="label">Huella digital · SHA-256</div>
+          <div class="val" id="motif-val">…</div>
+        </div>
+        <span class="status" id="motif-status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg>Calculando</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE — PROBLEMA -->
+  <section class="slide dense">
+    <span class="kicker">Motivación</span>
+    <h2>Un documento revisado por IA es <span class="accent">imposible de distinguir</span> de uno falso</h2>
+    <p class="head-lead">Hoy, verificar que una evaluación es auténtica obliga a confiar en la plataforma que la emitió. Si esa plataforma desaparece o miente, la prueba se cae.</p>
+    <div class="grid2">
+      <div class="card bad">
+        <div class="ct">Sin solución</div>
+        <ul class="clist no">
+          <li>Un PDF revisado por IA es <b>indistinguible</b> de uno manipulado</li>
+          <li>No hay forma de comprobar de manera independiente la integridad de una evaluación</li>
+          <li>Toda verificación exige <b>confiar en la plataforma</b> emisora</li>
+        </ul>
+      </div>
+      <div class="card good">
+        <div class="ct">Con Ancrux</div>
+        <ul class="clist ok">
+          <li>Huella canónica del registro anclada <b>en blockchain</b> (inalterable)</li>
+          <li>Verificación pública <b>sin confiar</b> en Ancrux</li>
+          <li>Cualquiera recalcula la huella y la compara por sí mismo</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout"><b>¿Por qué blockchain?</b> El estado de la cadena es auditable por cualquiera y no depende de Ancrux para existir — ni siquiera para sobrevivir.</div>
+  </section>
+
+  <!-- SLIDE 2 — CONCEPTO DTR -->
+  <section class="slide">
+    <div class="cols">
+      <div class="stack">
+        <span class="kicker">El concepto</span>
+        <h2>¿Qué es un <span class="accent">Registro Digital de Confianza</span>?</h2>
+        <p class="lead">Un DTR (Registro Digital de Confianza) es la partida de nacimiento de tu documento: prueba <b class="green">qué</b> se certificó, <b class="green">cuándo</b> y que <b class="green">no cambió ni un carácter</b> desde entonces.</p>
+        <div class="stack" style="gap:12px;margin-top:6px">
+          <div class="fragment step"><span class="num">1</span><div><div class="st">No guarda tu archivo</div><div class="ss">Solo su huella. El contenido nunca se hace público.</div></div></div>
+          <div class="fragment step"><span class="num">2</span><div><div class="st">Es inalterable</div><div class="ss">Vive en blockchain: nadie —ni nosotros— puede editarlo.</div></div></div>
+          <div class="fragment step"><span class="num">3</span><div><div class="st">Es público y verificable</div><div class="ss">Cualquiera comprueba su validez con un enlace o un QR.</div></div></div>
+        </div>
+      </div>
+      <div class="dtr fragment">
+        <div class="head">
+          <span class="t">Registro Digital de Confianza</span>
+          <span class="badge-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Certificado</span>
+        </div>
+        <div class="field"><div class="k">Documento</div><div class="v">contrato-marco-v3.pdf</div></div>
+        <div class="field"><div class="k">Huella SHA-256</div><div class="v mono">e3b0c44298fc1c149afbf4c8996fb924…b855</div></div>
+        <div class="field"><div class="k">Anclado</div><div class="v">10 ago 2026 · 14:32 UTC</div></div>
+        <div class="field"><div class="k">Red / Anclaje</div><div class="v">Base Sepolia · tx 0x7a3f…e21c</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE — FLUJO -->
+  <section class="slide dense">
+    <span class="kicker">Flujo</span>
+    <h2>De la subida a la <span class="accent">prueba pública</span></h2>
+
+    <div class="flabel">UC-01 · Certificación del activo</div>
+    <div class="flowline">
+      <div class="fstep">
+        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span>
+        <div class="ft">Subida</div><div class="fs">AES-256-GCM → R2</div>
+      </div>
+      <div class="fstep hl">
+        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2M15 13v2M9 13v2"/></svg></span>
+        <div class="ft">Revisión IA</div><div class="fs">OpenAI / Stub</div>
+      </div>
+      <div class="fstep">
+        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9M14 17H5M17 17a3 3 0 1 0 0 .01M7 7a3 3 0 1 0 0 .01"/></svg></span>
+        <div class="ft">Canoniza</div><div class="fs">dtr-core</div>
+      </div>
+      <div class="fstep">
+        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg></span>
+        <div class="ft">SHA-256</div><div class="fs">determinista</div>
+      </div>
+      <div class="fstep hl">
+        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V8"/><circle cx="12" cy="5" r="3"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
+        <div class="ft">anchor()</div><div class="fs">worker pg-boss</div>
+      </div>
+      <div class="fstep ok">
+        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <div class="ft">CERTIFIED</div><div class="fs">on-chain</div>
+      </div>
+    </div>
+
+    <div class="flabel">UC-02 · Verificación pública (sin cuenta)</div>
+    <div class="flowline">
+      <div class="fstep">
+        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+        <div class="ft">Activo original</div><div class="fs">cualquier persona</div>
+      </div>
+      <div class="fstep hl">
+        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9M14 17H5M17 17a3 3 0 1 0 0 .01M7 7a3 3 0 1 0 0 .01"/></svg></span>
+        <div class="ft">Re-canoniza</div><div class="fs">mismo algoritmo</div>
+      </div>
+      <div class="fstep hl">
+        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg></span>
+        <div class="ft">Re-calcula huella</div><div class="fs">local, en tu navegador</div>
+      </div>
+      <div class="fstep">
+        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V8"/><circle cx="12" cy="5" r="3"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
+        <div class="ft">isAnchored()</div><div class="fs">consulta on-chain</div>
+      </div>
+      <div class="fstep ok">
+        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3a9 9 0 1 0 9 9"/></svg></span>
+        <div class="ft">VÁLIDO</div><div class="fs">o falla al instante</div>
+      </div>
+    </div>
+
+    <div class="flabel">Ciclo de vida del registro</div>
+    <div class="lifecycle">
+      <div class="chip s1"><div class="cn">DRAFT</div><div class="cs">Subido, en análisis</div></div>
+      <span class="arrow">→</span>
+      <div class="chip s2"><div class="cn">READY</div><div class="cs">Revisado y confirmado</div></div>
+      <span class="arrow">→</span>
+      <div class="chip s3"><div class="cn">ANCHORING</div><div class="cs">TX enviada</div></div>
+      <span class="arrow">→</span>
+      <div class="chip s4"><div class="cn">CERTIFIED</div><div class="cs">Confirmado on-chain</div></div>
+    </div>
+  </section>
+
+  <!-- SLIDE 3 — ARQUITECTURA -->
+  <section class="slide">
+    <div class="cols">
+      <div class="stack">
+        <span class="kicker">Cómo funciona por dentro</span>
+        <h2>De un archivo a una <span class="accent">prueba pública</span></h2>
+        <p class="lead">Cuatro capas independientes. Cada una hace una sola cosa y deja una evidencia que la siguiente no puede falsear.</p>
+        <p class="lead" style="font-size:0.95rem"><b class="green">Ninguna capa necesita tu confianza:</b> el resultado se comprueba de forma matemática, no por reputación.</p>
+      </div>
+      <div class="arch">
+        <div class="layer fragment">
+          <span class="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+          <div class="body"><div class="lt">1 · Documento</div><div class="ls">El usuario sube el archivo de forma privada.</div></div>
+        </div>
+        <div class="layer fragment">
+          <span class="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2M15 13v2M9 13v2"/></svg></span>
+          <div class="body"><div class="lt">2 · Análisis con IA</div><div class="ls">Detecta tipo, idioma y genera un resumen de contexto.</div></div>
+        </div>
+        <div class="layer fragment">
+          <span class="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg></span>
+          <div class="body"><div class="lt">3 · Huella SHA-256</div><div class="ls">Se calcula la huella única del archivo, byte a byte.</div></div>
+        </div>
+        <div class="layer anchor fragment">
+          <span class="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V8"/><circle cx="12" cy="5" r="3"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
+          <div class="body"><div class="lt">4 · Anclaje en blockchain</div><div class="ls">La huella queda pública e inalterable en Base. Verificable para siempre.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE — DTR-CORE -->
+  <section class="slide dense">
+    <span class="kicker">Paquete central</span>
+    <h2><code style="font-size:0.85em">@trustai/dtr-core</code></h2>
+    <p class="head-lead">TypeScript puro — sin framework, sin base de datos, sin IA. La única fuente de verdad del protocolo DTR, reproducible en cualquier lenguaje.</p>
+    <div class="grid2">
+      <div>
         <div class="card">
-          <p style="font-size:0.68em; color:var(--muted-2); margin-bottom:0.3em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Sin solución</p>
-          <ul>
-            <li>Un PDF revisado por IA es <strong>indistinguible</strong> de uno falsificado</li>
-            <li>No existe mecanismo para verificar independientemente la integridad de una evaluación</li>
-            <li>Toda verificación requiere <strong>confiar en la plataforma</strong> emisora</li>
-          </ul>
+          <div class="ctitle mono">canonicalize(value)</div>
+          <p class="desc">Serialización determinista (RFC 8785): claves ordenadas, números normalizados, campos nulos excluidos. El mismo DTR produce la misma cadena en cualquier entorno.</p>
         </div>
-        <div class="card accent-border">
-          <p style="font-size:0.68em; color:var(--primary); margin-bottom:0.3em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Con TrustAI</p>
-          <ul>
-            <li>Hash canónico del registro anclado <strong>on-chain</strong> (inmutable)</li>
-            <li>Verificación pública <strong>sin confiar</strong> en TrustAI</li>
-            <li>Cualquiera puede recalcular el hash y compararlo</li>
-          </ul>
+        <div class="card">
+          <div class="ctitle mono">computeCanonicalHash(record)</div>
+          <p class="desc">SHA-256 sobre la forma canónica → hex de 64 caracteres. Idempotente: mismo DTR, mismo hash, siempre.</p>
+        </div>
+        <div class="card">
+          <div class="ctitle mono">verifyAssetAgainstRecord(record, sha256)</div>
+          <p class="desc">Valida el DTR y compara la huella del archivo. Devuelve <code>asset_verified</code> · <code>asset_mismatch</code> · <code>invalid_record</code>.</p>
         </div>
       </div>
-      <div class="callout" style="margin-top:0.8em;">
-        <strong>¿Por qué blockchain?</strong> El estado de la cadena es auditable públicamente y no depende de TrustAI para existir — ni siquiera para sobrevivir.
-      </div>
-    </section>
-
-    <!-- ===================== SLIDE 3: CONCEPTO DTR ===================== -->
-    <section>
-      <span class="badge">Concepto central</span>
-      <h2>Digital Trust Record <span class="accent">(DTR)</span></h2>
-      <p style="font-size:0.72em; color:var(--muted); margin-bottom:0.7em;">Un DTR es el registro completo y verificable de un activo certificado.</p>
-      <div class="grid-3">
-        <div class="card center">
-          <div style="font-size:1.8em; margin-bottom:0.2em;">🧠</div>
-          <p style="font-size:0.68em; font-weight:700; color:var(--accent);">Evaluación IA</p>
-          <p style="font-size:0.58em; color:var(--muted-2); margin-top:0.2em;">Análisis estructurado del contenido — score, resumen, flags de riesgo</p>
-        </div>
-        <div class="card center">
-          <div style="font-size:1.8em; margin-bottom:0.2em;">🔑</div>
-          <p style="font-size:0.68em; font-weight:700; color:var(--accent);">Hash canónico</p>
-          <p style="font-size:0.58em; color:var(--muted-2); margin-top:0.2em;">SHA-256 sobre representación determinista del DTR completo</p>
-        </div>
-        <div class="card center">
-          <div style="font-size:1.8em; margin-bottom:0.2em;">⛓️</div>
-          <p style="font-size:0.68em; font-weight:700; color:var(--accent);">Ancla on-chain</p>
-          <p style="font-size:0.58em; color:var(--muted-2); margin-top:0.2em;">Hash registrado en <code>AnchorRegistry</code> / Base Sepolia</p>
-        </div>
-      </div>
-      <hr style="margin-top:0.8em;">
-      <p style="font-size:0.7em; color:var(--muted); margin-bottom:0.4em;">Estados del ciclo de vida</p>
-      <div style="display:flex; gap:0.5em; font-size:0.65em;">
-        <div class="card" style="flex:1; text-align:center; color:var(--muted-2);">PENDING<br><span style="font-size:0.8em;">Subido, sin revisar</span></div>
-        <div class="flow-arrow" style="align-self:center;">→</div>
-        <div class="card" style="flex:1; text-align:center; color:#fbbf24;">REVIEWED<br><span style="font-size:0.8em;">IA completada</span></div>
-        <div class="flow-arrow" style="align-self:center;">→</div>
-        <div class="card" style="flex:1; text-align:center; color:#60a5fa;">ANCHORING<br><span style="font-size:0.8em;">TX enviada</span></div>
-        <div class="flow-arrow" style="align-self:center;">→</div>
-        <div class="card green-border" style="flex:1; text-align:center; color:#86efac;"><strong>CERTIFIED</strong><br><span style="font-size:0.8em;">On-chain confirmado</span></div>
-      </div>
-    </section>
-
-    <!-- ===================== SLIDE 4: FLUJO ===================== -->
-    <section>
-      <span class="badge">Flujo de certificación</span>
-      <h2>Cómo funciona</h2>
-      <p style="font-size:0.68em; color:var(--muted); margin-bottom:0.7em; font-weight:600;">UC-01 — Certificación de activo</p>
-      <div class="flow" style="justify-content:center; margin-bottom:0.5em;">
-        <div class="flow-step">
-          <div>📄</div>
-          <div style="font-weight:600; font-size:0.9em;">Subida</div>
-          <div style="color:var(--muted-2); font-size:0.8em;">AES-256-GCM → R2</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step hl">
-          <div>🧠</div>
-          <div style="font-weight:600; font-size:0.9em;">IA Review</div>
-          <div style="color:var(--muted-2); font-size:0.8em;">OpenAI / Stub</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <div>🔧</div>
-          <div style="font-weight:600; font-size:0.9em;">Canoniza</div>
-          <div style="color:var(--muted-2); font-size:0.8em;">dtr-core</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <div style="font-family:monospace;">#</div>
-          <div style="font-weight:600; font-size:0.9em;">SHA-256</div>
-          <div style="color:var(--muted-2); font-size:0.8em;">determinista</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step hl">
-          <div>⛓️</div>
-          <div style="font-weight:600; font-size:0.9em;">anchor()</div>
-          <div style="color:var(--muted-2); font-size:0.8em;">pg-boss worker</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step ok">
-          <div>✅</div>
-          <div style="font-weight:700; font-size:0.9em;">CERTIFIED</div>
-        </div>
-      </div>
-      <hr>
-      <p style="font-size:0.68em; color:var(--muted); margin-bottom:0.5em; font-weight:600;">UC-02 — Verificación pública (sin login)</p>
-      <div class="flow" style="justify-content:center;">
-        <div class="flow-step">
-          <div>📄</div>
-          <div style="font-weight:600; font-size:0.9em;">Activo original</div>
-          <div style="color:var(--muted-2); font-size:0.8em;">(cualquier persona)</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step hl">
-          <div>🔧</div>
-          <div style="font-weight:600; font-size:0.9em;">Re-canoniza</div>
-          <div style="color:var(--muted-2); font-size:0.8em;">mismo algoritmo</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step hl">
-          <div style="font-family:monospace;">#</div>
-          <div style="font-weight:600; font-size:0.9em;">Re-hashea</div>
-          <div style="color:var(--muted-2); font-size:0.8em;">local</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step">
-          <div>⛓️</div>
-          <div style="font-weight:600; font-size:0.9em;">exists()</div>
-          <div style="color:var(--muted-2); font-size:0.8em;">on-chain query</div>
-        </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-step ok">
-          <div>🔐</div>
-          <div style="font-weight:700; font-size:0.9em;">VÁLIDO</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== SLIDE 5: ARQUITECTURA ===================== -->
-    <section>
-      <span class="badge">Diseño técnico</span>
-      <h2>Arquitectura</h2>
-      <div class="grid-2" style="margin-top:0.5em; align-items:start;">
-        <div>
-          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.4em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Capas del sistema (C4 Container)</p>
-          <div class="card" style="margin-bottom:0.35em;">
-            <div style="font-size:0.65em; color:var(--muted-2); margin-bottom:0.15em;">Web</div>
-            <span class="tag">Next.js App Router</span><span class="tag">Tailwind</span><span class="tag">TanStack Query</span>
-          </div>
-          <div class="card" style="margin-bottom:0.35em;">
-            <div style="font-size:0.65em; color:var(--muted-2); margin-bottom:0.15em;">API</div>
-            <span class="tag">NestJS</span><span class="tag">pg-boss</span><span class="tag">Prisma</span>
-          </div>
-          <div class="card accent-border" style="margin-bottom:0.35em;">
-            <div style="font-size:0.65em; color:var(--primary); margin-bottom:0.15em;">Core</div>
-            <span class="tag" style="color:var(--accent); border-color:rgba(99,102,241,0.4);">@trustai/dtr-core</span>
-            <span style="font-size:0.6em; color:var(--muted-2);"> — sin framework, sin BD</span>
-          </div>
-          <div class="card" style="margin-bottom:0.35em;">
-            <div style="font-size:0.65em; color:var(--muted-2); margin-bottom:0.15em;">Smart contract</div>
-            <span class="tag">Solidity ^0.8.20</span><span class="tag">Foundry</span><span class="tag">Base Sepolia</span>
-          </div>
-          <div class="card">
-            <div style="font-size:0.65em; color:var(--muted-2); margin-bottom:0.15em;">Almacenamiento</div>
-            <span class="tag">PostgreSQL</span><span class="tag">Cloudflare R2</span>
-          </div>
-        </div>
-        <div>
-          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.4em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">API — Arquitectura Hexagonal</p>
-          <div class="hex-layer" style="border-style:solid; border-color:rgba(34,197,94,0.3); text-align:center;">
-            <div class="hex-layer-label" style="color:#86efac;">Infraestructura (Adapters)</div>
-            <div style="color:var(--muted-2); font-size:0.85em;">OpenAI · StubAi · R2Store · Ethers.js · PgBoss</div>
-          </div>
-          <div style="display:flex; justify-content:center; gap:1em; font-size:0.6em; color:var(--muted-2); margin: 0.2em 0;">↑ depende de ↓ (inversión)</div>
-          <div class="hex-layer" style="text-align:center; border-color:rgba(99,102,241,0.4);">
-            <div class="hex-layer-label">Puertos (Interfaces)</div>
-            <div style="color:var(--muted-2); font-size:0.85em;">IAiReviewer · IAssetStore · IAnchorService</div>
-          </div>
-          <div style="display:flex; justify-content:center; gap:1em; font-size:0.6em; color:var(--muted-2); margin: 0.2em 0;">↑ usa ↓</div>
-          <div class="hex-layer" style="border-style:solid; border-color:rgba(99,102,241,0.6); text-align:center; background:var(--primary-dim);">
-            <div class="hex-layer-label">Dominio (Core)</div>
-            <div style="color:var(--muted); font-size:0.85em;">Entities · Use Cases · Domain Logic</div>
-          </div>
-          <div class="callout" style="margin-top:0.5em; font-size:0.62em;">
-            Los adaptadores son intercambiables sin tocar el dominio — stub en CI, implementación real en prod.
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== SLIDE 6: DTR-CORE ===================== -->
-    <section>
-      <span class="badge">Paquete central</span>
-      <h2><code style="font-size:0.85em;">@trustai/dtr-core</code></h2>
-      <p style="font-size:0.7em; color:var(--muted);">Paquete puro TypeScript — sin framework, sin base de datos, sin IA. La única fuente de verdad sobre el protocolo DTR.</p>
-      <div class="grid-2" style="margin-top:0.6em;">
-        <div>
-          <div class="card" style="margin-bottom:0.4em;">
-            <p style="color:var(--accent); font-size:0.68em; font-weight:700; margin-bottom:0.2em;"><code style="font-size:1em;">canonicalize(dtr)</code></p>
-            <p style="font-size:0.6em; color:var(--muted-2);">Serialización determinista: claves ordenadas, números normalizados, campos nulos excluidos. El mismo DTR produce la misma cadena en cualquier entorno.</p>
-          </div>
-          <div class="card" style="margin-bottom:0.4em;">
-            <p style="color:var(--accent); font-size:0.68em; font-weight:700; margin-bottom:0.2em;"><code style="font-size:1em;">hashDtr(dtr)</code></p>
-            <p style="font-size:0.6em; color:var(--muted-2);">SHA-256 sobre la representación canónica → string hex de 64 caracteres. Idempotente: mismo DTR → mismo hash, siempre.</p>
-          </div>
-          <div class="card">
-            <p style="color:var(--accent); font-size:0.68em; font-weight:700; margin-bottom:0.2em;"><code style="font-size:1em;">verifyDtr(dtr, onChainHash)</code></p>
-            <p style="font-size:0.6em; color:var(--muted-2);">Recalcula el hash y compara contra el ancla. Devuelve <code>VALID</code> | <code>INVALID</code> | <code>NOT_FOUND</code>.</p>
-          </div>
-        </div>
-        <div>
-          <p style="font-size:0.6em; color:var(--muted); margin-bottom:0.25em;">Esquema DTR (Zod v1.0)</p>
-          <pre><code>const DTRSchema = z.object({
-  id:        z.string().uuid(),
-  version:   z.literal("dtr/1.0"),
-  assetId:   z.string(),
-  assetHash: z.string(),
-  aiReview: z.object({
-    model:   z.string(),
-    summary: z.string(),
-    score:   z.number().min(0).max(1),
-    flags:   z.array(z.string()),
+      <div>
+        <div class="flabel" style="margin-top:0">Esquema DTR (Zod · dtr-1)</div>
+        <pre><code><span class="k">const</span> TrustRecordV1Schema = z.object({
+  schemaVersion: z.literal(<span class="s">"dtr-1"</span>),
+  asset: z.object({
+    sha256:    z.string(),   <span class="c">// hex 64</span>
+    mimeType:  z.string(),
+    sizeBytes: z.number().int().positive(),
+    filename:  z.string().optional(),
   }),
-  issuedAt:  z.string().datetime(),
-  issuerDid: z.string(),
+  analysis: z.object({
+    summary:        z.string(),
+    classification: z.enum(TAXONOMIA), <span class="c">// contrato, factura…</span>
+    language:       z.string(),        <span class="c">// ISO 639-1</span>
+  }),
+  provenance: z.object({
+    provider:     z.string(),
+    model:        z.string(),
+    modelVersion: z.string(),
+    analyzedAt:   z.string(),
+  }),
+  issuedAt: z.string(),
 });</code></pre>
-          <div class="callout" style="font-size:0.62em; margin-top:0.4em;">
-            <strong>29 pruebas unitarias</strong> — canonicalización, hashing, verificación e idempotencia. Incluyendo casos edge: ordenación de claves, valores nulos, normalización numérica.
-          </div>
-        </div>
+        <div class="callout green"><b>29 pruebas unitarias</b> — canonicalización, hashing, verificación e idempotencia, incluidos casos límite: orden de claves, nulos y normalización numérica.</div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ===================== SLIDE 7: SMART CONTRACT ===================== -->
-    <section>
-      <span class="badge">Blockchain</span>
-      <h2>AnchorRegistry</h2>
-      <div class="grid-2" style="margin-top:0.6em; align-items:start;">
-        <div>
-          <p style="font-size:0.68em; color:var(--muted); margin-bottom:0.5em;">Contrato mínimo, sin sorpresas, sin owner.</p>
-          <div class="card" style="margin-bottom:0.4em;">
-            <p style="color:var(--accent); font-size:0.68em; font-weight:700;"><code style="font-size:1em;">anchor(bytes32 hash)</code></p>
-            <p style="font-size:0.6em; color:var(--muted-2); margin-top:0.2em;">Registra el hash en el estado de la cadena. Emite <code>Anchored</code>. Idempotente — no revierte si ya existe.</p>
-          </div>
-          <div class="card" style="margin-bottom:0.6em;">
-            <p style="color:var(--accent); font-size:0.68em; font-weight:700;"><code style="font-size:1em;">exists(bytes32) → bool</code></p>
-            <p style="font-size:0.6em; color:var(--muted-2); margin-top:0.2em;">Consulta pública, gratuita, sin permisos. Cualquiera puede verificar.</p>
-          </div>
-          <ul style="font-size:0.68em;">
-            <li>Sin ownership ni control de acceso</li>
-            <li>Chain id: <code>84532</code> (Base Sepolia)</li>
-            <li>Probado con Foundry (unit + fuzz)</li>
-            <li>Desplegado: <code>0xe6738f...607C22</code></li>
-          </ul>
-          <div class="callout" style="font-size:0.62em; margin-top:0.5em;">
-            <strong>ADR-003:</strong> ERC-721 descartado — overhead innecesario para MVP. El contrato mínimo tiene la menor superficie de ataque posible.
-          </div>
+  <!-- SLIDE — SMART CONTRACT -->
+  <section class="slide dense">
+    <span class="kicker">Blockchain</span>
+    <h2><span class="accent">AnchorRegistry</span> · el contrato mínimo</h2>
+    <p class="head-lead">Sin owner, sin lógica de negocio, sin sorpresas. La menor superficie de ataque posible.</p>
+    <div class="grid2">
+      <div>
+        <div class="card">
+          <div class="ctitle mono">anchor(bytes32 hash)</div>
+          <p class="desc">Ancla la huella en la cadena y emite <code>Anchored(hash, sender, timestamp)</code>. Revierte con <code>AlreadyAnchored</code> si ya existe o <code>ZeroHash</code> si es cero.</p>
         </div>
-        <div>
-          <pre><code>// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+        <div class="card">
+          <div class="ctitle mono">isAnchored(bytes32) → bool</div>
+          <p class="desc">Consulta pública, gratuita y sin permisos. <code>anchoredAt(bytes32)</code> devuelve además el timestamp del bloque.</p>
+        </div>
+        <ul class="clist ok" style="margin-top:16px">
+          <li>Sin ownership ni control de acceso</li>
+          <li>Chain id <code>84532</code> · Base Sepolia</li>
+          <li>Probado con Foundry (unit + fuzz)</li>
+          <li>Desplegado en <code>0xe6738f…607C22</code></li>
+        </ul>
+        <div class="callout"><b>ADR-003:</b> se descartó ERC-721 por overhead innecesario para el MVP.</div>
+      </div>
+      <div>
+        <div class="flabel" style="margin-top:0">Solidity ^0.8.20</div>
+        <pre><code><span class="c">// SPDX-License-Identifier: MIT</span>
+<span class="k">pragma</span> solidity ^0.8.20;
 
-contract AnchorRegistry {
-    event Anchored(bytes32 indexed hash);
+<span class="k">contract</span> AnchorRegistry {
+    <span class="k">event</span> Anchored(bytes32 <span class="k">indexed</span> hash, address <span class="k">indexed</span> sender, uint256 timestamp);
+    <span class="k">error</span> AlreadyAnchored(bytes32 hash);
+    <span class="k">error</span> ZeroHash();
 
-    mapping(bytes32 => bool) private _anchors;
+    <span class="k">mapping</span>(bytes32 =&gt; uint256) <span class="k">public</span> anchoredAt;
 
-    function anchor(bytes32 hash) external {
-        if (!_anchors[hash]) {
-            _anchors[hash] = true;
-            emit Anchored(hash);
-        }
+    <span class="k">function</span> anchor(bytes32 hash) <span class="k">external</span> {
+        <span class="k">if</span> (hash == bytes32(0)) <span class="k">revert</span> ZeroHash();
+        <span class="k">if</span> (anchoredAt[hash] != 0) <span class="k">revert</span> AlreadyAnchored(hash);
+        anchoredAt[hash] = block.timestamp;
+        <span class="k">emit</span> Anchored(hash, msg.sender, block.timestamp);
     }
 
-    function exists(bytes32 hash)
-        external
-        view
-        returns (bool)
+    <span class="k">function</span> isAnchored(bytes32 hash)
+        <span class="k">external view returns</span> (bool)
     {
-        return _anchors[hash];
+        <span class="k">return</span> anchoredAt[hash] != 0;
     }
 }</code></pre>
-          <p style="font-size:0.58em; color:var(--muted-2); margin-top:0.3em;">
-            Auditado en BaseScan: <code style="font-size:0.9em;">sepolia.basescan.org</code>
-          </p>
-        </div>
+        <p class="desc" style="margin-top:8px">Auditable en <code>sepolia.basescan.org</code></p>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ===================== SLIDE 8: IA ADAPTER ===================== -->
-    <section>
-      <span class="badge">Inteligencia Artificial</span>
-      <h2>Adaptador de IA dual</h2>
-      <div class="grid-2" style="margin-top:0.6em; align-items:start;">
-        <div>
-          <div class="callout" style="margin-bottom:0.7em;">
-            Puerto <code>IAiReviewer</code> — el dominio no sabe qué modelo usa ni si hay red disponible.
-          </div>
-          <div class="card" style="margin-bottom:0.4em;">
-            <p style="color:var(--accent); font-size:0.7em; font-weight:700; margin-bottom:0.2em;">StubAiAdapter</p>
-            <p style="font-size:0.6em; color:var(--muted-2);">Datos sintéticos deterministas. Sin red, sin coste, sin latencia. Activo en CI y entornos de desarrollo.</p>
-          </div>
-          <div class="card" style="margin-bottom:0.5em;">
-            <p style="color:var(--accent); font-size:0.7em; font-weight:700; margin-bottom:0.2em;">OpenAiAdapter</p>
-            <p style="font-size:0.6em; color:var(--muted-2);">Envía el texto del activo a GPT-4o. Respuesta validada con Zod antes de persistirse en el DTR.</p>
-          </div>
-          <p style="font-size:0.62em; color:var(--muted-2);">Selección por variable de entorno: <code>AI_ADAPTER=stub|openai</code></p>
-          <div class="callout" style="font-size:0.62em; margin-top:0.5em;">
-            <strong>ADR-004:</strong> El stub es ciudadano de primera clase, no un hack de testing. Permite demos offline y CI completamente determinista.
-          </div>
+  <!-- SLIDE — IA ADAPTER -->
+  <section class="slide dense">
+    <span class="kicker">Inteligencia artificial</span>
+    <h2>Adaptador de IA <span class="accent">dual</span></h2>
+    <p class="head-lead">El dominio no sabe qué modelo se usa, ni si hay red disponible. Todo pasa por el puerto <code>AiAnalysisPort</code>.</p>
+    <div class="grid2">
+      <div>
+        <div class="card blue">
+          <div class="ctitle">StubAiAnalysisAdapter</div>
+          <p class="desc">Datos sintéticos deterministas. Sin red, sin coste, sin latencia. Activo en CI y en desarrollo.</p>
         </div>
-        <div>
-          <p style="font-size:0.62em; color:var(--muted); margin-bottom:0.25em;">Resultado de revisión IA (validado con Zod)</p>
-          <pre><code>// AiReviewResult
-{
-  model:      "gpt-4o",
-  summary:    "Informe financiero Q1 2026.
-               Proyecciones de ingresos +18%
-               respecto al año anterior.",
-  score:      0.87,
-  flags:      ["datos_financieros", "pii"],
-  reviewedAt: "2026-07-15T10:30:00Z"
+        <div class="card blue">
+          <div class="ctitle">OpenAiAnalysisAdapter</div>
+          <p class="desc">Envía el texto del activo al modelo configurado (por defecto <code>gpt-5.4-mini</code>). La respuesta se valida con Zod antes de persistirse en el DTR.</p>
+        </div>
+        <p class="desc" style="margin-top:14px">Selección por entorno: <code>AI_ADAPTER=stub|openai</code></p>
+        <div class="callout"><b>ADR-004:</b> el stub es ciudadano de primera clase, no un truco de testing — permite demos offline y CI 100% determinista.</div>
+      </div>
+      <div>
+        <div class="flabel" style="margin-top:0">Resultado del análisis (validado con Zod)</div>
+        <pre><code>analysis: {
+  summary:        <span class="s">"Informe financiero Q1 2026.
+                   Ingresos +18% interanual."</span>,
+  classification: <span class="s">"informe"</span>,
+  language:       <span class="s">"es"</span>
+}
+provenance: {
+  provider:   <span class="s">"openai"</span>,
+  model:      <span class="s">"gpt-5.4-mini"</span>,
+  analyzedAt: <span class="s">"2026-07-15T10:30:00Z"</span>
 }</code></pre>
-          <div class="card" style="margin-top:0.5em; font-size:0.62em;">
-            <p style="color:var(--accent); font-weight:600; margin-bottom:0.2em;">Flujo de validación</p>
-            <div style="color:var(--muted-2);">
-              GPT-4o → <code>JSON.parse</code> → <code>AiReviewSchema.parse()</code> → dominio
-            </div>
-            <div style="font-size:0.85em; margin-top:0.3em; color:var(--muted-2);">Si Zod falla → el DTR queda en PENDING, no se corrompe.</div>
-          </div>
+        <div class="card" style="margin-top:12px">
+          <div class="ct">Flujo de validación</div>
+          <p class="desc">Modelo → <code>JSON.parse</code> → validación Zod del análisis → dominio.<br>Si Zod falla, el DTR queda en <code>DRAFT</code>: no se corrompe.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ===================== SLIDE 9: STACK ===================== -->
-    <section>
-      <span class="badge">Infraestructura</span>
-      <h2>Stack y despliegue</h2>
-      <div class="grid-2" style="margin-top:0.5em; align-items:start;">
-        <div>
-          <table>
-            <tr><th>Capa</th><th>Tecnología</th></tr>
-            <tr><td>Web</td><td>Next.js 15 · App Router · Tailwind CSS</td></tr>
-            <tr><td>API</td><td>NestJS · pg-boss worker · Prisma ORM</td></tr>
-            <tr><td>Core</td><td>@trustai/dtr-core (TS puro)</td></tr>
-            <tr><td>Base de datos</td><td>PostgreSQL (datos + cola pg-boss)</td></tr>
-            <tr><td>Almacenamiento</td><td>Cloudflare R2 · AES-256-GCM en reposo</td></tr>
-            <tr><td>Blockchain</td><td>Base Sepolia · Ethers.js v6</td></tr>
-            <tr><td>IA</td><td>OpenAI GPT-4o · adaptador stub</td></tr>
-            <tr><td>Testing</td><td>Vitest · Playwright · Foundry</td></tr>
-          </table>
-        </div>
-        <div>
-          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.4em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Topología de producción</p>
-          <div class="card" style="font-size:0.65em; margin-bottom:0.35em;">
-            <span style="color:var(--primary);">▸</span> <strong>Vercel</strong> — Web Next.js (Edge Network, CI integrado)
-          </div>
-          <div class="card" style="font-size:0.65em; margin-bottom:0.35em;">
-            <span style="color:var(--primary);">▸</span> <strong>Railway</strong> — API NestJS + PostgreSQL
-          </div>
-          <div class="card" style="font-size:0.65em; margin-bottom:0.35em;">
-            <span style="color:var(--primary);">▸</span> <strong>Cloudflare R2</strong> — Activos cifrados en reposo
-          </div>
-          <div class="card" style="font-size:0.65em; margin-bottom:0.5em;">
-            <span style="color:var(--primary);">▸</span> <strong>Base Sepolia</strong> — Contrato AnchorRegistry
-          </div>
-          <div class="callout" style="font-size:0.62em;">
-            Monorepo pnpm workspaces:<br>
-            <code>packages/dtr-core</code> · <code>apps/api</code> · <code>apps/web</code> · <code>smart-contracts/</code>
-          </div>
+  <!-- SLIDE — STACK -->
+  <section class="slide dense">
+    <span class="kicker">Infraestructura</span>
+    <h2>Stack y <span class="accent">despliegue</span></h2>
+    <div class="grid2">
+      <div>
+        <div class="flabel" style="margin-top:0">Tecnología por capa</div>
+        <table>
+          <thead><tr><th>Capa</th><th>Tecnología</th></tr></thead>
+          <tbody>
+            <tr><td><span class="em">Web</span></td><td class="mut">Next.js 16 · App Router · Tailwind v4</td></tr>
+            <tr><td><span class="em">API</span></td><td class="mut">NestJS · pg-boss · Prisma</td></tr>
+            <tr><td><span class="em">Core</span></td><td class="mut">@trustai/dtr-core (TS puro)</td></tr>
+            <tr><td><span class="em">Base de datos</span></td><td class="mut">PostgreSQL (datos + cola)</td></tr>
+            <tr><td><span class="em">Almacenamiento</span></td><td class="mut">Cloudflare R2 · AES-256-GCM</td></tr>
+            <tr><td><span class="em">Blockchain</span></td><td class="mut">Base Sepolia · viem</td></tr>
+            <tr><td><span class="em">IA</span></td><td class="mut">OpenAI gpt-5.4-mini · adaptador stub</td></tr>
+            <tr><td><span class="em">Testing</span></td><td class="mut">Vitest · Playwright · Foundry</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="flabel" style="margin-top:0">Topología de producción</div>
+        <div class="tier"><span class="tk">Vercel</span><span class="mut" style="font-size:.85rem">Web Next.js · Edge Network · CI</span></div>
+        <div class="tier"><span class="tk">Railway</span><span class="mut" style="font-size:.85rem">API NestJS + PostgreSQL</span></div>
+        <div class="tier"><span class="tk">Cloudflare</span><span class="mut" style="font-size:.85rem">R2 · activos cifrados en reposo</span></div>
+        <div class="tier core"><span class="tk">Base</span><span class="mut" style="font-size:.85rem">Sepolia · contrato AnchorRegistry</span></div>
+        <div class="callout">Monorepo pnpm workspaces:<br><code>packages/dtr-core</code> · <code>apps/api</code> · <code>apps/web</code> · <code>smart-contracts</code></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE — TESTING -->
+  <section class="slide dense">
+    <span class="kicker">Calidad</span>
+    <h2>Pruebas y <span class="accent">CI</span></h2>
+    <div class="grid3">
+      <div class="card center">
+        <div class="statbig">534</div>
+        <div class="sl">Pruebas unitarias</div>
+        <div class="ssl">dtr-core 29 · utils 11 · API 205 · Web 289</div>
+      </div>
+      <div class="card center">
+        <div class="statbig">E2E</div>
+        <div class="sl">End-to-end real</div>
+        <div class="ssl">Playwright + Base Sepolia real</div>
+      </div>
+      <div class="card center">
+        <div class="statbig">CI</div>
+        <div class="sl">GitHub Actions</div>
+        <div class="ssl">build · typecheck · lint · suite en cada push</div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="callout"><b>Contrato (Foundry):</b> unit + fuzz tests sobre <code>anchor()</code> y <code>isAnchored()</code>. Superficie de ataque mínima verificada.</div>
+      <div class="callout"><b>dtr-core:</b> casos límite cubiertos — orden de claves, nulos, normalización numérica y re-hashing idempotente bajo cualquier permutación.</div>
+    </div>
+  </section>
+
+  <!-- SLIDE 4 — DEMO -->
+  <section class="slide">
+    <div class="cols">
+      <div class="stack">
+        <span class="kicker"><span class="dot"></span>Demo en vivo</span>
+        <h2>Escanea y <span class="green">compruébalo</span> tú mismo</h2>
+        <p class="lead">No hace falta creer en la diapositiva. Abre la verificación pública, sube el documento y observa cómo la huella coincide con la registrada en blockchain.</p>
+        <div class="steps" style="margin-top:8px">
+          <div class="fragment step"><span class="num">1</span><div><div class="st">Escanea el QR</div><div class="ss">Abre la página de verificación de Ancrux.</div></div></div>
+          <div class="fragment step"><span class="num">2</span><div><div class="st">Vuelve a calcular la huella</div><div class="ss">Tu navegador recalcula el SHA-256 localmente.</div></div></div>
+          <div class="fragment step"><span class="num">3</span><div><div class="st">Compara con la cadena</div><div class="ss"><span class="green">Coinciden → auténtico.</span> Cambia un byte → falla.</div></div></div>
         </div>
       </div>
-    </section>
-
-    <!-- ===================== SLIDE 10: TESTING ===================== -->
-    <section>
-      <span class="badge">Calidad</span>
-      <h2>Pruebas y CI</h2>
-      <div class="grid-3" style="margin-top:0.6em;">
-        <div class="card center">
-          <div class="stat">327</div>
-          <p style="font-size:0.68em; color:var(--muted); margin-top:0.2em;">Pruebas unitarias</p>
-          <hr>
-          <p style="font-size:0.6em; color:var(--muted-2);">dtr-core 29 · API 170 · Web 128</p>
-        </div>
-        <div class="card center">
-          <div class="stat">E2E</div>
-          <p style="font-size:0.68em; color:var(--muted); margin-top:0.2em;">End-to-end real</p>
-          <hr>
-          <p style="font-size:0.6em; color:var(--muted-2);">Playwright (local) + Base Sepolia real</p>
-        </div>
-        <div class="card center">
-          <div class="stat">CI</div>
-          <p style="font-size:0.68em; color:var(--muted); margin-top:0.2em;">GitHub Actions</p>
-          <hr>
-          <p style="font-size:0.6em; color:var(--muted-2);">build · typecheck · lint · suite completa en cada push</p>
+      <div class="stack" style="align-items:center">
+        <div class="qrcard fragment">
+          <svg class="qr" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 37" shape-rendering="crispEdges"><path fill="none" d="M0 0h37v37H0z"/><path stroke="currentColor" d="M2 2.5h7m2 0h1m1 0h2m3 0h1m1 0h4m1 0h1m2 0h7M2 3.5h1m5 0h1m2 0h2m1 0h1m2 0h1m2 0h1m1 0h2m2 0h1m1 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m4 0h1m1 0h2m3 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m1 0h1m1 0h2m3 0h1m2 0h2m2 0h1m1 0h1m1 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m1 0h3m3 0h2m1 0h1m2 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m1 0h1m1 0h2m1 0h1m4 0h2m1 0h1m4 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M10 9.5h1m2 0h2m1 0h1m1 0h1m2 0h6M2 10.5h1m1 0h5m5 0h3m1 0h2m1 0h1m2 0h1m3 0h5M5 11.5h1m4 0h2m1 0h3m2 0h2m1 0h3m1 0h1m2 0h2m1 0h2m1 0h1M2 12.5h1m2 0h2m1 0h1m1 0h1m2 0h7m2 0h1m4 0h1m2 0h1m1 0h2M3 13.5h1m2 0h2m4 0h4m1 0h4m1 0h6m2 0h3m1 0h1M2 14.5h1m4 0h4m2 0h2m1 0h3m2 0h2m1 0h1m1 0h2m1 0h3m1 0h2M3 15.5h1m2 0h1m4 0h2m4 0h1m2 0h1m4 0h1m1 0h2m3 0h3M5 16.5h2m1 0h3m1 0h1m1 0h2m1 0h2m1 0h1m1 0h2m3 0h7M3 17.5h3m1 0h1m3 0h1m2 0h2m1 0h1m2 0h1m2 0h2m1 0h3m2 0h2M2 18.5h1m3 0h1m1 0h1m1 0h1m2 0h5m1 0h1m5 0h1m1 0h1m1 0h3m2 0h1M2 19.5h1m2 0h1m1 0h1m1 0h2m1 0h4m2 0h1m2 0h1m3 0h1m1 0h3m1 0h2m1 0h1M8 20.5h1m3 0h3m2 0h1m2 0h1m2 0h1m5 0h2m1 0h1M3 21.5h1m5 0h5m1 0h2m1 0h1m2 0h1m1 0h2m3 0h5M2 22.5h2m3 0h5m1 0h1m3 0h1m2 0h1m3 0h1m1 0h2m2 0h2m1 0h2M2 23.5h3m1 0h2m3 0h1m1 0h1m2 0h3m3 0h1m2 0h1m2 0h1m3 0h1m1 0h1M2 24.5h1m2 0h1m2 0h1m1 0h1m2 0h4m3 0h2m1 0h2m1 0h2m2 0h1m1 0h2M2 25.5h1m1 0h1m2 0h1m1 0h2m1 0h2m1 0h2m1 0h1m1 0h6m4 0h4M2 26.5h1m1 0h2m2 0h1m1 0h2m1 0h1m2 0h1m1 0h2m1 0h1m2 0h1m1 0h6M10 27.5h1m1 0h1m5 0h5m1 0h3m3 0h1m1 0h1m1 0h1M2 28.5h7m3 0h1m1 0h1m2 0h1m1 0h1m2 0h1m1 0h3m1 0h1m1 0h1m1 0h2M2 29.5h1m5 0h1m1 0h3m1 0h1m3 0h3m1 0h5m3 0h4M2 30.5h1m1 0h3m1 0h1m1 0h2m1 0h2m1 0h1m1 0h1m5 0h1m1 0h6m1 0h1M2 31.5h1m1 0h3m1 0h1m1 0h3m1 0h4m2 0h1m2 0h1m3 0h1m2 0h1m1 0h3M2 32.5h1m1 0h3m1 0h1m1 0h1m3 0h1m2 0h2m1 0h1m3 0h1m1 0h4m2 0h1M2 33.5h1m5 0h1m3 0h1m1 0h1m1 0h2m3 0h4m3 0h1m1 0h1m1 0h1M2 34.5h7m1 0h1m4 0h1m1 0h1m1 0h3m2 0h4m1 0h1m3 0h1"/></svg>
+          <div class="cap">Verificación pública de Ancrux</div>
+          <div class="url">ancrux.vercel.app/verify/&lt;id&gt;</div>
         </div>
       </div>
-      <div class="grid-2" style="margin-top:0.7em;">
-        <div class="callout" style="font-size:0.7em;">
-          <strong>Contrato (Foundry):</strong> unit tests + fuzz tests sobre <code>anchor()</code> y <code>exists()</code>. Superficie de ataque mínima verificada formalmente.
-        </div>
-        <div class="callout" style="font-size:0.7em;">
-          <strong>dtr-core:</strong> casos edge cubiertos — ordenación de claves, valores nulos, normalización numérica, re-hashing idempotente bajo cualquier permutación.
-        </div>
+    </div>
+  </section>
+
+  <!-- SLIDE — ADRs -->
+  <section class="slide dense">
+    <span class="kicker">Decisiones de arquitectura</span>
+    <h2>Architecture Decision Records</h2>
+    <p class="head-lead">Cada decisión relevante quedó registrada como ADR en <code>docs/adr/</code> con su contexto, alternativas y consecuencias.</p>
+    <table>
+      <thead><tr><th style="width:64px">ADR</th><th>Decisión</th><th>Alternativa descartada</th></tr></thead>
+      <tbody>
+        <tr><td><code>001</code></td><td><span class="em">Anclar la huella canónica del DTR on-chain</span></td><td class="mut">Guardar el JSON completo en la cadena (caro e inmutable de forma indeseable)</td></tr>
+        <tr><td><code>002</code></td><td><span class="em">Stack full-TypeScript en monorepo pnpm</span></td><td class="mut">Backend Python / Go (ecosistemas separados, fricción)</td></tr>
+        <tr><td><code>003</code></td><td><span class="em">Contrato mínimo sin owner ni lógica de negocio</span></td><td class="mut">NFT ERC-721 (overhead y más superficie de ataque)</td></tr>
+        <tr><td><code>004</code></td><td><span class="em">Adaptador de IA dual con stub de primera clase</span></td><td class="mut">Mock solo en tests (no extensible)</td></tr>
+        <tr><td><code>005</code></td><td><span class="em">Next.js App Router + TanStack Query</span></td><td class="mut">Pages Router / SWR (caching menos expresivo)</td></tr>
+        <tr><td><code>006</code></td><td><span class="em">Vercel + Railway + R2 para el despliegue</span></td><td class="mut">AWS full-stack (coste y complejidad excesivos para un MVP)</td></tr>
+        <tr><td><code>007</code></td><td><span class="em">Método de repositorio dedicado para el join asset org-scoped</span></td><td class="mut">Reusar el método sin scope y post-filtrar (violaría el org-scoping a nivel de query, RNF-004)</td></tr>
+        <tr><td><code>008</code></td><td><span class="em">DTO de query validado para los filtros de lista</span></td><td class="mut">Parámetros sueltos con pipes ad-hoc en el controller</td></tr>
+        <tr><td><code>009</code></td><td><span class="em">La web es dueña del copy de veredictos y del aviso eIDAS</span></td><td class="mut">Renderizar el copy/disclaimer en inglés que devuelve la API</td></tr>
+        <tr><td><code>010</code></td><td><span class="em">Verbo canónico on-chain: «anclar» sobre «registrar»</span></td><td class="mut">«registrar» (choca con «Registro Digital de Confianza» y con «registrarse»)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- SLIDE — RESULTADOS -->
+  <section class="slide dense">
+    <span class="kicker">Estado del proyecto</span>
+    <h2><span class="accent">Resultados</span></h2>
+    <div class="grid3">
+      <div class="card center"><div class="statbig">MVP</div><div class="sl">Completo y en producción</div><div class="ssl">Flujo end-to-end contra Base Sepolia real</div></div>
+      <div class="card center"><div class="statbig">534</div><div class="sl">Pruebas automáticas</div><div class="ssl">Unitarias + E2E + contrato Foundry</div></div>
+      <div class="card center"><div class="statbig">10</div><div class="sl">ADRs documentados</div><div class="ssl">Con alternativas y consecuencias</div></div>
+    </div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="card good">
+        <div class="ct">Funciona en producción</div>
+        <ul class="clist ok">
+          <li>Registro de usuario + verificación de email</li>
+          <li>Subida de activos (PDF) cifrados en R2</li>
+          <li>Análisis IA (gpt-5.4-mini) → DTR estructurado</li>
+          <li>Anclaje on-chain → estado CERTIFIED</li>
+          <li>Verificación pública sin cuenta (UC-02)</li>
+        </ul>
       </div>
-    </section>
-
-    <!-- ===================== SLIDE 11: DEMO ===================== -->
-    <section>
-      <span class="badge">Demo en vivo</span>
-      <h2>Pruébalo ahora</h2>
-      <div class="grid-2" style="margin-top:0.7em; align-items:start;">
-        <div>
-          <div class="card accent-border" style="margin-bottom:0.5em;">
-            <p style="color:var(--accent); font-size:0.7em; font-weight:700; margin-bottom:0.3em;">Aplicación web</p>
-            <code style="font-size:0.68em;">trustai-web-kappa.vercel.app</code>
-            <p style="font-size:0.6em; color:var(--muted-2); margin-top:0.3em;">Cuenta de prueba preconfigurada (email ya verificado):</p>
-            <div style="margin-top:0.2em;">
-              <span class="tag">revisor@trustai.app</span>
-              <span class="tag">RevisorTFM2026</span>
-            </div>
-          </div>
-          <div class="card" style="margin-bottom:0.5em;">
-            <p style="color:var(--accent); font-size:0.7em; font-weight:700; margin-bottom:0.2em;">Verificación pública (sin login)</p>
-            <code style="font-size:0.6em;">/verify/:id</code>
-            <p style="font-size:0.58em; color:var(--muted-2); margin-top:0.2em;">Recalcula el hash localmente y consulta Base Sepolia. Ningún dato sensible necesita salir del cliente.</p>
-          </div>
-          <div class="card">
-            <p style="color:var(--accent); font-size:0.7em; font-weight:700; margin-bottom:0.2em;">API de salud</p>
-            <code style="font-size:0.6em;">trustaiapi-production.up.railway.app/health</code>
-          </div>
-        </div>
-        <div class="center" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
-          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.5em;">Contrato en BaseScan</p>
-          <div style="background:white; width:170px; height:170px; border-radius:0.6rem; display:flex; align-items:center; justify-content:center; font-size:3.5em;">⛓️</div>
-          <p style="font-size:0.6em; color:var(--muted-2); margin-top:0.5em;">sepolia.basescan.org</p>
-          <code style="font-size:0.55em; color:var(--muted-2); display:block; margin-top:0.2em;">0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22</code>
-        </div>
+      <div class="card">
+        <div class="ct">Documentación viva</div>
+        <ul class="clist ok">
+          <li>TDD completo en <code>docs/</code> (13 secciones)</li>
+          <li>Diagramas C4 (context · container · component)</li>
+          <li>Endpoints de API documentados</li>
+          <li>Modelo de seguridad con diagramas de secuencia</li>
+        </ul>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ===================== SLIDE 12: ADRs ===================== -->
-    <section>
-      <span class="badge">Decisiones de arquitectura</span>
-      <h2>Architecture Decision Records</h2>
-      <p style="font-size:0.68em; color:var(--muted); margin-bottom:0.6em;">Cada decisión relevante registrada como ADR en <code>docs/adr/</code> con contexto, alternativas y consecuencias.</p>
-      <table>
-        <tr>
-          <th>ADR</th>
-          <th>Decisión</th>
-          <th>Alternativa descartada</th>
-        </tr>
-        <tr>
-          <td><code>001</code></td>
-          <td>Anclar hash canónico del DTR on-chain</td>
-          <td>Almacenar el JSON completo on-chain (costoso e inmutable de forma indeseable)</td>
-        </tr>
-        <tr>
-          <td><code>002</code></td>
-          <td>Stack full-TypeScript en monorepo pnpm</td>
-          <td>Backend Python / Go (ecosistemas separados, fricción entre equipos)</td>
-        </tr>
-        <tr>
-          <td><code>003</code></td>
-          <td>Contrato mínimo sin owner ni lógica de negocio</td>
-          <td>ERC-721 NFT (overhead innecesario para MVP, más superficie de ataque)</td>
-        </tr>
-        <tr>
-          <td><code>004</code></td>
-          <td>Adaptador dual IA: stub como ciudadano de primera clase</td>
-          <td>Mock solo en tests (stub descartable, no extensible)</td>
-        </tr>
-        <tr>
-          <td><code>005</code></td>
-          <td>Next.js App Router + TanStack Query</td>
-          <td>Pages Router / SWR (caching menos expresivo, SSR más limitado)</td>
-        </tr>
-        <tr>
-          <td><code>006</code></td>
-          <td>Vercel + Railway + R2 para despliegue</td>
-          <td>AWS full-stack (coste y complejidad excesivos para un MVP)</td>
-        </tr>
-      </table>
-    </section>
-
-    <!-- ===================== SLIDE 13: RESULTADOS ===================== -->
-    <section>
-      <span class="badge">Estado del proyecto</span>
-      <h2>Resultados</h2>
-      <div class="grid-3" style="margin-top:0.5em;">
-        <div class="card center">
-          <div class="stat" style="font-size:1.8em;">MVP</div>
-          <p style="font-size:0.65em; color:var(--muted);">Completo y en producción</p>
-          <p style="font-size:0.58em; color:var(--muted-2);">Flujo end-to-end probado contra Base Sepolia real</p>
-        </div>
-        <div class="card center">
-          <div class="stat">327</div>
-          <p style="font-size:0.65em; color:var(--muted);">Pruebas automáticas</p>
-          <p style="font-size:0.58em; color:var(--muted-2);">Unitarias + E2E + contrato Foundry</p>
-        </div>
-        <div class="card center">
-          <div class="stat">6</div>
-          <p style="font-size:0.65em; color:var(--muted);">ADRs documentados</p>
-          <p style="font-size:0.58em; color:var(--muted-2);">Con alternativas descartadas y consecuencias</p>
-        </div>
+  <!-- SLIDE — PRÓXIMOS PASOS -->
+  <section class="slide dense">
+    <span class="kicker">Roadmap</span>
+    <h2>Próximos pasos</h2>
+    <div class="grid2">
+      <div>
+        <div class="flabel" style="margin-top:0">Funcionalidad</div>
+        <div class="card"><div class="ctitle">Firma del emisor (ECDSA)</div><p class="desc">No repudio real: el emisor firma la huella del DTR con su clave privada antes del anclaje.</p></div>
+        <div class="card"><div class="ctitle">Mainnet (Base)</div><p class="desc">El contrato ya está listo. Solo requiere ETH real y redeploy. Coste mínimo por transacción en la L2.</p></div>
+        <div class="card"><div class="ctitle">Más tipos de activos</div><p class="desc">Imágenes, audio, código. El pipeline de canonicalización es extensible por tipo.</p></div>
       </div>
-      <div class="grid-2" style="margin-top:0.7em;">
-        <div class="card">
-          <p style="color:var(--accent); font-size:0.68em; font-weight:700; margin-bottom:0.3em;">Lo que funciona en producción</p>
-          <ul>
-            <li>Registro de usuario + verificación de email</li>
-            <li>Subida de activos (PDF) cifrados en R2</li>
-            <li>Revisión IA (GPT-4o) → DTR estructurado</li>
-            <li>Anclaje on-chain → estado CERTIFIED</li>
-            <li>Verificación pública sin login (UC-02)</li>
-          </ul>
-        </div>
-        <div class="card">
-          <p style="color:var(--accent); font-size:0.68em; font-weight:700; margin-bottom:0.3em;">Documentación viva</p>
-          <ul>
-            <li>TDD completo en <code>docs/</code> (13 secciones)</li>
-            <li>Diagramas C4 (context, container, component)</li>
-            <li>Endpoints de API documentados</li>
-            <li>Modelo de seguridad con diagramas de secuencia</li>
-          </ul>
-        </div>
+      <div>
+        <div class="flabel" style="margin-top:0">Plataforma y negocio</div>
+        <div class="card"><div class="ctitle">SDK / API pública</div><p class="desc">Integración desde sistemas externos: certificar activos sin usar la interfaz web.</p></div>
+        <div class="card"><div class="ctitle">Modelo freemium</div><p class="desc">N certificaciones gratis al mes. Planes para equipos y empresas con SLA.</p></div>
+        <div class="card"><div class="ctitle">Certificadores especializados</div><p class="desc">Marketplace de revisores IA por dominio: legal, financiero, médico.</p></div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ===================== SLIDE 14: PRÓXIMOS PASOS ===================== -->
-    <section>
-      <span class="badge">Roadmap</span>
-      <h2>Próximos pasos</h2>
-      <div class="grid-2" style="margin-top:0.7em;">
-        <div>
-          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.4em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Funcionalidad</p>
-          <div class="card" style="margin-bottom:0.4em;">
-            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">Firma del emisor (ECDSA)</p>
-            <p style="font-size:0.6em; color:var(--muted-2);">No-repudio real — el emisor firma el hash del DTR con su clave privada antes del anclaje.</p>
-          </div>
-          <div class="card" style="margin-bottom:0.4em;">
-            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">Mainnet (Base)</p>
-            <p style="font-size:0.6em; color:var(--muted-2);">El contrato ya está listo. Solo requiere ETH real y redeploy. Costo mínimo por transacción en Base L2.</p>
-          </div>
-          <div class="card">
-            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">Más tipos de activos</p>
-            <p style="font-size:0.6em; color:var(--muted-2);">Imágenes, audio, código fuente. El pipeline de canonicalización es extensible por tipo.</p>
-          </div>
-        </div>
-        <div>
-          <p style="font-size:0.65em; color:var(--muted); margin-bottom:0.4em; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Plataforma y negocio</p>
-          <div class="card" style="margin-bottom:0.4em;">
-            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">SDK / API pública</p>
-            <p style="font-size:0.6em; color:var(--muted-2);">Permitir integración desde sistemas externos. Certificar activos sin usar la interfaz web.</p>
-          </div>
-          <div class="card" style="margin-bottom:0.4em;">
-            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">Modelo freemium</p>
-            <p style="font-size:0.6em; color:var(--muted-2);">N certificaciones gratis/mes. Planes para equipos y empresas con SLA.</p>
-          </div>
-          <div class="card">
-            <p style="color:var(--accent); font-size:0.7em; font-weight:700;">Certificadores especializados</p>
-            <p style="font-size:0.6em; color:var(--muted-2);">Marketplace de revisores IA por dominio: legal, financiero, médico.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+  <!-- SLIDE — CONCLUSIONES -->
+  <section class="slide dense">
+    <span class="kicker">Cierre</span>
+    <h2><span class="accent">Conclusiones</span></h2>
+    <div class="concl">
+      <div class="card blue fragment"><p><b>IA + blockchain resuelven el problema de la confianza</b> sin exigir que quien verifica confíe en quien emite.</p></div>
+      <div class="card fragment"><p><b>La arquitectura hexagonal</b> permitió desarrollar y probar el dominio aislado por completo de la infraestructura, sin acoplarlo a ningún framework ni servicio externo.</p></div>
+      <div class="card fragment"><p><b>dtr-core como paquete puro</b> garantiza que la canonicalización y la verificación sean reproducibles por cualquier implementación futura, en cualquier lenguaje.</p></div>
+      <div class="card good fragment"><p><b>El MVP está en producción</b>, con flujo completo probado end-to-end contra Base Sepolia real y 534 pruebas automáticas pasando en CI.</p></div>
+    </div>
+  </section>
 
-    <!-- ===================== SLIDE 15: CONCLUSIONES ===================== -->
-    <section>
-      <span class="badge">Cierre</span>
-      <h2>Conclusiones</h2>
-      <div style="max-width:740px; margin:0.7em auto 0;">
-        <div class="card accent-border" style="margin-bottom:0.4em;">
-          <p style="font-size:0.78em;"><strong style="color:var(--accent);">IA + blockchain resuelven el problema de la confianza</strong> sin requerir que el verificador confíe en el emisor.</p>
-        </div>
-        <div class="card" style="margin-bottom:0.4em;">
-          <p style="font-size:0.78em;"><strong style="color:var(--accent);">La arquitectura hexagonal</strong> permitió desarrollar y testear el dominio completamente aislado de la infraestructura — sin acoplamiento a ningún framework ni servicio externo.</p>
-        </div>
-        <div class="card" style="margin-bottom:0.4em;">
-          <p style="font-size:0.78em;"><strong style="color:var(--accent);">dtr-core como paquete puro</strong> garantiza que la canonicalización y verificación son reproducibles por cualquier implementación futura, en cualquier lenguaje.</p>
-        </div>
-        <div class="card green-border">
-          <p style="font-size:0.78em;"><strong style="color:#86efac;">El MVP está en producción</strong>, con flujo completo probado end-to-end contra Base Sepolia real y 327 pruebas automáticas pasando en CI.</p>
-        </div>
-      </div>
-    </section>
+  <!-- SLIDE — Q&A -->
+  <section class="slide qa">
+    <span class="bigmark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="4.9" r="1.9" fill="none"/><line x1="12" y1="6.8" x2="12" y2="21"/><rect x="9.8" y="10.1" width="4.4" height="4.4" rx="1.3" fill="currentColor" stroke="none"/><path d="M6.6 14.6H4.7a7.3 7.3 0 0 0 14.6 0h-1.9" fill="none"/></svg>
+    </span>
+    <h1>Ancr<span class="accent">ux</span></h1>
+    <p class="sub">¿Preguntas?</p>
+    <div class="rule"></div>
+    <p class="meta">Código · Documentación · Demo en vivo</p>
+    <p class="link">ancrux.vercel.app</p>
+    <p class="author">Jose Aguilera · TFM 2026</p>
+  </section>
 
-    <!-- ===================== SLIDE 16: Q&A ===================== -->
-    <section class="center" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
-      <div class="logo-box" style="margin-bottom:0.5em;">🔐</div>
-      <h1 style="font-size:2.5em; margin-bottom:0.1em;"><span class="accent">Trust</span>AI</h1>
-      <h3 style="font-size:1.1em; margin-bottom:1em;">¿Preguntas?</h3>
-      <hr style="width:260px; margin:0 auto 0.8em;">
-      <p style="font-size:0.7em; color:var(--muted-2);">
-        Código · Documentación · Demo en vivo
-      </p>
-      <code style="font-size:0.68em; color:var(--accent); display:block; margin-top:0.3em;">trustai-web-kappa.vercel.app</code>
-      <p style="font-size:0.58em; color:var(--muted-2); margin-top:1.2em;">
-        Jose Aguilera &nbsp;·&nbsp; TFM 2026
-      </p>
-    </section>
+</div>
 
-  </div><!-- /slides -->
-</div><!-- /reveal -->
+<div class="chrome">
+  <div class="nav-hint">Usa <kbd>←</kbd> <kbd>→</kbd> o <kbd>espacio</kbd></div>
+  <div class="dots" id="dots"></div>
+  <div class="counter" id="counter">01 / 04</div>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
 <script>
-  Reveal.initialize({
-    hash: true,
-    slideNumber: 'c/t',
-    progress: true,
-    controls: true,
-    center: false,
-    transition: 'slide',
-    transitionSpeed: 'fast',
-    backgroundTransition: 'fade',
-    width: 1280,
-    height: 720,
-    margin: 0.04,
-    plugins: []
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dotsWrap = document.getElementById('dots');
+  var counter = document.getElementById('counter');
+  var progress = document.getElementById('progress');
+  var current = 0;
+
+  // Build dots
+  slides.forEach(function (_, i) {
+    var b = document.createElement('button');
+    b.setAttribute('aria-label', 'Ir a la diapositiva ' + (i + 1));
+    b.addEventListener('click', function () { goTo(i); });
+    dotsWrap.appendChild(b);
   });
+  var dots = Array.prototype.slice.call(dotsWrap.children);
+
+  function fragmentsOf(i) { return Array.prototype.slice.call(slides[i].querySelectorAll('.fragment')); }
+
+  function render() {
+    slides.forEach(function (s, i) { s.classList.toggle('active', i === current); });
+    dots.forEach(function (d, i) { d.classList.toggle('on', i === current); });
+    var n = (current + 1).toString().padStart(2, '0');
+    var t = slides.length.toString().padStart(2, '0');
+    counter.textContent = n + ' / ' + t;
+    progress.style.width = ((current + 1) / slides.length * 100) + '%';
+  }
+
+  function goTo(i) {
+    if (i < 0 || i > slides.length - 1) return;
+    // hide fragments of the slide we leave if moving forward-fresh
+    current = i;
+    fragmentsOf(current).forEach(function (f) { f.classList.remove('visible'); });
+    render();
+    if (current === 0) startMotif();
+  }
+
+  function next() {
+    var frags = fragmentsOf(current);
+    var hidden = frags.filter(function (f) { return !f.classList.contains('visible'); });
+    if (hidden.length) { hidden[0].classList.add('visible'); return; }
+    if (current < slides.length - 1) goTo(current + 1);
+  }
+
+  function prev() {
+    var frags = fragmentsOf(current);
+    var shown = frags.filter(function (f) { return f.classList.contains('visible'); });
+    if (shown.length) { shown[shown.length - 1].classList.remove('visible'); return; }
+    if (current > 0) {
+      current -= 1;
+      render();
+      // reveal all fragments of previous slide so going back feels complete
+      fragmentsOf(current).forEach(function (f) { f.classList.add('visible'); });
+    }
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { goTo(0); }
+    else if (e.key === 'End') { goTo(slides.length - 1); }
+  });
+
+  // Touch swipe
+  var tx = 0;
+  document.addEventListener('touchstart', function (e) { tx = e.changedTouches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', function (e) {
+    var dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) { dx < 0 ? next() : prev(); }
+  }, { passive: true });
+
+  // ---- Hash motif animation (slide 1) ----
+  var HEX = '0123456789abcdef';
+  var TARGET = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+  var motifVal = document.getElementById('motif-val');
+  var motifRow = document.getElementById('motif-hash');
+  var motifStatus = document.getElementById('motif-status');
+  var motifTimer = null;
+
+  function startMotif() {
+    if (motifTimer) return;
+    var locked = 0;
+    motifRow.classList.remove('matched');
+    motifStatus.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg>Calculando';
+    motifTimer = setInterval(function () {
+      var out = '';
+      for (var i = 0; i < TARGET.length; i++) {
+        out += i < locked ? TARGET[i] : HEX[(Math.random() * 16) | 0];
+      }
+      motifVal.textContent = out;
+      locked += 2;
+      if (locked >= TARGET.length) {
+        clearInterval(motifTimer); motifTimer = null;
+        motifVal.textContent = TARGET;
+        motifRow.classList.add('matched');
+        motifStatus.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Anclada';
+      }
+    }, 45);
+  }
+
+  render();
+  startMotif();
+})();
 </script>
 </body>
 </html>
