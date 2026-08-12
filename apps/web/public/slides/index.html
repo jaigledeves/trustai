@@ -732,9 +732,9 @@ provenance: {
     <h2>Pruebas y <span class="accent">CI</span></h2>
     <div class="grid3">
       <div class="card center">
-        <div class="statbig">534</div>
+        <div class="statbig">576</div>
         <div class="sl">Pruebas unitarias</div>
-        <div class="ssl">dtr-core 29 · utils 11 · API 205 · Web 289</div>
+        <div class="ssl">dtr-core 29 · utils 11 · API 217 · Web 319</div>
       </div>
       <div class="card center">
         <div class="statbig">E2E</div>
@@ -771,6 +771,8 @@ provenance: {
         <tr><td><code>008</code></td><td><span class="em">DTO de query validado para los filtros de lista</span></td><td class="mut">Parámetros sueltos con pipes ad-hoc en el controller</td></tr>
         <tr><td><code>009</code></td><td><span class="em">La web es dueña del copy de veredictos y del aviso eIDAS</span></td><td class="mut">Renderizar el copy/disclaimer en inglés que devuelve la API</td></tr>
         <tr><td><code>010</code></td><td><span class="em">Verbo canónico on-chain: «anclar» sobre «registrar»</span></td><td class="mut">«registrar» (choca con «Registro Digital de Confianza» y con «registrarse»)</td></tr>
+        <tr><td><code>011</code></td><td><span class="em">Theming con cookie + Server Component (SSR sin FOUC)</span></td><td class="mut">Librería <code>next-themes</code> (flash de tema en SSR, estado en cliente)</td></tr>
+        <tr><td><code>012</code></td><td><span class="em">Guardia global de rate limiting (<code>APP_GUARD</code>) con tracker por usuario</span></td><td class="mut">Throttling solo por IP (comparte balde entre usuarios tras el mismo NAT)</td></tr>
       </tbody>
     </table>
   </section>
@@ -781,8 +783,8 @@ provenance: {
     <h2><span class="accent">Resultados</span></h2>
     <div class="grid3">
       <div class="card center"><div class="statbig">MVP</div><div class="sl">Completo y en producción</div><div class="ssl">Flujo end-to-end contra Base Sepolia real</div></div>
-      <div class="card center"><div class="statbig">534</div><div class="sl">Pruebas automáticas</div><div class="ssl">Unitarias + E2E + contrato Foundry</div></div>
-      <div class="card center"><div class="statbig">10</div><div class="sl">ADRs documentados</div><div class="ssl">Con alternativas y consecuencias</div></div>
+      <div class="card center"><div class="statbig">576</div><div class="sl">Pruebas automáticas</div><div class="ssl">Unitarias + E2E + contrato Foundry</div></div>
+      <div class="card center"><div class="statbig">12</div><div class="sl">ADRs documentados</div><div class="ssl">Con alternativas y consecuencias</div></div>
     </div>
     <div class="grid2" style="margin-top:16px">
       <div class="card good">
@@ -858,7 +860,7 @@ provenance: {
       <div class="card blue fragment"><p><b>IA + blockchain resuelven el problema de la confianza</b> sin exigir que quien verifica confíe en quien emite.</p></div>
       <div class="card fragment"><p><b>La arquitectura hexagonal</b> permitió desarrollar y probar el dominio aislado por completo de la infraestructura, sin acoplarlo a ningún framework ni servicio externo.</p></div>
       <div class="card fragment"><p><b>dtr-core como paquete puro</b> garantiza que la canonicalización y la verificación sean reproducibles por cualquier implementación futura, en cualquier lenguaje.</p></div>
-      <div class="card good fragment"><p><b>El MVP está en producción</b>, con flujo completo probado end-to-end contra Base Sepolia real y 534 pruebas automáticas pasando en CI.</p></div>
+      <div class="card good fragment"><p><b>El MVP está en producción</b>, con flujo completo probado end-to-end contra Base Sepolia real y 576 pruebas automáticas pasando en CI.</p></div>
     </div>
   </section>
 
