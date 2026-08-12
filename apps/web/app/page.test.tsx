@@ -16,18 +16,17 @@ vi.mock("@/components/landing/VerificationDemo", () => ({
 // client `render()` can't resolve an async component nested under this
 // sync `LandingPage` the way the real Next.js RSC renderer does, so it's
 // mocked here — this suite only cares about section ORDERING, same
-// rationale as the `VerificationDemo` mock above.
-vi.mock("@/components/landing/Nav", async () => {
-  const { landingDictionary } = await import("@/dictionaries/es/landing");
-  return {
-    Nav: () => (
-      <header>
-        <a href="/login">{landingDictionary.nav.login}</a>
-        <a href="/register">{landingDictionary.nav.register}</a>
-      </header>
-    ),
-  };
-});
+// rationale as the `VerificationDemo` mock above. Uses a hardcoded marker
+// instead of `landingDictionary.nav.*` since those keys were removed
+// (spec: public-landing — Session-Aware Nav Auth Affordance moved the auth
+// CTA copy to `shellDictionary.nav.signIn`, out of scope for this mock).
+vi.mock("@/components/landing/Nav", () => ({
+  Nav: () => (
+    <header>
+      <a href="/login">NAV_MARKER</a>
+    </header>
+  ),
+}));
 
 describe("LandingPage (spec: public-landing — Landing Composition, Config-Driven Navigation & Links)", () => {
   beforeEach(() => {
@@ -46,7 +45,7 @@ describe("LandingPage (spec: public-landing — Landing Composition, Config-Driv
     render(<LandingPage />);
 
     const orderedMarkers = [
-      landingDictionary.nav.register,
+      "NAV_MARKER",
       landingDictionary.hero.title,
       landingDictionary.how.title,
       "VERIFICATION_DEMO_MARKER",

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ExternalLink, ShieldAlert, UploadCloud } from "lucide-react";
+import { ExternalLink, UploadCloud } from "lucide-react";
 import { useState, type ChangeEvent, type DragEvent } from "react";
 
 const KB = 1024;
@@ -15,6 +15,7 @@ import { verifyDictionary } from "../../dictionaries/es/verify";
 import { postVerifyUpload } from "../../lib/api/public-verify-client";
 import type { VerifyUploadResponse } from "../../lib/api/types";
 import { cn } from "../../lib/utils";
+import { classifyVerdict, VERDICT_SEVERITY_STYLES } from "../../lib/verify/verdict";
 import { Button } from "../ui/button";
 import { ClientHashRecompute } from "./ClientHashRecompute";
 
@@ -170,26 +171,16 @@ export function UploadVerdictPanel({ id }: UploadVerdictPanelProps) {
   );
 }
 
-/** True for the two "something is wrong" verdicts — ASSET_MISMATCH and INVALID_RECORD. */
-function isErrorVerdict(verdict: VerifyUploadResponse["verdict"]): boolean {
-  return verdict === "ASSET_MISMATCH" || verdict === "INVALID_RECORD";
-}
-
 function VerdictOutcome({ result }: { result: VerifyUploadResponse }) {
   const copy = verifyDictionary.verdicts[result.verdict];
-  const isError = isErrorVerdict(result.verdict);
+  const severity = classifyVerdict(result.verdict);
+  const { role, className, Icon } = VERDICT_SEVERITY_STYLES[severity];
 
   return (
     <div className="mt-6 flex flex-col gap-4">
-      <div
-        role={isError ? "alert" : "status"}
-        className={cn(
-          "rounded-xl p-4",
-          isError ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success",
-        )}
-      >
+      <div role={role} className={cn("rounded-xl p-4", className)}>
         <div className="flex items-center gap-2">
-          {isError ? <ShieldAlert className="size-5" /> : <Check className="size-5" />}
+          <Icon className="size-5" />
           <h3 className="font-semibold">{copy.title}</h3>
         </div>
         <p className="mt-1 text-sm">{copy.message}</p>

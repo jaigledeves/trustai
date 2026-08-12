@@ -14,6 +14,18 @@ import { VerificationDemo } from "./VerificationDemo";
  * browser-recomputed hash matches/verifies the on-chain hash.
  */
 describe("VerificationDemo (spec: public-landing — Honest Verification Demo)", () => {
+  it("renders verdict toggle buttons in semaphore order: VALID, PENDING_ANCHOR, ASSET_MISMATCH, INVALID_RECORD", () => {
+    render(<VerificationDemo />);
+
+    const buttons = screen.getAllByRole("button");
+    expect(buttons.map((button) => button.textContent)).toEqual([
+      verifyDictionary.verdicts.VALID.title,
+      verifyDictionary.verdicts.PENDING_ANCHOR.title,
+      verifyDictionary.verdicts.ASSET_MISMATCH.title,
+      verifyDictionary.verdicts.INVALID_RECORD.title,
+    ]);
+  });
+
   it("defaults to the VALID verdict", () => {
     render(<VerificationDemo />);
 
@@ -54,9 +66,13 @@ describe("VerificationDemo (spec: public-landing — Honest Verification Demo)",
     expect(
       await screen.findByText(verifyDictionary.verdicts.PENDING_ANCHOR.message),
     ).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      verifyDictionary.verdicts.PENDING_ANCHOR.message,
-    );
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent(verifyDictionary.verdicts.PENDING_ANCHOR.message);
+
+    // Honesty bug guard (spec: public-landing — "PENDING_ANCHOR never
+    // renders as success"): no success color/check icon for pending.
+    expect(status.querySelector("svg.lucide-check")).not.toBeInTheDocument();
+    expect(status.className).not.toMatch(/bg-success|text-success/);
   });
 
   it("toggling INVALID_RECORD renders its exact title/message as an alert", async () => {

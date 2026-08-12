@@ -57,8 +57,6 @@ export function Hero() {
             ) : null}
           </div>
 
-          <p className="text-xs text-muted-foreground">{t.ctaMicrocopy}</p>
-
           <ul className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
             {t.valueProps.map((valueProp) => (
               <li key={valueProp} className="inline-flex items-center gap-1.5">

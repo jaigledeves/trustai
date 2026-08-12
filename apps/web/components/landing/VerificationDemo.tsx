@@ -4,20 +4,17 @@ import { useState } from "react";
 import { landingDictionary } from "@/dictionaries/es/landing";
 import { verifyDictionary } from "@/dictionaries/es/verify";
 import { cn } from "@/lib/utils";
+import { classifyVerdict, VERDICT_SEVERITY_STYLES } from "@/lib/verify/verdict";
 
 type VerifyVerdict = keyof typeof verifyDictionary.verdicts;
 
+/** Semaphore order (spec: public-landing — Honest Verification Demo). */
 const VERDICT_ORDER: VerifyVerdict[] = [
   "VALID",
-  "ASSET_MISMATCH",
   "PENDING_ANCHOR",
+  "ASSET_MISMATCH",
   "INVALID_RECORD",
 ];
-
-/** Mirrors `UploadVerdictPanel`'s `isErrorVerdict` split. */
-function isErrorVerdict(verdict: VerifyVerdict): boolean {
-  return verdict === "ASSET_MISMATCH" || verdict === "INVALID_RECORD";
-}
 
 /**
  * Honest verification demo (spec: public-landing — Honest Verification
@@ -35,6 +32,7 @@ export function VerificationDemo() {
   const [verdict, setVerdict] = useState<VerifyVerdict>("VALID");
   const t = landingDictionary.verificationDemo;
   const copy = verifyDictionary.verdicts[verdict];
+  const { role, className, Icon } = VERDICT_SEVERITY_STYLES[classifyVerdict(verdict)];
 
   return (
     <section
@@ -79,16 +77,11 @@ export function VerificationDemo() {
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6 shadow-lg shadow-primary/5">
-          <div
-            role={isErrorVerdict(verdict) ? "alert" : "status"}
-            className={cn(
-              "rounded-lg p-4",
-              isErrorVerdict(verdict)
-                ? "bg-destructive/10 text-destructive"
-                : "bg-success/10 text-success",
-            )}
-          >
-            <h3 className="font-semibold">{copy.title}</h3>
+          <div role={role} className={cn("rounded-lg p-4", className)}>
+            <div className="flex items-center gap-2">
+              <Icon className="size-5" />
+              <h3 className="font-semibold">{copy.title}</h3>
+            </div>
             <p className="mt-1 text-sm">{copy.message}</p>
           </div>
 

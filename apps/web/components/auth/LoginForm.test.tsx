@@ -135,4 +135,14 @@ describe("LoginForm (spec: Login and Session Establishment)", () => {
       screen.getByRole("link", { name: authDictionary.login.forgotPasswordLink }),
     ).toHaveAttribute("href", "/forgot-password");
   });
+
+  it("renders a register cross-link with an accessible name distinct from submit (spec: web-auth-flow — Login Form Offers a Register Cross-Link)", () => {
+    render(<LoginForm />);
+
+    const registerLink = screen.getByRole("link", {
+      name: authDictionary.login.registerCta,
+    });
+    expect(registerLink).toHaveAttribute("href", "/register");
+    expect(registerLink.textContent).not.toBe(authDictionary.login.submit);
+  });
 });

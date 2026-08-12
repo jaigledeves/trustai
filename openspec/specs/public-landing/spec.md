@@ -21,6 +21,9 @@ The system MUST render route `/` as a Server Component (`apps/web/app/page.tsx`)
 composing Nav, Hero, HowItWorks, VerificationDemo, UseCases, Pillars, Faq,
 FinalCta, and Footer sections from `apps/web/components/landing/`. Only
 `VerificationDemo` MUST declare `'use client'`; every other section MUST NOT.
+`Nav` becomes session-aware (see "Session-Aware Nav Auth Affordance" below)
+but this MUST NOT introduce an additional `'use client'` boundary — session
+resolution happens server-side via `getSession()`.
 
 #### Scenario: Page renders all sections in order
 
@@ -31,9 +34,45 @@ FinalCta, and Footer sections from `apps/web/components/landing/`. Only
 
 #### Scenario: Only VerificationDemo ships client JS
 
-- GIVEN the composed page's section modules
+- GIVEN the composed page's section modules, including the now
+  session-aware `Nav`
 - WHEN each is inspected for a `'use client'` directive
-- THEN only `VerificationDemo.tsx` has it; the rest MUST NOT
+- THEN only `VerificationDemo.tsx` has it; the rest, including `Nav.tsx`,
+  MUST NOT
+
+### Requirement: Session-Aware Nav Auth Affordance
+
+The landing `Nav` MUST read the visitor's session (`getSession()`) and
+render exactly one auth affordance state. When logged out, it MUST render
+a single primary "Acceder" action (`shellDictionary.nav.signIn`) linking
+to `/login`, and MUST NOT render a "Crear cuenta" button or any login icon
+in the nav. When logged in, it MUST render "Mis DTR" (`shellDictionary.nav.dtrs`,
+linking to `/dtrs`) plus "Cerrar sesión" (`shellDictionary.nav.logout`) via
+the shared `LogoutButton`, and MUST NOT render a "Certificar"/new-certification
+shortcut. `ThemeToggle` and the section links (`sectionLinks`) MUST render
+identically in both auth states.
+
+#### Scenario: Logged-out visitor sees a single Acceder CTA
+
+- GIVEN a visitor with no session requests `/`
+- WHEN `Nav` renders
+- THEN it shows exactly one primary action labeled
+  `shellDictionary.nav.signIn` linking to `/login`
+- AND no "Crear cuenta" button or login icon is rendered
+
+#### Scenario: Logged-in visitor sees Mis DTR and Cerrar sesión only
+
+- GIVEN a visitor with an active session requests `/`
+- WHEN `Nav` renders
+- THEN it shows "Mis DTR" linking to `/dtrs` and "Cerrar sesión"
+- AND no "Certificar"/new-certification shortcut is rendered
+
+#### Scenario: ThemeToggle and section links are unaffected by auth state
+
+- GIVEN either a logged-out or a logged-in visitor requests `/`
+- WHEN `Nav` renders
+- THEN `ThemeToggle` and all four section links render identically in
+  both states
 
 ### Requirement: Dictionary-Sourced Copy (RNF-041)
 
@@ -57,18 +96,26 @@ MUST define `nav`, `hero`, `how`, `verificationDemo`, `useCases`, `pillars`,
 - THEN `useCases`, `faq`, and `verificationDemo` groups exist and every leaf
   is a non-empty string
 
-### Requirement: Light-Mode-Only Styling
+### Requirement: Success/Pending Indicator Semantic Tokens
 
-Landing sections MUST NOT introduce `.dark` selectors, `prefers-color-scheme`
-media queries, or `--success*` custom properties. Success/live indicators
-MUST use existing `emerald-*` Tailwind utilities.
+Landing success and pending indicators use the `--success`/`--warning`
+semantic tokens (light + dark), consistent with the rest of the app.
 
-#### Scenario: No dark-mode or success-token artifacts
+(Previously "Light-Mode-Only Styling": banned `.dark` selectors and
+`--success*` properties in landing sections, mandating `emerald-*`-only
+success/live indicators. That mandate predated `--success` adoption and
+ADR-011's app-wide dark mode, and was already contradicted by shipped code
+(`Hero.tsx`/`VerificationDemo.tsx` used `bg-success/10 text-success` before
+this change). Resolved per ADR-014 at archive of
+`honest-verdicts-and-landing-copy`, which additionally introduced
+`bg-warning/10 text-warning` for the pending state.)
 
-- GIVEN the diff introduced by this change
-- WHEN `globals.css` and `components/landing/*` are inspected
-- THEN no `.dark` rule, `prefers-color-scheme` query, or `--success` custom
-  property appears; success/live indicators use `emerald-*` classes only
+#### Scenario: Success/pending indicators resolve via semantic tokens
+
+- GIVEN a landing section renders a success or pending indicator
+- WHEN its color is inspected in `:root` (light) and `.dark`
+- THEN it resolves via `--success`/`--success-foreground` or
+  `--warning`/`--warning-foreground`, not a hardcoded `emerald-*` utility
 
 ### Requirement: Central Artifact Terminology Lock
 
@@ -132,21 +179,39 @@ which remain supporting-section, opt-in reading.
 ### Requirement: Honest Verification Demo
 
 `VerificationDemo` MUST let a visitor toggle among the four real backend
-verdicts (`VALID`, `ASSET_MISMATCH`, `PENDING_ANCHOR`, `INVALID_RECORD`),
-sourcing verdict title/message copy from `verifyDictionary.verdicts` (not
-re-authored). It MUST NOT claim the browser recomputes a file hash and
+verdicts, presented in semaphore order `VALID`, `PENDING_ANCHOR`,
+`ASSET_MISMATCH`, `INVALID_RECORD`, sourcing verdict title/message copy
+from `verifyDictionary.verdicts` (not re-authored). The rendered outcome
+MUST use the same three-state severity as `web-public-verify`: `success`
+for `VALID`, `pending` for `PENDING_ANCHOR`, `error` for `ASSET_MISMATCH`/
+`INVALID_RECORD`. `PENDING_ANCHOR` MUST NOT render with the success color
+or the success (check) icon — it MUST use a distinct pending/warning
+treatment. It MUST NOT claim the browser recomputes a file hash and
 compares it against the on-chain/canonical hash. It MAY state the browser
 independently recomputes the file's SHA-256, with caveat wording consistent
 with `verifyDictionary.recompute.caveat`. `landingDictionary.verificationDemo`
 copy MUST use the same fingerprint term and on-chain verb mandated by
 `web-plain-language`, matching `verifyDictionary`'s equivalent copy.
 
+#### Scenario: Buttons render in semaphore order
+
+- GIVEN `VerificationDemo` is rendered
+- WHEN the verdict toggle buttons are inspected in DOM order
+- THEN they appear as VALID, PENDING_ANCHOR, ASSET_MISMATCH, INVALID_RECORD
+
 #### Scenario: Toggling shows each real verdict's copy
 
-- GIVEN VerificationDemo is rendered
+- GIVEN `VerificationDemo` is rendered
 - WHEN a visitor selects each of the four verdict options in turn
 - THEN the displayed title/message match `verifyDictionary.verdicts.VALID`,
-  `.ASSET_MISMATCH`, `.PENDING_ANCHOR`, `.INVALID_RECORD` respectively
+  `.PENDING_ANCHOR`, `.ASSET_MISMATCH`, `.INVALID_RECORD` respectively
+
+#### Scenario: PENDING_ANCHOR never renders as success
+
+- GIVEN a visitor selects the `PENDING_ANCHOR` verdict
+- WHEN the outcome panel renders
+- THEN it does not use the success color token or a check icon
+- AND it uses the pending/warning color token instead
 
 #### Scenario: No on-chain comparison claim
 
@@ -168,6 +233,27 @@ copy MUST use the same fingerprint term and on-chain verb mandated by
   on-chain-action wording
 - WHEN compared against `verifyDictionary`'s equivalent wording
 - THEN both use the same fingerprint noun and the same on-chain verb
+
+### Requirement: Hero Value Props Are the Single Source of Free/No-Card Messaging
+
+The hero section MUST communicate "free / no card / no install" claims in
+exactly one place: the `valueProps` list (rendered with the success check
+icon). The hero MUST NOT render a separate microcopy line duplicating the
+same claims beneath the CTA buttons, and `landingDictionary.hero` MUST NOT
+define an unused `ctaMicrocopy` key.
+
+#### Scenario: Hero renders no duplicate free/no-card line
+
+- GIVEN the Hero section is rendered
+- WHEN its DOM is inspected below the CTA buttons
+- THEN no standalone paragraph repeats the free/no-card/no-install claims
+- AND the `valueProps` list remains the only place those claims appear
+
+#### Scenario: ctaMicrocopy key is removed from the dictionary
+
+- GIVEN `landingDictionary.hero`
+- WHEN its keys are inspected
+- THEN no `ctaMicrocopy` key is present
 
 ### Requirement: Accurate Anchoring Copy
 
