@@ -1,6 +1,5 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { ThrottlerModule } from "@nestjs/throttler";
 import { createPublicClient, http, type Address, type Chain } from "viem";
 import { ChainNotConfiguredAnchorAdapter } from "../../adapters/chain/not-configured-anchor.adapter";
 import { ViemAnchorAdapter } from "../../adapters/chain/viem-anchor.adapter";
@@ -13,16 +12,16 @@ import { TRUST_RECORD_REPOSITORY_PORT } from "../../ports/trust-record-repositor
 import { VERIFICATION_ATTEMPT_REPOSITORY_PORT } from "../../ports/verification-attempt-repository.port";
 import { PublicVerificationController } from "./public-verification.controller";
 
-/** design.md "Throttler scope" decision: 60/min GET default here, 20/min POST via a per-route @Throttle override — never a global APP_GUARD (would throttle every authenticated route in the app too). */
-const DEFAULT_THROTTLE_TTL_MS = 60_000;
-const DEFAULT_THROTTLE_LIMIT = 60;
-
+// ADR-012: rate limiting is app-wide via the global "global" APP_GUARD
+// (ThrottlingModule). This module no longer registers its own ThrottlerModule;
+// the controller pins its 60/min GET and 20/min POST limits via per-route
+// @Throttle({ global: {...} }) overrides on that shared guard — the same
+// mechanism assets/anchor use. (Two coexisting ThrottlerModules collided on
+// the throttler-options DI token, silently disabling these limits — hence the
+// consolidation onto one guard.)
 @Module({
   imports: [
     ConfigModule,
-    ThrottlerModule.forRoot([
-      { ttl: DEFAULT_THROTTLE_TTL_MS, limit: DEFAULT_THROTTLE_LIMIT },
-    ]),
   ],
   controllers: [PublicVerificationController],
   providers: [

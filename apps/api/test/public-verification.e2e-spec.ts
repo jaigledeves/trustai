@@ -524,5 +524,59 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
       }
       expect(lastStatus).toBe(429);
     }, 30_000);
+
+    // ADR-012 / spec "Public Verification Limits Remain Unchanged": proves
+    // public-verification's per-route @Throttle({ global: {...} }) overrides
+    // (60/20) always win over the global default THROTTLE_LIMIT. Uses its OWN
+    // app instance with THROTTLE_LIMIT=1 — far below public-verification's own
+    // 60/20 — so if the per-route overrides weren't applied (or were wrong),
+    // the 2nd call on either route would 429 immediately. The record id
+    // doesn't need to exist — GET 404s / POST 200s INVALID_RECORD either
+    // way; only the ABSENCE of 429 is under test here.
+    it("S-PV-9: public-verification keeps its own 60/20 limits (per-route override) even when THROTTLE_LIMIT is set far below them", async () => {
+      const previousGlobalLimit = process.env["THROTTLE_LIMIT"];
+      const previousGlobalTtl = process.env["THROTTLE_TTL_SECONDS"];
+      process.env["THROTTLE_LIMIT"] = "1";
+      process.env["THROTTLE_TTL_SECONDS"] = "60";
+
+      let exemptApp: INestApplication | undefined;
+      try {
+        const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+          .overrideProvider(NOTIFICATION_PORT)
+          .useValue({ sendVerificationEmail: vi.fn() })
+          .compile();
+        exemptApp = moduleRef.createNestApplication();
+        await exemptApp.init();
+
+        for (let i = 0; i < 3; i++) {
+          const getRes = await request(exemptApp.getHttpServer())
+            .get("/public/verify/global-guard-exemption-probe")
+            .send();
+          expect(getRes.status).not.toBe(429);
+        }
+
+        for (let i = 0; i < 3; i++) {
+          const postRes = await request(exemptApp.getHttpServer())
+            .post("/public/verify/global-guard-exemption-probe")
+            .attach("file", Buffer.from("probe"), {
+              filename: "probe.pdf",
+              contentType: "application/pdf",
+            });
+          expect(postRes.status).not.toBe(429);
+        }
+      } finally {
+        await exemptApp?.close();
+        if (previousGlobalLimit === undefined) {
+          delete process.env["THROTTLE_LIMIT"];
+        } else {
+          process.env["THROTTLE_LIMIT"] = previousGlobalLimit;
+        }
+        if (previousGlobalTtl === undefined) {
+          delete process.env["THROTTLE_TTL_SECONDS"];
+        } else {
+          process.env["THROTTLE_TTL_SECONDS"] = previousGlobalTtl;
+        }
+      }
+    }, 30_000);
   },
 );

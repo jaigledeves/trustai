@@ -4,6 +4,7 @@ import { AssetsModule } from "./modules/assets/assets.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { HealthModule } from "./modules/health/health.module";
 import { PublicVerificationModule } from "./modules/public-verification/public-verification.module";
+import { ThrottlingModule } from "./modules/throttling/throttling.module";
 import { TrustRecordsModule } from "./modules/trust-records/trust-records.module";
 import { WorkerModule } from "./modules/worker/worker.module";
 
@@ -22,6 +23,10 @@ const publicVerificationImports: Array<Type | DynamicModule> =
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
+    // ADR-012: the global rate-limiting APP_GUARD. Imported after
+    // ConfigModule/AuthModule (both of which it depends on), before the
+    // route modules it guards.
+    ThrottlingModule,
     HealthModule,
     WorkerModule,
     AssetsModule,

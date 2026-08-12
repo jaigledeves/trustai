@@ -14,6 +14,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 import type { JwtPayload } from "../../application/auth/login.use-case";
 import { ConfirmReviewUseCase } from "../../application/certification/confirm-review.use-case";
 import { DiscardDraftUseCase } from "../../application/certification/discard-draft.use-case";
@@ -38,6 +39,23 @@ import { TrustRecordListResponseDto } from "./dto/trust-record-list-response.dto
 
 /** pg-boss job states that represent a visible, not-yet-succeeded analyze-document outcome. */
 const JOB_FAILURE_STATES = new Set(["failed", "retry"]);
+
+const ANCHOR_THROTTLE_TTL_MS = 60_000;
+const DEFAULT_ANCHOR_THROTTLE_LIMIT = 10;
+
+/**
+ * ADR-012 / spec "Moderate Throttle on Trust Record Anchoring":
+ * `POST /trust-records/:id/anchor` incurs on-chain gas cost, so it needs
+ * its own limit independent of the global default. Same rationale as
+ * `assets.controller.ts`'s `resolveUploadThrottleLimit` (mirroring
+ * `public-verification.controller.ts`'s original pattern): read via
+ * `process.env` through a function so `@Throttle`'s `Resolvable<number>`
+ * re-evaluates `ANCHOR_THROTTLE_LIMIT` per request, not once at
+ * class-definition time.
+ */
+function resolveAnchorThrottleLimit(): number {
+  return Number(process.env["ANCHOR_THROTTLE_LIMIT"] ?? DEFAULT_ANCHOR_THROTTLE_LIMIT);
+}
 
 @ApiTags("trust-records")
 @ApiBearerAuth()
@@ -201,6 +219,7 @@ export class TrustRecordsController {
   }
 
   @Post(":id/anchor")
+  @Throttle({ global: { limit: resolveAnchorThrottleLimit, ttl: ANCHOR_THROTTLE_TTL_MS } })
   @ApiOperation({
     summary: "Submit for anchoring: READY -> ANCHORING (non-blocking)",
     description:

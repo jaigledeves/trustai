@@ -9,13 +9,12 @@ import {
   Post,
   Query,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiConsumes, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
+import { Throttle } from "@nestjs/throttler";
 import type {
   VerifyChainAnchor,
   VerifyResult,
@@ -43,7 +42,11 @@ const DEFAULT_EXPLORER_BASE_URL = "https://sepolia.basescan.org";
  * not per-request; a function defers the read to request time instead,
  * making the .env values (`PUBLIC_VERIFY_GET_THROTTLE_LIMIT`/
  * `PUBLIC_VERIFY_POST_THROTTLE_LIMIT`) actually configurable. Defaults
- * match the spec's fixed 60/20 (RF-042's rate-limiting requirement).
+ * are the fixed 60/20 this public surface has always enforced (ADR-012).
+ * These are applied as per-route `@Throttle({ global: {...} })` overrides
+ * on the app-wide `"global"` throttler — the same mechanism assets/anchor
+ * use — so they ALWAYS win over the global default `THROTTLE_LIMIT`
+ * regardless of its value.
  */
 function resolveGetThrottleLimit(): number {
   return Number(process.env["PUBLIC_VERIFY_GET_THROTTLE_LIMIT"] ?? DEFAULT_GET_THROTTLE_LIMIT);
@@ -56,13 +59,16 @@ function resolvePostThrottleLimit(): number {
 /**
  * public-verification (UC-02): no-auth verification surface. Deliberately
  * carries NO `@UseGuards(JwtAuthGuard)` — structurally separate from
- * `TrustRecordsModule`/`AssetsModule` (design.md, RF-040). The only guard
- * is `ThrottlerGuard`, resolved from this module's own `ThrottlerModule`
- * import (never a global `APP_GUARD` — that would throttle every
- * authenticated route in the app too).
+ * `TrustRecordsModule`/`AssetsModule` (design.md, RF-040). Rate limited by
+ * the app-wide `"global"` `APP_GUARD` (ADR-012), with per-route
+ * `@Throttle({ global: {...} })` overrides pinning GET to 60/min and POST
+ * to 20/min — its long-standing limits, unchanged. Being anonymous, the
+ * guard's tracker falls back to the client IP (no JWT), exactly as this
+ * surface was always keyed. The per-route override always wins over the
+ * global `THROTTLE_LIMIT`, so these limits can never be loosened OR
+ * tightened by that global default.
  */
 @ApiTags("public-verification")
-@UseGuards(ThrottlerGuard)
 @Controller("public/verify")
 export class PublicVerificationController {
   constructor(
@@ -71,7 +77,7 @@ export class PublicVerificationController {
   ) {}
 
   @Get(":id")
-  @Throttle({ default: { limit: resolveGetThrottleLimit, ttl: GET_THROTTLE_TTL_MS } })
+  @Throttle({ global: { limit: resolveGetThrottleLimit, ttl: GET_THROTTLE_TTL_MS } })
   @ApiQuery({ name: "channel", required: false, enum: VALID_CHANNELS })
   @ApiOperation({
     summary: "Hash-only public verification (no auth)",
@@ -99,7 +105,7 @@ export class PublicVerificationController {
 
   @Post(":id")
   @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { limit: resolvePostThrottleLimit, ttl: POST_THROTTLE_TTL_MS } })
+  @Throttle({ global: { limit: resolvePostThrottleLimit, ttl: POST_THROTTLE_TTL_MS } })
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiQuery({ name: "channel", required: false, enum: VALID_CHANNELS })
