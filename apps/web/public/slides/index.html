@@ -557,7 +557,7 @@
   <!-- SLIDE — DTR-CORE -->
   <section class="slide dense">
     <span class="kicker">Paquete central</span>
-    <h2><code style="font-size:0.85em">@trustai/dtr-core</code></h2>
+    <h2><code style="font-size:0.85em">dtr-core</code></h2>
     <p class="head-lead">TypeScript puro — sin framework, sin base de datos, sin IA. La única fuente de verdad del protocolo DTR, reproducible en cualquier lenguaje.</p>
     <div class="grid2">
       <div>
@@ -706,7 +706,7 @@ provenance: {
           <tbody>
             <tr><td><span class="em">Web</span></td><td class="mut">Next.js 16 · App Router · Tailwind v4</td></tr>
             <tr><td><span class="em">API</span></td><td class="mut">NestJS · pg-boss · Prisma</td></tr>
-            <tr><td><span class="em">Core</span></td><td class="mut">@trustai/dtr-core (TS puro)</td></tr>
+            <tr><td><span class="em">Core</span></td><td class="mut">dtr-core (TS puro)</td></tr>
             <tr><td><span class="em">Base de datos</span></td><td class="mut">PostgreSQL (datos + cola)</td></tr>
             <tr><td><span class="em">Almacenamiento</span></td><td class="mut">Cloudflare R2 · AES-256-GCM</td></tr>
             <tr><td><span class="em">Blockchain</span></td><td class="mut">Base Sepolia · viem</td></tr>
@@ -732,9 +732,9 @@ provenance: {
     <h2>Pruebas y <span class="accent">CI</span></h2>
     <div class="grid3">
       <div class="card center">
-        <div class="statbig">534</div>
+        <div class="statbig">576</div>
         <div class="sl">Pruebas unitarias</div>
-        <div class="ssl">dtr-core 29 · utils 11 · API 205 · Web 289</div>
+        <div class="ssl">dtr-core 29 · utils 11 · API 217 · Web 319</div>
       </div>
       <div class="card center">
         <div class="statbig">E2E</div>
@@ -750,6 +750,62 @@ provenance: {
     <div class="grid2" style="margin-top:16px">
       <div class="callout"><b>Contrato (Foundry):</b> unit + fuzz tests sobre <code>anchor()</code> y <code>isAnchored()</code>. Superficie de ataque mínima verificada.</div>
       <div class="callout"><b>dtr-core:</b> casos límite cubiertos — orden de claves, nulos, normalización numérica y re-hashing idempotente bajo cualquier permutación.</div>
+    </div>
+  </section>
+
+  <!-- SLIDE — ADRs -->
+  <section class="slide dense">
+    <span class="kicker">Decisiones de arquitectura</span>
+    <h2>Architecture Decision Records</h2>
+    <p class="head-lead">Cada decisión relevante quedó registrada como ADR en <code>docs/adr/</code> con su contexto, alternativas y consecuencias.</p>
+    <table>
+      <thead><tr><th style="width:64px">ADR</th><th>Decisión</th><th>Alternativa descartada</th></tr></thead>
+      <tbody>
+        <tr><td><code>001</code></td><td><span class="em">Anclar la huella canónica del DTR on-chain</span></td><td class="mut">Guardar el JSON completo en la cadena (caro e inmutable de forma indeseable)</td></tr>
+        <tr><td><code>002</code></td><td><span class="em">Stack full-TypeScript en monorepo pnpm</span></td><td class="mut">Backend Python / Go (ecosistemas separados, fricción)</td></tr>
+        <tr><td><code>003</code></td><td><span class="em">Contrato mínimo sin owner ni lógica de negocio</span></td><td class="mut">NFT ERC-721 (overhead y más superficie de ataque)</td></tr>
+        <tr><td><code>004</code></td><td><span class="em">Adaptador de IA dual con stub de primera clase</span></td><td class="mut">Mock solo en tests (no extensible)</td></tr>
+        <tr><td><code>005</code></td><td><span class="em">Next.js App Router + TanStack Query</span></td><td class="mut">Pages Router / SWR (caching menos expresivo)</td></tr>
+        <tr><td><code>006</code></td><td><span class="em">Vercel + Railway + R2 para el despliegue</span></td><td class="mut">AWS full-stack (coste y complejidad excesivos para un MVP)</td></tr>
+        <tr><td><code>007</code></td><td><span class="em">Método de repositorio dedicado para el join asset org-scoped</span></td><td class="mut">Reusar el método sin scope y post-filtrar (violaría el org-scoping a nivel de query, RNF-004)</td></tr>
+        <tr><td><code>008</code></td><td><span class="em">DTO de query validado para los filtros de lista</span></td><td class="mut">Parámetros sueltos con pipes ad-hoc en el controller</td></tr>
+        <tr><td><code>009</code></td><td><span class="em">La web es dueña del copy de veredictos y del aviso eIDAS</span></td><td class="mut">Renderizar el copy/disclaimer en inglés que devuelve la API</td></tr>
+        <tr><td><code>010</code></td><td><span class="em">Verbo canónico on-chain: «anclar» sobre «registrar»</span></td><td class="mut">«registrar» (choca con «Registro Digital de Confianza» y con «registrarse»)</td></tr>
+        <tr><td><code>011</code></td><td><span class="em">Theming con cookie + Server Component (SSR sin FOUC)</span></td><td class="mut">Librería <code>next-themes</code> (flash de tema en SSR, estado en cliente)</td></tr>
+        <tr><td><code>012</code></td><td><span class="em">Guardia global de rate limiting (<code>APP_GUARD</code>) con tracker por usuario</span></td><td class="mut">Throttling solo por IP (comparte balde entre usuarios tras el mismo NAT)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- SLIDE — RESULTADOS -->
+  <section class="slide dense">
+    <span class="kicker">Estado del proyecto</span>
+    <h2><span class="accent">Resultados</span></h2>
+    <div class="grid3">
+      <div class="card center"><div class="statbig">MVP</div><div class="sl">Completo y en producción</div><div class="ssl">Flujo end-to-end contra Base Sepolia real</div></div>
+      <div class="card center"><div class="statbig">576</div><div class="sl">Pruebas automáticas</div><div class="ssl">Unitarias + E2E + contrato Foundry</div></div>
+      <div class="card center"><div class="statbig">12</div><div class="sl">ADRs documentados</div><div class="ssl">Con alternativas y consecuencias</div></div>
+    </div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="card good">
+        <div class="ct">Funciona en producción</div>
+        <ul class="clist ok">
+          <li>Registro de usuario + verificación de email</li>
+          <li>Subida de activos (PDF) cifrados en R2</li>
+          <li>Análisis IA (gpt-5.4-mini) → DTR estructurado</li>
+          <li>Anclaje on-chain → estado CERTIFIED</li>
+          <li>Verificación pública sin cuenta (UC-02)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ct">Documentación viva</div>
+        <ul class="clist ok">
+          <li>TDD completo en <code>docs/</code> (13 secciones)</li>
+          <li>Diagramas C4 (context · container · component)</li>
+          <li>Endpoints de API documentados</li>
+          <li>Modelo de seguridad con diagramas de secuencia</li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -772,60 +828,6 @@ provenance: {
           <div class="cap">Verificación pública de Ancrux</div>
           <div class="url">ancrux.vercel.app/verify/&lt;id&gt;</div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE — ADRs -->
-  <section class="slide dense">
-    <span class="kicker">Decisiones de arquitectura</span>
-    <h2>Architecture Decision Records</h2>
-    <p class="head-lead">Cada decisión relevante quedó registrada como ADR en <code>docs/adr/</code> con su contexto, alternativas y consecuencias.</p>
-    <table>
-      <thead><tr><th style="width:64px">ADR</th><th>Decisión</th><th>Alternativa descartada</th></tr></thead>
-      <tbody>
-        <tr><td><code>001</code></td><td><span class="em">Anclar la huella canónica del DTR on-chain</span></td><td class="mut">Guardar el JSON completo en la cadena (caro e inmutable de forma indeseable)</td></tr>
-        <tr><td><code>002</code></td><td><span class="em">Stack full-TypeScript en monorepo pnpm</span></td><td class="mut">Backend Python / Go (ecosistemas separados, fricción)</td></tr>
-        <tr><td><code>003</code></td><td><span class="em">Contrato mínimo sin owner ni lógica de negocio</span></td><td class="mut">NFT ERC-721 (overhead y más superficie de ataque)</td></tr>
-        <tr><td><code>004</code></td><td><span class="em">Adaptador de IA dual con stub de primera clase</span></td><td class="mut">Mock solo en tests (no extensible)</td></tr>
-        <tr><td><code>005</code></td><td><span class="em">Next.js App Router + TanStack Query</span></td><td class="mut">Pages Router / SWR (caching menos expresivo)</td></tr>
-        <tr><td><code>006</code></td><td><span class="em">Vercel + Railway + R2 para el despliegue</span></td><td class="mut">AWS full-stack (coste y complejidad excesivos para un MVP)</td></tr>
-        <tr><td><code>007</code></td><td><span class="em">Método de repositorio dedicado para el join asset org-scoped</span></td><td class="mut">Reusar el método sin scope y post-filtrar (violaría el org-scoping a nivel de query, RNF-004)</td></tr>
-        <tr><td><code>008</code></td><td><span class="em">DTO de query validado para los filtros de lista</span></td><td class="mut">Parámetros sueltos con pipes ad-hoc en el controller</td></tr>
-        <tr><td><code>009</code></td><td><span class="em">La web es dueña del copy de veredictos y del aviso eIDAS</span></td><td class="mut">Renderizar el copy/disclaimer en inglés que devuelve la API</td></tr>
-        <tr><td><code>010</code></td><td><span class="em">Verbo canónico on-chain: «anclar» sobre «registrar»</span></td><td class="mut">«registrar» (choca con «Registro Digital de Confianza» y con «registrarse»)</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- SLIDE — RESULTADOS -->
-  <section class="slide dense">
-    <span class="kicker">Estado del proyecto</span>
-    <h2><span class="accent">Resultados</span></h2>
-    <div class="grid3">
-      <div class="card center"><div class="statbig">MVP</div><div class="sl">Completo y en producción</div><div class="ssl">Flujo end-to-end contra Base Sepolia real</div></div>
-      <div class="card center"><div class="statbig">534</div><div class="sl">Pruebas automáticas</div><div class="ssl">Unitarias + E2E + contrato Foundry</div></div>
-      <div class="card center"><div class="statbig">10</div><div class="sl">ADRs documentados</div><div class="ssl">Con alternativas y consecuencias</div></div>
-    </div>
-    <div class="grid2" style="margin-top:16px">
-      <div class="card good">
-        <div class="ct">Funciona en producción</div>
-        <ul class="clist ok">
-          <li>Registro de usuario + verificación de email</li>
-          <li>Subida de activos (PDF) cifrados en R2</li>
-          <li>Análisis IA (gpt-5.4-mini) → DTR estructurado</li>
-          <li>Anclaje on-chain → estado CERTIFIED</li>
-          <li>Verificación pública sin cuenta (UC-02)</li>
-        </ul>
-      </div>
-      <div class="card">
-        <div class="ct">Documentación viva</div>
-        <ul class="clist ok">
-          <li>TDD completo en <code>docs/</code> (13 secciones)</li>
-          <li>Diagramas C4 (context · container · component)</li>
-          <li>Endpoints de API documentados</li>
-          <li>Modelo de seguridad con diagramas de secuencia</li>
-        </ul>
       </div>
     </div>
   </section>
@@ -858,7 +860,7 @@ provenance: {
       <div class="card blue fragment"><p><b>IA + blockchain resuelven el problema de la confianza</b> sin exigir que quien verifica confíe en quien emite.</p></div>
       <div class="card fragment"><p><b>La arquitectura hexagonal</b> permitió desarrollar y probar el dominio aislado por completo de la infraestructura, sin acoplarlo a ningún framework ni servicio externo.</p></div>
       <div class="card fragment"><p><b>dtr-core como paquete puro</b> garantiza que la canonicalización y la verificación sean reproducibles por cualquier implementación futura, en cualquier lenguaje.</p></div>
-      <div class="card good fragment"><p><b>El MVP está en producción</b>, con flujo completo probado end-to-end contra Base Sepolia real y 534 pruebas automáticas pasando en CI.</p></div>
+      <div class="card good fragment"><p><b>El MVP está en producción</b>, con flujo completo probado end-to-end contra Base Sepolia real y 576 pruebas automáticas pasando en CI.</p></div>
     </div>
   </section>
 
@@ -880,7 +882,7 @@ provenance: {
 <div class="chrome">
   <div class="nav-hint">Usa <kbd>←</kbd> <kbd>→</kbd> o <kbd>espacio</kbd></div>
   <div class="dots" id="dots"></div>
-  <div class="counter" id="counter">01 / 04</div>
+  <div class="counter" id="counter">01 / 16</div>
 </div>
 
 <script>

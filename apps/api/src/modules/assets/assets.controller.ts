@@ -13,6 +13,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 import type { JwtPayload } from "../../application/auth/login.use-case";
 import { UploadAssetUseCase } from "../../application/certification/upload-asset.use-case";
 import {
@@ -24,6 +25,26 @@ import { AssetResponseDto } from "./dto/asset-response.dto";
 import { UploadAssetResponseDto } from "./dto/upload-asset-response.dto";
 
 const PDF_MIME_TYPE = "application/pdf";
+
+const UPLOAD_THROTTLE_TTL_MS = 60_000;
+export const DEFAULT_UPLOAD_THROTTLE_LIMIT = 5;
+
+/**
+ * ADR-012 / spec "Stricter Throttle on Asset Upload": `POST /assets`
+ * enqueues `analyze-document` against the paid OpenAI adapter, so it needs
+ * a tighter limit than the global default (`THROTTLE_LIMIT`). Read via
+ * `process.env` directly (not `ConfigService`), mirroring
+ * `public-verification.controller.ts`'s `resolveGetThrottleLimit`/
+ * `resolvePostThrottleLimit` pattern: `@Throttle`'s `limit` accepts a
+ * `Resolvable<number>` (a plain number or a function), and decorator
+ * arguments are evaluated once at class-definition time, not per-request —
+ * a function defers the read to request time instead, making
+ * `UPLOAD_THROTTLE_LIMIT` actually configurable without a restart-only env
+ * read baked into the decorator.
+ */
+export function resolveUploadThrottleLimit(): number {
+  return Number(process.env["UPLOAD_THROTTLE_LIMIT"] ?? DEFAULT_UPLOAD_THROTTLE_LIMIT);
+}
 
 @ApiTags("assets")
 @ApiBearerAuth()
@@ -37,6 +58,7 @@ export class AssetsController {
   ) {}
 
   @Post()
+  @Throttle({ global: { limit: resolveUploadThrottleLimit, ttl: UPLOAD_THROTTLE_TTL_MS } })
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiOperation({

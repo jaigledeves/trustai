@@ -49,6 +49,9 @@ import { JwtStrategy } from "./jwt.strategy";
     JwtStrategy,
     JwtAuthGuard,
   ],
-  exports: [JwtAuthGuard],
+  // JwtModule is exported so ThrottlingModule (modules/throttling/) can
+  // inject JwtService into UserAwareThrottlerGuard without redeclaring its
+  // own JWT config (ADR-012).
+  exports: [JwtAuthGuard, JwtModule],
 })
 export class AuthModule {}

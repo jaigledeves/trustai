@@ -18,8 +18,8 @@ async function bootstrap(): Promise<void> {
   );
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle("TrustAI API")
-    .setDescription("TrustAI API — auth and health endpoints")
+    .setTitle("Ancrux API")
+    .setDescription("Ancrux API — auth and health endpoints")
     .setVersion(process.env["npm_package_version"] ?? "0.1.0")
     .addBearerAuth()
     .build();
@@ -29,7 +29,7 @@ async function bootstrap(): Promise<void> {
   const port = process.env["PORT"] ?? 3000;
   await app.listen(port);
   // eslint-disable-next-line no-console
-  console.log(`TrustAI API listening on port ${port}`);
+  console.log(`Ancrux API listening on port ${port}`);
 }
 
 void bootstrap();

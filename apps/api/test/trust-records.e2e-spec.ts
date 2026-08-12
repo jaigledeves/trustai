@@ -538,5 +538,102 @@ describe.skipIf(!dbAvailable || !storageAvailable)(
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ items: [], total: 0, page: 1, pageSize: 20 });
     });
+
+    // ADR-012 / spec "Global Default Throttle Coverage": GET /trust-records
+    // carries no per-route @Throttle override, so it falls back to the
+    // global default. Uses its OWN app instance with a tiny
+    // THROTTLE_LIMIT/THROTTLE_TTL_SECONDS (rather than the shared 100/60s
+    // default) so this test stays fast without waiting out a real window.
+    // Passes explicit ?page/?pageSize: this endpoint has a pre-existing,
+    // unrelated bug (empty query -> NaN pagination -> 500, untouched by this
+    // change) that would otherwise mask the throttle assertion. The throttle
+    // (a guard) runs before the handler regardless, so explicit params only
+    // keep the successful requests at 200 without changing what's proven.
+    it("S-DTR-17: a no-override route enforces the global default — within limit succeeds, exceeding it returns 429", async () => {
+      const previousLimit = process.env["THROTTLE_LIMIT"];
+      const previousTtl = process.env["THROTTLE_TTL_SECONDS"];
+      process.env["THROTTLE_LIMIT"] = "3";
+      process.env["THROTTLE_TTL_SECONDS"] = "60";
+
+      const localSentEmails = new Map<string, string>();
+      let throttledApp: INestApplication | undefined;
+      try {
+        const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+          .overrideProvider(NOTIFICATION_PORT)
+          .useValue({
+            sendVerificationEmail: vi.fn(async (email: string, rawToken: string) => {
+              localSentEmails.set(email, rawToken);
+            }),
+          })
+          .compile();
+        throttledApp = moduleRef.createNestApplication();
+        await throttledApp.init();
+
+        const email = `dtr-throttle-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
+        const password = "Password123";
+        await request(throttledApp.getHttpServer()).post("/auth/register").send({ email, password });
+        const rawToken = localSentEmails.get(email);
+        await request(throttledApp.getHttpServer()).get(`/auth/verify-email?token=${rawToken}`);
+        const loginRes = await request(throttledApp.getHttpServer())
+          .post("/auth/login")
+          .send({ email, password });
+        const accessToken = loginRes.body.accessToken as string;
+
+        // 3 requests (== THROTTLE_LIMIT) within the window all succeed.
+        for (let i = 0; i < 3; i++) {
+          const res = await request(throttledApp.getHttpServer())
+            .get("/trust-records?page=1&pageSize=20")
+            .set("Authorization", `Bearer ${accessToken}`)
+            .send();
+          expect(res.status).toBe(200);
+        }
+
+        // The 4th request exceeds THROTTLE_LIMIT within THROTTLE_TTL_SECONDS.
+        const overLimitRes = await request(throttledApp.getHttpServer())
+          .get("/trust-records?page=1&pageSize=20")
+          .set("Authorization", `Bearer ${accessToken}`)
+          .send();
+        expect(overLimitRes.status).toBe(429);
+      } finally {
+        await throttledApp?.close();
+        if (previousLimit === undefined) {
+          delete process.env["THROTTLE_LIMIT"];
+        } else {
+          process.env["THROTTLE_LIMIT"] = previousLimit;
+        }
+        if (previousTtl === undefined) {
+          delete process.env["THROTTLE_TTL_SECONDS"];
+        } else {
+          process.env["THROTTLE_TTL_SECONDS"] = previousTtl;
+        }
+      }
+    }, 30_000);
+
+    // ADR-012 / spec "Moderate Throttle on Trust Record Anchoring":
+    // ANCHOR_THROTTLE_LIMIT (default 10) is independent of the global
+    // default. Repeating the SAME request 11 times is sufficient — the
+    // throttle guard counts every request to this route+tracker
+    // regardless of the handler's own response (first call succeeds
+    // 201->ANCHORING; every call after that 409s, since the record is no
+    // longer READY — irrelevant to the guard, which runs before the
+    // handler either way).
+    it("S-DTR-18: exceeding ANCHOR_THROTTLE_LIMIT on POST /trust-records/:id/anchor returns 429", async () => {
+      const userA = await createAuthenticatedUser("dtr-anchor-throttle");
+      const { trustRecordId } = await uploadAndWaitForAnalysis(userA.accessToken, "S-DTR-18");
+      await request(app.getHttpServer())
+        .post(`/trust-records/${trustRecordId}/confirm`)
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .send();
+
+      let lastStatus = 0;
+      for (let i = 0; i < 11; i++) {
+        const res = await request(app.getHttpServer())
+          .post(`/trust-records/${trustRecordId}/anchor`)
+          .set("Authorization", `Bearer ${userA.accessToken}`)
+          .send();
+        lastStatus = res.status;
+      }
+      expect(lastStatus).toBe(429);
+    }, 30_000);
   },
 );

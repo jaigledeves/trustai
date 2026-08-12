@@ -202,5 +202,56 @@ describe.skipIf(!dbAvailable || !storageAvailable)(
       expect(assetA?.sha256).toBe(assetB?.sha256);
       expect(assetA?.organizationId).not.toBe(assetB?.organizationId);
     });
+
+    // ADR-012 / spec "Stricter Throttle on Asset Upload": UPLOAD_THROTTLE_LIMIT
+    // (default 5) is enforced independently of, and stricter than,
+    // THROTTLE_LIMIT (default 100). The 429 must block the handler
+    // entirely — proven here by the DigitalAsset row count staying exactly
+    // at the number of requests that got a 201, never higher (i.e. no
+    // DigitalAsset/TrustRecord created and, since the analyze-document
+    // enqueue happens inside that same DB transaction, no job enqueued and
+    // no OpenAI adapter call for the rejected request).
+    it("S-ASSET-7: exceeding UPLOAD_THROTTLE_LIMIT returns 429 and the rejected request never reaches the handler", async () => {
+      const userA = await createAuthenticatedUser("asset-upload-throttle");
+
+      async function uploadProbe(): Promise<{ status: number; body: Record<string, unknown> }> {
+        const res = await request(app.getHttpServer())
+          .post("/assets")
+          .set("Authorization", `Bearer ${userA.accessToken}`)
+          .attach(
+            "file",
+            Buffer.from(`%PDF-1.4 upload-throttle probe ${Date.now()}-${Math.random()}`),
+            { filename: "probe.pdf", contentType: "application/pdf" },
+          );
+        return { status: res.status, body: res.body as Record<string, unknown> };
+      }
+
+      let successCount = 0;
+      let lastStatus = 0;
+      let lastBody: Record<string, unknown> = {};
+      // One request beyond any plausible UPLOAD_THROTTLE_LIMIT (default 5,
+      // always < THROTTLE_LIMIT's default 100) guarantees a 429 shows up.
+      for (let i = 0; i < 6; i++) {
+        const { status, body } = await uploadProbe();
+        if (status === 201) {
+          successCount += 1;
+        }
+        lastStatus = status;
+        lastBody = body;
+      }
+
+      expect(lastStatus).toBe(429);
+      expect(lastBody.assetId).toBeUndefined();
+      expect(successCount).toBeLessThan(6);
+      expect(successCount).toBeGreaterThan(0);
+
+      const assetCount = await prisma.digitalAsset.count({
+        where: { organizationId: userA.organizationId },
+      });
+      // Exactly as many DigitalAsset rows as successful (201) uploads — the
+      // rejected (429) request created none, so it never enqueued
+      // analyze-document nor called the OpenAI adapter either.
+      expect(assetCount).toBe(successCount);
+    });
   },
 );
