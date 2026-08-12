@@ -16,6 +16,11 @@ export const shellDictionary = {
     /** Abbreviated label shown beside the icon on constrained nav widths. */
     newCertificationShort: "Certificar",
     logout: "Cerrar sesión",
+    /** Single sign-in CTA shared by the public landing `Nav` and the
+     * `verify/[id]` header (spec: web-visual-coherence — No Ambiguous Auth
+     * Icon in Public Nav; public-landing — Session-Aware Nav Auth
+     * Affordance). Always a text label, never an icon-only control. */
+    signIn: "Acceder",
   },
   /**
    * Theme toggle copy (spec: web-theme). Shared by the authenticated shell

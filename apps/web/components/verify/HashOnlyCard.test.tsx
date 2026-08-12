@@ -115,6 +115,66 @@ describe("HashOnlyCard (spec: web-public-verify — Hash-Only Card Without Analy
     expect(screen.getByText(glossaryDictionary.redDePrueba.definition)).toBeInTheDocument();
   });
 
+  it("Honesty bug guard (spec: web-public-verify — HashOnlyCard's PENDING_ANCHOR title never reads as success): PENDING_ANCHOR title is text-warning, VALID is text-success, error is text-destructive", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/rec-1`, () =>
+        HttpResponse.json({
+          verdict: "PENDING_ANCHOR",
+          documentIntegrity: true,
+          chainAnchor: null,
+          explanation: "server explanation",
+          disclaimer: "server disclaimer",
+          verifiedAt: "2026-07-09T12:30:00.000Z",
+        }),
+      ),
+    );
+
+    const pendingJsx = await HashOnlyCard({ id: "rec-1" });
+    const { unmount } = render(pendingJsx);
+    const pendingTitle = screen.getByText(verifyDictionary.verdicts.PENDING_ANCHOR.title);
+    expect(pendingTitle.className).not.toMatch(/text-success/);
+    expect(pendingTitle.className).not.toMatch(/text-destructive/);
+    expect(pendingTitle.className).toMatch(/text-warning/);
+    unmount();
+
+    server.use(
+      http.get(`${BASE_URL}/public/verify/rec-2`, () =>
+        HttpResponse.json({
+          verdict: "VALID",
+          documentIntegrity: true,
+          chainAnchor: null,
+          explanation: "server explanation",
+          disclaimer: "server disclaimer",
+          verifiedAt: "2026-07-09T12:30:00.000Z",
+        }),
+      ),
+    );
+
+    const validJsx = await HashOnlyCard({ id: "rec-2" });
+    const { unmount: unmountValid } = render(validJsx);
+    const validTitle = screen.getByText(verifyDictionary.verdicts.VALID.title);
+    expect(validTitle.className).toMatch(/text-success/);
+    unmountValid();
+
+    server.use(
+      http.get(`${BASE_URL}/public/verify/rec-3`, () =>
+        HttpResponse.json({
+          verdict: "ASSET_MISMATCH",
+          documentIntegrity: false,
+          chainAnchor: null,
+          explanation: "server explanation",
+          disclaimer: "server disclaimer",
+          verifiedAt: "2026-07-09T12:30:00.000Z",
+        }),
+      ),
+    );
+
+    const errorJsx = await HashOnlyCard({ id: "rec-3" });
+    render(errorJsx);
+    const errorTitle = screen.getByText(verifyDictionary.verdicts.ASSET_MISMATCH.title);
+    expect(errorTitle.className).toMatch(/text-destructive/);
+  });
+
   it("renders notFound() for an unknown id on GET (never a silent empty card)", async () => {
     server.use(
       http.get(`${BASE_URL}/public/verify/unknown-id`, () =>

@@ -20,7 +20,7 @@ producto e ingeniería, en [`docs/`](docs/TDD-Index.md).
 
 | Recurso | URL |
 |---|---|
-| Aplicación web | https://trustai-web-kappa.vercel.app |
+| Aplicación web | https://ancrux.vercel.app |
 | Salud de la API | https://trustaiapi-production.up.railway.app/health |
 | Contrato de anclaje (Base Sepolia) | [`0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22`](https://sepolia.basescan.org/address/0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22) |
 

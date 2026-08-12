@@ -3,19 +3,25 @@ import { notFound } from "next/navigation";
 import { glossaryDictionary } from "../../dictionaries/es/glossary";
 import { verifyDictionary } from "../../dictionaries/es/verify";
 import { getVerifyHash, NotFoundError } from "../../lib/api/public-verify-client";
-import type { VerifyHashResponse, VerifyVerdict } from "../../lib/api/types";
+import type { VerifyHashResponse } from "../../lib/api/types";
 import { truncateId } from "../../lib/format";
 import { cn } from "../../lib/utils";
+import { classifyVerdict } from "../../lib/verify/verdict";
 import { QuickHelp } from "../ui/quick-help";
 
 interface HashOnlyCardProps {
   id: string;
 }
 
-/** True for the two "something is wrong" verdicts — mirrors `UploadVerdictPanel`. */
-function isErrorVerdict(verdict: VerifyVerdict): boolean {
-  return verdict === "ASSET_MISMATCH" || verdict === "INVALID_RECORD";
-}
+/** Verdict-title color per severity (success/pending/error) — mirrors the
+ * shared table's `className` slice, but title-only (no `role`/icon change:
+ * the title is a heading, not a status/alert region, and this card doesn't
+ * render a verdict icon). */
+const VERDICT_TITLE_COLOR: Record<ReturnType<typeof classifyVerdict>, string> = {
+  success: "text-success",
+  pending: "text-warning",
+  error: "text-destructive",
+};
 
 /**
  * Hash-only landing card (spec: "Hash-Only Card Without Analysis", INV-41).
@@ -33,7 +39,7 @@ export async function HashOnlyCard({ id }: HashOnlyCardProps) {
   const result = await fetchHash(id);
   const t = verifyDictionary.landing;
   const verdictCopy = verifyDictionary.verdicts[result.verdict];
-  const isError = isErrorVerdict(result.verdict);
+  const severity = classifyVerdict(result.verdict);
   const anchored = Boolean(result.chainAnchor?.anchored);
 
   return (
@@ -50,12 +56,7 @@ export async function HashOnlyCard({ id }: HashOnlyCardProps) {
         ) : null}
       </div>
 
-      <h2
-        className={cn(
-          "mt-5 text-2xl font-semibold",
-          isError ? "text-destructive" : "text-success",
-        )}
-      >
+      <h2 className={cn("mt-5 text-2xl font-semibold", VERDICT_TITLE_COLOR[severity])}>
         {verdictCopy.title}
       </h2>
       <p className="mt-1 text-pretty">{verdictCopy.message}</p>

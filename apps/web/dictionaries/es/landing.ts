@@ -20,8 +20,6 @@
  */
 export const landingDictionary = {
   nav: {
-    login: "Iniciar sesión",
-    register: "Crear cuenta",
     // In-page anchor labels. Hrefs (#como-funciona, #verificacion, #casos,
     // #faq) are structural and live in `Nav.tsx` (same pattern as the
     // hardcoded /login, /register hrefs); only the labels are dictionary copy.
@@ -41,7 +39,6 @@ export const landingDictionary = {
       "Ancrux certifica tus documentos para que cualquiera confirme, por su cuenta, que no fueron alterados. Sin depender de tu palabra ni de la nuestra.",
     primaryCta: "Certificar mi primer documento",
     secondaryCta: "Ver una verificación",
-    ctaMicrocopy: "Gratis · Sin tarjeta · Sin instalar nada",
     valueProps: [
       "Sin instalar nada",
       "Verificación pública y gratuita",

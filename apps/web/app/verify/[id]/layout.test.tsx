@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { shellDictionary } from "../../../dictionaries/es/shell";
 
 // Mock next/headers so getSession() works in the Vitest environment.
 // Default: no cookie → unauthenticated (public nav), "system" theme.
@@ -33,10 +34,15 @@ describe("verify/[id] layout (spec: web-visual-coherence — Decision 7, persist
     expect(
       screen.getByRole("navigation", { name: "Secciones" }),
     ).toBeInTheDocument();
+    // Unified header auth cluster (spec: web-public-verify — Unified
+    // Header Auth Cluster on Verify): single "Acceder" action → /login.
+    expect(
+      screen.getByRole("link", { name: shellDictionary.nav.signIn }),
+    ).toHaveAttribute("href", "/login");
     expect(screen.getByText("CHILD_CONTENT")).toBeInTheDocument();
   });
 
-  it("renders the app nav (Mis DTR, Certificar documento) when the visitor is authenticated", async () => {
+  it("renders the shared auth cluster (Mis DTR, Cerrar sesión, no Certificar) when the visitor is authenticated", async () => {
     // Override: return a session token for this one call.
     vi.mocked(cookies).mockResolvedValueOnce({
       get: () => ({ value: "test-token" }),
@@ -49,16 +55,19 @@ describe("verify/[id] layout (spec: web-visual-coherence — Decision 7, persist
       "href",
       "/dtrs",
     );
-    // Landing section links are replaced by app nav.
+    // Landing section links are replaced by the auth cluster.
     expect(
       screen.queryByRole("navigation", { name: "Secciones" }),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /mis dtr/i }),
-    ).toBeInTheDocument();
+      screen.getByRole("link", { name: shellDictionary.nav.dtrs }),
+    ).toHaveAttribute("href", "/dtrs");
+    expect(screen.getByText("Cerrar sesión")).toBeInTheDocument();
+    // web-public-verify — Unified Header Auth Cluster on Verify: no
+    // "Certificar"/new-certification shortcut for the logged-in visitor.
     expect(
-      screen.getByRole("link", { name: /certificar/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("link", { name: /certificar/i }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText("CHILD_CONTENT")).toBeInTheDocument();
   });
 

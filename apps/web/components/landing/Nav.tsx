@@ -1,10 +1,9 @@
-import { LogIn } from "lucide-react";
 import { cookies } from "next/headers";
-import Link from "next/link";
 import { Wordmark } from "@/components/brand/Wordmark";
+import { HeaderAuthActions } from "@/components/shell/HeaderAuthActions";
 import { ThemeToggle } from "@/components/shell/ThemeToggle";
-import { Button } from "@/components/ui/button";
 import { landingDictionary } from "@/dictionaries/es/landing";
+import { getSession } from "@/lib/session";
 import { parseThemePreference, THEME_COOKIE_NAME } from "@/lib/theme";
 
 /**
@@ -14,7 +13,8 @@ import { parseThemePreference, THEME_COOKIE_NAME } from "@/lib/theme";
  * /register hrefs below. Only the labels are dictionary copy (RNF-041).
  * Plain same-page hash links: they only scroll, never touch auth or the
  * session proxy (which guards `/dtrs/*` only). Hidden on mobile to keep the
- * bar uncluttered; the login/register actions stay visible at every width.
+ * bar uncluttered; the auth cluster (`HeaderAuthActions`) stays visible at
+ * every width.
  */
 const sectionLinks = [
   { href: "#como-funciona", label: landingDictionary.nav.sectionLinks.howItWorks },
@@ -24,12 +24,19 @@ const sectionLinks = [
 ] as const;
 
 /**
- * Landing nav (spec: public-landing — Landing Composition; web-theme —
- * "Theme Toggle Control"). Server Component — reads the `theme` cookie to
- * SSR-resolve `ThemeToggle`'s `initialPreference` (design.md decision #4:
- * landing reuses `shellDictionary.theme`, not its own dictionary group).
+ * Landing nav (spec: public-landing — Landing Composition, Session-Aware
+ * Nav Auth Affordance; web-theme — "Theme Toggle Control"). Server
+ * Component — reads the `theme` cookie to SSR-resolve `ThemeToggle`'s
+ * `initialPreference` (design.md decision #4: landing reuses
+ * `shellDictionary.theme`, not its own dictionary group), and reads the
+ * session cookie via `getSession()` to render the shared
+ * `HeaderAuthActions` cluster — same component `verify/[id]/layout.tsx`
+ * uses, so both public surfaces present one consistent auth entry point.
  */
 export async function Nav() {
+  const session = await getSession();
+  const isAuthenticated = Boolean(session);
+
   const cookieStore = await cookies();
   const themePreference = parseThemePreference(
     cookieStore.get(THEME_COOKIE_NAME)?.value,
@@ -55,15 +62,7 @@ export async function Nav() {
         </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle initialPreference={themePreference} />
-          {/* "Iniciar sesión" is the secondary auth action; "Crear cuenta"
-              is the primary CTA. Reducing login to an icon keeps the nav
-              uncluttered on all widths while preserving clear hierarchy. */}
-          <Button variant="ghost" size="icon-sm" aria-label={landingDictionary.nav.login} asChild>
-            <Link href="/login"><LogIn /></Link>
-          </Button>
-          <Button size="lg" asChild>
-            <Link href="/register">{landingDictionary.nav.register}</Link>
-          </Button>
+          <HeaderAuthActions isAuthenticated={isAuthenticated} />
         </div>
       </div>
     </header>

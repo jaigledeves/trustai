@@ -8,7 +8,11 @@ GET, POST verdicts, client hash recompute) plus the RNF-041 copy refocus
 
 ### Requirement: Public No-Auth Verification Page
 
-`/verify/[id]` MUST be a Server Component, no login/auth affordance.
+`/verify/[id]` MUST be a Server Component. Viewing verification results
+MUST NOT require login: no verification content, GET result, or POST
+verdict is ever gated behind, or redirects to, authentication. The page
+header MAY render a session-aware auth affordance (see "Unified Header
+Auth Cluster on Verify" below) without this affordance gating any content.
 `HashOnlyCard` MUST fetch `GET /public/verify/:id` server-side, no-store,
 gated by `config.publicVerificationEnabled` (else `disabledMessage`).
 Only `UploadVerdictPanel.tsx`/`ClientHashRecompute.tsx` MUST declare
@@ -17,8 +21,52 @@ Only `UploadVerdictPanel.tsx`/`ClientHashRecompute.tsx` MUST declare
 #### Scenario: No-auth render, flag-gated, only two client islands
 
 - GIVEN a no-session visitor requests `/verify/[id]`
-- WHEN the flag is true, it renders with no auth UI and only `UploadVerdictPanel`/`ClientHashRecompute` carry `'use client'`
+- WHEN the flag is true, it renders with no forced login and only
+  `UploadVerdictPanel`/`ClientHashRecompute` carry `'use client'`
 - AND WHEN false, only `disabledMessage` renders
+
+#### Scenario: Authenticated visitor's session never gates verification content
+
+- GIVEN a logged-in visitor requests `/verify/[id]`
+- WHEN the page renders
+- THEN the GET result, POST verdict flow, and all verification content
+  render identically to the logged-out case — the auth cluster in the
+  header is the only difference
+
+#### Scenario: Verification never redirects to login
+
+- GIVEN any visitor, logged in or not, requests `/verify/[id]`
+- WHEN the page resolves
+- THEN no redirect to `/login` occurs under any auth state
+
+### Requirement: Unified Header Auth Cluster on Verify
+
+The `/verify/[id]` layout header MUST render the same session-aware auth
+cluster used by the landing `Nav`. Logged out: section links (excluding
+`verificacion`) plus `ThemeToggle` plus a single "Acceder"
+(`shellDictionary.nav.signIn`) action linking to `/login`. Logged in:
+"Mis DTR" (→ `/dtrs`) plus "Cerrar sesión", with `ThemeToggle` still
+present; it MUST NOT render a "Certificar"/new-certification shortcut.
+
+#### Scenario: Logged-out verify header shows section links, ThemeToggle, and Acceder
+
+- GIVEN a no-session visitor requests `/verify/[id]`
+- WHEN the header renders
+- THEN it shows the section links, `ThemeToggle`, and a single "Acceder"
+  action linking to `/login`
+
+#### Scenario: Logged-in verify header shows Mis DTR and Cerrar sesión, not Certificar
+
+- GIVEN an authenticated visitor requests `/verify/[id]`
+- WHEN the header renders
+- THEN it shows "Mis DTR" linking to `/dtrs` and "Cerrar sesión"
+- AND it does NOT show a "Certificar"/new-certification shortcut
+
+#### Scenario: ThemeToggle renders in both auth states
+
+- GIVEN either a logged-out or a logged-in visitor requests `/verify/[id]`
+- WHEN the header renders
+- THEN `ThemeToggle` is present in both states
 
 ### Requirement: Hash-Only GET & 404 Asymmetry (INV-41)
 
@@ -35,15 +83,64 @@ appear only after POST, for `VALID`/`PENDING_ANCHOR`. An unknown id MUST
 
 ### Requirement: Four Verdicts
 
-The page MUST represent exactly `VALID`, `ASSET_MISMATCH`,
-`PENDING_ANCHOR`, `INVALID_RECORD` from `verdicts.*`, colored `ok`
-(VALID/PENDING_ANCHOR) or `destructive` (others).
+The page MUST represent exactly `VALID`, `ASSET_MISMATCH`, `PENDING_ANCHOR`,
+`INVALID_RECORD` from `verdicts.*`, using three visual severities:
+`success` for `VALID`, `pending` for `PENDING_ANCHOR`, and `error` for
+`ASSET_MISMATCH`/`INVALID_RECORD`. `PENDING_ANCHOR` MUST NOT render with the
+same color or icon as `VALID` — it communicates "in progress, not yet
+proven," not a completed success. It MUST use a distinct pending/warning
+treatment (amber, clock icon), never the green success color or the
+success check icon.
 
-#### Scenario: Each verdict renders its dictionary copy and color
+#### Scenario: Each verdict renders its dictionary copy and severity
 
-- GIVEN a result for each of the 4 verdicts
+- GIVEN a result for each of the four verdicts
 - WHEN rendered
-- THEN title/message match `verdicts.{VERDICT}`, color follows ok/destructive
+- THEN title/message match `verdicts.{VERDICT}`
+- AND severity follows success (VALID), pending (PENDING_ANCHOR), or error
+  (ASSET_MISMATCH, INVALID_RECORD)
+
+#### Scenario: PENDING_ANCHOR never reads as success
+
+- GIVEN a POST result with verdict `PENDING_ANCHOR`
+- WHEN `UploadVerdictPanel` renders the outcome
+- THEN it does NOT use the success color token or the `Check` icon
+- AND it uses the pending/warning color token and a `Clock` icon instead
+
+#### Scenario: HashOnlyCard's PENDING_ANCHOR title never reads as success
+
+- GIVEN a GET result with verdict `PENDING_ANCHOR`
+- WHEN `HashOnlyCard` renders the verdict title
+- THEN it does NOT use the success color token (`text-success`)
+- AND it uses the pending/warning color token (`text-warning`) instead
+
+### Requirement: Accessible Verdict Outcome Roles
+
+The verdict outcome MUST expose an ARIA role matching its severity:
+`role="alert"` for `error` severity (`ASSET_MISMATCH`, `INVALID_RECORD`),
+`role="status"` for `success` (`VALID`) and `pending` (`PENDING_ANCHOR`)
+severities. The pending outcome's accessible content MUST communicate an
+in-progress, not-yet-proven state and MUST NOT imply the verdict already
+succeeded.
+
+#### Scenario: Error verdicts use role="alert"
+
+- GIVEN a verdict of `ASSET_MISMATCH` or `INVALID_RECORD`
+- WHEN the outcome renders
+- THEN its container has `role="alert"`
+
+#### Scenario: VALID and PENDING_ANCHOR use role="status"
+
+- GIVEN a verdict of `VALID` or `PENDING_ANCHOR`
+- WHEN the outcome renders
+- THEN its container has `role="status"`
+
+#### Scenario: Pending accessible content does not imply success
+
+- GIVEN `PENDING_ANCHOR` renders with `role="status"`
+- WHEN its accessible name/content is inspected
+- THEN it communicates an in-progress, not-yet-proven state, not a
+  completed/successful verification
 
 ### Requirement: Client-Side Hash Recompute Honesty
 

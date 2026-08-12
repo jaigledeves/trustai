@@ -90,6 +90,15 @@ describe("UploadVerdictPanel (spec: web-public-verify — Upload Verdict, All Fo
 
     expect(await screen.findByText("Anclaje pendiente")).toBeInTheDocument();
     expect(screen.getByText("Resumen Y")).toBeInTheDocument();
+
+    // Honesty bug guard (spec: web-public-verify — "PENDING_ANCHOR never
+    // reads as success"): pending is role="status" with a Clock icon, never
+    // the success color/icon.
+    const status = screen.getByRole("status");
+    expect(status).toBeInTheDocument();
+    expect(status.querySelector("svg.lucide-clock")).toBeInTheDocument();
+    expect(status.querySelector("svg.lucide-check")).not.toBeInTheDocument();
+    expect(status.className).not.toMatch(/bg-success|text-success/);
   });
 
   it("clears the previous file's recompute panel when a new file is selected after a verdict (no stale hash)", async () => {

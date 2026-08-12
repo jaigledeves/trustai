@@ -117,6 +117,15 @@ export function LoginForm() {
         ) : null}
         {authDictionary.login.submit}
       </Button>
+      <p className="text-center text-sm text-muted-foreground">
+        {authDictionary.login.registerPrompt}{" "}
+        <Link
+          href="/register"
+          className="font-medium text-primary underline-offset-4 hover:underline"
+        >
+          {authDictionary.login.registerCta}
+        </Link>
+      </p>
     </form>
   );
 }
