@@ -668,7 +668,7 @@
         </div>
         <div class="card blue">
           <div class="ctitle">OpenAiAnalysisAdapter</div>
-          <p class="desc">Envía el texto del activo al modelo configurado (por defecto <code>gpt-5.4-mini</code>). La respuesta se valida con Zod antes de persistirse en el DTR.</p>
+          <p class="desc">Envía el texto del activo al modelo configurado (por defecto <code>gpt-5.4-nano</code>). La respuesta se valida con Zod antes de persistirse en el DTR.</p>
         </div>
         <p class="desc" style="margin-top:14px">Selección por entorno: <code>AI_ADAPTER=stub|openai</code></p>
         <div class="callout"><b>ADR-004:</b> el stub es ciudadano de primera clase, no un truco de testing — permite demos offline y CI 100% determinista.</div>
@@ -683,7 +683,7 @@
 }
 provenance: {
   provider:   <span class="s">"openai"</span>,
-  model:      <span class="s">"gpt-5.4-mini"</span>,
+  model:      <span class="s">"gpt-5.4-nano"</span>,
   analyzedAt: <span class="s">"2026-07-15T10:30:00Z"</span>
 }</code></pre>
         <div class="card" style="margin-top:12px">
@@ -710,7 +710,7 @@ provenance: {
             <tr><td><span class="em">Base de datos</span></td><td class="mut">PostgreSQL (datos + cola)</td></tr>
             <tr><td><span class="em">Almacenamiento</span></td><td class="mut">Cloudflare R2 · AES-256-GCM</td></tr>
             <tr><td><span class="em">Blockchain</span></td><td class="mut">Base Sepolia · viem</td></tr>
-            <tr><td><span class="em">IA</span></td><td class="mut">OpenAI gpt-5.4-mini · adaptador stub</td></tr>
+            <tr><td><span class="em">IA</span></td><td class="mut">OpenAI gpt-5.4-nano · adaptador stub</td></tr>
             <tr><td><span class="em">Testing</span></td><td class="mut">Vitest · Playwright · Foundry</td></tr>
           </tbody>
         </table>
@@ -792,7 +792,7 @@ provenance: {
         <ul class="clist ok">
           <li>Registro de usuario + verificación de email</li>
           <li>Subida de activos (PDF) cifrados en R2</li>
-          <li>Análisis IA (gpt-5.4-mini) → DTR estructurado</li>
+          <li>Análisis IA (gpt-5.4-nano) → DTR estructurado</li>
           <li>Anclaje on-chain → estado CERTIFIED</li>
           <li>Verificación pública sin cuenta (UC-02)</li>
         </ul>

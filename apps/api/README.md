@@ -171,7 +171,7 @@ implementation, selected via the `AI_ADAPTER` env var:
 ```bash
 AI_ADAPTER="openai"
 OPENAI_API_KEY="sk-..."
-OPENAI_MODEL="gpt-5.4-mini"   # optional, this is the default
+OPENAI_MODEL="gpt-5.4-nano"   # optional, this is the default (cheapest tier)
 ```
 
 If `AI_ADAPTER=openai` and `OPENAI_API_KEY` is missing, `OpenAiAnalysisAdapter`'s constructor

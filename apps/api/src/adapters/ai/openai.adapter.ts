@@ -3,9 +3,10 @@ import { DOCUMENT_TAXONOMY_V1 } from "@trustai/dtr-core";
 import OpenAI from "openai";
 import type { AiAnalysisPort, AiAnalysisRawResult } from "../../ports/ai-analysis.port";
 
-// Matches 04-Viability's cost reference (~€0.008/DTR) — see proposal's
-// "First real AI adapter" decision.
-const DEFAULT_MODEL = "gpt-5.4-mini";
+// Cheapest tier for the pilot (~€0.002/DTR) — chosen as the safe default so
+// a public-repo deployment that forgets to set OPENAI_MODEL still lands on the
+// low-cost model instead of the pricier mini. Override via OPENAI_MODEL.
+const DEFAULT_MODEL = "gpt-5.4-nano";
 const PROMPT_VERSION = "v1";
 
 const SYSTEM_PROMPT = [
@@ -128,7 +129,7 @@ export class OpenAiAnalysisAdapter implements AiAnalysisPort {
       analysis,
       provenance: {
         provider: "openai",
-        // `this.model` is the configured alias (e.g. "gpt-5.4-mini");
+        // `this.model` is the configured alias (e.g. "gpt-5.4-nano");
         // `completion.model` is the exact snapshot OpenAI actually resolved
         // it to — kept distinct so provenance records precisely which
         // model version produced this analysis.
