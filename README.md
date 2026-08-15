@@ -1,4 +1,4 @@
-# TrustAI
+# Ancrux
 
 Certificación inteligente de activos digitales: **la IA comprende el
 contenido, la blockchain certifica su integridad**. Cada activo obtiene
@@ -24,19 +24,8 @@ producto e ingeniería, en [`docs/`](docs/TDD-Index.md).
 | Salud de la API | https://trustaiapi-production.up.railway.app/health |
 | Contrato de anclaje (Base Sepolia) | [`0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22`](https://sepolia.basescan.org/address/0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22) |
 
-### Credenciales de prueba
-
-Usa estas credenciales para entrar a la aplicación web y ejecutar el
-flujo de certificación:
-
-```
-Email:    revisor@trustai.app
-Password: RevisorTFM2026
-```
-
-> Esta cuenta se crea con `pnpm --filter @trustai/api seed:demo` (ver
-> [`docs/12-Deployment.md`](docs/12-Deployment.md)): queda con el email ya
-> verificado, lista para iniciar sesión.
+> Para entrar con login y ejecutar el flujo de certificación, mira las
+> [**credenciales de prueba**](#acceso-a-la-demo) al final del README.
 
 > La verificación pública (UC-02) no requiere login: al abrir el enlace
 > de verificación pública de un DTR, la app recalcula el hash canónico y
@@ -46,7 +35,7 @@ Password: RevisorTFM2026
 
 ## Qué hace
 
-TrustAI emite un **Digital Trust Record (DTR)** para un activo digital:
+Ancrux emite un **Digital Trust Record (DTR)** para un activo digital:
 
 1. **Subida** de un activo (por ejemplo, un PDF). Se almacena cifrado
    (AES-256-GCM).
@@ -58,7 +47,7 @@ TrustAI emite un **Digital Trust Record (DTR)** para un activo digital:
    `AnchorRegistry`.
 5. Cualquiera puede **verificar la integridad de forma independiente**
    recalculando el hash y comparándolo con el anclaje on-chain — sin
-   necesidad de confiar en TrustAI.
+   necesidad de confiar en Ancrux.
 
 ---
 
@@ -67,6 +56,9 @@ TrustAI emite un **Digital Trust Record (DTR)** para un activo digital:
 Stack full-TypeScript con una API **hexagonal (puertos y adaptadores)**.
 Las decisiones clave están registradas como ADR en
 [`docs/adr/`](docs/adr/).
+
+> Nota: el producto es **Ancrux**; los paquetes internos y scripts
+> conservan el namespace `@trustai/*` por histórico del proyecto.
 
 | Capa | Tecnología |
 |---|---|
@@ -155,7 +147,7 @@ pnpm --filter @trustai/web dev
 ### Pruebas
 
 ```bash
-pnpm -r test          # 327 pruebas unitarias (dtr-core 29 + api 170 + web 128)
+pnpm -r test          # 592 pruebas unitarias (dtr-core 29 + api 221 + web 331 + utils 11)
 pnpm -r typecheck
 ```
 
@@ -187,3 +179,21 @@ del Technical Design Document. Destacados:
 - **Entrega:** [Definición del MVP](docs/11-MVP-Definition.md),
   [Despliegue](docs/12-Deployment.md),
   [Endpoints de la API](docs/api/endpoints.md), [ADRs](docs/adr/)
+
+---
+
+## Acceso a la demo
+
+Credenciales de una cuenta de prueba ya sembrada (email verificado, lista
+para iniciar sesión) para recorrer el flujo de certificación **con login**
+en [ancrux.vercel.app](https://ancrux.vercel.app):
+
+```
+Email:    revisor@trustai.app
+Password: RevisorTFM2026
+```
+
+> Esta cuenta se crea con `pnpm --filter @trustai/api seed:demo` (ver
+> [`docs/12-Deployment.md`](docs/12-Deployment.md)). El email conserva el
+> dominio `trustai.app` porque es el identificador real de acceso de la
+> cuenta sembrada.
