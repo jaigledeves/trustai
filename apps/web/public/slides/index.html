@@ -197,6 +197,22 @@
   .layer.anchor { border-color: rgba(52,211,153,.4); background: linear-gradient(90deg, var(--success-dim), var(--panel) 70%); }
   .layer.anchor .n { background: rgba(52,211,153,.16); color: var(--success); }
 
+  /* ---- Hexagonal · ports & adapters ---- */
+  .hexwrap { display: grid; grid-template-columns: 1fr auto 1.15fr; gap: 26px; align-items: center; width: 100%; max-width: 1060px; margin: 24px auto 0; }
+  .hexcol { display: flex; flex-direction: column; gap: 10px; }
+  .hexcol .side { font-size: .68rem; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); font-weight: 650; text-align: center; margin-bottom: 2px; }
+  .adp { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 11px 14px; }
+  .adp .port { font-family: var(--mono); font-size: .72rem; color: var(--primary-soft); }
+  .adp .impl { font-size: .88rem; color: var(--fg); font-weight: 650; margin-top: 3px; }
+  .adp .impl small { color: var(--muted); font-weight: 400; font-size: .82rem; }
+  .adp.drv { border-color: rgba(77,132,245,.4); background: linear-gradient(150deg, rgba(77,132,245,.09), var(--panel) 70%); }
+  .hexcore { position: relative; width: 200px; height: 220px; display: grid; place-items: center; margin: 0 auto; }
+  .hexcore svg { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 14px 36px rgba(52,211,153,.18)); }
+  .hexcore .lbl { position: relative; z-index: 2; text-align: center; padding: 0 22px; }
+  .hexcore .lbl .t1 { font-size: .64rem; text-transform: uppercase; letter-spacing: .16em; color: var(--success); font-weight: 700; }
+  .hexcore .lbl .t2 { font-family: var(--mono); font-weight: 700; font-size: 1.15rem; color: var(--fg); margin-top: 5px; }
+  .hexcore .lbl .t3 { font-size: .7rem; color: var(--muted); margin-top: 8px; line-height: 1.45; }
+
   /* ---- Demo / QR ---- */
   .qrcard {
     background: #fff; border-radius: 20px; padding: 22px; width: 300px; align-self: center;
@@ -524,34 +540,39 @@
     </div>
   </section>
 
-  <!-- SLIDE 3 — ARQUITECTURA -->
-  <section class="slide">
-    <div class="cols">
-      <div class="stack">
-        <span class="kicker">Cómo funciona por dentro</span>
-        <h2>De un archivo a una <span class="accent">prueba pública</span></h2>
-        <p class="lead">Cuatro capas independientes. Cada una hace una sola cosa y deja una evidencia que la siguiente no puede falsear.</p>
-        <p class="lead" style="font-size:0.95rem"><b class="green">Ninguna capa necesita tu confianza:</b> el resultado se comprueba de forma matemática, no por reputación.</p>
+  <!-- SLIDE 3 — ARQUITECTURA HEXAGONAL -->
+  <section class="slide dense">
+    <span class="kicker">Cómo está hecho por dentro</span>
+    <h2>Arquitectura <span class="accent">hexagonal</span> · puertos y adaptadores</h2>
+    <p class="head-lead">El <b style="color:var(--fg)">dominio</b> no conoce el framework, la base de datos, la IA ni la blockchain. Se comunica solo por <b style="color:var(--fg)">puertos</b> (interfaces); cada adaptador es intercambiable —incluso por un doble en tests.</p>
+
+    <div class="hexwrap">
+      <div class="hexcol">
+        <div class="side">Entrada · driving</div>
+        <div class="adp drv"><div class="port">HTTP · REST</div><div class="impl">Web <small>· Next.js</small></div></div>
+        <div class="adp drv"><div class="port">Controllers · casos de uso</div><div class="impl">API <small>· NestJS</small></div></div>
       </div>
-      <div class="arch">
-        <div class="layer fragment">
-          <span class="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
-          <div class="body"><div class="lt">1 · Documento</div><div class="ls">El usuario sube el archivo de forma privada.</div></div>
+
+      <div class="hexcore">
+        <svg viewBox="0 0 200 220" aria-hidden="true"><polygon points="50,12 150,12 198,110 150,208 50,208 2,110" fill="rgba(52,211,153,.08)" stroke="var(--success)" stroke-width="1.5"/></svg>
+        <div class="lbl">
+          <div class="t1">Núcleo · dominio</div>
+          <div class="t2">dtr-core</div>
+          <div class="t3">canonicalize · hash · verify<br>+ reglas del DTR</div>
         </div>
-        <div class="layer fragment">
-          <span class="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2M15 13v2M9 13v2"/></svg></span>
-          <div class="body"><div class="lt">2 · Análisis con IA</div><div class="ls">Detecta tipo, idioma y genera un resumen de contexto.</div></div>
-        </div>
-        <div class="layer fragment">
-          <span class="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg></span>
-          <div class="body"><div class="lt">3 · Huella SHA-256</div><div class="ls">Se calcula la huella única del archivo, byte a byte.</div></div>
-        </div>
-        <div class="layer anchor fragment">
-          <span class="n"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V8"/><circle cx="12" cy="5" r="3"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
-          <div class="body"><div class="lt">4 · Anclaje en blockchain</div><div class="ls">La huella queda pública e inalterable en Base. Verificable para siempre.</div></div>
-        </div>
+      </div>
+
+      <div class="hexcol">
+        <div class="side">Salida · driven</div>
+        <div class="adp"><div class="port">AiAnalysisPort</div><div class="impl">OpenAI <small>/ Stub</small></div></div>
+        <div class="adp"><div class="port">AnchorPort</div><div class="impl">Base · viem <small>· AnchorRegistry</small></div></div>
+        <div class="adp"><div class="port">StoragePort · EncryptionPort</div><div class="impl">Cloudflare R2 <small>· AES-256-GCM</small></div></div>
+        <div class="adp"><div class="port">…RepositoryPort</div><div class="impl">PostgreSQL <small>· Prisma</small></div></div>
+        <div class="adp"><div class="port">QueuePort</div><div class="impl">pg-boss <small>· worker in-process</small></div></div>
       </div>
     </div>
+
+    <div class="callout green" style="margin-top:22px"><b>Ninguna capa necesita tu confianza:</b> el resultado se comprueba por matemática, no por reputación. Y como todo entra por puertos, el dominio se testea <b>100 % aislado</b> — cada adaptador se sustituye por un doble.</div>
   </section>
 
   <!-- SLIDE — DTR-CORE -->
