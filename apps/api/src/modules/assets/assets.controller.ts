@@ -21,6 +21,7 @@ import {
   type DigitalAssetRepositoryPort,
 } from "../../ports/digital-asset-repository.port";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { decodeMultipartFilename } from "./decode-multipart-filename";
 import { AssetResponseDto } from "./dto/asset-response.dto";
 import { UploadAssetResponseDto } from "./dto/upload-asset-response.dto";
 
@@ -84,7 +85,7 @@ export class AssetsController {
       createdByUserId: req.user.sub,
       buffer: file.buffer,
       mimeType: file.mimetype,
-      filename: file.originalname ?? null,
+      filename: file.originalname ? decodeMultipartFilename(file.originalname) : null,
     });
   }
 
