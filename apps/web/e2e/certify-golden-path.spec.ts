@@ -54,7 +54,8 @@ test.describe("Certify golden path (register -> verify -> login -> certify -> an
     // 1. Register
     await page.goto("/register");
     await page.getByLabel("Email").fill(email);
-    await page.getByLabel("Contraseña").fill(password);
+    await page.getByLabel("Contraseña", { exact: true }).fill(password);
+    await page.getByLabel("Confirmar contraseña").fill(password);
     await page.getByRole("button", { name: "Registrarme" }).click();
     await expect(
       page.getByText("Revisa tu email para verificar tu cuenta antes de iniciar sesión."),
