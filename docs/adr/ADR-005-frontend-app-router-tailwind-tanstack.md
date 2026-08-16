@@ -80,7 +80,7 @@ asíncrono, que es parte del camino dorado.
 
 **Positivas**
 - La página pública de verificación puede recomputar el hash con `dtr-core` en
-  el navegador: la reproducibilidad sin confiar en TrustAI se demuestra en vivo.
+  el navegador: la reproducibilidad sin confiar en Ancrux se demuestra en vivo.
 - UI accesible y profesional sin diseñador dedicado.
 - Polling de estados del DTR (DRAFT→…→CERTIFIED) resuelto por TanStack Query.
 - Token protegido de XSS por la cookie httpOnly.

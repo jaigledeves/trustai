@@ -1,4 +1,4 @@
-# TrustAI — Documentación
+# Ancrux — Documentación
 
 Índice navegable de la documentación del proyecto (TFM: certificación de
 contenido con IA + anclaje blockchain en Base Sepolia). Documento vivo:
@@ -17,7 +17,7 @@ previstas del TDD maestro.
 | 00 | [Project Constitution](00-Project-Constitution.md) | Reglas de ingeniería y gobernanza |
 | 01 | [Product Vision](01-Product-Vision.md) | Visión de producto |
 | 02 | [Market Research](02-Market-Research.md) | Análisis de mercado |
-| 03 | [Business Model](03-Business-Model.md) | Modelo de negocio (ver también [03-Business-Model/](03-Business-Model/) con el desglose Lean/BMC/pricing/GTM) |
+| 03 | [Business Model](03-Business-Model.md) | Modelo de negocio (Lean Canvas, pricing, GTM) |
 | 04 | [Viability](04-Viability.md) | Viabilidad económica |
 | 05 | [Personas & Use Cases](05-Personas-UseCases.md) | Personas y casos de uso |
 | 06 | [Requirements](06-Requirements.md) | Requisitos funcionales y no funcionales |

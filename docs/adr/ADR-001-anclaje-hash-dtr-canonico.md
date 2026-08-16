@@ -12,7 +12,7 @@ Había que decidir qué evidencia se registra en blockchain, porque
 define qué puede demostrar el producto ante un tercero.
 
 El Market Research (02) mostró que la prueba de existencia de un hash
-es una commodity gratuita (OpenTimestamps). El diferencial de TrustAI
+es una commodity gratuita (OpenTimestamps). El diferencial de Ancrux
 debe estar en certificar también el análisis de IA (tendencia
 AI-provenance, ya explotada comercialmente por OriginStamp para el AI
 Act europeo).
@@ -40,7 +40,7 @@ Se ancla en blockchain el **hash SHA-256 del DTR canónico completo**.
 4. Comprueba que ese hash existe en la blockchain en la transacción
    referenciada.
 
-Ningún paso requiere confiar en TrustAI como plataforma.
+Ningún paso requiere confiar en Ancrux como plataforma.
 
 ## Alternativas consideradas
 

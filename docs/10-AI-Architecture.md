@@ -1,6 +1,6 @@
 # 10 - AI Architecture
 
-**Proyecto:** TrustAI
+**Proyecto:** Ancrux
 **Versión:** 1.0
 **Estado:** Draft
 **Fecha:** Julio 2026

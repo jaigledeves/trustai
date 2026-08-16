@@ -1,8 +1,8 @@
-# TrustAI -- Product Vision Document
+# Ancrux -- Product Vision Document
 
 **Versión:** 1.1\
 **Estado:** Draft\
-**Proyecto:** Trabajo Fin de Máster + Producto Comercial\
+**Proyecto:** MVP + Producto Comercial\
 **Fecha:** Julio 2026
 
 # 1. Introducción
@@ -12,7 +12,7 @@ el intercambio de activos digitales. Sin embargo, garantizar su
 autenticidad, integridad, trazabilidad y comprensión continúa siendo un
 desafío para organizaciones y profesionales.
 
-TrustAI propone una plataforma que combina Inteligencia Artificial y
+Ancrux propone una plataforma que combina Inteligencia Artificial y
 Blockchain para construir confianza digital sobre cualquier activo
 digital.
 
@@ -163,7 +163,7 @@ Justificación (ver 02-Market-Research):
 
 # 13. Visión a cinco años
 
-TrustAI evolucionará hacia una plataforma de confianza digital basada en
+Ancrux evolucionará hacia una plataforma de confianza digital basada en
 un núcleo estable de certificación y módulos especializados para
 diferentes sectores.
 

@@ -1,13 +1,13 @@
 # 05 - Personas y Casos de Uso
 
-**Proyecto:** TrustAI
+**Proyecto:** Ancrux
 **Versión:** 1.0
 **Estado:** Draft
 **Fecha:** Julio 2026
 
 ## Objetivo
 
-Definir quién usa TrustAI (personas) y qué hace con él (casos de uso),
+Definir quién usa Ancrux (personas) y qué hace con él (casos de uso),
 para que los requisitos (06) y el diseño del MVP deriven de necesidades
 concretas del segmento cabeza de playa y no de suposiciones.
 
@@ -80,7 +80,7 @@ una persona de primer nivel aunque nunca pague.
 - **Perfil**: juez, perito, auditor, contraparte o cliente final.
   **No tiene cuenta ni la tendrá.**
 - **Contexto**: recibe un documento + un DTR (o un QR) y necesita
-  comprobar autenticidad sin depender de TrustAI como autoridad.
+  comprobar autenticidad sin depender de Ancrux como autoridad.
 - **Dolores**: desconfianza por defecto; cero tolerancia a registrarse
   o pagar para verificar.
 - **Objetivos**: veredicto claro (válido / no válido / alterado) en

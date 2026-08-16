@@ -1,6 +1,6 @@
 # 07 - Domain Model
 
-**Proyecto:** TrustAI
+**Proyecto:** Ancrux
 **Versión:** 1.0
 **Estado:** Draft
 **Fecha:** Julio 2026
@@ -103,7 +103,7 @@ Fuera de alcance: diseño físico de base de datos (08), contratos de API
 | **DTR (Trust Record)** | La evidencia: análisis IA congelado + hash del activo + metadatos, serializado canónicamente y anclado. |
 | **Anclaje (Anchor)** | La transacción blockchain que certifica el hash de uno o más DTRs. |
 | **Certificar** | Llevar un DTR desde borrador hasta anclado. |
-| **Verificar** | Comprobar, sin confiar en TrustAI, que activo + DTR + blockchain son coherentes. |
+| **Verificar** | Comprobar, sin confiar en Ancrux, que activo + DTR + blockchain son coherentes. |
 | **Versión** | Nuevo activo (nuevo hash) enlazado a la cadena de DTRs de su predecesor. |
 
 ## Agregados e invariantes

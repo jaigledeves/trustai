@@ -1,4 +1,4 @@
-# API Endpoints — TrustAI
+# API Endpoints — Ancrux
 
 **Fuente:** código real de `apps/api/src/modules/**` (leído en la fecha de esta
 pasada de documentación). Cualquier discrepancia futura entre este documento y

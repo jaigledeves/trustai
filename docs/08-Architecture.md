@@ -1,6 +1,6 @@
 # 08 - Architecture
 
-**Proyecto:** TrustAI
+**Proyecto:** Ancrux
 **Versión:** 1.0
 **Estado:** Draft
 **Fecha:** Julio 2026
@@ -36,12 +36,12 @@ intercambiables).
 
 ```mermaid
 C4Context
-    title TrustAI — C4 Nivel 1: Contexto (verificado contra el código, 2026-07)
+    title Ancrux — C4 Nivel 1: Contexto (verificado contra el código, 2026-07)
 
     Person(orguser, "Usuario de despacho", "P1-P3: certifica y gestiona activos")
     Person(verifier, "Verificador externo", "P4: verifica sin cuenta")
 
-    System(trustai, "TrustAI", "Certificación inteligente de activos digitales (DTR)")
+    System(trustai, "Ancrux", "Certificación inteligente de activos digitales (DTR)")
 
     System_Ext(llm, "Proveedor LLM", "OpenAI (adaptador real) / stub de desarrollo: análisis documental")
     System_Ext(chain, "Blockchain L2", "Base Sepolia: anclaje de evidencias (contrato AnchorRegistry desplegado)")
@@ -58,7 +58,7 @@ C4Context
 ```
 
 La flecha `verifier → chain` es deliberada y es el alma del producto:
-el verificador PUEDE comprobar la evidencia sin pasar por TrustAI
+el verificador PUEDE comprobar la evidencia sin pasar por Ancrux
 (RNF-032).
 
 **Nota de drift corregida (2026-07):** el segundo adaptador IA real
@@ -72,12 +72,12 @@ enmienda de ADR-004 en 11-MVP-Definition.md. El diagrama ya refleja esto.
 
 ```mermaid
 C4Container
-    title TrustAI — C4 Nivel 2: Contenedores (verificado contra el código, 2026-07)
+    title Ancrux — C4 Nivel 2: Contenedores (verificado contra el código, 2026-07)
 
     Person(orguser, "Usuario de despacho")
     Person(verifier, "Verificador externo")
 
-    System_Boundary(trustai, "TrustAI") {
+    System_Boundary(trustai, "Ancrux") {
         Container(web, "Web App", "Next.js 16 (App Router)", "UI de certificación (app/(dashboard)) + login/registro (app/(auth)) + página pública /verify/[id]")
         Container(api, "API", "NestJS (Node)", "Módulos: auth, assets, trust-records, public-verification, health. Núcleo hexagonal (domain/application/ports/adapters)")
         Container(worker, "Worker", "NestJS + pg-boss (mismo proceso que la API)", "Jobs: analyze-document, anchor-dtr, confirm-anchor (WorkerModule, in-process)")

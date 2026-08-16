@@ -1,4 +1,4 @@
-# TrustAI — TDD Index (documento vivo)
+# Ancrux — TDD Index (documento vivo)
 
 **Propósito:** índice maestro del Technical Design Document. El TDD no
 es un monolito: emerge de documentos modulares. Este índice mapea las

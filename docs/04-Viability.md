@@ -1,6 +1,6 @@
 # 04 - Viability Study
 
-**Proyecto:** TrustAI
+**Proyecto:** Ancrux
 **Versión:** 1.0
 **Estado:** Draft
 **Fecha:** Julio 2026
@@ -8,7 +8,7 @@
 ## Objetivo
 
 Cuantificar con precios reales (julio 2026) el coste de construir y
-operar TrustAI, calcular el coste unitario por DTR, contrastarlo con el
+operar Ancrux, calcular el coste unitario por DTR, contrastarlo con el
 pricing del Business Model (03) y determinar el punto de equilibrio.
 
 ## Alcance

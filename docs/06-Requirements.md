@@ -1,6 +1,6 @@
 # 06 - Requirements
 
-**Proyecto:** TrustAI
+**Proyecto:** Ancrux
 **Versión:** 1.0
 **Estado:** Draft
 **Fecha:** Julio 2026
@@ -85,7 +85,7 @@ RGPD del segmento (03 §Riesgos) y control de scope de la Constitución
 | RF-041 | Verificación completa: subir documento + DTR → veredicto de integridad | Must | UC-02 |
 | RF-042 | Consulta por hash: prueba de existencia y timestamp (sin exponer contenido ni análisis) | Should | UC-02 |
 | RF-043 | QR y URL pública de verificación por cada DTR | Must | UC-05 |
-| RF-044 | Enlace a la transacción blockchain para verificación independiente de TrustAI | Must | UC-02 |
+| RF-044 | Enlace a la transacción blockchain para verificación independiente de Ancrux | Must | UC-02 |
 | RF-045 | Veredicto en lenguaje claro para no técnicos, explicitando qué se garantiza y qué no (sin implicar validez eIDAS) | Must | UC-02 |
 | RF-046 | Registro de cada verificación realizada (métrica clave del negocio) | Must | UC-02 |
 
@@ -159,7 +159,7 @@ RGPD del segmento (03 §Riesgos) y control de scope de la Constitución
 3. **RNF-011 resuelve la tensión RGPD vs inmutabilidad**: en la cadena
    solo vive un hash; el derecho de supresión se satisface off-chain.
 4. **RNF-032 es el requisito más importante del producto**: si la
-   verificación solo funciona dentro de TrustAI, no somos mejores que
+   verificación solo funciona dentro de Ancrux, no somos mejores que
    la evidencia propietaria de DocuSign (02 §DocuSign).
 
 ## Alternativas consideradas

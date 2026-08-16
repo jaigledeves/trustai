@@ -1,6 +1,6 @@
 # 02 - Market Research
 
-**Proyecto:** TrustAI
+**Proyecto:** Ancrux
 **Versión:** 2.0
 **Estado:** Draft
 **Fecha:** Julio 2026
@@ -18,7 +18,7 @@ viabilidad (04).
 - Análisis de competidores directos e indirectos por categoría, con
   nombres, precios y posicionamiento.
 - Benchmark de precios de mercado (julio 2026).
-- Identificación del hueco competitivo de TrustAI.
+- Identificación del hueco competitivo de Ancrux.
 - Hipótesis de negocio y plan de validación.
 
 Fuera de alcance: dimensionamiento TAM/SAM/SOM con fuentes de pago
@@ -52,7 +52,7 @@ Posicionamiento: ha evolucionado hacia "Intelligent Agreement
 Management" (IAM) con IA para gestión y análisis de acuerdos. Señal
 relevante: el líder de la categoría ya está integrando IA documental.
 
-Debilidad frente a TrustAI: la evidencia queda dentro de su plataforma
+Debilidad frente a Ancrux: la evidencia queda dentro de su plataforma
 (certificate of completion propietario); no ofrece verificación
 independiente del proveedor.
 
@@ -69,10 +69,10 @@ Precios públicos (julio 2026, fuente: signaturit.com/pricing):
 | Firma cualificada (QES) | €10–15/firma | add-on |
 
 Posicionamiento: cumplimiento eIDAS/RGPD, mercado español y europeo.
-Relevante para TrustAI por ser el referente de precios en nuestro
+Relevante para Ancrux por ser el referente de precios en nuestro
 mercado inicial (España).
 
-Debilidad frente a TrustAI: sin inteligencia documental (no resume, no
+Debilidad frente a Ancrux: sin inteligencia documental (no resume, no
 clasifica, no extrae entidades).
 
 ### Categoría 2: Notarización / timestamping blockchain
@@ -86,7 +86,7 @@ clasifica, no extrae entidades).
   (certificación de outputs de IA para el AI Act europeo). Valida la
   tendencia IA + timestamping y a la vez es una amenaza directa.
 
-Debilidad frente a TrustAI: certifica el hash pero no comprende el
+Debilidad frente a Ancrux: certifica el hash pero no comprende el
 contenido; no genera resumen, clasificación ni entidades.
 
 #### OpenTimestamps (estándar abierto, gratuito)
@@ -95,7 +95,7 @@ contenido; no genera resumen, clasificación ni entidades.
 - Servidores de calendario gratuitos, sin registro ni API key.
 - Usado por Zoho Sign, Verisart y decenas de empresas.
 
-**Implicación crítica para TrustAI**: la prueba de existencia "a secas"
+**Implicación crítica para Ancrux**: la prueba de existencia "a secas"
 es una commodity con coste marginal cero. Nadie pagará por el anclaje
 en sí. El valor por el que se puede cobrar está en la capa superior:
 comprensión IA del contenido, flujo de trabajo, experiencia de
@@ -109,7 +109,7 @@ verificación y el DTR como evidencia integrada.
   Europea (€1M): señal de apoyo institucional europeo a esta categoría.
 - Plan gratuito; precios de pago no transparentes.
 
-Debilidad frente a TrustAI: nicho de contenido web, no de activos
+Debilidad frente a Ancrux: nicho de contenido web, no de activos
 documentales empresariales.
 
 ### Categoría 3: Gestión documental

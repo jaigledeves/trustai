@@ -1,6 +1,6 @@
 # 09 - Smart Contract Design
 
-**Proyecto:** TrustAI
+**Proyecto:** Ancrux
 **Versión:** 1.0
 **Estado:** Draft
 **Fecha:** Julio 2026
@@ -53,7 +53,7 @@ Eso es TODO el contrato. Cada línea que no está aquí es una decisión
 
 | Propiedad | Cómo se garantiza | Por qué importa |
 |---|---|---|
-| **Inmutable** | Sin proxy, sin upgradeability, sin `selfdestruct` | Un registro de evidencias actualizable no es un registro de evidencias: nadie (ni TrustAI) puede cambiar la semántica a posteriori |
+| **Inmutable** | Sin proxy, sin upgradeability, sin `selfdestruct` | Un registro de evidencias actualizable no es un registro de evidencias: nadie (ni Ancrux) puede cambiar la semántica a posteriori |
 | **Permissionless** | `anchor` sin control de acceso | El contrato es un bien público: cualquiera puede anclar (paga su gas) y cualquiera puede verificar. Refuerza la independencia del proveedor (RNF-032) |
 | **Sin owner** | Ningún rol privilegiado | No hay clave que robar ni poder que abusar |
 | **Idempotente para el operador** | `AlreadyAnchored` en duplicado | El worker puede reintentar sin ensuciar la cadena; el error "ya anclado" se trata como éxito (la evidencia existe) |
@@ -72,7 +72,7 @@ el contrato: verificar en cadena costaría gas sin añadir garantías.
 
 ## Flujo de verificación independiente (RNF-032)
 
-Un verificador sin relación con TrustAI puede:
+Un verificador sin relación con Ancrux puede:
 
 1. Canonicalizar el DTR (spec pública, `dtr-core` open source) y
    calcular su SHA-256.
@@ -80,7 +80,7 @@ Un verificador sin relación con TrustAI puede:
    buscar el evento `Anchored` en el explorador.
 3. Comparar el timestamp del bloque con la fecha declarada.
 
-Ningún paso requiere permiso, cuenta ni infraestructura de TrustAI.
+Ningún paso requiere permiso, cuenta ni infraestructura de Ancrux.
 
 ## Plan de pruebas (Foundry)
 
@@ -116,7 +116,7 @@ Objetivo de cobertura: 100%. Con 15 líneas efectivas no hay excusa.
    anterior (el DTR referencia dirección + tx). La confianza exige que
    el código que verificó tu evidencia no pueda cambiar.
 3. **Permissionless a propósito**: restringir `anchor` a la wallet de
-   TrustAI no aporta nada (el spam lo paga quien lo envía) y convierte
+   Ancrux no aporta nada (el spam lo paga quien lo envía) y convierte
    un bien público en un servicio propietario.
 4. **Custom errors en lugar de strings**: menos gas, ABI explícita para
    que el worker distinga `AlreadyAnchored` (éxito) de otros fallos.

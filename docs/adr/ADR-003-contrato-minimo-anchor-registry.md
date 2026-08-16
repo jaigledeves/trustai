@@ -36,7 +36,7 @@ Propiedades clave:
   Merkle root** de N DTRs: activar batching (04) no requiere cambiar el
   contrato.
 - Evento indexado → verificación y auditoría sencillas desde cualquier
-  explorador o cliente RPC, sin depender de TrustAI (RNF-032).
+  explorador o cliente RPC, sin depender de Ancrux (RNF-032).
 - Sin ownership de documentos, sin versionado, sin permisos on-chain:
   todo eso vive en la base de datos. On-chain solo evidencia.
 

@@ -1,13 +1,13 @@
 # 03 - Business Model
 
-**Proyecto:** TrustAI
+**Proyecto:** Ancrux
 **Versión:** 1.0
 **Estado:** Draft
 **Fecha:** Julio 2026
 
 ## Objetivo
 
-Definir el modelo de negocio de TrustAI: a quién vendemos, qué
+Definir el modelo de negocio de Ancrux: a quién vendemos, qué
 vendemos, cómo generamos ingresos y con qué estructura de precios,
 usando el benchmark de mercado del documento 02. Este documento fusiona
 Business Model y Lean Canvas para evitar duplicidad.
@@ -135,9 +135,7 @@ Principios:
 
 ## Decisiones
 
-1. Fusionar Business Model Canvas y Lean Canvas en un único documento
-   (evitar duplicidad; el BMC completo se generará solo si el TFM lo
-   exige formalmente).
+1. Fusionar Business Model Canvas y Lean Canvas en un único documento.
 2. Modelo principal del MVP: **suscripción SaaS por usuario con cupo de
    DTRs**; API por consumo pospuesta a post-MVP.
 3. Sin freemium permanente; trial de 14 días con cupo.

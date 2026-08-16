@@ -1,6 +1,6 @@
 # 11 - MVP Definition
 
-**Proyecto:** TrustAI
+**Proyecto:** Ancrux
 **Versión:** 1.0
 **Estado:** Approved (gate de salida de la Fase 1)
 **Fecha:** Julio 2026
@@ -16,7 +16,7 @@ cierra la Fase 1: a partir de aquí, código.
 
 > Un usuario certifica un documento (análisis IA + DTR anclado en
 > testnet) y cualquier tercero lo verifica escaneando un QR, sin
-> cuenta y sin confiar en TrustAI.
+> cuenta y sin confiar en Ancrux.
 
 ## Alcance
 
@@ -69,7 +69,7 @@ El MVP está terminado cuando, en un despliegue accesible por URL:
    veredicto **Válido** con explicación clara y enlace a la tx.
 4. El mismo PDF con un byte cambiado obtiene veredicto **No
    corresponde/alterado**.
-5. La verificación es reproducible sin TrustAI: la spec de
+5. La verificación es reproducible sin Ancrux: la spec de
    canonicalización y `dtr-core` permiten verificar contra el contrato
    directamente (documentado en el README).
 6. `dtr-core` y el contrato tienen su suite de tests verde en CI
@@ -132,7 +132,7 @@ Verificado directamente contra `apps/api`, `apps/web` y `smart-contracts`:
 Los criterios de aceptación 1-2 del MVP (registro/verificación de email,
 certificación hasta `CERTIFIED` con tx visible) son ejecutables hoy en el
 código; los criterios 3-5 (verificación de terceros, detección de alteración,
-reproducibilidad sin TrustAI) dependen de la demo en vivo y no se han
+reproducibilidad sin Ancrux) dependen de la demo en vivo y no se han
 verificado en esta pasada documental (requeriría ejecutar la aplicación, no
 solo leer el código).
 

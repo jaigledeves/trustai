@@ -1,4 +1,4 @@
-# PRes — Detalles de Arquitectura de TrustAI
+# PRes — Detalles de Arquitectura de Ancrux
 
 > **Propósito:** guía de presentación del proyecto ante un tribunal (y ante
 > cualquier persona interesada). Recorre, de forma progresiva, las decisiones
@@ -14,13 +14,13 @@
 
 ## 0. El pitch en 60 segundos
 
-> **TrustAI certifica activos digitales combinando IA y blockchain: la IA
+> **Ancrux certifica activos digitales combinando IA y blockchain: la IA
 > comprende el contenido del documento y la blockchain certifica su integridad.
 > Cada activo obtiene un _Digital Trust Record (DTR)_ verificable por cualquiera,
-> sin necesidad de confiar en TrustAI.**
+> sin necesidad de confiar en Ancrux.**
 
 La frase clave —y el alma técnica del proyecto— es *sin necesidad de confiar en
-TrustAI*: cualquier tercero puede recalcular el hash del documento y comprobarlo
+Ancrux*: cualquier tercero puede recalcular el hash del documento y comprobarlo
 contra la blockchain por su cuenta. La plataforma no es el árbitro de la verdad;
 la matemática y la cadena lo son.
 
@@ -32,7 +32,7 @@ la matemática y la cadena lo son.
 alterado, y —esto es lo diferencial— que un análisis concreto se hizo sobre él.
 
 **La trampa a evitar:** la simple prueba de existencia de un hash en blockchain
-es hoy una *commodity gratuita* (OpenTimestamps). Si TrustAI solo hiciera eso,
+es hoy una *commodity gratuita* (OpenTimestamps). Si Ancrux solo hiciera eso,
 sería "un OpenTimestamps con interfaz": indiferenciado y sin valor por el que
 cobrar.
 
@@ -139,7 +139,7 @@ Propiedades que lo hacen elegante:
   de N documentos → activar *batching* de costes en el futuro **no requiere
   cambiar el contrato**.
 - El **evento indexado** permite verificar y auditar desde cualquier explorador,
-  sin depender de TrustAI.
+  sin depender de Ancrux.
 - El `require` de duplicados hace el anclaje **idempotente**: los reintentos del
   worker no duplican evidencia.
 
@@ -194,7 +194,7 @@ ADR-002 fijó Next.js; ADR-005 baja al detalle:
 
 Beneficio que cierra el círculo con ADR-001: la página pública **recomputa el
 hash con `dtr-core` en el navegador** → la reproducibilidad sin confiar en
-TrustAI se demuestra en vivo, en el cliente.
+Ancrux se demuestra en vivo, en el cliente.
 
 ---
 
@@ -278,7 +278,7 @@ criterio de aceptación del MVP:
 3. **Un tercero, sin cuenta**, abre el enlace público / escanea el QR y obtiene
    veredicto **Válido**, con enlace a la transacción on-chain.
 4. El mismo PDF con **un byte cambiado** → veredicto **No corresponde / alterado**.
-5. La verificación es **reproducible sin TrustAI**: `dtr-core` permite comprobar
+5. La verificación es **reproducible sin Ancrux**: `dtr-core` permite comprobar
    el hash contra el contrato directamente.
 
 Los pasos 3–5 son el momento fuerte: certificar en vivo, verificar en vivo,
@@ -309,7 +309,7 @@ el alcance está bien trazado.
 
 **A alguien no técnico (30 segundos):**
 > "¿Sabés cómo un sello notarial certifica que un documento existía en una fecha?
-> TrustAI hace eso, pero automático y verificable por cualquiera: la inteligencia
+> Ancrux hace eso, pero automático y verificable por cualquiera: la inteligencia
 > artificial lee y resume el documento, y la blockchain le pone un sello
 > inmutable. Lo bueno es que no tenés que confiar en nosotros: cualquiera puede
 > comprobar por su cuenta que el documento es auténtico, escaneando un código QR."
@@ -337,7 +337,7 @@ el alcance está bien trazado.
 
 **¿Por qué blockchain y no una base de datos firmada o una autoridad de sellado
 de tiempo (TSA, RFC 3161)?**
-Porque una TSA o una base firmada por TrustAI exigen **confiar en un tercero**
+Porque una TSA o una base firmada por Ancrux exigen **confiar en un tercero**
 (en la TSA, o en nosotros). El objetivo del producto es justamente **eliminar esa
 confianza**: la evidencia vive en un registro público e inmutable que nadie
 controla, y cualquiera la verifica sin pasar por la plataforma. Un tercero
@@ -359,7 +359,7 @@ beneficio a este volumen. La arquitectura hexagonal ya deja las costuras: cuando
 el volumen lo pida (umbral documentado: >10.000 jobs/día), el worker se separa
 **sin reescribir el dominio**.
 
-**¿Qué pasa si TrustAI desaparece mañana?**
+**¿Qué pasa si Ancrux desaparece mañana?**
 La evidencia **sobrevive**. El hash está en Base (pública), el algoritmo de
 verificación es `dtr-core` (corre en el navegador y puede publicarse open
 source), y el usuario conserva su documento y su DTR (JSON). Cualquiera verifica
@@ -408,7 +408,7 @@ DTR/versión — eso es **trazabilidad, no un fallo**. La reproducibilidad aplic
 la verificación del hash, que sí es 100% determinista.
 
 **¿Qué impide que alguien certifique un documento que no es suyo?**
-TrustAI certifica **existencia e integridad en una fecha, no autoría legal**. El
+Ancrux certifica **existencia e integridad en una fecha, no autoría legal**. El
 ancla prueba "este contenido y este análisis existían en este momento", no "esta
 persona es el autor legítimo". La identidad se apoya en la cuenta autenticada
 (metadatos), y el producto es explícito en su *disclaimer*: **no es una firma
