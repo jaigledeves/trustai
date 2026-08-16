@@ -20,6 +20,8 @@ producto e ingeniería, en [`docs/`](docs/TDD-Index.md).
 | Recurso | URL |
 |---|---|
 | Aplicación web | https://ancrux.vercel.app |
+| Vídeo de presentación (YouTube) | https://www.youtube.com/watch?v=3gAmxk86-tU |
+| Presentación / slides | https://ancrux.vercel.app/slides |
 | Salud de la API | https://trustaiapi-production.up.railway.app/health |
 | Contrato de anclaje (Base Sepolia) | [`0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22`](https://sepolia.basescan.org/address/0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22) |
 
