@@ -1,6 +1,6 @@
 # Ancrux
 
-Certificación inteligente de activos digitales: **la IA comprende el
+Certificación de activos digitales: **la IA comprende el
 contenido, la blockchain certifica su integridad**. Cada activo obtiene
 un **Digital Trust Record (DTR)** verificable, cuyo hash canónico queda
 anclado on-chain.
@@ -10,8 +10,7 @@ anclado on-chain.
 > anclaje on-chain → `CERTIFIED`) está probado de punta a punta contra
 > **Base Sepolia real**.
 
-Proyecto de Trabajo Fin de Máster (TFM). Este repositorio es el
-entregable completo: el código fuente **y** la documentación viva de
+Este repositorio es el entregable completo: el código fuente **y** la documentación viva de
 producto e ingeniería, en [`docs/`](docs/TDD-Index.md).
 
 ---
