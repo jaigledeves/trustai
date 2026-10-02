@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { ValidationPipe } from "@nestjs/common";
+import { Logger, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
@@ -9,7 +9,14 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
   // Allow-list only (CORS_ORIGINS); the browser calls the API just from /verify.
-  app.enableCors({ origin: resolveCorsOrigins(process.env["CORS_ORIGINS"]) });
+  const cors = resolveCorsOrigins(process.env["CORS_ORIGINS"]);
+  if (cors.usedFallback) {
+    Logger.warn(
+      `CORS_ORIGINS is not set; only ${cors.origins.join(", ")} may call the API from a browser.`,
+      "Bootstrap",
+    );
+  }
+  app.enableCors({ origin: cors.origins });
 
   app.useGlobalPipes(
     new ValidationPipe({

@@ -34,7 +34,7 @@ serverless.
 | Variable | Requerida | Valor / nota |
 |---|---|---|
 | `PORT` | sí | La inyecta Railway; `main.ts` la lee (default 3000). |
-| `CORS_ORIGINS` | sí (prod) | Orígenes permitidos, separados por coma (p. ej. `https://ancrux.vercel.app`). Sin valor solo se permite `http://localhost:3100`; el comodín `*` se ignora. Lo necesita la verificación pública, que llama a la API desde el navegador. |
+| `CORS_ORIGINS` | sí (prod) | Orígenes permitidos, separados por coma (p. ej. `https://ancrux.vercel.app`). Sin valor solo se permite `http://localhost:3100` y la API lo avisa en el log al arrancar; el comodín `*` se ignora y la barra final se elimina. Lo necesita la verificación pública, que llama a la API desde el navegador. |
 | `DATABASE_URL` | sí | Referencia al Postgres de Railway. |
 | `PGBOSS_SCHEMA` | no | Schema de pg-boss (default interno). |
 | `JWT_SECRET` | sí (secreto) | Cadena larga aleatoria. Sin valor por defecto: la API no arranca si falta o si conserva el placeholder de `.env.example`. |

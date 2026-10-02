@@ -64,7 +64,7 @@ Out of scope: phases B to D, demo password rotation.
 | Task | Commit | Review tier | Notes |
 |---|---|---|---|
 | A1 | d2bdd34, 956313d | high, granted, approved (4 lenses) | RED observed (module missing), GREEN: 33 files / 225 tests, typecheck clean. e2e not run (needs Docker). Follow-up 956313d applies review findings (trimmed placeholder, key-aware stub). Deferred: minimum secret length (unknown length of the Railway secret). |
-| A4 | (this commit) | pending | RED observed (module missing), GREEN: 34 files / 230 tests, typecheck clean. Requires CORS_ORIGINS on Railway. |
+| A4 | c971f21, (follow-up) | high, granted, approved (4 lenses) | RED observed (module missing), GREEN: 34 files / 230 tests, typecheck clean. Requires CORS_ORIGINS on Railway. Follow-up applies review findings (trailing-slash normalization, startup warning on fallback). |
 
 ## Next step
 
