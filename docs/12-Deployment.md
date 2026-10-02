@@ -36,7 +36,7 @@ serverless.
 | `PORT` | sí | La inyecta Railway; `main.ts` la lee (default 3000). |
 | `CORS_ORIGINS` | sí (prod) | Orígenes permitidos, separados por coma (p. ej. `https://ancrux.vercel.app`). Sin valor solo se permite `http://localhost:3100` y la API lo avisa en el log al arrancar; el comodín `*` se ignora y la barra final se elimina. Lo necesita la verificación pública, que llama a la API desde el navegador. |
 | `DATABASE_URL` | sí | Referencia al Postgres de Railway. |
-| `TRUSTED_PROXY_SECRET` | sí (prod, secreto) | Cadena larga aleatoria, con el mismo valor en Railway y en Vercel. La API solo confía en la IP de cliente reenviada por el web (`x-client-ip`) para el rate limiting cuando el secreto coincide; si no, usa la IP de conexión. |
+| `TRUSTED_PROXY_SECRET` | sí (prod, secreto) | Cadena larga aleatoria, con el mismo valor en Railway y en Vercel. La API solo confía en la IP de cliente reenviada por el web (`x-client-ip`) para el rate limiting cuando el secreto coincide; si no, usa la IP de conexión, que para el tráfico del web es la de salida de Vercel y la comparten todos los usuarios. Si falta, la API lo avisa en el log al arrancar. |
 | `PGBOSS_SCHEMA` | no | Schema de pg-boss (default interno). |
 | `JWT_SECRET` | sí (secreto) | Cadena larga aleatoria. Sin valor por defecto: la API no arranca si falta o si conserva el placeholder de `.env.example`. |
 | `JWT_EXPIRES_IN` | no | p. ej. `7d` (debe cuadrar con `sessionMaxAgeSeconds` del web). |
@@ -56,7 +56,7 @@ serverless.
 | `OPENAI_API_KEY` / `OPENAI_MODEL` | si `openai` | Solo si `AI_ADAPTER=openai`. |
 | `PUBLIC_VERIFICATION_ENABLED` | no | `true` para habilitar UC-02 (verificación pública). |
 | `PUBLIC_VERIFY_GET_THROTTLE_LIMIT` / `..._POST_...` | no | Rate limits del endpoint público. |
-| `AUTH_THROTTLE_LIMIT` | no | Intentos por minuto y por cuenta (email) en `POST /auth/login` y `POST /auth/forgot-password` (default 5). Se cuenta por email porque la web llama a la API desde su servidor y la API no ve la IP del usuario. Este límite por cuenta se aplica además del límite global por IP (`THROTTLE_LIMIT`), no lo reemplaza. Un valor vacío, no entero o menor que 1 se ignora y se usa 5. |
+| `AUTH_THROTTLE_LIMIT` | no | Intentos por minuto y por cuenta (email) en `POST /auth/login` y `POST /auth/forgot-password` (default 5). Frena la fuerza bruta contra una cuenta concreta. Este límite por cuenta se aplica además del límite global por IP (`THROTTLE_LIMIT`), no lo reemplaza. Un valor vacío, no entero o menor que 1 se ignora y se usa 5. |
 
 ## Web en Vercel
 

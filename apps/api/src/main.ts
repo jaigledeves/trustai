@@ -18,6 +18,13 @@ async function bootstrap(): Promise<void> {
   }
   app.enableCors({ origin: cors.origins });
 
+  if (!process.env["TRUSTED_PROXY_SECRET"]?.trim()) {
+    Logger.warn(
+      "TRUSTED_PROXY_SECRET is not set; web traffic is rate limited by the hosting egress IP shared by all users.",
+      "Bootstrap",
+    );
+  }
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

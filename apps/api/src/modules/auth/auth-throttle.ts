@@ -25,13 +25,11 @@ export function resolveAuthThrottleLimit(): number {
 }
 
 /**
- * Tracks auth attempts by the target account instead of the client IP.
- * The web calls these routes from its Next server, so every request reaches
- * the API from the hosting provider's egress IP: an IP key would make all
- * users share one bucket. Keying by email caps brute force against a single
- * account regardless of origin. It does not stop spraying one password
- * across many accounts; that needs the real client IP (see docs/14-Roadmap.md).
- * The `global` per-IP throttler still applies on top of this one.
+ * Tracks auth attempts by the target account. Keying by email caps brute
+ * force against a single account regardless of origin. Spraying one
+ * password across many accounts is capped by the `global` per-IP throttler,
+ * which still applies on top of this one and sees the real client IP through
+ * the trusted proxy headers (see resolveClientIp).
  */
 export function accountTracker(req: Record<string, unknown>): string {
   const body = req["body"] as Record<string, unknown> | undefined;

@@ -2,6 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 
 export const PROXY_SECRET_HEADER = "x-proxy-secret";
 export const CLIENT_IP_HEADER = "x-client-ip";
+/** Longest textual IP: an IPv6 address with an embedded IPv4 suffix. */
 const MAX_IP_LENGTH = 45;
 
 /**
