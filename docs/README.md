@@ -27,6 +27,8 @@ previstas del TDD maestro.
 | 10 | [AI Architecture](10-AI-Architecture.md) | Arquitectura de la capa IA |
 | 11 | [MVP Definition](11-MVP-Definition.md) | Alcance del MVP + estado real de implementación |
 | 12 | [Deployment](12-Deployment.md) | Runbook de despliegue (Vercel + Railway + R2) |
+| 13 | [Security](13-Security.md) | Autenticación y modelo de sesión |
+| 14 | [Roadmap](14-Roadmap.md) | Backlog post-TFM priorizado a partir del feedback recibido |
 
 ## API y diagramas
 
