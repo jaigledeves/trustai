@@ -11,14 +11,14 @@ export interface CorsOriginsResolution {
  * Parses `CORS_ORIGINS` (comma-separated) into the allow-list passed to
  * `app.enableCors`. Only the public `/verify` page calls the API from the
  * browser, so production must list the web origin explicitly. Entries are
- * trimmed and lose trailing slashes (a browser `Origin` header never has
- * one). A wildcard is never honored; with no usable entry the local dev
+ * trimmed, lowercased and lose trailing slashes, matching what a browser
+ * sends in the `Origin` header. A wildcard is never honored; with no usable entry the local dev
  * origin applies and `usedFallback` lets the caller warn about it.
  */
 export function resolveCorsOrigins(raw: string | undefined): CorsOriginsResolution {
   const origins = (raw ?? "")
     .split(",")
-    .map((origin) => origin.trim().replace(/\/+$/, ""))
+    .map((origin) => origin.trim().replace(/\/+$/, "").toLowerCase())
     .filter((origin) => origin !== "" && origin !== "*");
   return origins.length > 0
     ? { origins, usedFallback: false }

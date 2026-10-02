@@ -22,7 +22,7 @@ anyone reading the code.
 - A2: upload size limit and PDF magic-byte check.
 - A3: security headers (`helmet` in the API; CSP and related headers in Next).
 - A4: CORS restricted to the web origin.
-- A5: per-route throttle on login, register, forgot-password, reset-password.
+- A5: per-account throttle on login and forgot-password, on top of the global per-IP limit (register and reset-password keep the global limit; see checklist).
 
 Out of scope: phases B to D, demo password rotation.
 
@@ -51,7 +51,7 @@ Out of scope: phases B to D, demo password rotation.
 - CORS only allows configured origins.
 - Responses carry the expected security headers.
 - Oversized uploads and non-PDF bytes declared as PDF are rejected.
-- Auth endpoints return 429 above their per-route limit.
+- Login and forgot-password return 429 above the per-account limit (unit-proven via throttler configuration; e2e proof pending, Docker unavailable).
 
 ## Checks
 
@@ -64,8 +64,8 @@ Out of scope: phases B to D, demo password rotation.
 | Task | Commit | Review tier | Notes |
 |---|---|---|---|
 | A1 | d2bdd34, 956313d | high, granted, approved (4 lenses) | RED observed (module missing), GREEN: 33 files / 225 tests, typecheck clean. e2e not run (needs Docker). Follow-up 956313d applies review findings (trimmed placeholder, key-aware stub). Deferred: minimum secret length (unknown length of the Railway secret). |
-| A4 | c971f21, ccb28cb, (wording) | high, granted, approved for c971f21 and ccb28cb (4 lenses each) | RED observed (module missing), GREEN: 34 files / 230 tests, typecheck clean. Requires CORS_ORIGINS on Railway. Follow-up applies review findings (trailing-slash normalization, startup warning on fallback). 7b7333e (wording) not reviewed yet; reviewed with the A5 slice. |
-| A5 | (this commit) | pending | RED observed (module missing), GREEN: 35 files / 239 tests, typecheck clean. e2e not run (Docker down); vitest.e2e.config raises AUTH_THROTTLE_LIMIT so existing suites are not throttled. Review of 52734b0 approved with warnings; follow-up adds a separate `account` throttler so the global per-IP limit still applies, validates AUTH_THROTTLE_LIMIT, and bounds tracker keys. Accepted trade-off: targeted lockout of one account (5/min) is inherent to per-account keying. |
+| A4 | c971f21, ccb28cb, 7b7333e, (lowercase) | high, granted, approved for c971f21 and ccb28cb (4 lenses each) | RED observed (module missing), GREEN: 34 files / 230 tests, typecheck clean. Requires CORS_ORIGINS on Railway. Follow-up applies review findings (trailing-slash normalization, startup warning on fallback). 7b7333e reviewed in the A5 slice and in the full-branch review (approved). Lowercase normalization added after the full-branch review finding. |
+| A5 | 52734b0, cfacf8f | high, granted, approved for 52734b0 and for the full branch up to 52734b0; cfacf8f pending | RED observed (module missing), GREEN: 35 files / 239 tests, typecheck clean. e2e not run (Docker down); vitest.e2e.config raises AUTH_THROTTLE_LIMIT so existing suites are not throttled. Review of 52734b0 approved with warnings; follow-up adds a separate `account` throttler so the global per-IP limit still applies, validates AUTH_THROTTLE_LIMIT, and bounds tracker keys. Accepted trade-off: targeted lockout of one account (5/min) is inherent to per-account keying. |
 
 ## Next step
 

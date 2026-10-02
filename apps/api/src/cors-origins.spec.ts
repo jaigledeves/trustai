@@ -29,6 +29,12 @@ describe("resolveCorsOrigins", () => {
     ]);
   });
 
+  it("lowercases origins, since browsers send a lowercase scheme and host", () => {
+    expect(resolveCorsOrigins("HTTPS://Ancrux.Vercel.App").origins).toStrictEqual([
+      "https://ancrux.vercel.app",
+    ]);
+  });
+
   it("ignores a wildcard and keeps the explicit origins", () => {
     expect(resolveCorsOrigins("*,https://ancrux.vercel.app")).toStrictEqual({
       origins: ["https://ancrux.vercel.app"],
