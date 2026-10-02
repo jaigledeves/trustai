@@ -43,7 +43,8 @@ export async function getVerifyHash(id: string): Promise<VerifyHashResponse> {
  * Always resolves — never throws on a semantically-missing record (that
  * comes back as a normal 200 with `verdict: "INVALID_RECORD"`). Only a
  * genuinely unexpected non-2xx (413/5xx/throttling) throws here, as an
- * `ApiError` carrying the status so the UI can map it.
+ * `ApiError` carrying the status so the UI can map it. A network failure
+ * still rejects with fetch's own TypeError, not an `ApiError`.
  */
 export async function postVerifyUpload(id: string, file: File): Promise<VerifyUploadResponse> {
   const formData = new FormData();

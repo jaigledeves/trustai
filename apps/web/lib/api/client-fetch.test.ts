@@ -89,4 +89,19 @@ describe("clientFetch (browser fetch wrapper targeting the /api/backend proxy)",
       new ApiError(404, "Trust record not found"),
     );
   });
+
+  it("keeps the HTTP status when the error body is not JSON (e.g. the hosting platform's own 413)", async () => {
+    server.use(
+      http.post("http://localhost:3000/api/backend/assets", () =>
+        new HttpResponse("Request Entity Too Large", {
+          status: 413,
+          headers: { "content-type": "text/plain" },
+        }),
+      ),
+    );
+
+    await expect(clientFetch("/assets", { method: "POST", body: {} })).rejects.toMatchObject({
+      status: 413,
+    });
+  });
 });
