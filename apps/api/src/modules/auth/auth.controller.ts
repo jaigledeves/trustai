@@ -10,7 +10,6 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { Throttle } from "@nestjs/throttler";
 import { ForgotPasswordUseCase } from "../../application/auth/forgot-password.use-case";
 import type { LoginResult } from "../../application/auth/login.use-case";
 import { LoginUseCase } from "../../application/auth/login.use-case";
@@ -19,7 +18,7 @@ import type { RegisterResult } from "../../application/auth/register.use-case";
 import { RegisterUseCase } from "../../application/auth/register.use-case";
 import { ResetPasswordUseCase } from "../../application/auth/reset-password.use-case";
 import { VerifyEmailUseCase } from "../../application/auth/verify-email.use-case";
-import { AUTH_THROTTLE_TTL_MS, accountTracker, resolveAuthThrottleLimit } from "./auth-throttle";
+import { AccountThrottle } from "./auth-throttle";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { LoginDto } from "./dto/login.dto";
@@ -57,7 +56,7 @@ export class AuthController {
   }
 
   @Post("login")
-  @Throttle({ global: { limit: resolveAuthThrottleLimit, ttl: AUTH_THROTTLE_TTL_MS, getTracker: accountTracker } })
+  @AccountThrottle()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Log in with email and password, receive a JWT" })
   async login(@Body() dto: LoginDto): Promise<LoginResult> {
@@ -65,7 +64,7 @@ export class AuthController {
   }
 
   @Post("forgot-password")
-  @Throttle({ global: { limit: resolveAuthThrottleLimit, ttl: AUTH_THROTTLE_TTL_MS, getTracker: accountTracker } })
+  @AccountThrottle()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Request a password reset email",

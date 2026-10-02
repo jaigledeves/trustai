@@ -65,7 +65,7 @@ Out of scope: phases B to D, demo password rotation.
 |---|---|---|---|
 | A1 | d2bdd34, 956313d | high, granted, approved (4 lenses) | RED observed (module missing), GREEN: 33 files / 225 tests, typecheck clean. e2e not run (needs Docker). Follow-up 956313d applies review findings (trimmed placeholder, key-aware stub). Deferred: minimum secret length (unknown length of the Railway secret). |
 | A4 | c971f21, ccb28cb, (wording) | high, granted, approved for c971f21 and ccb28cb (4 lenses each) | RED observed (module missing), GREEN: 34 files / 230 tests, typecheck clean. Requires CORS_ORIGINS on Railway. Follow-up applies review findings (trailing-slash normalization, startup warning on fallback). 7b7333e (wording) not reviewed yet; reviewed with the A5 slice. |
-| A5 | (this commit) | pending | RED observed (module missing), GREEN: 35 files / 239 tests, typecheck clean. e2e not run (Docker down); vitest.e2e.config raises AUTH_THROTTLE_LIMIT so existing suites are not throttled. |
+| A5 | (this commit) | pending | RED observed (module missing), GREEN: 35 files / 239 tests, typecheck clean. e2e not run (Docker down); vitest.e2e.config raises AUTH_THROTTLE_LIMIT so existing suites are not throttled. Review of 52734b0 approved with warnings; follow-up adds a separate `account` throttler so the global per-IP limit still applies, validates AUTH_THROTTLE_LIMIT, and bounds tracker keys. Accepted trade-off: targeted lockout of one account (5/min) is inherent to per-account keying. |
 
 ## Next step
 
