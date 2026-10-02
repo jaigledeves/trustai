@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSecurityHeaders } from "./security-headers";
+import { apiOriginWarning, buildSecurityHeaders } from "./security-headers";
 
 function headerMap(
   options: Parameters<typeof buildSecurityHeaders>[0],
@@ -72,5 +72,29 @@ describe("buildSecurityHeaders", () => {
     );
 
     expect(csp.get("connect-src")).toBe("'self'");
+  });
+});
+
+describe("apiOriginWarning", () => {
+  it("warns in production when NEXT_PUBLIC_API_BASE_URL is unset", () => {
+    expect(apiOriginWarning({ rawPublicApiBaseUrl: undefined, isProduction: true })).toMatch(
+      /NEXT_PUBLIC_API_BASE_URL/,
+    );
+  });
+
+  it("warns in production when the value is not a valid URL", () => {
+    expect(apiOriginWarning({ rawPublicApiBaseUrl: "not a url", isProduction: true })).toMatch(
+      /NEXT_PUBLIC_API_BASE_URL/,
+    );
+  });
+
+  it("stays silent in production with a valid URL", () => {
+    expect(
+      apiOriginWarning({ rawPublicApiBaseUrl: "https://api.example.com", isProduction: true }),
+    ).toBeUndefined();
+  });
+
+  it("stays silent outside production", () => {
+    expect(apiOriginWarning({ rawPublicApiBaseUrl: undefined, isProduction: false })).toBeUndefined();
   });
 });

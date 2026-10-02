@@ -48,6 +48,20 @@ function originOf(url: string): string | undefined {
   }
 }
 
+/**
+ * Build-time check for the CSP `connect-src` API origin. Without a valid
+ * NEXT_PUBLIC_API_BASE_URL in a production build, `connect-src` degrades to
+ * 'self' and the browser blocks the public /verify call to the API.
+ */
+export function apiOriginWarning(options: {
+  rawPublicApiBaseUrl: string | undefined;
+  isProduction: boolean;
+}): string | undefined {
+  if (!options.isProduction) return undefined;
+  if (options.rawPublicApiBaseUrl && originOf(options.rawPublicApiBaseUrl)) return undefined;
+  return "NEXT_PUBLIC_API_BASE_URL is missing or invalid in a production build; the CSP will block browser calls to the API (public /verify).";
+}
+
 function buildContentSecurityPolicy(options: SecurityHeadersOptions): string {
   const apiOrigin = originOf(options.publicApiBaseUrl);
   const scriptSrc = ["'self'", "'unsafe-inline'"];

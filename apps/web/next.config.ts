@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 import { config } from "./lib/config";
-import { buildSecurityHeaders } from "./lib/security-headers";
+import { apiOriginWarning, buildSecurityHeaders } from "./lib/security-headers";
+
+const cspWarning = apiOriginWarning({
+  rawPublicApiBaseUrl: process.env["NEXT_PUBLIC_API_BASE_URL"],
+  isProduction: process.env.NODE_ENV === "production",
+});
+if (cspWarning) {
+  console.warn(`[security-headers] ${cspWarning}`);
+}
 
 const nextConfig: NextConfig = {
   async headers() {
