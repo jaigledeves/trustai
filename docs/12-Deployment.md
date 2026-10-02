@@ -102,9 +102,10 @@ pnpm --filter @trustai/api seed:demo
 El script (`apps/api/scripts/seed-demo-user.mjs`) registra la cuenta contra
 la API real (hashing argon2 + creación de Organization/User por el código
 real) y luego marca `emailVerified = true` vía Prisma. Es idempotente:
-re-ejecutarlo sobre una cuenta existente solo la re-verifica. Credenciales
-por defecto (`DEMO_EMAIL` / `DEMO_PASSWORD` las sobreescriben): las
-publicadas en el README raíz. Requiere que la API esté desplegada y el
+re-ejecutarlo sobre una cuenta existente solo la re-verifica. Las credenciales
+por defecto del script son solo para desarrollo local. Contra producción,
+definir siempre `DEMO_EMAIL` y `DEMO_PASSWORD` con valores no publicados:
+el repositorio es público y los valores por defecto son visibles. Requiere que la API esté desplegada y el
 `DATABASE_URL` apunte al Postgres de Railway.
 
 ## Checklist de corte
@@ -115,7 +116,7 @@ publicadas en el README raíz. Requiere que la API esté desplegada y el
 - [ ] API `/health` responde 200 en su URL pública.
 - [ ] Web carga y `API_BASE_URL` apunta a la API.
 - [ ] Golden path end-to-end: registrar → verificar → certificar → CERTIFIED con tx en basescan.
-- [ ] Usuario de prueba sembrado (`pnpm --filter @trustai/api seed:demo`) y login verificado con las credenciales del README.
+- [ ] Usuario de prueba sembrado (`pnpm --filter @trustai/api seed:demo`) con credenciales no publicadas y login verificado.
 
 Endpoints reales expuestos por la API en este despliegue:
 [`docs/api/endpoints.md`](api/endpoints.md).
