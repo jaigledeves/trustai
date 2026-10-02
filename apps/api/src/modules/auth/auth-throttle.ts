@@ -28,8 +28,10 @@ export function resolveAuthThrottleLimit(): number {
  * Tracks auth attempts by the target account. Keying by email caps brute
  * force against a single account regardless of origin. Spraying one
  * password across many accounts is capped by the `global` per-IP throttler,
- * which still applies on top of this one and sees the real client IP through
- * the trusted proxy headers (see resolveClientIp).
+ * which still applies on top of this one. That throttler sees the real client
+ * IP through the trusted proxy headers (see resolveClientIp) only when
+ * TRUSTED_PROXY_SECRET is set and matches on both Railway and Vercel;
+ * otherwise all web traffic shares the hosting egress-IP bucket.
  */
 export function accountTracker(req: Record<string, unknown>): string {
   const body = req["body"] as Record<string, unknown> | undefined;

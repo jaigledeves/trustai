@@ -87,8 +87,20 @@ serverless.
 
 ## CORS
 
-`main.ts` hace `app.enableCors()` (permisivo, todos los orígenes). Suficiente para
-el MVP; endurecer al dominio del web de Vercel antes de un uso serio.
+`main.ts` solo permite los orígenes de `CORS_ORIGINS` (ver la tabla de
+variables de la API).
+
+## Cabeceras de seguridad
+
+| App | Cabeceras | Nota |
+|---|---|---|
+| API (`apps/api/src/security-headers.ts`) | `helmet` con sus valores por defecto (HSTS, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, políticas `Cross-Origin-*`, sin `X-Powered-By`) y una CSP con `frame-ancestors 'none'` | La CSP admite estilos inline e imágenes `data:` para que Swagger UI (`/api-docs`) funcione; los scripts solo pueden venir de `'self'`. Se omite `upgrade-insecure-requests` porque el TLS lo termina Railway y en local rompe Swagger sobre HTTP. |
+| Web (`apps/web/lib/security-headers.ts`, aplicado en `next.config.ts` a todas las rutas) | `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (cámara, micrófono, geolocalización, pagos, USB y similares deshabilitados) | `connect-src` admite `'self'` y el origen de `NEXT_PUBLIC_API_BASE_URL`, que se lee **en el build**: debe estar definida en Vercel al construir, o la verificación pública (`/verify`) no podrá llamar a la API. |
+
+Limitación conocida: sin nonces, Next.js necesita `script-src 'unsafe-inline'`
+para sus scripts inline de arranque e hidratación, por lo que la CSP del web no
+frena scripts inline inyectados. `'unsafe-eval'` solo se añade en desarrollo
+(`next dev`). Una CSP con nonce por petición queda como paso posterior.
 
 ## Usuario de prueba (demo para el revisor)
 
@@ -173,6 +185,6 @@ vivo. Son las que más se olvidan y las que rompen una demo aunque
 ## Pendientes / follow-ups
 
 - Migraciones Prisma formales (hoy `db push`) antes de producción con datos reales.
-- Endurecer CORS al dominio del web.
+- CSP del web basada en nonces (eliminar `script-src 'unsafe-inline'`).
 - Gestión de secretos: la private key del worker pasa a variables de plataforma; considerar un secrets manager pre-mainnet.
 - Separar el worker en su propio servicio si crece la carga (ver ADR-006 seguimiento).

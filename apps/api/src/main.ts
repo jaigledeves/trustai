@@ -4,9 +4,13 @@ import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import { resolveCorsOrigins } from "./cors-origins";
+import { applySecurityHeaders } from "./security-headers";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+
+  // Registered first so every response, including Swagger UI and errors, carries them.
+  applySecurityHeaders(app);
 
   // Allow-list only (CORS_ORIGINS); the browser calls the API just from /verify.
   const cors = resolveCorsOrigins(process.env["CORS_ORIGINS"]);
