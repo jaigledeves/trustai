@@ -89,6 +89,7 @@ completar la visión; no se implementarán sin esa necesidad.
 
 | Área | Mejora |
 |---|---|
+| Cuentas | Reenviar la IP real del cliente desde el servidor de Next (cabecera firmada con un secreto compartido) para limitar también por IP el registro, el reset de contraseña y el rociado de una contraseña sobre muchas cuentas; hoy el límite de A5 es por cuenta |
 | Cuentas | MFA (passkeys/WebAuthn o TOTP); contraseña mínima de 12 caracteres con chequeo contra listas de contraseñas filtradas; revocación server-side del JWT al cerrar sesión y expiración más corta que 7 días |
 | Cuentas | Adaptador de notificaciones real (hoy `StubNotificationAdapter`: el reset de contraseña no envía correo) |
 | Datos | `keyId` en el blob cifrado para permitir rotación; gestión de claves con KMS; aviso explícito pre-upload de que el texto se envía a OpenAI; instrucción anti prompt-injection en el system prompt |

@@ -55,6 +55,7 @@ serverless.
 | `OPENAI_API_KEY` / `OPENAI_MODEL` | si `openai` | Solo si `AI_ADAPTER=openai`. |
 | `PUBLIC_VERIFICATION_ENABLED` | no | `true` para habilitar UC-02 (verificación pública). |
 | `PUBLIC_VERIFY_GET_THROTTLE_LIMIT` / `..._POST_...` | no | Rate limits del endpoint público. |
+| `AUTH_THROTTLE_LIMIT` | no | Intentos por minuto y por cuenta (email) en `POST /auth/login` y `POST /auth/forgot-password` (default 5). Se cuenta por email porque la web llama a la API desde su servidor y la API no ve la IP del usuario. |
 
 ## Web en Vercel
 
