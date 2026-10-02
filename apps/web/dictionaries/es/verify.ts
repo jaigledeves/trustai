@@ -72,6 +72,7 @@ export const verifyDictionary = {
     fileSizeLabel: "Tamaño: {size}",
     submitLabel: "Verificar documento",
     errorGeneric: "No pudimos verificar el documento. Prueba de nuevo.",
+    errorTooLarge: "El archivo es demasiado grande para verificarlo.",
   },
   /** Mirrors `VerificationAttemptVerdict` (apps/api) 1:1 — every verdict must have copy. */
   verdicts: {

@@ -26,8 +26,7 @@ export const certifyDictionary = {
     fileSizeLabel: "Tamaño: {size}",
     submit: "Subir documento",
     errorNotPdf: "Solo se aceptan archivos PDF.",
-    errorSizeWarning:
-      "Este archivo es grande — la subida puede tardar más de lo habitual.",
+    errorTooLarge: "El archivo es demasiado grande. Prueba con un PDF más pequeño.",
     duplicateNotice:
       "Ya existe un documento igual certificado en tu organización. Te llevamos al registro existente.",
     errorGeneric: "No pudimos subir el documento. Prueba de nuevo.",

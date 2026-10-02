@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "../../test/msw/server";
+import { ApiError } from "./errors";
 import { getVerifyHash, NotFoundError, postVerifyUpload } from "./public-verify-client";
 
 const BASE_URL = "http://localhost:3000";
@@ -61,6 +62,21 @@ describe("public-verify-client (spec: GET/POST existence asymmetry, no-auth)", (
     const result = await postVerifyUpload("unknown-id", new File(["pdf bytes"], "doc.pdf"));
 
     expect(result.verdict).toBe("INVALID_RECORD");
+  });
+
+  it("postVerifyUpload rejects with an ApiError carrying the HTTP status (e.g. 413 for an oversized file)", async () => {
+    server.use(
+      http.post(`${BASE_URL}/public/verify/rec-1`, () =>
+        HttpResponse.json({ message: "File too large" }, { status: 413 }),
+      ),
+    );
+
+    const error = await postVerifyUpload("rec-1", new File(["x"], "big.pdf")).catch(
+      (caught: unknown) => caught,
+    );
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).status).toBe(413);
   });
 
   it("postVerifyUpload sends the file as multipart form data (not JSON) to POST /public/verify/:id", async () => {

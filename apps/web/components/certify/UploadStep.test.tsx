@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
+import { certifyDictionary } from "../../dictionaries/es/certify";
 import { server } from "../../test/msw/server";
 
 const pushMock = vi.fn();
@@ -114,6 +115,36 @@ describe("UploadStep (spec: PDF Upload)", () => {
     await vi.waitFor(() =>
       expect(pushMock).toHaveBeenCalledWith("/dtrs/tr-existing?notice=duplicate"),
     );
+  });
+
+  it("shows the file-too-large message when the upload is rejected with 413", async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.post("http://localhost:3000/api/backend/assets", () =>
+        HttpResponse.json({ status: 413, message: "File too large" }, { status: 413 }),
+      ),
+    );
+
+    renderWithQueryClient(<UploadStep />);
+    await user.upload(screen.getByLabelText("Elige un archivo PDF para certificar"), pdfFile());
+    await user.click(screen.getByRole("button", { name: "Subir documento" }));
+
+    expect(await screen.findByText(certifyDictionary.upload.errorTooLarge)).toBeInTheDocument();
+  });
+
+  it("shows the generic upload error for any other failure", async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.post("http://localhost:3000/api/backend/assets", () =>
+        HttpResponse.json({ status: 500, message: "boom" }, { status: 500 }),
+      ),
+    );
+
+    renderWithQueryClient(<UploadStep />);
+    await user.upload(screen.getByLabelText("Elige un archivo PDF para certificar"), pdfFile());
+    await user.click(screen.getByRole("button", { name: "Subir documento" }));
+
+    expect(await screen.findByText(certifyDictionary.upload.errorGeneric)).toBeInTheDocument();
   });
 
   it("accepts a PDF via drag-and-drop and shows the filename", () => {
