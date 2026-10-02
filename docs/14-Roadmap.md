@@ -47,7 +47,7 @@ migrar implicaría hacerlos dos veces.
 | # | Mejora | Hallazgo | Estado |
 |---|---|---|---|
 | A1 | Eliminar el valor por defecto de `JWT_SECRET`; fallar al arrancar si falta | `auth.module.ts`, `jwt.strategy.ts` usan `"change-me-in-production"` como fallback | hecho |
-| A2 | Límite de tamaño y verificación de magic bytes en el upload | El tipo MIME se toma del cliente; no hay `limits` en multer; todo el cuerpo se carga en memoria | pendiente |
+| A2 | Límite de tamaño y verificación de magic bytes en el upload | El tipo MIME se toma del cliente; no hay `limits` en multer; todo el cuerpo se carga en memoria | hecho |
 | A3 | Cabeceras de seguridad: `helmet` en la API; CSP, `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy` en Next | No existe ninguna | hecho |
 | A4 | CORS restringido al origen de la web | `app.enableCors()` sin opciones | hecho |
 | A5 | Throttle específico en login, registro, forgot-password y reset-password | Solo aplica el límite global de 100/min | hecho: límite por cuenta en login y forgot-password, más reenvío firmado de la IP real del cliente desde el servidor de Next (`TRUSTED_PROXY_SECRET`) para que el límite global por IP no lo compartan todos los usuarios |

@@ -41,7 +41,7 @@ Documentación interactiva: Swagger/OpenAPI vía `@nestjs/swagger` en `main.ts`.
 
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
-| POST | `/assets` | JWT | Sube un PDF (`multipart/form-data`, campo `file`). Solo `application/pdf`. Hashea (SHA-256) y cifra (AES-256-GCM), crea `DigitalAsset` + `TrustRecord` en `DRAFT`. Si la organización ya tiene un asset con el mismo SHA-256, devuelve el DTR existente (RF-012, idempotencia). |
+| POST | `/assets` | JWT | Sube un PDF (`multipart/form-data`, campo `file`). Solo `application/pdf`: además del tipo MIME declarado, el contenido debe empezar por la firma `%PDF-`; si no, **400**. Un archivo mayor que `MAX_UPLOAD_BYTES` (default 10 MB) -> **413**. Hashea (SHA-256) y cifra (AES-256-GCM), crea `DigitalAsset` + `TrustRecord` en `DRAFT`. Si la organización ya tiene un asset con el mismo SHA-256, devuelve el DTR existente (RF-012, idempotencia). |
 | GET | `/assets/:id` | JWT | Detalle de un asset, escopado a la organización del caller (404 cross-org). |
 
 ## `trust-records`
@@ -64,7 +64,7 @@ global, para no limitar rutas autenticadas).
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
 | GET | `/public/verify/:id?channel=QR\|URL\|HASH` | No (throttled, límite configurable por `PUBLIC_VERIFY_GET_THROTTLE_LIMIT`, default 60/min) | Verificación solo por hash: existencia, estado y veredicto de anclaje. Nunca devuelve análisis IA ni contenido (INV-41). `id` desconocido -> **404**. |
-| POST | `/public/verify/:id?channel=QR\|URL\|HASH` | No (throttled, límite configurable por `PUBLIC_VERIFY_POST_THROTTLE_LIMIT`, default 20/min) | Verificación completa subiendo el documento (`multipart/form-data`, campo `file`). Recalcula SHA-256 y compara contra el asset certificado; corrobora on-chain. `analysis` solo si el veredicto es `VALID`/`PENDING_ANCHOR`. `id` desconocido -> **200 `INVALID_RECORD`**, nunca 404 (asimetría deliberada GET vs POST). |
+| POST | `/public/verify/:id?channel=QR\|URL\|HASH` | No (throttled, límite configurable por `PUBLIC_VERIFY_POST_THROTTLE_LIMIT`, default 20/min) | Verificación completa subiendo el documento (`multipart/form-data`, campo `file`). Recalcula SHA-256 y compara contra el asset certificado; corrobora on-chain. `analysis` solo si el veredicto es `VALID`/`PENDING_ANCHOR`. `id` desconocido -> **200 `INVALID_RECORD`**, nunca 404 (asimetría deliberada GET vs POST). Un archivo mayor que `MAX_UPLOAD_BYTES` (default 10 MB) -> **413**; no se exige la firma PDF, porque cualquier archivo recibe su veredicto normal. |
 
 Veredictos posibles (`VerificationAttemptVerdict`): `VALID`,
 `ASSET_MISMATCH`, `PENDING_ANCHOR`, `INVALID_RECORD`.

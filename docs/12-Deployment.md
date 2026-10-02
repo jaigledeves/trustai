@@ -57,6 +57,7 @@ serverless.
 | `PUBLIC_VERIFICATION_ENABLED` | no | `true` para habilitar UC-02 (verificación pública). |
 | `PUBLIC_VERIFY_GET_THROTTLE_LIMIT` / `..._POST_...` | no | Rate limits del endpoint público. |
 | `AUTH_THROTTLE_LIMIT` | no | Intentos por minuto y por cuenta (email) en `POST /auth/login` y `POST /auth/forgot-password` (default 5). Frena la fuerza bruta contra una cuenta concreta. Este límite por cuenta se aplica además del límite global por IP (`THROTTLE_LIMIT`), no lo reemplaza. Un valor vacío, no entero o menor que 1 se ignora y se usa 5. |
+| `MAX_UPLOAD_BYTES` | no | Tamaño máximo en bytes de un archivo subido a `POST /assets` y `POST /public/verify/:id` (default `10485760`, 10 MB). Por encima responde **413**. Se lee una vez al arrancar; un valor vacío, no entero o menor que 1 se ignora y se usa el default. Ver [Límites de subida](#límites-de-subida). |
 
 ## Web en Vercel
 
@@ -78,6 +79,19 @@ serverless.
 | `NEXT_PUBLIC_DEMO_DTR_ID` | no | `id` de un DTR ya `CERTIFIED`. Si está seteada, la landing muestra un CTA "Ver una verificación de ejemplo" que enlaza a `/verify/:id` (probar sin registro). Debe existir y persistir en la base del entorno. |
 | `TRUSTED_PROXY_SECRET` | sí (prod, secreto) | Mismo valor que en la API (Railway); cadena larga aleatoria. Solo server-side, nunca `NEXT_PUBLIC_`. El web reenvía con él la IP real del cliente para que la API limite por cliente y no por la IP de salida de Vercel. |
 | `SESSION_COOKIE_NAME` | no | Default `trustai_session`. |
+
+### Límites de subida
+
+- **Certificación (`POST /assets`)**: el navegador sube el PDF al proxy del web
+  (`/api/backend/[...path]`), una Vercel Function que lee el cuerpo completo y lo
+  reenvía a la API. Vercel limita el cuerpo de la petición de una función a unos
+  **4,5 MB** y responde 413 antes de que el proxy se ejecute, así que en Vercel el
+  límite efectivo de certificación es ese y no `MAX_UPLOAD_BYTES`. Subir el límite
+  real exigiría subir el archivo sin pasar por la función (p. ej. directamente a la
+  API o al almacenamiento).
+- **Verificación pública (`POST /public/verify/:id`)**: el navegador llama
+  directamente a la API (`NEXT_PUBLIC_API_BASE_URL`), sin pasar por Vercel, así que
+  aplica `MAX_UPLOAD_BYTES`.
 
 ## Cloudflare R2
 

@@ -5,6 +5,7 @@ import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { PrismaService } from "../src/adapters/prisma/prisma.service";
 import { AppModule } from "../src/app.module";
+import { DEFAULT_MAX_UPLOAD_BYTES } from "../src/modules/uploads/upload-limits";
 import { NOTIFICATION_PORT } from "../src/ports/notification.port";
 import { isDatabaseAvailable } from "./utils/db-availability";
 import { isStorageAvailable } from "./utils/storage-availability";
@@ -126,6 +127,35 @@ describe.skipIf(!dbAvailable || !storageAvailable)(
 
       expect(response.status).toBe(401);
     });
+
+    it("S-ASSET-2b: bytes that are not a PDF are rejected with 400 even when declared as application/pdf", async () => {
+      const userA = await createAuthenticatedUser("asset-fake-pdf");
+
+      const response = await request(app.getHttpServer())
+        .post("/assets")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .attach("file", Buffer.from("<html>not a pdf</html>"), {
+          filename: "fake.pdf",
+          contentType: "application/pdf",
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it("S-ASSET-2c: a file above MAX_UPLOAD_BYTES is rejected with 413", async () => {
+      const userA = await createAuthenticatedUser("asset-too-large");
+      const oversized = Buffer.concat([
+        Buffer.from("%PDF-1.4 "),
+        Buffer.alloc(DEFAULT_MAX_UPLOAD_BYTES),
+      ]);
+
+      const response = await request(app.getHttpServer())
+        .post("/assets")
+        .set("Authorization", `Bearer ${userA.accessToken}`)
+        .attach("file", oversized, { filename: "big.pdf", contentType: "application/pdf" });
+
+      expect(response.status).toBe(413);
+    }, 30_000);
 
     it("S-ASSET-4: cross-org access to GET /assets/:id returns 404, not 403", async () => {
       const userA = await createAuthenticatedUser("asset-cross-org-a");
