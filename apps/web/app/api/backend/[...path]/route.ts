@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { config } from "../../../../lib/config";
 import { getSession } from "../../../../lib/session";
+import { trustedProxyHeaders } from "../../../../lib/api/trusted-proxy-headers";
 
 interface RouteContext {
   params: Promise<{ path: string[] }>;
@@ -49,6 +50,9 @@ async function proxyRequest(
   }
   if (token) {
     headers.set("authorization", `Bearer ${token}`);
+  }
+  for (const [name, value] of Object.entries(trustedProxyHeaders(request))) {
+    headers.set(name, value);
   }
 
   const hasBody = request.method !== "GET" && request.method !== "HEAD";

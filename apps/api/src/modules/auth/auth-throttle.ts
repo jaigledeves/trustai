@@ -1,4 +1,5 @@
 import { SetMetadata, type ExecutionContext } from "@nestjs/common";
+import { resolveClientIp } from "../throttling/client-ip";
 
 export const AUTH_THROTTLE_TTL_MS = 60_000;
 export const DEFAULT_AUTH_THROTTLE_LIMIT = 5;
@@ -41,8 +42,8 @@ export function accountTracker(req: Record<string, unknown>): string {
       return `account:${normalized}`;
     }
   }
-  const ip = req["ip"];
-  return typeof ip === "string" && ip !== "" ? `ip:${ip}` : UNKNOWN_IP_TRACKER;
+  const ip = resolveClientIp(req);
+  return ip ? `ip:${ip}` : UNKNOWN_IP_TRACKER;
 }
 
 /** Opts a handler into the `account` throttler registered by ThrottlingModule. */

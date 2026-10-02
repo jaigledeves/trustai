@@ -36,6 +36,7 @@ serverless.
 | `PORT` | sí | La inyecta Railway; `main.ts` la lee (default 3000). |
 | `CORS_ORIGINS` | sí (prod) | Orígenes permitidos, separados por coma (p. ej. `https://ancrux.vercel.app`). Sin valor solo se permite `http://localhost:3100` y la API lo avisa en el log al arrancar; el comodín `*` se ignora y la barra final se elimina. Lo necesita la verificación pública, que llama a la API desde el navegador. |
 | `DATABASE_URL` | sí | Referencia al Postgres de Railway. |
+| `TRUSTED_PROXY_SECRET` | sí (prod, secreto) | Cadena larga aleatoria, con el mismo valor en Railway y en Vercel. La API solo confía en la IP de cliente reenviada por el web (`x-client-ip`) para el rate limiting cuando el secreto coincide; si no, usa la IP de conexión. |
 | `PGBOSS_SCHEMA` | no | Schema de pg-boss (default interno). |
 | `JWT_SECRET` | sí (secreto) | Cadena larga aleatoria. Sin valor por defecto: la API no arranca si falta o si conserva el placeholder de `.env.example`. |
 | `JWT_EXPIRES_IN` | no | p. ej. `7d` (debe cuadrar con `sessionMaxAgeSeconds` del web). |
@@ -75,6 +76,7 @@ serverless.
 | `NEXT_PUBLIC_APP_BASE_URL` | sí (prod) | Origen público del propio web (p. ej. `https://ancrux.vercel.app`). Se usa para construir el enlace absoluto y el QR de verificación pública en el detalle del DTR. Default dev: `http://localhost:3100`. |
 | `NEXT_PUBLIC_PUBLIC_VERIFICATION_ENABLED` | no | `true` para mostrar la página de verificación pública. |
 | `NEXT_PUBLIC_DEMO_DTR_ID` | no | `id` de un DTR ya `CERTIFIED`. Si está seteada, la landing muestra un CTA "Ver una verificación de ejemplo" que enlaza a `/verify/:id` (probar sin registro). Debe existir y persistir en la base del entorno. |
+| `TRUSTED_PROXY_SECRET` | sí (prod, secreto) | Mismo valor que en la API (Railway); cadena larga aleatoria. Solo server-side, nunca `NEXT_PUBLIC_`. El web reenvía con él la IP real del cliente para que la API limite por cliente y no por la IP de salida de Vercel. |
 | `SESSION_COOKIE_NAME` | no | Default `trustai_session`. |
 
 ## Cloudflare R2
