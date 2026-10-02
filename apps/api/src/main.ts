@@ -12,7 +12,7 @@ async function bootstrap(): Promise<void> {
   const cors = resolveCorsOrigins(process.env["CORS_ORIGINS"]);
   if (cors.usedFallback) {
     Logger.warn(
-      `CORS_ORIGINS is not set; only ${cors.origins.join(", ")} may call the API from a browser.`,
+      `CORS_ORIGINS has no usable origin (unset, blank or wildcard-only); only ${cors.origins.join(", ")} may call the API from a browser.`,
       "Bootstrap",
     );
   }

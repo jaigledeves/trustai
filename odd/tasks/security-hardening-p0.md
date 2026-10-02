@@ -41,7 +41,7 @@ Out of scope: phases B to D, demo password rotation.
 
 - [x] A1 - Required `JWT_SECRET` (route: inline; 1 helper + 2 call sites, no research needed)
 - [x] A4 - Restricted CORS (route: inline; 1 helper + main.ts)
-- [ ] A5 - Auth route throttles (route: TBD)
+- [ ] A5 - Auth route throttles (route: TBD; BLOCKED on design decision: auth calls reach the API from the Next server, so the API sees the Vercel egress IP, not the client IP)
 - [ ] A3 - Security headers API + web (route: TBD)
 - [ ] A2 - Upload size limit + magic bytes (route: TBD)
 
@@ -64,7 +64,7 @@ Out of scope: phases B to D, demo password rotation.
 | Task | Commit | Review tier | Notes |
 |---|---|---|---|
 | A1 | d2bdd34, 956313d | high, granted, approved (4 lenses) | RED observed (module missing), GREEN: 33 files / 225 tests, typecheck clean. e2e not run (needs Docker). Follow-up 956313d applies review findings (trimmed placeholder, key-aware stub). Deferred: minimum secret length (unknown length of the Railway secret). |
-| A4 | c971f21, (follow-up) | high, granted, approved (4 lenses) | RED observed (module missing), GREEN: 34 files / 230 tests, typecheck clean. Requires CORS_ORIGINS on Railway. Follow-up applies review findings (trailing-slash normalization, startup warning on fallback). |
+| A4 | c971f21, ccb28cb, (wording) | high, granted, approved for c971f21 and ccb28cb (4 lenses each) | RED observed (module missing), GREEN: 34 files / 230 tests, typecheck clean. Requires CORS_ORIGINS on Railway. Follow-up applies review findings (trailing-slash normalization, startup warning on fallback). |
 
 ## Next step
 
