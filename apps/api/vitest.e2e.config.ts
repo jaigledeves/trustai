@@ -11,6 +11,8 @@ export default defineConfig({
     }),
   ],
   test: {
+    // JWT_SECRET has no fallback (requireJwtSecret); tests need a fixed one.
+    env: { JWT_SECRET: "test-jwt-secret" },
     include: ["test/**/*.e2e-spec.ts"],
     hookTimeout: 30_000,
     testTimeout: 30_000,

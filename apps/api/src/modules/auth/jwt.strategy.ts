@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import type { JwtPayload } from "../../application/auth/login.use-case";
+import { requireJwtSecret } from "./jwt-secret";
 
 export type { JwtPayload } from "../../application/auth/login.use-case";
 
@@ -12,7 +13,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>("JWT_SECRET", "change-me-in-production"),
+      secretOrKey: requireJwtSecret(configService),
     });
   }
 

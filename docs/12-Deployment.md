@@ -36,7 +36,7 @@ serverless.
 | `PORT` | sí | La inyecta Railway; `main.ts` la lee (default 3000). |
 | `DATABASE_URL` | sí | Referencia al Postgres de Railway. |
 | `PGBOSS_SCHEMA` | no | Schema de pg-boss (default interno). |
-| `JWT_SECRET` | sí (secreto) | Cadena larga aleatoria. |
+| `JWT_SECRET` | sí (secreto) | Cadena larga aleatoria. Sin valor por defecto: la API no arranca si falta o si conserva el placeholder de `.env.example`. |
 | `JWT_EXPIRES_IN` | no | p. ej. `7d` (debe cuadrar con `sessionMaxAgeSeconds` del web). |
 | `ASSET_ENCRYPTION_KEY` | sí (secreto) | **base64 de 32 bytes** (AES-256-GCM). Generar: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`. |
 | `S3_ENDPOINT` | sí | Endpoint R2: `https://<accountid>.r2.cloudflarestorage.com`. |

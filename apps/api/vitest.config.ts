@@ -14,6 +14,8 @@ export default defineConfig({
     }),
   ],
   test: {
+    // JWT_SECRET has no fallback (requireJwtSecret); tests need a fixed one.
+    env: { JWT_SECRET: "test-jwt-secret" },
     include: ["src/**/*.spec.ts"],
     coverage: {
       provider: "v8",
