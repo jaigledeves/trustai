@@ -18,8 +18,9 @@
  *   $env:DATABASE_URL="postgresql://...railway..."
  *   pnpm --filter @trustai/api seed:demo
  *
- * Defaults target a local stack. Credentials can be overridden with
- * DEMO_EMAIL / DEMO_PASSWORD (keep them in sync with the README).
+ * Defaults target a local stack. Against production, always set
+ * DEMO_EMAIL / DEMO_PASSWORD: the repository is public, so the default
+ * credentials below are not secret.
  */
 import { PrismaClient } from "@prisma/client";
 

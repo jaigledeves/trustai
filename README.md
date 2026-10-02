@@ -20,13 +20,13 @@ producto e ingeniería, en [`docs/`](docs/TDD-Index.md).
 | Recurso | URL |
 |---|---|
 | Aplicación web | https://ancrux.vercel.app |
-| Vídeo de presentación (YouTube) | https://www.youtube.com/watch?v=3gAmxk86-tU |
 | Presentación / slides | https://ancrux.vercel.app/slides |
+| Verificación pública de un DTR de ejemplo | https://ancrux.vercel.app/verify/23b34471-d804-4836-8c91-a0871b20095e |
 | Salud de la API | https://trustaiapi-production.up.railway.app/health |
 | Contrato de anclaje (Base Sepolia) | [`0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22`](https://sepolia.basescan.org/address/0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22) |
 
-> Para entrar con login y ejecutar el flujo de certificación, mira las
-> [**credenciales de prueba**](#acceso-a-la-demo) al final del README.
+> Para recorrer el flujo de certificación con login, consulta
+> [**acceso a la demo**](#acceso-a-la-demo) al final del README.
 
 > La verificación pública (UC-02) no requiere login: al abrir el enlace
 > de verificación pública de un DTR, la app recalcula el hash canónico y
@@ -185,16 +185,11 @@ del Technical Design Document. Destacados:
 
 ## Acceso a la demo
 
-Credenciales de una cuenta de prueba ya sembrada (email verificado, lista
-para iniciar sesión) para recorrer el flujo de certificación **con login**
-en [ancrux.vercel.app](https://ancrux.vercel.app):
+La **verificación pública** no requiere cuenta: el
+[DTR de ejemplo](https://ancrux.vercel.app/verify/23b34471-d804-4836-8c91-a0871b20095e)
+recalcula el hash canónico y lo compara contra el registro on-chain.
 
-```
-Email:    revisor@trustai.app
-Password: RevisorTFM2026
-```
-
-> Esta cuenta se crea con `pnpm --filter @trustai/api seed:demo` (ver
-> [`docs/12-Deployment.md`](docs/12-Deployment.md)). El email conserva el
-> dominio `trustai.app` porque es el identificador real de acceso de la
-> cuenta sembrada.
+El acceso **con login** al flujo de certificación se facilita bajo
+petición. Para recorrerlo en local, `dev-up.ps1` siembra una cuenta de
+prueba e imprime sus credenciales (ver
+[`docs/12-Deployment.md`](docs/12-Deployment.md)).
