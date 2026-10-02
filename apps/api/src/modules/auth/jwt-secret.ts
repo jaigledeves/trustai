@@ -10,7 +10,8 @@ export const JWT_SECRET_PLACEHOLDER = "change-me-in-production";
  */
 export function requireJwtSecret(configService: ConfigService): string {
   const secret = configService.get<string>("JWT_SECRET");
-  if (secret === undefined || secret.trim() === "" || secret === JWT_SECRET_PLACEHOLDER) {
+  const trimmed = secret?.trim() ?? "";
+  if (secret === undefined || trimmed === "" || trimmed === JWT_SECRET_PLACEHOLDER) {
     throw new Error(
       "JWT_SECRET must be set to a non-placeholder value before the API can start.",
     );
