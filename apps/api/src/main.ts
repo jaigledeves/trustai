@@ -3,12 +3,13 @@ import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
+import { resolveCorsOrigins } from "./cors-origins";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
-  // Permissive CORS for dev; tighten per environment before production use.
-  app.enableCors();
+  // Allow-list only (CORS_ORIGINS); the browser calls the API just from /verify.
+  app.enableCors({ origin: resolveCorsOrigins(process.env["CORS_ORIGINS"]) });
 
   app.useGlobalPipes(
     new ValidationPipe({

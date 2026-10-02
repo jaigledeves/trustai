@@ -40,7 +40,7 @@ Out of scope: phases B to D, demo password rotation.
 ## Checklist
 
 - [x] A1 - Required `JWT_SECRET` (route: inline; 1 helper + 2 call sites, no research needed)
-- [ ] A4 - Restricted CORS (route: inline)
+- [x] A4 - Restricted CORS (route: inline; 1 helper + main.ts)
 - [ ] A5 - Auth route throttles (route: TBD)
 - [ ] A3 - Security headers API + web (route: TBD)
 - [ ] A2 - Upload size limit + magic bytes (route: TBD)
@@ -63,8 +63,9 @@ Out of scope: phases B to D, demo password rotation.
 
 | Task | Commit | Review tier | Notes |
 |---|---|---|---|
-| A1 | d2bdd34 | pending | RED observed (module missing), GREEN: 33 files / 225 tests, typecheck clean. e2e not run (needs Docker). |
+| A1 | d2bdd34, 956313d | high, granted, approved (4 lenses) | RED observed (module missing), GREEN: 33 files / 225 tests, typecheck clean. e2e not run (needs Docker). Follow-up 956313d applies review findings (trimmed placeholder, key-aware stub). Deferred: minimum secret length (unknown length of the Railway secret). |
+| A4 | (this commit) | pending | RED observed (module missing), GREEN: 34 files / 230 tests, typecheck clean. Requires CORS_ORIGINS on Railway. |
 
 ## Next step
 
-A4.
+A5.
