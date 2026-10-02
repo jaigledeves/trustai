@@ -12,6 +12,7 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / MB).toFixed(1)} MB`;
 }
 import { verifyDictionary } from "../../dictionaries/es/verify";
+import { ApiError, mapApiError } from "../../lib/api/errors";
 import { postVerifyUpload } from "../../lib/api/public-verify-client";
 import type { VerifyUploadResponse } from "../../lib/api/types";
 import { cn } from "../../lib/utils";
@@ -88,8 +89,12 @@ export function UploadVerdictPanel({ id }: UploadVerdictPanelProps) {
     try {
       const response = await postVerifyUpload(id, file);
       setResult(response);
-    } catch {
-      setError(verifyDictionary.upload.errorGeneric);
+    } catch (caught) {
+      setError(
+        caught instanceof ApiError
+          ? mapApiError(caught.status, "verifyUpload")
+          : verifyDictionary.upload.errorGeneric,
+      );
     } finally {
       setIsPending(false);
     }

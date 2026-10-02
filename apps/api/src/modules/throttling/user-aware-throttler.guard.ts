@@ -9,6 +9,7 @@ import {
   type ThrottlerStorage,
 } from "@nestjs/throttler";
 import type { JwtPayload } from "../../application/auth/login.use-case";
+import { resolveClientIp } from "./client-ip";
 
 const BEARER_PREFIX = "Bearer ";
 
@@ -53,6 +54,6 @@ export class UserAwareThrottlerGuard extends ThrottlerGuard {
       }
     }
 
-    return `ip:${req["ip"] as string}`;
+    return `ip:${resolveClientIp(req) ?? "unknown"}`;
   }
 }

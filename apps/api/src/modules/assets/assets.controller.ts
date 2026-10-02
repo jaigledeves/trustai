@@ -21,6 +21,7 @@ import {
   type DigitalAssetRepositoryPort,
 } from "../../ports/digital-asset-repository.port";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { isPdf, uploadMulterOptions } from "../uploads/upload-limits";
 import { decodeMultipartFilename } from "./decode-multipart-filename";
 import { AssetResponseDto } from "./dto/asset-response.dto";
 import { UploadAssetResponseDto } from "./dto/upload-asset-response.dto";
@@ -60,14 +61,16 @@ export class AssetsController {
 
   @Post()
   @Throttle({ global: { limit: resolveUploadThrottleLimit, ttl: UPLOAD_THROTTLE_TTL_MS } })
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", uploadMulterOptions))
   @ApiConsumes("multipart/form-data")
   @ApiOperation({
     summary: "Upload a PDF for certification",
     description:
       "Authenticated, org-scoped upload (asset-ingestion spec). Hashes and encrypts the file, " +
       "creates a DigitalAsset + DRAFT TrustRecord, or returns the existing DTR reference if this " +
-      "org already has an asset with the same SHA-256 (RF-012).",
+      "org already has an asset with the same SHA-256 (RF-012). Rejects non-PDF content (400, " +
+      "checked by the %PDF- signature, not only the declared MIME type) and files above " +
+      "MAX_UPLOAD_BYTES (413).",
   })
   async upload(
     @UploadedFile() file: Express.Multer.File | undefined,
@@ -76,7 +79,9 @@ export class AssetsController {
     if (!file) {
       throw new BadRequestException("A file is required");
     }
-    if (file.mimetype !== PDF_MIME_TYPE) {
+    // The declared MIME type is a cheap early rejection, but it comes from
+    // the client; the %PDF- signature is the check that actually decides.
+    if (file.mimetype !== PDF_MIME_TYPE || !isPdf(file.buffer)) {
       throw new BadRequestException("Only application/pdf uploads are supported");
     }
 
@@ -84,7 +89,7 @@ export class AssetsController {
       organizationId: req.user.organizationId,
       createdByUserId: req.user.sub,
       buffer: file.buffer,
-      mimeType: file.mimetype,
+      mimeType: PDF_MIME_TYPE,
       filename: file.originalname ? decodeMultipartFilename(file.originalname) : null,
     });
   }

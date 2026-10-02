@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ApiError, mapApiError } from "../../../../lib/api/errors";
 import { serverFetch } from "../../../../lib/api/server-client";
+import { trustedProxyHeaders } from "../../../../lib/api/trusted-proxy-headers";
 import type { LoginResponse } from "../../../../lib/api/types";
 import { setSessionCookie } from "../../../../lib/session";
 
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const result = await serverFetch<LoginResponse>("/auth/login", {
       method: "POST",
       body: { email, password },
+      headers: trustedProxyHeaders(request),
     });
 
     await setSessionCookie(result.accessToken);

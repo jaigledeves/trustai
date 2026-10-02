@@ -1,6 +1,7 @@
 import { authDictionary } from "../../dictionaries/es/auth";
 import { certifyDictionary } from "../../dictionaries/es/certify";
 import { shellDictionary } from "../../dictionaries/es/shell";
+import { verifyDictionary } from "../../dictionaries/es/verify";
 
 /** Thrown by server-client/client-fetch on any non-2xx response. */
 export class ApiError extends Error {
@@ -24,7 +25,9 @@ export type ApiErrorContext =
   | "confirm"
   | "anchor"
   | "forgotPassword"
-  | "resetPassword";
+  | "resetPassword"
+  | "upload"
+  | "verifyUpload";
 
 /**
  * Maps an HTTP status to Spanish, spec-grounded copy. `context` matters
@@ -61,6 +64,21 @@ export function mapApiError(status: number, context: ApiErrorContext): string {
   // password policy before submitting.
   if (context === "resetPassword") {
     if (status === 400) return authDictionary.resetPassword.errorInvalidToken;
+  }
+
+  // 413: the file exceeds the upload limit. The copy states no number
+  // because the effective cap depends on the path: certification goes
+  // through the Vercel proxy (about 4.5 MB request body), verification
+  // calls the API directly (MAX_UPLOAD_BYTES). Other failures keep each
+  // flow's own generic copy.
+  if (context === "upload") {
+    if (status === 413) return certifyDictionary.upload.errorTooLarge;
+    return certifyDictionary.upload.errorGeneric;
+  }
+
+  if (context === "verifyUpload") {
+    if (status === 413) return verifyDictionary.upload.errorTooLarge;
+    return verifyDictionary.upload.errorGeneric;
   }
 
   return shellDictionary.errors.generic;

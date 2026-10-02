@@ -14,6 +14,7 @@ import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { ANCHOR_REGISTRY_ABI } from "../src/adapters/chain/anchor-registry.abi";
 import { PrismaService } from "../src/adapters/prisma/prisma.service";
+import { DEFAULT_MAX_UPLOAD_BYTES } from "../src/modules/uploads/upload-limits";
 import { NOTIFICATION_PORT } from "../src/ports/notification.port";
 import {
   anchorRegistryArtifactExists,
@@ -374,6 +375,18 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
       const attempts = await prisma.verificationAttempt.findMany({ where: { trustRecordId: unknownId } });
       expect(attempts).toHaveLength(0);
     });
+
+    // Only the size limit applies here: any bytes under it get a normal
+    // verdict (see S-PV-4, which uploads non-PDF bytes).
+    it("S-PV-4b: an upload above MAX_UPLOAD_BYTES is rejected with 413", async () => {
+      const postRes = await request(app.getHttpServer())
+        .post("/public/verify/00000000-0000-0000-0000-000000000000")
+        .attach("file", Buffer.alloc(DEFAULT_MAX_UPLOAD_BYTES + 1), {
+          filename: "big.pdf",
+          contentType: "application/pdf",
+        });
+      expect(postRes.status).toBe(413);
+    }, 30_000);
 
     it("S-PV-5: on-chain read failure falls back to DB Anchor.status, chainReadUnavailable=true, never 5xx", async () => {
       const pdfBytes = buildMinimalPdf("BT /F1 24 Tf 50 100 Td (PV-FALLBACK) Tj ET");

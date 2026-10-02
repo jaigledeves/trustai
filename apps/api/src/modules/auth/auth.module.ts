@@ -16,6 +16,7 @@ import { PASSWORD_HASHER_PORT } from "../../ports/password-hasher.port";
 import { USER_REPOSITORY_PORT } from "../../ports/user-repository.port";
 import { AuthController } from "./auth.controller";
 import { JwtAuthGuard } from "./jwt-auth.guard";
+import { requireJwtSecret } from "./jwt-secret";
 import { JwtStrategy } from "./jwt.strategy";
 
 @Module({
@@ -25,10 +26,7 @@ import { JwtStrategy } from "./jwt.strategy";
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>(
-          "JWT_SECRET",
-          "change-me-in-production",
-        ),
+        secret: requireJwtSecret(configService),
         signOptions: {
           expiresIn: configService.get<string>("JWT_EXPIRES_IN", "7d"),
         },

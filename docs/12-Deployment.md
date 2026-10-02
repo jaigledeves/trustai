@@ -34,9 +34,11 @@ serverless.
 | Variable | Requerida | Valor / nota |
 |---|---|---|
 | `PORT` | sí | La inyecta Railway; `main.ts` la lee (default 3000). |
+| `CORS_ORIGINS` | sí (prod) | Orígenes permitidos, separados por coma (p. ej. `https://ancrux.vercel.app`). Sin valor solo se permite `http://localhost:3100` y la API lo avisa en el log al arrancar; el comodín `*` se ignora y la barra final se elimina. Lo necesita la verificación pública, que llama a la API desde el navegador. |
 | `DATABASE_URL` | sí | Referencia al Postgres de Railway. |
+| `TRUSTED_PROXY_SECRET` | sí (prod, secreto) | Cadena larga aleatoria, con el mismo valor en Railway y en Vercel. La API solo confía en la IP de cliente reenviada por el web (`x-client-ip`) para el rate limiting cuando el secreto coincide; si no, usa la IP de conexión, que para el tráfico del web es la de salida de Vercel y la comparten todos los usuarios. Si falta, la API lo avisa en el log al arrancar. |
 | `PGBOSS_SCHEMA` | no | Schema de pg-boss (default interno). |
-| `JWT_SECRET` | sí (secreto) | Cadena larga aleatoria. |
+| `JWT_SECRET` | sí (secreto) | Cadena larga aleatoria. Sin valor por defecto: la API no arranca si falta o si conserva el placeholder de `.env.example`. |
 | `JWT_EXPIRES_IN` | no | p. ej. `7d` (debe cuadrar con `sessionMaxAgeSeconds` del web). |
 | `ASSET_ENCRYPTION_KEY` | sí (secreto) | **base64 de 32 bytes** (AES-256-GCM). Generar: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`. |
 | `S3_ENDPOINT` | sí | Endpoint R2: `https://<accountid>.r2.cloudflarestorage.com`. |
@@ -54,6 +56,8 @@ serverless.
 | `OPENAI_API_KEY` / `OPENAI_MODEL` | si `openai` | Solo si `AI_ADAPTER=openai`. |
 | `PUBLIC_VERIFICATION_ENABLED` | no | `true` para habilitar UC-02 (verificación pública). |
 | `PUBLIC_VERIFY_GET_THROTTLE_LIMIT` / `..._POST_...` | no | Rate limits del endpoint público. |
+| `AUTH_THROTTLE_LIMIT` | no | Intentos por minuto y por cuenta (email) en `POST /auth/login` y `POST /auth/forgot-password` (default 5). Frena la fuerza bruta contra una cuenta concreta. Este límite por cuenta se aplica además del límite global por IP (`THROTTLE_LIMIT`), no lo reemplaza. Un valor vacío, no entero o menor que 1 se ignora y se usa 5. |
+| `MAX_UPLOAD_BYTES` | no | Tamaño máximo en bytes de un archivo subido a `POST /assets` y `POST /public/verify/:id` (default `10485760`, 10 MB). Por encima responde **413**. Se lee una vez al arrancar; un valor vacío, no entero o menor que 1 se ignora y se usa el default. Ver [Límites de subida](#límites-de-subida). |
 
 ## Web en Vercel
 
@@ -73,7 +77,21 @@ serverless.
 | `NEXT_PUBLIC_APP_BASE_URL` | sí (prod) | Origen público del propio web (p. ej. `https://ancrux.vercel.app`). Se usa para construir el enlace absoluto y el QR de verificación pública en el detalle del DTR. Default dev: `http://localhost:3100`. |
 | `NEXT_PUBLIC_PUBLIC_VERIFICATION_ENABLED` | no | `true` para mostrar la página de verificación pública. |
 | `NEXT_PUBLIC_DEMO_DTR_ID` | no | `id` de un DTR ya `CERTIFIED`. Si está seteada, la landing muestra un CTA "Ver una verificación de ejemplo" que enlaza a `/verify/:id` (probar sin registro). Debe existir y persistir en la base del entorno. |
+| `TRUSTED_PROXY_SECRET` | sí (prod, secreto) | Mismo valor que en la API (Railway); cadena larga aleatoria. Solo server-side, nunca `NEXT_PUBLIC_`. El web reenvía con él la IP real del cliente para que la API limite por cliente y no por la IP de salida de Vercel. |
 | `SESSION_COOKIE_NAME` | no | Default `trustai_session`. |
+
+### Límites de subida
+
+- **Certificación (`POST /assets`)**: el navegador sube el PDF al proxy del web
+  (`/api/backend/[...path]`), una Vercel Function que lee el cuerpo completo y lo
+  reenvía a la API. Vercel limita el cuerpo de la petición de una función a unos
+  **4,5 MB** y responde 413 antes de que el proxy se ejecute, así que en Vercel el
+  límite efectivo de certificación es ese y no `MAX_UPLOAD_BYTES`. Subir el límite
+  real exigiría subir el archivo sin pasar por la función (p. ej. directamente a la
+  API o al almacenamiento).
+- **Verificación pública (`POST /public/verify/:id`)**: el navegador llama
+  directamente a la API (`NEXT_PUBLIC_API_BASE_URL`), sin pasar por Vercel, así que
+  aplica `MAX_UPLOAD_BYTES`.
 
 ## Cloudflare R2
 
@@ -83,8 +101,20 @@ serverless.
 
 ## CORS
 
-`main.ts` hace `app.enableCors()` (permisivo, todos los orígenes). Suficiente para
-el MVP; endurecer al dominio del web de Vercel antes de un uso serio.
+`main.ts` solo permite los orígenes de `CORS_ORIGINS` (ver la tabla de
+variables de la API).
+
+## Cabeceras de seguridad
+
+| App | Cabeceras | Nota |
+|---|---|---|
+| API (`apps/api/src/security-headers.ts`) | `helmet` con sus valores por defecto (HSTS, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, políticas `Cross-Origin-*`, sin `X-Powered-By`) y una CSP con `frame-ancestors 'none'` | La CSP admite estilos inline e imágenes `data:` para que Swagger UI (`/api-docs`) funcione; los scripts solo pueden venir de `'self'`. Se omite `upgrade-insecure-requests` porque el TLS lo termina Railway y en local rompe Swagger sobre HTTP. |
+| Web (`apps/web/lib/security-headers.ts`, aplicado en `next.config.ts` a todas las rutas) | `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (cámara, micrófono, geolocalización, pagos, USB y similares deshabilitados) | `connect-src` admite `'self'` y el origen de `NEXT_PUBLIC_API_BASE_URL`, que se lee **en el build**: debe estar definida en Vercel al construir, o la verificación pública (`/verify`) no podrá llamar a la API. |
+
+Limitación conocida: sin nonces, Next.js necesita `script-src 'unsafe-inline'`
+para sus scripts inline de arranque e hidratación, por lo que la CSP del web no
+frena scripts inline inyectados. `'unsafe-eval'` solo se añade en desarrollo
+(`next dev`). Una CSP con nonce por petición queda como paso posterior.
 
 ## Usuario de prueba (demo para el revisor)
 
@@ -169,6 +199,6 @@ vivo. Son las que más se olvidan y las que rompen una demo aunque
 ## Pendientes / follow-ups
 
 - Migraciones Prisma formales (hoy `db push`) antes de producción con datos reales.
-- Endurecer CORS al dominio del web.
+- CSP del web basada en nonces (eliminar `script-src 'unsafe-inline'`).
 - Gestión de secretos: la private key del worker pasa a variables de plataforma; considerar un secrets manager pre-mainnet.
 - Separar el worker en su propio servicio si crece la carga (ver ADR-006 seguimiento).

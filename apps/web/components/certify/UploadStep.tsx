@@ -4,15 +4,16 @@ import { UploadCloud } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type ChangeEvent, type DragEvent } from "react";
 import { certifyDictionary } from "../../dictionaries/es/certify";
+import { ApiError, mapApiError } from "../../lib/api/errors";
 import { useUploadAsset } from "../../lib/api/hooks/useUploadAsset";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import { StatusPanel } from "../ui/status-panel";
 
+// No client-side size check: the server is the authority (413) and the
+// effective cap differs by deployment (Vercel proxy body limit vs the API's
+// MAX_UPLOAD_BYTES), so any number here would be wrong somewhere.
 const PDF_MIME_TYPE = "application/pdf";
-// Soft warning only — the backend enforces no hard maximum (design.md
-// Grounding Correction #5), so the client must never hard-block on size.
-const SIZE_WARNING_THRESHOLD_BYTES = 20 * 1024 * 1024;
 
 const KB = 1024;
 const MB = KB * 1024;
@@ -34,14 +35,12 @@ export function UploadStep() {
   const uploadAsset = useUploadAsset();
   const [file, setFile] = useState<File | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [sizeWarning, setSizeWarning] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   /** Shared by the file-picker (`onChange`) and drag-and-drop (`onDrop`) paths. */
   function validateAndSetFile(selected: File | null) {
     setValidationError(null);
-    setSizeWarning(null);
     setSubmitError(null);
     setFile(null);
 
@@ -51,9 +50,6 @@ export function UploadStep() {
     if (selected.type !== PDF_MIME_TYPE) {
       setValidationError(certifyDictionary.upload.errorNotPdf);
       return;
-    }
-    if (selected.size > SIZE_WARNING_THRESHOLD_BYTES) {
-      setSizeWarning(certifyDictionary.upload.errorSizeWarning);
     }
     setFile(selected);
   }
@@ -101,8 +97,12 @@ export function UploadStep() {
           ? `/dtrs/${result.trustRecordId}?notice=duplicate`
           : `/dtrs/${result.trustRecordId}`,
       );
-    } catch {
-      setSubmitError(certifyDictionary.upload.errorGeneric);
+    } catch (caught) {
+      setSubmitError(
+        caught instanceof ApiError
+          ? mapApiError(caught.status, "upload")
+          : certifyDictionary.upload.errorGeneric,
+      );
     }
   }
 
@@ -154,7 +154,6 @@ export function UploadStep() {
       ) : null}
 
       {validationError ? <StatusPanel variant="error">{validationError}</StatusPanel> : null}
-      {sizeWarning ? <StatusPanel variant="info">{sizeWarning}</StatusPanel> : null}
       {submitError ? <StatusPanel variant="error">{submitError}</StatusPanel> : null}
 
       <Button

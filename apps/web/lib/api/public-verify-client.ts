@@ -1,4 +1,5 @@
 import { config } from "../config";
+import { ApiError } from "./errors";
 import type { VerifyHashResponse, VerifyUploadResponse } from "./types";
 
 /**
@@ -41,7 +42,9 @@ export async function getVerifyHash(id: string): Promise<VerifyHashResponse> {
 /**
  * Always resolves — never throws on a semantically-missing record (that
  * comes back as a normal 200 with `verdict: "INVALID_RECORD"`). Only a
- * genuinely unexpected non-2xx (network/5xx/throttling) throws here.
+ * genuinely unexpected non-2xx (413/5xx/throttling) throws here, as an
+ * `ApiError` carrying the status so the UI can map it. A network failure
+ * still rejects with fetch's own TypeError, not an `ApiError`.
  */
 export async function postVerifyUpload(id: string, file: File): Promise<VerifyUploadResponse> {
   const formData = new FormData();
@@ -53,7 +56,7 @@ export async function postVerifyUpload(id: string, file: File): Promise<VerifyUp
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new ApiError(response.status, `Request failed with status ${response.status}`);
   }
 
   return (await response.json()) as VerifyUploadResponse;

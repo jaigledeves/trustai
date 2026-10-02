@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { authDictionary } from "../../dictionaries/es/auth";
 import { certifyDictionary } from "../../dictionaries/es/certify";
+import { verifyDictionary } from "../../dictionaries/es/verify";
 import { ApiError, mapApiError } from "./errors";
 
 describe("mapApiError (pure — spec: no enumeration on login, distinct unverified/duplicate copy)", () => {
@@ -44,6 +45,31 @@ describe("mapApiError (pure — spec: no enumeration on login, distinct unverifi
     expect(mapApiError(400, "resetPassword")).toBe(
       authDictionary.resetPassword.errorInvalidToken,
     );
+  });
+
+  it("maps 413 in the upload context to the file-too-large message", () => {
+    expect(mapApiError(413, "upload")).toBe(certifyDictionary.upload.errorTooLarge);
+  });
+
+  it("falls back to the upload-specific generic message for other upload failures", () => {
+    expect(mapApiError(500, "upload")).toBe(certifyDictionary.upload.errorGeneric);
+  });
+
+  it("maps 413 in the verifyUpload context to the verify file-too-large message", () => {
+    expect(mapApiError(413, "verifyUpload")).toBe(verifyDictionary.upload.errorTooLarge);
+  });
+
+  it("falls back to the verify-specific generic message for other verifyUpload failures", () => {
+    expect(mapApiError(429, "verifyUpload")).toBe(verifyDictionary.upload.errorGeneric);
+  });
+
+  it("never states a specific size limit, since the effective cap depends on the deployment", () => {
+    for (const copy of [
+      certifyDictionary.upload.errorTooLarge,
+      verifyDictionary.upload.errorTooLarge,
+    ]) {
+      expect(copy).not.toMatch(/[0-9]/);
+    }
   });
 });
 

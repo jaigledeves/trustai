@@ -22,6 +22,7 @@ import type {
 } from "../../application/verification/verify-document.use-case";
 import { VerifyDocumentUseCase } from "../../application/verification/verify-document.use-case";
 import type { VerificationAttemptChannel } from "../../ports/verification-attempt-repository.port";
+import { uploadMulterOptions } from "../uploads/upload-limits";
 import { ChainAnchorResponseDto, VerifyHashResponseDto } from "./dto/verify-hash-response.dto";
 import { VerifyUploadResponseDto } from "./dto/verify-upload-response.dto";
 
@@ -106,7 +107,10 @@ export class PublicVerificationController {
   @Post(":id")
   @HttpCode(HttpStatus.OK)
   @Throttle({ global: { limit: resolvePostThrottleLimit, ttl: POST_THROTTLE_TTL_MS } })
-  @UseInterceptors(FileInterceptor("file"))
+  // Size limit only: no PDF signature check here, because verification
+  // hashes whatever is uploaded and a non-matching file must still get its
+  // normal verdict (ASSET_MISMATCH/INVALID_RECORD), not a 400.
+  @UseInterceptors(FileInterceptor("file", uploadMulterOptions))
   @ApiConsumes("multipart/form-data")
   @ApiQuery({ name: "channel", required: false, enum: VALID_CHANNELS })
   @ApiOperation({
@@ -114,7 +118,8 @@ export class PublicVerificationController {
     description:
       "POST /public/verify/:id — hashes the upload, compares to the certified asset, and " +
       "corroborates on-chain (RF-041/044). AI analysis is included only when the hash matches " +
-      "(VALID/PENDING_ANCHOR). Unknown id -> 200 INVALID_RECORD (never 404, unlike GET).",
+      "(VALID/PENDING_ANCHOR). Unknown id -> 200 INVALID_RECORD (never 404, unlike GET). " +
+      "Files above MAX_UPLOAD_BYTES -> 413.",
   })
   async verifyByUpload(
     @Param("id") id: string,

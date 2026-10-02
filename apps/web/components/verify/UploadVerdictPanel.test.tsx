@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { verifyDictionary } from "../../dictionaries/es/verify";
+import { ApiError } from "../../lib/api/errors";
 import type { VerifyUploadResponse } from "../../lib/api/types";
 
 const postVerifyUploadMock = vi.fn<(id: string, file: File) => Promise<VerifyUploadResponse>>();
@@ -45,6 +46,26 @@ async function uploadAndSubmit(response: VerifyUploadResponse) {
 describe("UploadVerdictPanel (spec: web-public-verify — Upload Verdict, All Four States)", () => {
   afterEach(() => {
     postVerifyUploadMock.mockClear();
+  });
+
+  it("shows the file-too-large message when the upload is rejected with 413", async () => {
+    postVerifyUploadMock.mockRejectedValueOnce(new ApiError(413, "File too large"));
+    const user = userEvent.setup();
+    render(<UploadVerdictPanel id="rec-1" />);
+    await user.upload(screen.getByLabelText("Elige el archivo a verificar"), pdfFile());
+    await user.click(screen.getByRole("button", { name: "Verificar documento" }));
+
+    expect(await screen.findByText(verifyDictionary.upload.errorTooLarge)).toBeInTheDocument();
+  });
+
+  it("shows the generic verify error when the request fails without an HTTP status", async () => {
+    postVerifyUploadMock.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    const user = userEvent.setup();
+    render(<UploadVerdictPanel id="rec-1" />);
+    await user.upload(screen.getByLabelText("Elige el archivo a verificar"), pdfFile());
+    await user.click(screen.getByRole("button", { name: "Verificar documento" }));
+
+    expect(await screen.findByText(verifyDictionary.upload.errorGeneric)).toBeInTheDocument();
   });
 
   it("VALID: renders the success verdict with analysis and the anchor tx link, alongside the recompute panel", async () => {

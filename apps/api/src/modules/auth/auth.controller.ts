@@ -18,6 +18,7 @@ import type { RegisterResult } from "../../application/auth/register.use-case";
 import { RegisterUseCase } from "../../application/auth/register.use-case";
 import { ResetPasswordUseCase } from "../../application/auth/reset-password.use-case";
 import { VerifyEmailUseCase } from "../../application/auth/verify-email.use-case";
+import { AccountThrottle } from "./auth-throttle";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { LoginDto } from "./dto/login.dto";
@@ -55,6 +56,7 @@ export class AuthController {
   }
 
   @Post("login")
+  @AccountThrottle()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Log in with email and password, receive a JWT" })
   async login(@Body() dto: LoginDto): Promise<LoginResult> {
@@ -62,6 +64,7 @@ export class AuthController {
   }
 
   @Post("forgot-password")
+  @AccountThrottle()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Request a password reset email",

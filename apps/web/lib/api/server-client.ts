@@ -6,6 +6,7 @@ export interface ServerFetchOptions {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   body?: unknown;
   query?: Record<string, string | number | undefined>;
+  headers?: Record<string, string>;
 }
 
 /** Outbound request timeout — a stuck backend must not hang the RSC render. */
@@ -32,6 +33,7 @@ export async function serverFetch<T>(
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    ...options.headers,
   };
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
