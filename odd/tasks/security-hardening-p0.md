@@ -41,7 +41,7 @@ Out of scope: phases B to D, demo password rotation.
 
 - [x] A1 - Required `JWT_SECRET` (route: inline; 1 helper + 2 call sites, no research needed)
 - [x] A4 - Restricted CORS (route: inline; 1 helper + main.ts)
-- [x] A5 - Per-account auth throttles on login and forgot-password (route: inline; user chose per-account keying on 2026-10-02 because the API only sees the Vercel egress IP; reset-password carries no email and per-email register limits are useless, so both keep the global limit; real client IP forwarding moved to roadmap section 5)
+- [x] A5 - Per-account auth throttles on login and forgot-password (route: inline; user chose per-account keying on 2026-10-02 because the API only sees the Vercel egress IP; reset-password carries no email and per-email register limits are useless, so both keep the global limit; after a CRITICAL review finding the user chose real client IP forwarding, implemented in 85e5a1a)
 - [x] A3 - Security headers API + web (route: delegated (2+ non-trivial files across api and web))
 - [ ] A2 - Upload size limit + magic bytes (route: TBD)
 

@@ -20,6 +20,16 @@ describe("resolveClientIp", () => {
     expect(resolveClientIp(req({ "x-proxy-secret": "s3cret", "x-client-ip": "1.2.3.4" }))).toBe("10.0.0.1");
   });
 
+  it("treats a whitespace-only secret as unset", () => {
+    vi.stubEnv("TRUSTED_PROXY_SECRET", "   ");
+    expect(resolveClientIp(req({ "x-proxy-secret": "   ", "x-client-ip": "1.2.3.4" }))).toBe("10.0.0.1");
+  });
+
+  it("matches a secret configured with surrounding whitespace", () => {
+    vi.stubEnv("TRUSTED_PROXY_SECRET", " s3cret ");
+    expect(resolveClientIp(req({ "x-proxy-secret": "s3cret", "x-client-ip": "1.2.3.4" }))).toBe("1.2.3.4");
+  });
+
   it("falls back to req.ip when x-client-ip is missing", () => {
     expect(resolveClientIp(req({ "x-proxy-secret": "s3cret" }))).toBe("10.0.0.1");
   });

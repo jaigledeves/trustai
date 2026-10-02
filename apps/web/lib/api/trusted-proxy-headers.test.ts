@@ -25,6 +25,13 @@ describe("trustedProxyHeaders", () => {
     expect(trustedProxyHeaders(requestWith("203.0.113.7"))).toStrictEqual({});
   });
 
+  it("treats a whitespace-only secret as unset and trims a padded one", () => {
+    vi.stubEnv("TRUSTED_PROXY_SECRET", "   ");
+    expect(trustedProxyHeaders(requestWith("203.0.113.7"))).toStrictEqual({});
+    vi.stubEnv("TRUSTED_PROXY_SECRET", " s3cret ");
+    expect(trustedProxyHeaders(requestWith("203.0.113.7"))["x-proxy-secret"]).toBe("s3cret");
+  });
+
   it("returns no headers when the request carries no client IP", () => {
     vi.stubEnv("TRUSTED_PROXY_SECRET", "s3cret");
     expect(trustedProxyHeaders(requestWith())).toStrictEqual({});

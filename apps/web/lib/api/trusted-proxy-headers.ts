@@ -6,7 +6,7 @@
  * apps/api/src/modules/throttling/client-ip.ts.
  */
 export function trustedProxyHeaders(request: Request): Record<string, string> {
-  const secret = process.env["TRUSTED_PROXY_SECRET"];
+  const secret = process.env["TRUSTED_PROXY_SECRET"]?.trim();
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   return secret && ip ? { "x-proxy-secret": secret, "x-client-ip": ip } : {};
 }

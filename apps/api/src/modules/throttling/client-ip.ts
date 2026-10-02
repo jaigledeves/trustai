@@ -13,7 +13,7 @@ const MAX_IP_LENGTH = 45;
  */
 export function resolveClientIp(req: Record<string, unknown>): string | undefined {
   const headers = (req["headers"] ?? {}) as Record<string, unknown>;
-  const secret = process.env["TRUSTED_PROXY_SECRET"];
+  const secret = process.env["TRUSTED_PROXY_SECRET"]?.trim();
   const presented = headers[PROXY_SECRET_HEADER];
   const forwarded = headers[CLIENT_IP_HEADER];
   if (secret && typeof presented === "string" && typeof forwarded === "string") {
