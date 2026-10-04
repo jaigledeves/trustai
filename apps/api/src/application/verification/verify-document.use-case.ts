@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { buildTrustRecordCandidate, sha256Hex, verifyAssetAgainstRecord } from "@trustai/dtr-core";
 import { AnchorStatus, type Anchor } from "../../domain/anchor.entity";
 import { TrustRecordState, type TrustRecord } from "../../domain/trust-record.entity";
-import { ANCHOR_PORT, type AnchorPort } from "../../ports/anchor.port";
+import { ANCHOR_PORT, type AnchorExistenceStatus, type AnchorPort } from "../../ports/anchor.port";
 import {
   TRUST_RECORD_REPOSITORY_PORT,
   type TrustRecordRepositoryPort,
@@ -148,6 +148,9 @@ export class VerifyDocumentUseCase {
     }
 
     const chainAnchor = await this.resolveChainAnchor(found.trustRecord.canonicalHash, found.anchor);
+    if (!chainAnchor) {
+      return this.finishChainDenied(found.trustRecord.id, "HASH_ONLY", params.channel);
+    }
     return this.finish(found.trustRecord.id, "HASH_ONLY", params.channel, {
       resolved: true,
       verdict: "VALID",
@@ -229,6 +232,9 @@ export class VerifyDocumentUseCase {
 
     // CERTIFIED — the chain is read with the (now proven equal) certified hash.
     const chainAnchor = await this.resolveChainAnchor(verification.canonicalHash, found.anchor);
+    if (!chainAnchor) {
+      return this.finishChainDenied(found.trustRecord.id, "FULL", params.channel);
+    }
     return this.finish(found.trustRecord.id, "FULL", params.channel, {
       resolved: true,
       verdict: "VALID",
@@ -305,19 +311,18 @@ export class VerifyDocumentUseCase {
    * failure, falls back to the DB `Anchor.status` and flags
    * `chainReadUnavailable: true` — never throws (spec: "On-Chain Read
    * Failure Never Fails the Request").
+   *
+   * Returns `null` when the chain read succeeds and the contract denies the
+   * certified hash: the chain is the source of truth for the anchor, so a
+   * CERTIFIED row it contradicts is not a valid record (phase C, C0).
    */
   private async resolveChainAnchor(
     canonicalHash: string,
     anchor: Anchor | null,
-  ): Promise<VerifyChainAnchor> {
+  ): Promise<VerifyChainAnchor | null> {
+    let status: AnchorExistenceStatus;
     try {
-      const status = await this.anchorPort.isAnchored(canonicalHash);
-      return {
-        anchored: status.anchored,
-        txHash: anchor?.txHash ?? null,
-        blockTimestamp: status.blockTimestamp,
-        chainReadUnavailable: false,
-      };
+      status = await this.anchorPort.isAnchored(canonicalHash);
     } catch {
       return {
         anchored: anchor?.status === AnchorStatus.CONFIRMED,
@@ -326,6 +331,36 @@ export class VerifyDocumentUseCase {
         chainReadUnavailable: true,
       };
     }
+    if (!status.anchored) {
+      return null;
+    }
+    return {
+      anchored: status.anchored,
+      txHash: anchor?.txHash ?? null,
+      blockTimestamp: status.blockTimestamp,
+      chainReadUnavailable: false,
+    };
+  }
+
+  /**
+   * The record is CERTIFIED but the contract, read successfully, says its
+   * certified hash was never anchored. Same shape as any other
+   * INVALID_RECORD; the warning carries the record id only.
+   */
+  private finishChainDenied(
+    trustRecordId: string,
+    type: VerificationAttemptType,
+    channel: VerificationAttemptChannel,
+  ): Promise<VerifyResult> {
+    this.logger.warn(
+      `Trust record ${trustRecordId} is CERTIFIED but its hash is not anchored on-chain; returning INVALID_RECORD`,
+    );
+    return this.finish(trustRecordId, type, channel, {
+      resolved: true,
+      verdict: "INVALID_RECORD",
+      chainAnchor: null,
+      analysis: null,
+    });
   }
 
   private async finish(

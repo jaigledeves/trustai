@@ -291,6 +291,35 @@ describe("VerifyDocumentUseCase", () => {
       });
     });
 
+    it("CERTIFIED + chain read ok but hash not anchored -> INVALID_RECORD, attempt logged, warning without data", async () => {
+      const warnSpy = vi.spyOn(Logger.prototype, "warn").mockImplementation(() => undefined);
+      anchorPort = buildAnchorPort({
+        isAnchored: vi.fn().mockResolvedValue({ anchored: false, blockTimestamp: null }),
+      });
+      useCase = new VerifyDocumentUseCase(trustRecordRepository, anchorPort, verificationAttemptRepository);
+
+      try {
+        const result = await useCase.verifyByHash({ trustRecordId: "trust-record-1", channel: "QR" });
+
+        expect(result.resolved).toBe(true);
+        expect(result.verdict).toBe("INVALID_RECORD");
+        expect(result.analysis).toBeNull();
+        expect(result.chainAnchor).toBeNull();
+        expect(verificationAttemptRepository.record).toHaveBeenCalledWith({
+          trustRecordId: "trust-record-1",
+          type: "HASH_ONLY",
+          verdict: "INVALID_RECORD",
+          channel: "QR",
+        });
+        expect(warnSpy).toHaveBeenCalledTimes(1);
+        const message = String(warnSpy.mock.calls[0]?.[0]);
+        expect(message).toContain("trust-record-1");
+        expect(message).not.toContain("a".repeat(64));
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
+
     it("includes the eIDAS disclaimer and a plain-language explanation on every verdict", async () => {
       const result = await useCase.verifyByHash({ trustRecordId: "trust-record-1", channel: "URL" });
 
@@ -513,6 +542,40 @@ describe("VerifyDocumentUseCase", () => {
         blockTimestamp: new Date("2026-07-06T00:00:00.000Z"),
         chainReadUnavailable: true,
       });
+    });
+
+    it("CERTIFIED + matching hash + chain read ok but hash not anchored -> INVALID_RECORD, analysis withheld", async () => {
+      const warnSpy = vi.spyOn(Logger.prototype, "warn").mockImplementation(() => undefined);
+      anchorPort = buildAnchorPort({
+        isAnchored: vi.fn().mockResolvedValue({ anchored: false, blockTimestamp: null }),
+      });
+      useCase = new VerifyDocumentUseCase(trustRecordRepository, anchorPort, verificationAttemptRepository);
+
+      try {
+        const result = await useCase.verifyByUpload({
+          trustRecordId: "trust-record-1",
+          fileBytes: MATCHING_BYTES,
+          channel: "URL",
+        });
+
+        expect(result.resolved).toBe(true);
+        expect(result.verdict).toBe("INVALID_RECORD");
+        expect(result.analysis).toBeNull();
+        expect(result.chainAnchor).toBeNull();
+        expect(anchorPort.isAnchored).toHaveBeenCalledWith(DTR1_HASH);
+        expect(verificationAttemptRepository.record).toHaveBeenCalledWith({
+          trustRecordId: "trust-record-1",
+          type: "FULL",
+          verdict: "INVALID_RECORD",
+          channel: "URL",
+        });
+        expect(warnSpy).toHaveBeenCalledTimes(1);
+        const message = String(warnSpy.mock.calls[0]?.[0]);
+        expect(message).toContain("trust-record-1");
+        expect(message).not.toContain(DTR1_HASH);
+      } finally {
+        warnSpy.mockRestore();
+      }
     });
 
     it("legacy dtr-1 + matching bytes -> VALID, chain checked with the dtr-1 canonical hash", async () => {
