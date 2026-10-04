@@ -95,6 +95,7 @@ export class ViemAnchorAdapter implements AnchorPort {
       const block = await this.config.publicClient.getBlock({ blockNumber: receipt.blockNumber });
       return {
         confirmations,
+        status: receipt.status,
         blockTimestamp: new Date(Number(block.timestamp) * 1000),
         blockNumber: receipt.blockNumber,
         ...this.deployment(),
@@ -104,7 +105,13 @@ export class ViemAnchorAdapter implements AnchorPort {
       // expected state while polling, not a failure. The caller's own
       // timeout logic decides when to give up waiting.
       if (err instanceof TransactionReceiptNotFoundError) {
-        return { confirmations: 0, blockTimestamp: null, blockNumber: null, ...this.deployment() };
+        return {
+          confirmations: 0,
+          status: null,
+          blockTimestamp: null,
+          blockNumber: null,
+          ...this.deployment(),
+        };
       }
       throw err;
     }

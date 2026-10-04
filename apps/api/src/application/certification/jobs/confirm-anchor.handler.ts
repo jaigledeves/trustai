@@ -45,6 +45,12 @@ export interface ConfirmAnchorJobPayload {
  * - `>= REQUIRED_CONFIRMATIONS` (INV-32): persists `txHash`, `blockTimestamp`,
  *   `blockNumber`, `chainId` and `contractAddress` on the `Anchor` row (CONFIRMED) and transitions ANCHORING->CERTIFIED
  *   (blockchain-anchoring spec: "Transaction confirmed").
+ * - the receipt is `reverted` (e.g. `AlreadyAnchored` because a third party
+ *   or a duplicate job anchored the same hash first — `anchor()` is
+ *   permissionless): the reverted tx is never certified. If the hash IS
+ *   anchored on-chain, the record is certified like `AnchorDtrHandler`'s
+ *   "already anchored" path (no txHash, timestamp from `anchoredAt`);
+ *   otherwise it follows the same FAILED + re-enqueue path as a timeout.
  * - the timeout window elapses: ANCHORING->FAILED (visible — "Failure
  *   state is visible throughout") then immediately FAILED->ANCHORING
  *   again with a fresh `anchor-dtr` job re-enqueued atomically (RF-033
@@ -90,6 +96,10 @@ export class ConfirmAnchorHandler {
     const status = await this.anchorPort.getConfirmationStatus(payload.txHash);
 
     if (status.confirmations >= REQUIRED_CONFIRMATIONS) {
+      if (status.status === "reverted") {
+        await this.handleRevertedTransaction(payload, status);
+        return;
+      }
       await this.certify(payload, status);
       return;
     }
@@ -120,27 +130,84 @@ export class ConfirmAnchorHandler {
       contractAddress: status.contractAddress,
     });
 
-    const trustRecord = await this.trustRecordRepository.findById(payload.trustRecordId);
-    if (!trustRecord) {
-      throw new Error(`TrustRecord not found: ${payload.trustRecordId}`);
-    }
-
-    try {
-      TrustRecordStateMachine.transition(trustRecord.state, TrustRecordState.CERTIFIED);
-    } catch (err) {
-      if (err instanceof InvalidTransitionError) {
-        throw new Error(`Cannot certify TrustRecord ${payload.trustRecordId}: ${err.message}`);
-      }
-      throw err;
-    }
-    await this.trustRecordRepository.certify(payload.trustRecordId);
+    await this.transitionToCertified(payload.trustRecordId);
 
     this.logger.log(
       `TrustRecord ${payload.trustRecordId} CERTIFIED after ${REQUIRED_CONFIRMATIONS}+ confirmations`,
     );
   }
 
+  /**
+   * A mined-but-reverted tx anchored nothing itself. Re-reads the registry:
+   * if the hash is anchored anyway (someone else got there first), certify
+   * exactly like `AnchorDtrHandler`'s "already anchored" branch — never
+   * publishing the reverted txHash; otherwise retry like a timeout.
+   */
+  private async handleRevertedTransaction(
+    payload: ConfirmAnchorJobPayload,
+    status: ConfirmationStatus,
+  ): Promise<void> {
+    const trustRecord = await this.trustRecordRepository.findById(payload.trustRecordId);
+    if (!trustRecord) {
+      throw new Error(`TrustRecord not found: ${payload.trustRecordId}`);
+    }
+    if (!trustRecord.canonicalHash) {
+      throw new Error(`TrustRecord ${payload.trustRecordId} has no canonicalHash to check`);
+    }
+
+    const existence = await this.anchorPort.isAnchored(trustRecord.canonicalHash);
+    if (!existence.anchored) {
+      await this.retryAnchoring(payload, "anchor tx reverted");
+      this.logger.warn(
+        `TrustRecord ${payload.trustRecordId} anchor tx ${payload.txHash} reverted and the hash is not anchored — retrying`,
+      );
+      return;
+    }
+
+    await this.anchorRepository.updateSubmissionResult(payload.anchorId, {
+      txHash: null,
+      status: AnchorStatus.CONFIRMED,
+      blockTimestamp: existence.blockTimestamp,
+      blockNumber: null,
+      chainId: status.chainId,
+      contractAddress: status.contractAddress,
+    });
+    await this.transitionToCertified(payload.trustRecordId);
+
+    this.logger.warn(
+      `TrustRecord ${payload.trustRecordId} anchor tx ${payload.txHash} reverted, but the hash is already anchored on-chain — CERTIFIED without a txHash`,
+    );
+  }
+
+  private async transitionToCertified(trustRecordId: string): Promise<void> {
+    const trustRecord = await this.trustRecordRepository.findById(trustRecordId);
+    if (!trustRecord) {
+      throw new Error(`TrustRecord not found: ${trustRecordId}`);
+    }
+
+    try {
+      TrustRecordStateMachine.transition(trustRecord.state, TrustRecordState.CERTIFIED);
+    } catch (err) {
+      if (err instanceof InvalidTransitionError) {
+        throw new Error(`Cannot certify TrustRecord ${trustRecordId}: ${err.message}`);
+      }
+      throw err;
+    }
+    await this.trustRecordRepository.certify(trustRecordId);
+  }
+
   private async retryAfterTimeout(payload: ConfirmAnchorJobPayload): Promise<void> {
+    await this.retryAnchoring(payload, "anchor confirmation timed out");
+    this.logger.warn(
+      `TrustRecord ${payload.trustRecordId} anchor confirmation timed out after ${this.timeoutMs}ms — retrying`,
+    );
+  }
+
+  /**
+   * ANCHORING -> FAILED -> ANCHORING with a fresh `anchor-dtr` job (RF-033).
+   * Shared by the timeout and the reverted-and-not-anchored outcomes.
+   */
+  private async retryAnchoring(payload: ConfirmAnchorJobPayload, reason: string): Promise<void> {
     const trustRecord = await this.trustRecordRepository.findById(payload.trustRecordId);
     if (!trustRecord) {
       throw new Error(`TrustRecord not found: ${payload.trustRecordId}`);
@@ -155,7 +222,9 @@ export class ConfirmAnchorHandler {
       TrustRecordStateMachine.transition(trustRecord.state, TrustRecordState.FAILED);
     } catch (err) {
       if (err instanceof InvalidTransitionError) {
-        throw new Error(`Cannot mark TrustRecord ${payload.trustRecordId} FAILED: ${err.message}`);
+        throw new Error(
+          `Cannot mark TrustRecord ${payload.trustRecordId} FAILED (${reason}): ${err.message}`,
+        );
       }
       throw err;
     }
@@ -174,9 +243,5 @@ export class ConfirmAnchorHandler {
         tx,
       );
     });
-
-    this.logger.warn(
-      `TrustRecord ${payload.trustRecordId} anchor confirmation timed out after ${this.timeoutMs}ms — retrying`,
-    );
   }
 }
