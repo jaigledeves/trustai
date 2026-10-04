@@ -291,6 +291,15 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
       expect(dbAnchor?.state).toBe("CERTIFIED");
       expect(dbAnchor?.anchor?.status).toBe("CONFIRMED");
       expect(dbAnchor?.anchor?.txHash).toMatch(/^0x[0-9a-f]{64}$/);
+      // Phase C (C1): the row records where the anchor lives, and its block
+      // number matches the receipt read straight from the chain.
+      expect(dbAnchor?.anchor?.chainId).toBe(ANVIL_CHAIN_ID);
+      expect(dbAnchor?.anchor?.contractAddress).toBe(contractAddress);
+      expect(dbAnchor?.anchor?.blockNumber).toBeGreaterThan(0n);
+      const anchorReceipt = await publicClient.getTransactionReceipt({
+        hash: dbAnchor!.anchor!.txHash as `0x${string}`,
+      });
+      expect(dbAnchor?.anchor?.blockNumber).toBe(anchorReceipt.blockNumber);
 
       // Independently verify the txHash on-chain — not just trusting the DB.
       const isAnchored = await publicClient.readContract({
@@ -358,8 +367,16 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
       expect(certified["anchor"]).toMatchObject({ status: "CONFIRMED", txHash: null });
       expect(certified["anchor"] && (certified["anchor"] as Record<string, unknown>)["blockTimestamp"]).toBeTruthy();
 
-      const record = await prisma.trustRecord.findUnique({ where: { id: trustRecordId } });
+      const record = await prisma.trustRecord.findUnique({
+        where: { id: trustRecordId },
+        include: { anchor: true },
+      });
       expect(record?.state).toBe("CERTIFIED");
+      // Phase C (C1): no transaction of ours, so no block number; chain and
+      // contract are still recorded.
+      expect(record?.anchor?.chainId).toBe(ANVIL_CHAIN_ID);
+      expect(record?.anchor?.contractAddress).toBe(contractAddress);
+      expect(record?.anchor?.blockNumber).toBeNull();
     });
   },
 );

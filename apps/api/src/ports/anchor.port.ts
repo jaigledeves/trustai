@@ -1,6 +1,17 @@
 export const ANCHOR_PORT = Symbol("AnchorPort");
 
-export interface AnchorSubmitResult {
+/**
+ * Where an anchor lives: the chain and the AnchorRegistry contract the
+ * adapter talks to (phase C, C1). Persisted on the `Anchor` row so a
+ * verifier knows which contract to read without trusting configuration.
+ */
+export interface AnchorDeployment {
+  /** EIP-155 chain id; `null` only if the chain client has no chain configured. */
+  chainId: number | null;
+  contractAddress: string;
+}
+
+export interface AnchorSubmitResult extends AnchorDeployment {
   /**
    * `null` when `alreadyAnchored` is true — no new transaction was ever
    * submitted (the revert was caught at the simulation step, before any
@@ -23,11 +34,13 @@ export interface AnchorSubmitResult {
   anchoredAtBlockTimestamp: Date | null;
 }
 
-export interface ConfirmationStatus {
+export interface ConfirmationStatus extends AnchorDeployment {
   /** 0 while the tx isn't mined yet (or the receipt can't be found yet). */
   confirmations: number;
   /** The tx's block timestamp — `null` until it has at least 1 confirmation. */
   blockTimestamp: Date | null;
+  /** The block that includes the tx — `null` until it has at least 1 confirmation. */
+  blockNumber: bigint | null;
 }
 
 export interface AnchorExistenceStatus {
@@ -60,8 +73,8 @@ export interface AnchorPort {
 
   /**
    * INV-32: `ConfirmAnchorHandler` polls this until `confirmations >= 2`
-   * (or a timeout elapses). Returns `{ confirmations: 0, blockTimestamp: null }`
-   * — not an error — while the transaction isn't mined yet; the caller's
+   * (or a timeout elapses). Returns `confirmations: 0` with a null block
+   * number and timestamp — not an error — while the transaction isn't mined yet; the caller's
    * timeout logic (not this port) decides when to give up.
    */
   getConfirmationStatus(txHash: string): Promise<ConfirmationStatus>;

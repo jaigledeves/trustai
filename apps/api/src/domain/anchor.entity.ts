@@ -16,5 +16,14 @@ export class Anchor {
     public readonly status: AnchorStatus,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    /**
+     * Phase C (C1): where the hash was anchored. Trailing and defaulted to
+     * null so rows created before these columns existed stay valid.
+     * `blockNumber` is null when the hash was already anchored before our
+     * submission (no transaction of ours to read a block from).
+     */
+    public readonly chainId: number | null = null,
+    public readonly blockNumber: bigint | null = null,
+    public readonly contractAddress: string | null = null,
   ) {}
 }

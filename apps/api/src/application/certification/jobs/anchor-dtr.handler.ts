@@ -65,10 +65,17 @@ export class AnchorDtrHandler {
     const result = await this.anchorPort.submitAnchor(payload.canonicalHash);
 
     if (result.alreadyAnchored) {
+      // The contract stores the anchoring timestamp, not the block, and no
+      // transaction of ours exists to read a receipt from: blockNumber stays
+      // null. Chain and contract are known, so a verifier can still read
+      // `isAnchored`/`anchoredAt` from the right registry.
       await this.anchorRepository.updateSubmissionResult(trustRecord.anchorId, {
         txHash: null,
         status: AnchorStatus.CONFIRMED,
         blockTimestamp: result.anchoredAtBlockTimestamp,
+        chainId: result.chainId,
+        contractAddress: result.contractAddress,
+        blockNumber: null,
       });
 
       // Reuses the state machine's own transition validation — no

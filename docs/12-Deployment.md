@@ -27,6 +27,8 @@ serverless.
 - **Start**: `node dist/main.js` (CMD del Dockerfile).
 - **Pre-deploy / release** (aplica el schema): `pnpm --filter @trustai/api db:deploy`
   (`prisma db push --skip-generate`; el client ya se generó en el build).
+  En la fase C (C1) añade a `anchors` las columnas opcionales `chainId`,
+  `blockNumber` y `contractAddress`; las filas existentes siguen siendo válidas.
 - **Postgres**: servicio Railway Postgres; referenciar su `DATABASE_URL` en la API.
 
 ### Variables de entorno (API)

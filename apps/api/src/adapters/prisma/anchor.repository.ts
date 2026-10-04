@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import type { Anchor as PrismaAnchor } from "@prisma/client";
 import { Anchor, AnchorStatus } from "../../domain/anchor.entity";
-import type { AnchorRepositoryPort } from "../../ports/anchor-repository.port";
+import type { AnchorRepositoryPort, AnchorSubmissionFields } from "../../ports/anchor-repository.port";
 import { PrismaService } from "./prisma.service";
 
 @Injectable()
@@ -20,10 +20,7 @@ export class PrismaAnchorRepository implements AnchorRepositoryPort {
     return record ? this.toDomain(record) : null;
   }
 
-  async updateSubmissionResult(
-    id: string,
-    fields: { txHash: string | null; status: AnchorStatus; blockTimestamp?: Date | null },
-  ): Promise<void> {
+  async updateSubmissionResult(id: string, fields: AnchorSubmissionFields): Promise<void> {
     await this.prisma.anchor.update({
       where: { id },
       data: {
@@ -32,6 +29,9 @@ export class PrismaAnchorRepository implements AnchorRepositoryPort {
         // Undefined is left untouched by Prisma; explicit null clears the
         // column — only relevant if a caller deliberately wants to reset it.
         ...(fields.blockTimestamp !== undefined ? { blockTimestamp: fields.blockTimestamp } : {}),
+        ...(fields.chainId !== undefined ? { chainId: fields.chainId } : {}),
+        ...(fields.blockNumber !== undefined ? { blockNumber: fields.blockNumber } : {}),
+        ...(fields.contractAddress !== undefined ? { contractAddress: fields.contractAddress } : {}),
       },
     });
   }
@@ -47,6 +47,9 @@ export class PrismaAnchorRepository implements AnchorRepositoryPort {
       this.toDomainStatus(record.status),
       record.createdAt,
       record.updatedAt,
+      record.chainId,
+      record.blockNumber,
+      record.contractAddress,
     );
   }
 
