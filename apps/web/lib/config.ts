@@ -10,6 +10,9 @@
 
 const SEVEN_DAYS_SECONDS = 60 * 60 * 24 * 7;
 
+/** Base Sepolia's public RPC, where the AnchorRegistry is deployed (ADR-003). */
+export const DEFAULT_CHAIN_RPC_URL = "https://sepolia.base.org";
+
 export const config = {
   /** Server-only target for server-client + the Bearer-injecting proxy. */
   apiBaseUrl: (): string =>
@@ -42,6 +45,14 @@ export const config = {
   chainExplorerBaseUrl:
     process.env["NEXT_PUBLIC_CHAIN_EXPLORER_BASE_URL"] ??
     "https://sepolia.basescan.org",
+
+  /**
+   * Public JSON-RPC endpoint the browser reads the AnchorRegistry contract
+   * from during independent verification (`/verify/:id`, ADR-016). Its origin
+   * is added to the CSP `connect-src` at build time (`lib/security-headers.ts`).
+   */
+  chainRpcUrl:
+    process.env["NEXT_PUBLIC_CHAIN_RPC_URL"] || DEFAULT_CHAIN_RPC_URL,
 
   /**
    * Public origin of THIS web app. Used to build absolute, shareable public

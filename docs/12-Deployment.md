@@ -76,6 +76,7 @@ serverless.
 | `API_BASE_URL` | sí | URL pública de la API en Railway (server-side). |
 | `NEXT_PUBLIC_API_BASE_URL` | sí | Misma URL (verificación pública llama directo, sin auth). |
 | `NEXT_PUBLIC_CHAIN_EXPLORER_BASE_URL` | no | `https://sepolia.basescan.org` (default). |
+| `NEXT_PUBLIC_CHAIN_RPC_URL` | no | `https://sepolia.base.org` (default). Nodo RPC público desde el que el navegador lee el contrato `AnchorRegistry` en la verificación independiente de `/verify/:id`. Se lee **en el build**: su origen entra en el `connect-src` de la CSP, así que un cambio exige reconstruir. |
 | `NEXT_PUBLIC_APP_BASE_URL` | sí (prod) | Origen público del propio web (p. ej. `https://ancrux.vercel.app`). Se usa para construir el enlace absoluto y el QR de verificación pública en el detalle del DTR. Default dev: `http://localhost:3100`. |
 | `NEXT_PUBLIC_PUBLIC_VERIFICATION_ENABLED` | no | `true` para mostrar la página de verificación pública. |
 | `NEXT_PUBLIC_DEMO_DTR_ID` | no | `id` de un DTR ya `CERTIFIED`. Si está seteada, la landing muestra un CTA "Ver una verificación de ejemplo" que enlaza a `/verify/:id` (probar sin registro). Debe existir y persistir en la base del entorno. |
@@ -111,7 +112,7 @@ variables de la API).
 | App | Cabeceras | Nota |
 |---|---|---|
 | API (`apps/api/src/security-headers.ts`) | `helmet` con sus valores por defecto (HSTS, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, políticas `Cross-Origin-*`, sin `X-Powered-By`) y una CSP con `frame-ancestors 'none'` | La CSP admite estilos inline e imágenes `data:` para que Swagger UI (`/api-docs`) funcione; los scripts solo pueden venir de `'self'`. Se omite `upgrade-insecure-requests` porque el TLS lo termina Railway y en local rompe Swagger sobre HTTP. |
-| Web (`apps/web/lib/security-headers.ts`, aplicado en `next.config.ts` a todas las rutas) | `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (cámara, micrófono, geolocalización, pagos, USB y similares deshabilitados) | `connect-src` admite `'self'` y el origen de `NEXT_PUBLIC_API_BASE_URL`, que se lee **en el build**: debe estar definida en Vercel al construir, o la verificación pública (`/verify`) no podrá llamar a la API. |
+| Web (`apps/web/lib/security-headers.ts`, aplicado en `next.config.ts` a todas las rutas) | `Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (cámara, micrófono, geolocalización, pagos, USB y similares deshabilitados) | `connect-src` admite `'self'`, el origen de `NEXT_PUBLIC_API_BASE_URL` y el de `NEXT_PUBLIC_CHAIN_RPC_URL` (o su valor por defecto), que se leen **en el build**: la API debe estar definida en Vercel al construir, o la verificación pública (`/verify`) no podrá llamarla; sin el origen del RPC, la verificación independiente no podrá leer la blockchain. |
 
 Limitación conocida: sin nonces, Next.js necesita `script-src 'unsafe-inline'`
 para sus scripts inline de arranque e hidratación, por lo que la CSP del web no

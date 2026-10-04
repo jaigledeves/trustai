@@ -69,9 +69,9 @@ sin confiar en el DTR que entrega Ancrux.
 | # | Mejora | Estado |
 |---|---|---|
 | C1 | Persistir `chainId`, `blockNumber` y `blockTimestamp` junto al `txHash` | hecho (PR #46) |
-| C2 | Verificación client-side completa: recomputar el DTR canónico y leer `AnchorRegistry` por RPC desde el navegador | pendiente |
+| C2 | Verificación client-side completa: recomputar el DTR canónico y leer `AnchorRegistry` por RPC desde el navegador | hecho: `/verify/:id` descarga la prueba `ancrux-proof-1`, recalcula `coreHash` y `anchorHash` con `dtr-core` y lee `isAnchored`/`anchoredAt` por RPC público (`NEXT_PUBLIC_CHAIN_RPC_URL`), solo `dtr-2` |
 | C3 | Paquete de prueba descargable (`dtr.json` con versión de esquema, algoritmos de canonicalización y hash, `chainId`, contrato, `txHash`, `blockNumber`, timestamp de bloque) | hecho: formato `ancrux-proof-1` en `GET /public/verify/:id/proof`, solo `dtr-2` (ADR-016) |
-| C4 | Página de diagnóstico paso a paso: extracción → canonicalización → hash local → lectura on-chain → comparación final | pendiente |
+| C4 | Página de diagnóstico paso a paso: extracción → canonicalización → hash local → lectura on-chain → comparación final | hecho: cada paso (archivo, prueba, `coreHash`, `anchorHash`, red, contrato, anclaje) se muestra con sus datos y su resultado |
 | C5 | CLI verificador sobre `dtr-core`, sin dependencia de la API | pendiente |
 
 ### Fase D - Lenguaje y posicionamiento

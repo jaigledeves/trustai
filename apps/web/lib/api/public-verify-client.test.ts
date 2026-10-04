@@ -1,8 +1,16 @@
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { server } from "../../test/msw/server";
 import { ApiError } from "./errors";
-import { getVerifyHash, NotFoundError, postVerifyUpload } from "./public-verify-client";
+import {
+  getProofPackage,
+  getVerifyHash,
+  NotFoundError,
+  postVerifyUpload,
+  PROOF_FETCH_TIMEOUT_MS,
+  ProofFetchTimeoutError,
+  proofPackageDownloadUrl,
+} from "./public-verify-client";
 
 const BASE_URL = "http://localhost:3000";
 
@@ -91,5 +99,132 @@ describe("public-verify-client (spec: GET/POST existence asymmetry, no-auth)", (
     await postVerifyUpload("rec-1", new File(["pdf bytes"], "sample.pdf"));
 
     expect(receivedContentType).toContain("multipart/form-data");
+  });
+});
+
+describe("getProofPackage (ADR-016: GET /public/verify/:id/proof)", () => {
+  it("returns the raw body on 200 without validating it (the caller parses it with dtr-core)", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/rec-1/proof`, () =>
+        HttpResponse.json({ format: "ancrux-proof-1" }),
+      ),
+    );
+
+    await expect(getProofPackage("rec-1")).resolves.toEqual({
+      status: "ok",
+      body: { format: "ancrux-proof-1" },
+    });
+  });
+
+  it("maps 404 to not_found", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/unknown/proof`, () =>
+        HttpResponse.json({ message: "Trust record not found" }, { status: 404 }),
+      ),
+    );
+
+    await expect(getProofPackage("unknown")).resolves.toEqual({ status: "not_found" });
+  });
+
+  it("maps the dtr-1 409 to legacy", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/old/proof`, () =>
+        HttpResponse.json(
+          {
+            statusCode: 409,
+            message:
+              "This is a legacy (dtr-1) record: it is verified by the server only and has no public proof package",
+            error: "Conflict",
+          },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    await expect(getProofPackage("old")).resolves.toEqual({ status: "legacy" });
+  });
+
+  it("maps a 409 with reason legacy_record to legacy, whatever the message says", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/old2/proof`, () =>
+        HttpResponse.json(
+          { statusCode: 409, message: "Registro anterior", reason: "legacy_record" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    await expect(getProofPackage("old2")).resolves.toEqual({ status: "legacy" });
+  });
+
+  it("maps a 409 with any other reason to unavailable, even if the message mentions dtr-1", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/pending2/proof`, () =>
+        HttpResponse.json(
+          { statusCode: 409, message: "dtr-1 note", reason: "not_anchored" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    await expect(getProofPackage("pending2")).resolves.toEqual({ status: "unavailable" });
+  });
+
+  it("maps any other 409 to unavailable", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/pending/proof`, () =>
+        HttpResponse.json(
+          { statusCode: 409, message: "This record is not yet anchored, so it has no proof package" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    await expect(getProofPackage("pending")).resolves.toEqual({ status: "unavailable" });
+  });
+
+  it("throws an ApiError on any other non-2xx", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/rec-1/proof`, () =>
+        HttpResponse.json({ message: "boom" }, { status: 500 }),
+      ),
+    );
+
+    const error = await getProofPackage("rec-1").catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).status).toBe(500);
+  });
+
+  it("gives up after PROOF_FETCH_TIMEOUT_MS with a TimeoutError instead of hanging", async () => {
+    const controller = new AbortController();
+    const timeoutSpy = vi.spyOn(AbortSignal, "timeout").mockReturnValue(controller.signal);
+    // A server that never answers: the request only settles when its signal aborts.
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(
+      (_input, init) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+        }),
+    );
+
+    try {
+      const pending = getProofPackage("slow").catch((caught: unknown) => caught);
+      controller.abort(new DOMException("The operation timed out.", "TimeoutError"));
+      const error = await pending;
+
+      expect(timeoutSpy).toHaveBeenCalledWith(PROOF_FETCH_TIMEOUT_MS);
+      expect(PROOF_FETCH_TIMEOUT_MS).toBe(10_000);
+      expect(error).toBeInstanceOf(ProofFetchTimeoutError);
+      expect((error as Error).name).toBe("TimeoutError");
+    } finally {
+      timeoutSpy.mockRestore();
+      fetchSpy.mockRestore();
+    }
+  });
+
+  it("builds the download URL with download=1", () => {
+    expect(proofPackageDownloadUrl("rec 1")).toBe(
+      `${BASE_URL}/public/verify/rec%201/proof?download=1`,
+    );
   });
 });

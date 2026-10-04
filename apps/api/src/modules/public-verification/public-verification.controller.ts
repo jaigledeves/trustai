@@ -120,7 +120,13 @@ export class PublicVerificationController {
       throw new NotFoundException("Trust record not found");
     }
     if (result.status !== "ok") {
-      throw new ConflictException(PROOF_REFUSALS[result.status]);
+      // `reason` is machine-readable so clients never have to parse `message`.
+      throw new ConflictException({
+        statusCode: 409,
+        error: "Conflict",
+        message: PROOF_REFUSALS[result.status],
+        reason: result.status,
+      });
     }
     if (download === "1") {
       // trustRecordId comes from the stored row (a UUID), not from the raw path parameter.
