@@ -342,6 +342,8 @@
   tbody td:first-child code { font-weight: 700; }
   td .em { color: var(--fg); font-weight: 600; }
   td .mut { color: var(--muted); }
+  table.tight { font-size: 0.76rem; margin-top: 14px; }
+  table.tight th, table.tight td { padding: 6px 12px; }
 
   /* ---- Tags ---- */
   .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
@@ -400,7 +402,7 @@
         </div>
         <span class="kicker"><span class="dot"></span>Piloto en vivo · Base Sepolia</span>
         <h1 style="max-width:16ch">Confianza <span class="accent">verificable</span> para documentos digitales</h1>
-        <p class="lead">Cada archivo recibe una huella única e imposible de falsificar, anclada en blockchain. Cualquiera puede comprobar que es el original — sin confiar en nadie.</p>
+        <p class="lead">Cada archivo recibe una huella única anclada en blockchain: cualquier modificación posterior es detectable criptográficamente. Cualquiera puede comprobarlo sin depender de Ancrux.</p>
       </div>
 
       <div class="hashwrap" style="margin-top:0;max-width:none">
@@ -415,7 +417,7 @@
         <div class="hashrow" id="motif-hash">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg></span>
           <div class="txt">
-            <div class="label">Huella digital · SHA-256</div>
+            <div class="label">Huella anclada · anchorHash (SHA-256)</div>
             <div class="val" id="motif-val">…</div>
           </div>
           <span class="status" id="motif-status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg>Calculando</span>
@@ -428,7 +430,7 @@
   <section class="slide dense">
     <span class="kicker">El problema</span>
     <h2>Un documento digital se puede <span class="accent">alterar sin dejar rastro</span></h2>
-    <p class="head-lead">Copiar o modificar un archivo es trivial, y una copia manipulada se ve <b>igual</b> que el original. Para probar que un documento es auténtico e íntegro, hoy dependes de <b>confiar en la plataforma</b> que lo emitió — y si esa plataforma miente o desaparece, la prueba se cae.</p>
+    <p class="head-lead">Copiar o modificar un archivo es trivial, y una copia manipulada se ve <b>igual</b> que el original. Para probar que un documento no fue modificado, hoy dependes de <b>confiar en la plataforma</b> que lo emitió — y si esa plataforma miente o desaparece, la prueba se cae.</p>
 
     <div class="flowline" style="margin-top:18px">
       <div class="fstep">
@@ -443,12 +445,12 @@
       <span class="arrow">→</span>
       <div class="fstep">
         <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V8"/><circle cx="12" cy="5" r="3"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
-        <div class="ft">Registro público</div><div class="fs">inalterable · blockchain</div>
+        <div class="ft">Registro público</div><div class="fs">anclado · blockchain pública</div>
       </div>
       <span class="arrow">→</span>
       <div class="fstep ok">
         <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-        <div class="ft">Verificable</div><div class="fs">por cualquiera, sin confiar</div>
+        <div class="ft">Verificable</div><div class="fs">por cualquiera, sin depender del emisor</div>
       </div>
     </div>
 
@@ -464,13 +466,13 @@
       <div class="card good">
         <div class="ct">Con Ancrux</div>
         <ul class="clist ok">
-          <li>Cada documento recibe una <b>huella digital única</b>, imposible de falsificar</li>
-          <li>Esa huella queda en un <b>registro público inalterable</b> (blockchain)</li>
-          <li>Cualquiera comprueba la integridad <b>sin confiar en nadie</b></li>
+          <li>Cada documento recibe una <b>huella digital única</b>: cualquier cambio posterior es detectable</li>
+          <li>Esa huella queda en un <b>registro público con fecha de bloque</b> (blockchain)</li>
+          <li>Cualquiera comprueba la integridad <b>sin depender de Ancrux</b></li>
         </ul>
       </div>
     </div>
-    <div class="callout"><b>La prueba es matemática, no reputacional:</b> cambias un solo carácter y la huella cambia por completo. Y el registro sobrevive aunque la empresa deje de existir.</div>
+    <div class="callout"><b>La prueba es matemática, no reputacional:</b> cambias un solo carácter y la huella cambia por completo. Y con el paquete de prueba descargado, la verificación no depende de que Ancrux siga en línea.</div>
   </section>
 
   <!-- SLIDE 2 — CONCEPTO DTR -->
@@ -479,10 +481,10 @@
       <div class="stack">
         <span class="kicker">El concepto</span>
         <h2>¿Qué es un <span class="accent">Registro Digital de Confianza</span>?</h2>
-        <p class="lead">Un DTR (Registro Digital de Confianza) es la partida de nacimiento de tu documento: prueba <b class="green">qué</b> se certificó, <b class="green">cuándo</b> y que <b class="green">no cambió ni un carácter</b> desde entonces.</p>
+        <p class="lead">Un DTR (Registro Digital de Confianza) es la partida de nacimiento de tu documento: prueba <b class="green">qué</b> se certificó, que existía <b class="green">como muy tarde en la fecha del bloque</b> y que <b class="green">no cambió ni un carácter</b> desde entonces.</p>
         <div class="stack" style="gap:12px;margin-top:6px">
           <div class="fragment step"><span class="num">1</span><div><div class="st">No guarda tu archivo</div><div class="ss">Solo su huella. El contenido nunca se hace público.</div></div></div>
-          <div class="fragment step"><span class="num">2</span><div><div class="st">Es inalterable</div><div class="ss">Vive en blockchain: nadie —ni nosotros— puede editarlo.</div></div></div>
+          <div class="fragment step"><span class="num">2</span><div><div class="st">Cualquier cambio es detectable</div><div class="ss">El anclaje vive en un contrato sin owner: ni Ancrux puede modificarlo.</div></div></div>
           <div class="fragment step"><span class="num">3</span><div><div class="st">Es público y verificable</div><div class="ss">Cualquiera comprueba su validez con un enlace o un QR.</div></div></div>
         </div>
       </div>
@@ -492,8 +494,8 @@
           <span class="badge-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Certificado</span>
         </div>
         <div class="field"><div class="k">Documento</div><div class="v">contrato-marco-v3.pdf</div></div>
-        <div class="field"><div class="k">Huella SHA-256</div><div class="v mono">e3b0c44298fc1c149afbf4c8996fb924…b855</div></div>
-        <div class="field"><div class="k">Anclado</div><div class="v">10 ago 2026 · 14:32 UTC</div></div>
+        <div class="field"><div class="k">Huella anclada · anchorHash</div><div class="v mono">9f8c2d775d90c88594687f16ba2652fa…e0c9</div></div>
+        <div class="field"><div class="k">Fecha del bloque</div><div class="v">10 ago 2026 · 14:32 UTC</div></div>
         <div class="field"><div class="k">Red / Anclaje</div><div class="v">Base Sepolia · tx 0x7a3f…e21c</div></div>
       </div>
     </div>
@@ -520,7 +522,7 @@
       </div>
       <div class="fstep">
         <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg></span>
-        <div class="ft">SHA-256</div><div class="fs">determinista</div>
+        <div class="ft">coreHash + anchorHash</div><div class="fs">SHA-256 determinista</div>
       </div>
       <div class="fstep hl">
         <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V8"/><circle cx="12" cy="5" r="3"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
@@ -548,7 +550,7 @@
       </div>
       <div class="fstep">
         <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V8"/><circle cx="12" cy="5" r="3"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg></span>
-        <div class="ft">isAnchored()</div><div class="fs">consulta on-chain</div>
+        <div class="ft">isAnchored()</div><div class="fs">RPC público desde el navegador</div>
       </div>
       <div class="fstep ok">
         <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3a9 9 0 1 0 9 9"/></svg></span>
@@ -600,7 +602,7 @@
       </div>
     </div>
 
-    <div class="callout green" style="margin-top:22px"><b>Ninguna capa necesita tu confianza:</b> el resultado se comprueba por matemática, no por reputación. Y como todo entra por puertos, el dominio se testea <b>100 % aislado</b> — cada adaptador se sustituye por un doble.</div>
+    <div class="callout green" style="margin-top:22px"><b>Verificar no exige confiar en Ancrux:</b> el resultado se comprueba con criptografía y una lectura pública del contrato, no por reputación. Y como todo entra por puertos, el dominio se testea <b>100 % aislado</b> — cada adaptador se sustituye por un doble.</div>
   </section>
 
   <!-- SLIDE — DTR-CORE -->
@@ -615,8 +617,8 @@
           <p class="desc">Serialización determinista (RFC 8785): claves ordenadas, números normalizados, campos nulos excluidos. El mismo DTR produce la misma cadena en cualquier entorno.</p>
         </div>
         <div class="card">
-          <div class="ctitle mono">computeCanonicalHash(record)</div>
-          <p class="desc">SHA-256 sobre la forma canónica → hex de 64 caracteres. Idempotente: mismo DTR, mismo hash, siempre.</p>
+          <div class="ctitle mono">computeDtr2Hashes(record)</div>
+          <p class="desc">SHA-256 sobre la forma canónica → <code>coreHash</code>, <code>enrichmentHash</code> y <code>anchorHash</code> (hex de 64). Idempotente: mismo DTR, mismos hashes.</p>
         </div>
         <div class="card">
           <div class="ctitle mono">verifyAssetAgainstRecord(record, sha256)</div>
@@ -624,29 +626,26 @@
         </div>
       </div>
       <div>
-        <div class="flabel" style="margin-top:0">Esquema DTR (Zod · dtr-1)</div>
-        <pre><code><span class="k">const</span> TrustRecordV1Schema = z.object({
-  schemaVersion: z.literal(<span class="s">"dtr-1"</span>),
-  asset: z.object({
-    sha256:    z.string(),   <span class="c">// hex 64</span>
-    mimeType:  z.string(),
-    sizeBytes: z.number().int().positive(),
-    filename:  z.string().optional(),
-  }),
-  analysis: z.object({
-    summary:        z.string(),
-    classification: z.enum(TAXONOMIA), <span class="c">// contrato, factura…</span>
-    language:       z.string(),        <span class="c">// ISO 639-1</span>
-  }),
-  provenance: z.object({
-    provider:     z.string(),
-    model:        z.string(),
-    modelVersion: z.string(),
-    analyzedAt:   z.string(),
-  }),
+        <div class="flabel" style="margin-top:0">Esquema DTR (Zod · dtr-2)</div>
+        <pre><code><span class="k">const</span> TrustRecordV2Schema = z.object({
+  schemaVersion: z.literal(<span class="s">"dtr-2"</span>),
   issuedAt: z.string(),
-});</code></pre>
-        <div class="callout green"><b>29 pruebas unitarias</b> — canonicalización, hashing, verificación e idempotencia, incluidos casos límite: orden de claves, nulos y normalización numérica.</div>
+  core: z.object({            <span class="c">// derivable del archivo</span>
+    asset: z.object({
+      sha256:    z.string(),   <span class="c">// hex 64</span>
+      mimeType:  z.string(),
+      sizeBytes: z.number().int().positive(),
+    }),
+  }),
+  enrichment: z.object({      <span class="c">// metadatos + IA</span>
+    asset:    z.object({ filename: z.string().optional() }),
+    analysis: z.object({ summary, classification, language }),
+    provenance: z.object({ provider, model, modelVersion,
+                           promptVersion, taxonomyVersion, analyzedAt }),
+  }),
+});
+<span class="c">// anchorHash = sha256(JCS({schemaVersion, issuedAt, coreHash, enrichmentHash}))</span></code></pre>
+        <div class="callout green"><b>124 pruebas unitarias</b> — canonicalización, dtr-1/dtr-2, paquete de prueba y verificación independiente.</div>
       </div>
     </div>
   </section>
@@ -699,7 +698,7 @@
         <span class="k">return</span> anchoredAt[hash] != 0;
     }
 }</code></pre>
-        <p class="desc" style="margin-top:8px">Auditable en <code>sepolia.basescan.org</code></p>
+        <p class="desc" style="margin-top:8px">Transacciones visibles en <code>sepolia.basescan.org</code></p>
       </div>
     </div>
   </section>
@@ -770,7 +769,7 @@ provenance: {
         <div class="tier"><span class="tk">Railway</span><span class="mut" style="font-size:.85rem">API NestJS + PostgreSQL</span></div>
         <div class="tier"><span class="tk">Cloudflare</span><span class="mut" style="font-size:.85rem">R2 · activos cifrados en reposo</span></div>
         <div class="tier core"><span class="tk">Base</span><span class="mut" style="font-size:.85rem">Sepolia · contrato AnchorRegistry</span></div>
-        <div class="callout">Monorepo pnpm workspaces:<br><code>packages/dtr-core</code> · <code>apps/api</code> · <code>apps/web</code> · <code>smart-contracts</code></div>
+        <div class="callout">Monorepo pnpm workspaces:<br><code>packages/dtr-core</code> · <code>packages/verify-cli</code> · <code>packages/utils</code><br><code>apps/api</code> · <code>apps/web</code> · <code>smart-contracts</code></div>
       </div>
     </div>
   </section>
@@ -781,9 +780,9 @@ provenance: {
     <h2>Pruebas y <span class="accent">CI</span></h2>
     <div class="grid3">
       <div class="card center">
-        <div class="statbig">592</div>
-        <div class="sl">Pruebas unitarias</div>
-        <div class="ssl">dtr-core 29 · utils 11 · API 221 · Web 331</div>
+        <div class="statbig">878</div>
+        <div class="sl">Pruebas automatizadas</div>
+        <div class="ssl">dtr-core 124 · utils 11 · verify-cli 38 · API 326 · Web 379</div>
       </div>
       <div class="card center">
         <div class="statbig">E2E</div>
@@ -807,10 +806,10 @@ provenance: {
     <span class="kicker">Decisiones de arquitectura</span>
     <h2>Architecture Decision Records</h2>
     <p class="head-lead">Cada decisión relevante quedó registrada como ADR en <code>docs/adr/</code> con su contexto, alternativas y consecuencias.</p>
-    <table>
+    <table class="tight">
       <thead><tr><th style="width:64px">ADR</th><th>Decisión</th><th>Alternativa descartada</th></tr></thead>
       <tbody>
-        <tr><td><code>001</code></td><td><span class="em">Anclar la huella canónica del DTR on-chain</span></td><td class="mut">Guardar el JSON completo en la cadena (caro e inmutable de forma indeseable)</td></tr>
+        <tr><td><code>001</code></td><td><span class="em">Anclar la huella canónica del DTR on-chain</span> <span class="mut">(supersedida por ADR-015)</span></td><td class="mut">Guardar el JSON completo en la cadena (caro e inmutable de forma indeseable)</td></tr>
         <tr><td><code>002</code></td><td><span class="em">Stack full-TypeScript en monorepo pnpm</span></td><td class="mut">Backend Python / Go (ecosistemas separados, fricción)</td></tr>
         <tr><td><code>003</code></td><td><span class="em">Contrato mínimo sin owner ni lógica de negocio</span></td><td class="mut">NFT ERC-721 (overhead y más superficie de ataque)</td></tr>
         <tr><td><code>004</code></td><td><span class="em">Adaptador de IA dual con stub de primera clase</span></td><td class="mut">Mock solo en tests (no extensible)</td></tr>
@@ -822,6 +821,10 @@ provenance: {
         <tr><td><code>010</code></td><td><span class="em">Verbo canónico on-chain: «anclar» sobre «registrar»</span></td><td class="mut">«registrar» (choca con «Registro Digital de Confianza» y con «registrarse»)</td></tr>
         <tr><td><code>011</code></td><td><span class="em">Theming con cookie + Server Component (SSR sin FOUC)</span></td><td class="mut">Librería <code>next-themes</code> (flash de tema en SSR, estado en cliente)</td></tr>
         <tr><td><code>012</code></td><td><span class="em">Guardia global de rate limiting (<code>APP_GUARD</code>) con tracker por usuario</span></td><td class="mut">Throttling solo por IP (comparte balde entre usuarios tras el mismo NAT)</td></tr>
+        <tr><td><code>013</code></td><td><span class="em">Cluster de autenticación compartido en el header público, sin variantes por superficie</span></td><td class="mut">Clusters inline por superficie o componente con slots/variantes (divergen con el tiempo)</td></tr>
+        <tr><td><code>014</code></td><td><span class="em">Clasificador de severidad de veredicto compartido y token <code>--warning</code></span></td><td class="mut">Duplicar la regla en cada componente (riesgo de que diverjan)</td></tr>
+        <tr><td><code>015</code></td><td><span class="em">dtr-2: núcleo y enriquecimiento separados</span></td><td class="mut">Anclar solo <code>coreHash</code> (el análisis IA queda sin proteger) / dos anclajes (doble gas)</td></tr>
+        <tr><td><code>016</code></td><td><span class="em">Paquete de prueba público <code>ancrux-proof-1</code></span></td><td class="mut">Publicar el DTR completo (expone el análisis IA) / paquete firmado por Ancrux (exige confiar en el emisor)</td></tr>
       </tbody>
     </table>
   </section>
@@ -832,8 +835,8 @@ provenance: {
     <h2><span class="accent">Resultados</span></h2>
     <div class="grid3">
       <div class="card center"><div class="statbig">MVP</div><div class="sl">Completo y en producción</div><div class="ssl">Flujo end-to-end contra Base Sepolia real</div></div>
-      <div class="card center"><div class="statbig">592</div><div class="sl">Pruebas automáticas</div><div class="ssl">Unitarias + E2E + contrato Foundry</div></div>
-      <div class="card center"><div class="statbig">12</div><div class="sl">ADRs documentados</div><div class="ssl">Con alternativas y consecuencias</div></div>
+      <div class="card center"><div class="statbig">878</div><div class="sl">Pruebas automáticas</div><div class="ssl">Unitarias de 5 paquetes; E2E y Foundry aparte</div></div>
+      <div class="card center"><div class="statbig">16</div><div class="sl">ADRs documentados</div><div class="ssl">Con alternativas y consecuencias</div></div>
     </div>
     <div class="grid2" style="margin-top:16px">
       <div class="card good">
@@ -844,12 +847,13 @@ provenance: {
           <li>Análisis IA (gpt-5.4-nano) → DTR estructurado</li>
           <li>Anclaje on-chain → estado CERTIFIED</li>
           <li>Verificación pública sin cuenta (UC-02)</li>
+          <li>Paquete de prueba ancrux-proof-1 y verificación independiente (navegador y CLI)</li>
         </ul>
       </div>
       <div class="card">
         <div class="ct">Documentación viva</div>
         <ul class="clist ok">
-          <li>TDD completo en <code>docs/</code> (13 secciones)</li>
+          <li>Documentación en <code>docs/</code> (15 secciones)</li>
           <li>Diagramas C4 (context · container · component)</li>
           <li>Endpoints de API documentados</li>
           <li>Modelo de seguridad con diagramas de secuencia</li>
@@ -864,14 +868,15 @@ provenance: {
       <div class="stack">
         <span class="kicker"><span class="dot"></span>Demo en vivo</span>
         <h2>Escanea y <span class="green">compruébalo</span> tú mismo</h2>
-        <p class="lead">No hace falta creer en la diapositiva. Abre la verificación pública, sube el documento y observa cómo la huella coincide con la registrada en blockchain.</p>
+        <p class="lead">No hace falta creer en la diapositiva. Abre la verificación pública, sube el documento y comprueba en tu navegador cada paso, hasta la lectura del contrato.</p>
         <div class="steps" style="margin-top:8px">
           <div class="fragment step"><span class="num">1</span><div><div class="st">Escanea el QR</div><div class="ss">Abre la página de verificación de Ancrux.</div></div></div>
           <div class="fragment step"><span class="num">2</span><div><div class="st">Vuelve a calcular la huella</div><div class="ss">Tu navegador recalcula el SHA-256 localmente.</div></div></div>
-          <div class="fragment step"><span class="num">3</span><div><div class="st">Compara con la cadena</div><div class="ss"><span class="green">Coinciden → auténtico.</span> Cambia un byte → falla.</div></div></div>
+          <div class="fragment step"><span class="num">3</span><div><div class="st">Consulta el contrato</div><div class="ss"><span class="green">Anclado y coincidente → íntegro.</span> Cambia un byte → falla.</div></div></div>
         </div>
       </div>
       <div class="stack" style="align-items:center">
+        <!-- TODO: apuntar a un DTR dtr-2 cuando se certifique el nuevo ejemplo -->
         <div class="qrcard fragment">
           <svg class="qr" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 41" shape-rendering="crispEdges"><path fill="none" d="M0 0h41v41H0z"/><path stroke="currentColor" d="M2 2.5h7M11 2.5h2M16 2.5h1M18 2.5h1M23 2.5h4M28 2.5h1M32 2.5h7M2 3.5h1M8 3.5h1M13 3.5h3M17 3.5h1M19 3.5h2M22 3.5h2M27 3.5h4M32 3.5h1M38 3.5h1M2 4.5h1M4 4.5h3M8 4.5h1M10 4.5h2M13 4.5h1M15 4.5h2M18 4.5h1M23 4.5h1M26 4.5h1M32 4.5h1M34 4.5h3M38 4.5h1M2 5.5h1M4 5.5h3M8 5.5h1M10 5.5h2M19 5.5h1M25 5.5h1M27 5.5h4M32 5.5h1M34 5.5h3M38 5.5h1M2 6.5h1M4 6.5h3M8 6.5h1M10 6.5h2M14 6.5h1M17 6.5h7M25 6.5h1M30 6.5h1M32 6.5h1M34 6.5h3M38 6.5h1M2 7.5h1M8 7.5h1M10 7.5h3M16 7.5h4M22 7.5h3M26 7.5h2M29 7.5h1M32 7.5h1M38 7.5h1M2 8.5h7M10 8.5h1M12 8.5h1M14 8.5h1M16 8.5h1M18 8.5h1M20 8.5h1M22 8.5h1M24 8.5h1M26 8.5h1M28 8.5h1M30 8.5h1M32 8.5h7M10 9.5h2M13 9.5h2M17 9.5h1M19 9.5h5M26 9.5h1M30 9.5h1M2 10.5h1M4 10.5h5M14 10.5h5M21 10.5h1M27 10.5h2M30 10.5h1M32 10.5h5M2 11.5h1M4 11.5h2M7 11.5h1M9 11.5h2M12 11.5h1M14 11.5h4M20 11.5h1M22 11.5h1M24 11.5h3M35 11.5h1M37 11.5h1M6 12.5h3M11 12.5h4M16 12.5h3M21 12.5h1M24 12.5h1M28 12.5h3M32 12.5h1M34 12.5h2M37 12.5h2M3 13.5h1M9 13.5h1M16 13.5h2M21 13.5h4M26 13.5h1M28 13.5h5M35 13.5h1M38 13.5h1M3 14.5h2M7 14.5h2M10 14.5h1M14 14.5h2M17 14.5h1M19 14.5h3M24 14.5h2M27 14.5h2M31 14.5h2M34 14.5h1M36 14.5h3M2 15.5h4M7 15.5h1M9 15.5h2M14 15.5h3M21 15.5h1M24 15.5h2M28 15.5h1M33 15.5h1M37 15.5h1M4 16.5h3M8 16.5h6M17 16.5h1M20 16.5h1M22 16.5h2M28 16.5h2M31 16.5h1M33 16.5h3M38 16.5h1M2 17.5h2M5 17.5h1M10 17.5h3M15 17.5h2M18 17.5h1M23 17.5h2M26 17.5h1M28 17.5h2M31 17.5h4M3 18.5h1M5 18.5h5M11 18.5h3M17 18.5h1M20 18.5h4M27 18.5h1M31 18.5h4M36 18.5h1M38 18.5h1M2 19.5h5M10 19.5h1M12 19.5h1M17 19.5h2M23 19.5h1M25 19.5h2M28 19.5h1M35 19.5h1M37 19.5h1M2 20.5h1M4 20.5h1M6 20.5h1M8 20.5h1M11 20.5h1M14 20.5h3M19 20.5h2M22 20.5h1M24 20.5h1M27 20.5h1M29 20.5h1M31 20.5h1M33 20.5h1M37 20.5h2M4 21.5h3M9 21.5h2M13 21.5h2M16 21.5h1M18 21.5h1M23 21.5h1M30 21.5h1M34 21.5h2M38 21.5h1M4 22.5h6M11 22.5h5M19 22.5h1M22 22.5h1M24 22.5h1M26 22.5h7M34 22.5h3M2 23.5h3M6 23.5h1M9 23.5h3M13 23.5h2M16 23.5h1M18 23.5h6M25 23.5h1M30 23.5h1M35 23.5h1M37 23.5h1M2 24.5h1M6 24.5h1M8 24.5h2M13 24.5h3M17 24.5h1M19 24.5h1M23 24.5h1M26 24.5h2M29 24.5h2M32 24.5h4M38 24.5h1M2 25.5h1M4 25.5h4M10 25.5h1M12 25.5h1M19 25.5h5M25 25.5h1M28 25.5h7M5 26.5h6M12 26.5h4M17 26.5h2M23 26.5h1M25 26.5h1M27 26.5h3M32 26.5h3M36 26.5h1M38 26.5h1M2 27.5h2M5 27.5h1M7 27.5h1M11 27.5h1M13 27.5h1M16 27.5h2M20 27.5h1M22 27.5h2M25 27.5h2M30 27.5h2M36 27.5h1M2 28.5h1M5 28.5h2M8 28.5h2M12 28.5h1M14 28.5h5M21 28.5h1M23 28.5h2M26 28.5h2M29 28.5h2M32 28.5h2M37 28.5h2M2 29.5h1M4 29.5h2M7 29.5h1M10 29.5h1M13 29.5h1M17 29.5h1M20 29.5h5M26 29.5h1M28 29.5h4M33 29.5h1M35 29.5h1M37 29.5h2M2 30.5h1M4 30.5h3M8 30.5h1M10 30.5h1M13 30.5h5M19 30.5h3M24 30.5h1M26 30.5h9M36 30.5h3M10 31.5h1M14 31.5h3M18 31.5h1M21 31.5h2M24 31.5h3M30 31.5h1M34 31.5h2M37 31.5h1M2 32.5h7M14 32.5h1M16 32.5h2M20 32.5h1M22 32.5h1M24 32.5h1M26 32.5h1M28 32.5h1M30 32.5h1M32 32.5h1M34 32.5h1M36 32.5h1M38 32.5h1M2 33.5h1M8 33.5h1M10 33.5h7M18 33.5h1M30 33.5h1M34 33.5h2M37 33.5h2M2 34.5h1M4 34.5h3M8 34.5h1M10 34.5h3M15 34.5h1M17 34.5h1M20 34.5h6M27 34.5h8M36 34.5h2M2 35.5h1M4 35.5h3M8 35.5h1M10 35.5h1M12 35.5h3M16 35.5h3M23 35.5h1M25 35.5h2M29 35.5h4M34 35.5h1M38 35.5h1M2 36.5h1M4 36.5h3M8 36.5h1M10 36.5h2M13 36.5h1M15 36.5h1M19 36.5h1M22 36.5h1M26 36.5h1M28 36.5h2M31 36.5h1M35 36.5h1M37 36.5h2M2 37.5h1M8 37.5h1M11 37.5h3M18 37.5h1M20 37.5h1M23 37.5h1M28 37.5h1M30 37.5h1M32 37.5h1M34 37.5h1M38 37.5h1M2 38.5h7M10 38.5h1M12 38.5h4M18 38.5h3M24 38.5h1M26 38.5h4M31 38.5h1M34 38.5h5"/></svg>
           <div class="cap">Verificación pública de Ancrux</div>
@@ -879,6 +884,38 @@ provenance: {
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- SLIDE — VERIFICACIÓN INDEPENDIENTE -->
+  <section class="slide dense">
+    <span class="kicker">Sin depender de Ancrux</span>
+    <h2>Verificación <span class="accent">independiente</span></h2>
+    <p class="head-lead">Con el archivo y el paquete de prueba, cualquiera comprueba el registro sin depender de Ancrux.</p>
+
+    <div class="flabel">Siete pasos · el mismo orquestador de <code>dtr-core</code> en navegador y CLI</div>
+    <div class="lifecycle">
+      <div class="chip"><div class="cn">1 · Archivo</div><div class="cs">SHA-256 local, es un PDF</div></div>
+      <div class="chip"><div class="cn">2 · Prueba</div><div class="cs">ancrux-proof-1 válido</div></div>
+      <div class="chip"><div class="cn">3 · coreHash</div><div class="cs">recalculado del archivo</div></div>
+      <div class="chip"><div class="cn">4 · anchorHash</div><div class="cs">recalculado de la prueba</div></div>
+      <div class="chip"><div class="cn">5 · Red</div><div class="cs">el RPC sirve la cadena</div></div>
+      <div class="chip"><div class="cn">6 · Contrato</div><div class="cs">AnchorRegistry conocido</div></div>
+      <div class="chip s4"><div class="cn">7 · Anclaje</div><div class="cs">isAnchored · anchoredAt</div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card blue">
+        <div class="ct">En el navegador</div>
+        <pre><code>/verify/&lt;id&gt; → elegir archivo</code></pre>
+        <p class="desc" style="margin-top:10px">Tu navegador recalcula las huellas y lee el contrato con un RPC público. Sin cartera, sin clave, sin gas.</p>
+      </div>
+      <div class="card blue">
+        <div class="ct">En la terminal</div>
+        <pre><code>ancrux-verify contrato.pdf --proof prueba.json</code></pre>
+        <p class="desc" style="margin-top:10px">Códigos de salida: <code>0</code> verificado · <code>1</code> no verificado · <code>2</code> error de uso · <code>3</code> no verificable de forma independiente.</p>
+      </div>
+    </div>
+    <div class="callout">Los registros recientes son <b>dtr-2</b> y admiten esta verificación. Los registros heredados <b>dtr-1</b> los verifica el servidor de Ancrux.</div>
   </section>
 
   <!-- SLIDE — PRÓXIMOS PASOS -->
@@ -894,7 +931,7 @@ provenance: {
       </div>
       <div>
         <div class="flabel" style="margin-top:0">Plataforma y negocio</div>
-        <div class="card"><div class="ctitle">SDK / API pública</div><p class="desc">Integración desde sistemas externos: certificar activos sin usar la interfaz web.</p></div>
+        <div class="card"><div class="ctitle">API de certificación</div><p class="desc">Ya hay paquete de prueba público y CLI de verificación; falta certificar activos sin la interfaz web.</p></div>
         <div class="card"><div class="ctitle">Modelo freemium</div><p class="desc">N certificaciones gratis al mes. Planes para equipos y empresas con SLA.</p></div>
         <div class="card"><div class="ctitle">Certificadores especializados</div><p class="desc">Marketplace de revisores IA por dominio: legal, financiero, médico.</p></div>
       </div>
@@ -906,10 +943,10 @@ provenance: {
     <span class="kicker">Cierre</span>
     <h2><span class="accent">Conclusiones</span></h2>
     <div class="concl">
-      <div class="card blue fragment"><p><b>IA + blockchain resuelven el problema de la confianza</b> sin exigir que quien verifica confíe en quien emite.</p></div>
+      <div class="card blue fragment"><p><b>Separar el núcleo verificable del análisis IA</b> permite comprobar un registro sin confiar en quien lo emite.</p></div>
       <div class="card fragment"><p><b>La arquitectura hexagonal</b> permitió desarrollar y probar el dominio aislado por completo de la infraestructura, sin acoplarlo a ningún framework ni servicio externo.</p></div>
       <div class="card fragment"><p><b>dtr-core como paquete puro</b> garantiza que la canonicalización y la verificación sean reproducibles por cualquier implementación futura, en cualquier lenguaje.</p></div>
-      <div class="card good fragment"><p><b>El MVP está en producción</b>, con flujo completo probado end-to-end contra Base Sepolia real y 592 pruebas automáticas pasando en CI.</p></div>
+      <div class="card good fragment"><p><b>El MVP está en producción</b>, con flujo completo probado end-to-end contra Base Sepolia real y 878 pruebas automáticas pasando en CI.</p></div>
     </div>
   </section>
 
@@ -932,7 +969,7 @@ provenance: {
 <div class="chrome">
   <div class="nav-hint">Usa <kbd>←</kbd> <kbd>→</kbd> o <kbd>espacio</kbd></div>
   <div class="dots" id="dots"></div>
-  <div class="counter" id="counter">01 / 16</div>
+  <div class="counter" id="counter">01 / 17</div>
 </div>
 
 <script>
@@ -1008,7 +1045,7 @@ provenance: {
 
   // ---- Hash motif animation (slide 1) ----
   var HEX = '0123456789abcdef';
-  var TARGET = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+  var TARGET = '9f8c2d775d90c88594687f16ba2652fae2ffc184d5f77881ca01e14331eee0c9';
   var motifVal = document.getElementById('motif-val');
   var motifRow = document.getElementById('motif-hash');
   var motifStatus = document.getElementById('motif-status');

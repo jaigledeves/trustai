@@ -149,7 +149,7 @@ pnpm --filter @trustai/web dev
 ### Pruebas
 
 ```bash
-pnpm -r test          # 592 pruebas unitarias (dtr-core 29 + api 221 + web 331 + utils 11)
+pnpm -r test          # 878 pruebas automatizadas (dtr-core 124 + utils 11 + verify-cli 38 + api 326 + web 379)
 pnpm -r typecheck
 ```
 
