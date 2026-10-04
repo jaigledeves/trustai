@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { buildTrustRecordCandidate } from "../src/build.js";
 import { canonicalize } from "../src/canonicalize.js";
+import { computeAnchoredHash } from "../src/dtr2-hash.js";
 import { computeCanonicalHash } from "../src/hash.js";
-import { parseTrustRecord, type TrustRecordV1 } from "../src/schema.js";
+import { parseAnyTrustRecord, parseTrustRecord, type TrustRecordV1 } from "../src/schema.js";
 
 /**
  * Characterization test (ADR-015, INV-22): dtr-1 records already anchored
@@ -64,6 +66,16 @@ describe("dtr-1 golden record (frozen)", () => {
     expect(parsed.ok).toBe(true);
     if (parsed.ok) {
       await expect(computeCanonicalHash(parsed.record)).resolves.toBe(GOLDEN_DTR1_HASH);
+    }
+  });
+
+  it("is reproduced from flat fields by the shared builder the API uses", async () => {
+    const { schemaVersion, asset, analysis, provenance, issuedAt } = GOLDEN_DTR1_RECORD;
+    const candidate = buildTrustRecordCandidate(schemaVersion, { asset, analysis, provenance, issuedAt });
+    const parsed = parseAnyTrustRecord(candidate);
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) {
+      await expect(computeAnchoredHash(parsed.record)).resolves.toBe(GOLDEN_DTR1_HASH);
     }
   });
 });

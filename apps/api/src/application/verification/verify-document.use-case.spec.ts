@@ -415,6 +415,46 @@ describe("VerifyDocumentUseCase", () => {
       expect(anchorPort.isAnchored).toHaveBeenCalledWith(reference);
     });
 
+    it("legacy dtr-1 rows with millisecond dates rebuild the hash pinned before dtr-2 existed", async () => {
+      // Same record as packages/dtr-core/test/golden-dtr1.test.ts. The literal
+      // hash was computed with the pre-dtr-2 code; it proves the column-to-record
+      // mapping and the Date-to-ISO conversion did not change (ADR-015 risks).
+      const GOLDEN_DTR1_HASH = "1ad1295bda2ed24252d48b4ae0da41e20eafa6f48a47a56d729b5dbba86b25ce";
+      const fileBytes = Buffer.from("test"); // SHA-256 9f86d081…0a08
+      trustRecordRepository = buildTrustRecordRepository({
+        findByIdWithAssetAndAnchor: vi.fn().mockResolvedValue(
+          buildFound({
+            trustRecord: buildTrustRecord({
+              schemaVersion: "dtr-1",
+              aiSummary:
+                "Contrato de arrendamiento de vivienda en Málaga; duración de 12 meses y fianza de 1.200 €.",
+              aiClassification: "contrato",
+              aiLanguage: "es",
+              aiProvider: "openai",
+              aiModel: "gpt-5.4-mini",
+              aiModelVersion: "2506",
+              aiPromptVersion: "analysis-v1.0",
+              aiTaxonomyVersion: "v1",
+              aiAnalyzedAt: new Date("2026-07-05T18:30:00.123Z"),
+            }),
+            issuedAt: "2026-07-05T18:31:02.456Z",
+            asset: buildDigitalAsset({
+              sha256: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              mimeType: "application/pdf",
+              sizeBytes: 48213,
+              filename: "contrato año.pdf",
+            }),
+          }),
+        ),
+      });
+      useCase = new VerifyDocumentUseCase(trustRecordRepository, anchorPort, verificationAttemptRepository);
+
+      const result = await useCase.verifyByUpload({ trustRecordId: "trust-record-1", fileBytes, channel: "URL" });
+
+      expect(result.verdict).toBe("VALID");
+      expect(anchorPort.isAnchored).toHaveBeenCalledWith(GOLDEN_DTR1_HASH);
+    });
+
     describe("dtr-2 record (ADR-015)", () => {
       beforeEach(() => {
         trustRecordRepository = buildTrustRecordRepository({
