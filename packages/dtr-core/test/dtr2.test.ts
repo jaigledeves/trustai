@@ -291,4 +291,20 @@ describe("verifyDtr2Proof — minimal proof without the AI text", () => {
     const result = await verifyDtr2Proof(proof, { ...fileFacts, sizeBytes: 0 });
     expect(result.status).toBe("invalid_proof");
   });
+
+  it.each([null, undefined, { ...fileFacts, sha256: 42 }])(
+    "returns invalid_proof instead of throwing for untrusted file input %#",
+    async (file) => {
+      const result = await verifyDtr2Proof(proof, file as never);
+      expect(result.status).toBe("invalid_proof");
+    },
+  );
+
+  it("prefixes and combines issues from both an invalid proof and invalid file facts", async () => {
+    const result = await verifyDtr2Proof({ ...proof, coreHash: "nope" }, { ...fileFacts, sizeBytes: 0 });
+    expect(result.status).toBe("invalid_proof");
+    if (result.status !== "invalid_proof") return;
+    expect(result.issues.some((issue) => issue.startsWith("proof."))).toBe(true);
+    expect(result.issues.some((issue) => issue.startsWith("file."))).toBe(true);
+  });
 });

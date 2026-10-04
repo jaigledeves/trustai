@@ -89,13 +89,15 @@ export type Dtr2ProofResult =
  *
  * @param proof  Untrusted `{ schemaVersion, issuedAt, coreHash, enrichmentHash }`.
  * @param file   Facts computed locally from the file: sha256, mimeType, sizeBytes.
+ *               Treated as untrusted: malformed input yields `invalid_proof`,
+ *               never a thrown error.
  */
 export async function verifyDtr2Proof(
   proof: unknown,
-  file: { sha256: string; mimeType: string; sizeBytes: number },
+  file: { sha256: string; mimeType: string; sizeBytes: number } | unknown,
 ): Promise<Dtr2ProofResult> {
   const parsedProof = Dtr2ProofSchema.safeParse(proof);
-  const parsedFile = Dtr2CoreAssetSchema.safeParse({ ...file, sha256: file.sha256.toLowerCase() });
+  const parsedFile = Dtr2CoreAssetSchema.safeParse(normalizeFileFacts(file));
   if (!parsedProof.success || !parsedFile.success) {
     const issues = [
       ...(parsedProof.success ? [] : formatIssues(parsedProof.error).map((i) => `proof.${i}`)),
@@ -114,4 +116,12 @@ export async function verifyDtr2Proof(
   }
 
   return { status: "core_verified", coreHash, anchorHash: await computeDtr2AnchorHash(parsedProof.data) };
+}
+
+/** Lowercases a string sha256 so uppercase hex from a caller still matches. */
+function normalizeFileFacts(file: unknown): unknown {
+  if (typeof file !== "object" || file === null) return file;
+  const facts = file as Record<string, unknown>;
+  const sha256 = facts["sha256"];
+  return typeof sha256 === "string" ? { ...facts, sha256: sha256.toLowerCase() } : facts;
 }

@@ -71,7 +71,7 @@ changes (AnchorRegistry is immutable), migrating anchored `dtr-1` records.
 
 | Task | Commit | Review tier | Notes |
 |---|---|---|---|
-| B2 | (pending commit) | pending | dtr-1 golden test pinned and passing on unchanged code (hash `1ad1295b...25ce`, cross-checked with Python hashlib). RED: `build.test.ts`/`dtr2.test.ts` failed to load `../src/build.js`, `../src/dtr2-hash.js`. GREEN: 79/79 tests, coverage 100%. dtr-2 golden: coreHash `4e0e672d...4802`, enrichmentHash `b19f7fe9...c514`, anchorHash `9f8c2d77...e0c9`. API typecheck and 288 tests pass. |
+| B2 | d9a87c6 (golden), de62d50, (follow-up) | medium, granted, approved; follow-up makes verifyDtr2Proof total over untrusted input | dtr-1 golden test pinned and passing on unchanged code (hash `1ad1295b...25ce`, cross-checked with Python hashlib). RED: `build.test.ts`/`dtr2.test.ts` failed to load `../src/build.js`, `../src/dtr2-hash.js`. GREEN: 79/79 tests, coverage 100%. dtr-2 golden: coreHash `4e0e672d...4802`, enrichmentHash `b19f7fe9...c514`, anchorHash `9f8c2d77...e0c9`. API typecheck and 288 tests pass. |
 
 ## Next step
 
