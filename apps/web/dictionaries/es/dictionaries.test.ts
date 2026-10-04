@@ -322,4 +322,66 @@ describe("dictionaries/es", () => {
       }
     });
   });
+
+  /**
+   * Honest-claims audit (roadmap D1): an anchor makes later changes
+   * cryptographically detectable and proves existence no later than the
+   * block timestamp. It is not permanent protection, not "impossible to
+   * forge" and not a qualified/certified time stamp.
+   */
+  describe("honest claims (roadmap D1)", () => {
+    const allLeaves = [
+      shellDictionary,
+      authDictionary,
+      certifyDictionary,
+      historyDictionary,
+      verifyDictionary,
+      landingDictionary,
+      glossaryDictionary,
+    ].flatMap((dictionary) => collectLeafValues(dictionary) as string[]);
+
+    it("no dictionary string makes an absolute or certified-time claim", () => {
+      const overclaims = [
+        /imposible de falsificar/i,
+        /falsificarlo/i,
+        /infalsificable/i,
+        /para siempre/i,
+        /permanente/i,
+        /irrefutable/i,
+        /no se puede alterar/i,
+        /hora certificada/i,
+        /desde cuándo existe/i,
+      ];
+
+      for (const leaf of allLeaves) {
+        for (const pattern of overclaims) {
+          expect(leaf).not.toMatch(pattern);
+        }
+      }
+    });
+
+    it("the landing states that later modifications are cryptographically detectable", () => {
+      expect(landingDictionary.pillars.items[1].description).toMatch(
+        /modificación posterior es detectable criptográficamente/i,
+      );
+    });
+
+    it("time claims are bounded by the block date, never a certified time", () => {
+      expect(verifyDictionary.legal.disclaimerSummary).toMatch(
+        /como muy tarde, en la fecha del bloque/i,
+      );
+      expect(landingDictionary.faq.items[3].answer).toMatch(
+        /como muy tarde, en la fecha del bloque/i,
+      );
+      expect(landingDictionary.faq.items[3].answer).toMatch(
+        /sello de tiempo cualificados/i,
+      );
+    });
+
+    it("the landing mentions independent verification in the browser and the CLI", () => {
+      const independent = landingDictionary.how.technicalDetail.items[5].desc;
+      expect(independent).toMatch(/navegador/i);
+      expect(independent).toMatch(/ancrux-verify/);
+    });
+  });
 });
