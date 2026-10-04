@@ -38,7 +38,10 @@ async function bootstrap(): Promise<void> {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle("Ancrux API")
-    .setDescription("Ancrux API — auth and health endpoints")
+    .setDescription(
+      "Ancrux API — authentication, asset upload, Digital Trust Record lifecycle " +
+        "(review, confirm, anchor) and public verification.",
+    )
     .setVersion(process.env["npm_package_version"] ?? "0.1.0")
     .addBearerAuth()
     .build();
