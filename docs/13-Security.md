@@ -1,8 +1,10 @@
-# 13 - Seguridad: Autenticación y modelo de sesión
+# 13 - Seguridad: autenticación, sesión y controles implementados
 
 **Estado:** draft
-**Alcance:** modelo de autenticación, sesión y protección de rutas del MVP.
-Otros aspectos de seguridad son transversales y viven en sus documentos:
+**Alcance:** modelo de autenticación, sesión y protección de rutas del MVP
+(§1-§6), y controles ya implementados de gestión de claves, subida de
+archivos, aislamiento entre organizaciones, límites de peticiones e
+integridad de la verificación (§7-§11). Otros aspectos de seguridad son transversales y viven en sus documentos:
 requisitos no funcionales en [06-Requirements.md](06-Requirements.md),
 arquitectura en [08-Architecture.md](08-Architecture.md) y diseño del
 contrato en [09-Smart-Contract-Design.md](09-Smart-Contract-Design.md).
@@ -243,3 +245,130 @@ Notas de diseño verificadas contra el código:
   el email como verificado.
 - **Logout = borrar la cookie.** El JWT es stateless: no requiere una
   llamada a la API para invalidar la sesión del lado del servidor.
+
+## 7. Gestión de claves y secretos
+
+Todos los secretos llegan por variables de entorno (lista completa en
+[12-Deployment.md](12-Deployment.md) y `apps/api/.env.example`). Ninguno
+está en el repositorio con un valor válido para producción.
+
+| Secreto | Uso | Control implementado | Código |
+|---|---|---|---|
+| `JWT_SECRET` | Firma y valida el JWT de sesión | Obligatorio: la API no arranca si falta, está vacío o es el valor publicado en `.env.example` (`change-me-in-production`). Lo usan el módulo de auth y `JwtStrategy`. | `apps/api/src/modules/auth/jwt-secret.ts`, `apps/api/src/modules/auth/auth.module.ts`, `apps/api/src/modules/auth/jwt.strategy.ts` |
+| `ASSET_ENCRYPTION_KEY` | Cifrado de los archivos en el almacenamiento (INV-12) | AES-256-GCM con IV aleatorio de 12 bytes y etiqueta de 16 bytes por blob (`[IV][tag][ciphertext]`). La clave (32 bytes en base64) se valida al arrancar y solo vive en memoria. Un blob alterado o descifrado con otra clave falla la autenticación GCM. El archivo se cifra antes de llegar al adaptador de almacenamiento. | `apps/api/src/adapters/crypto/aes-gcm.adapter.ts`, `apps/api/src/application/certification/upload-asset.use-case.ts` |
+| `WORKER_WALLET_PRIVATE_KEY` | Firma las transacciones `anchor()` del worker | Solo se lee en la factoría del adaptador de cadena; sin ella (o sin RPC o contrato) se usa un adaptador que falla con un error claro al anclar, y el resto de la app funciona. Ninguna llamada de log incluye la clave. La verificación pública no depende de ella. | `apps/api/src/modules/worker/worker.module.ts`, `apps/api/src/adapters/chain/not-configured-anchor.adapter.ts`, `apps/api/src/modules/public-verification/public-verification.module.ts` |
+| `TRUSTED_PROXY_SECRET` | Autentica la IP de cliente que reenvía el servidor de Next | Comparación en tiempo constante (`timingSafeEqual`); solo server-side en el web. Si falta, la API avisa al arrancar (ver §10). | `apps/api/src/modules/throttling/client-ip.ts`, `apps/web/lib/api/trusted-proxy-headers.ts`, `apps/api/src/main.ts` |
+| `OPENAI_API_KEY` | Llamadas al proveedor de IA | Solo se usa con `AI_ADAPTER=openai`; si falta, el adaptador lanza `MissingOpenAiApiKeyError`. Por defecto se usa el adaptador stub, que no necesita clave. | `apps/api/src/modules/worker/worker.module.ts`, `apps/api/src/adapters/ai/openai.adapter.ts` |
+
+**Pendiente** (roadmap, "Siguiente etapa", [14-Roadmap.md](14-Roadmap.md)):
+
+- Gestión de claves con KMS: hoy las claves son variables de entorno de la
+  plataforma.
+- `keyId` en el blob cifrado para poder rotar `ASSET_ENCRYPTION_KEY`: hoy
+  hay una sola clave y rotarla dejaría ilegibles los archivos ya cifrados.
+- Revocación server-side del JWT y expiración más corta que 7 días.
+
+## 8. Seguridad de la subida de archivos
+
+Aplica a `POST /assets` (certificación, autenticado) y a `POST
+/public/verify/:id` (verificación pública).
+
+| Control | Detalle | Código |
+|---|---|---|
+| Tamaño máximo | `MAX_UPLOAD_BYTES` (10 MB por defecto; valores inválidos usan el default). Multer corta el flujo al superar el límite, así que un cuerpo excesivo nunca se carga entero, y responde **413**. Un único archivo por petición. | `apps/api/src/modules/uploads/upload-limits.ts` |
+| Tipo de archivo | En `POST /assets`, el MIME declarado es solo un filtro rápido: decide la firma `%PDF-` en el offset 0. Si falla, **400**. El MIME que entra en el DTR es el verificado por el servidor (`application/pdf`), no el del cliente. | `apps/api/src/modules/assets/assets.controller.ts` |
+| Verificación pública | Solo límite de tamaño, sin comprobar la firma: se hashea lo que se sube y un archivo distinto recibe su veredicto normal (`ASSET_MISMATCH` / `INVALID_RECORD`), no un 400. | `apps/api/src/modules/public-verification/public-verification.controller.ts` |
+| Límite del proxy de Vercel | La certificación pasa por la Vercel Function del proxy (`/api/backend/[...path]`), que limita el cuerpo a unos 4,5 MB: en Vercel ese es el límite efectivo. La verificación pública llama directamente a la API. | [12-Deployment.md, Límites de subida](12-Deployment.md#límites-de-subida), `apps/web/app/api/backend/[...path]/route.ts` |
+| Límite de frecuencia | Subida: 5 por minuto por usuario (`UPLOAD_THROTTLE_LIMIT`). Verificación pública: 60/min en `GET` y 20/min en `POST` (`PUBLIC_VERIFY_*_THROTTLE_LIMIT`). | `apps/api/src/modules/assets/assets.controller.ts`, `apps/api/src/modules/public-verification/public-verification.controller.ts` |
+
+## 9. Aislamiento entre organizaciones
+
+- **El `organizationId` sale del JWT.** Los controladores privados lo leen
+  de `req.user.organizationId`, nunca del cuerpo ni de la URL
+  (`apps/api/src/modules/trust-records/trust-records.controller.ts`,
+  `apps/api/src/modules/assets/assets.controller.ts`).
+- **Filtro en la consulta, no después.** Los métodos de repositorio
+  reciben el `organizationId` y lo incluyen en el `where` (RNF-004).
+  `TrustRecord` no tiene columna de organización: se filtra por el join con
+  `DigitalAsset.organizationId` (`findByIdForOrganization`,
+  `findByIdForOrganizationWithAsset`, `findAllForOrganization`), según
+  [ADR-007](adr/ADR-007-metodo-repo-dedicado-para-join-de-asset-org-scoped.md).
+  Código: `apps/api/src/ports/trust-record-repository.port.ts`,
+  `apps/api/src/adapters/prisma/trust-record.repository.ts`,
+  `apps/api/src/adapters/prisma/digital-asset.repository.ts`.
+- **404, no 403.** Un id de otra organización devuelve `null`, igual que uno
+  inexistente: no se filtra si el recurso existe.
+- **Duplicados por organización.** La detección de duplicados por SHA-256 y
+  la clave de almacenamiento (`<organizationId>/<sha256>`) están acotadas a
+  la organización (`apps/api/src/application/certification/upload-asset.use-case.ts`).
+- **Tests negativos e2e:** S-ASSET-4 y S-ASSET-6
+  (`apps/api/test/assets.e2e-spec.ts`); S-DTR-4, S-DTR-7, S-DTR-9 y S-DTR-15
+  (`apps/api/test/trust-records.e2e-spec.ts`).
+
+**Endpoints públicos.** Usan a propósito una consulta sin organización
+(`findByIdWithAssetAndAnchor`), porque no hay sesión. Lo que exponen está
+acotado (INV-41):
+
+| Endpoint | Expone | No expone |
+|---|---|---|
+| `GET /public/verify/:id` | Existencia, estado y veredicto del anclaje. El DTO no tiene campo de análisis. | Análisis IA, contenido |
+| `POST /public/verify/:id` | Lo anterior y el análisis IA, solo si el archivo subido coincide con el certificado | Análisis IA si el archivo no coincide |
+| `GET /public/verify/:id/proof` | Paquete `ancrux-proof-1`: hashes, algoritmos y coordenadas del anclaje ([ADR-016](adr/ADR-016-paquete-de-prueba-publico.md)) | Análisis IA, procedencia, nombre de archivo |
+
+Código: `apps/api/src/modules/public-verification/public-verification.controller.ts`,
+`apps/api/src/modules/public-verification/dto/verify-hash-response.dto.ts`,
+`apps/api/src/application/verification/get-proof-package.use-case.ts`.
+
+## 10. Límites de peticiones, proxy, CORS y cabeceras
+
+Configuración y variables en [12-Deployment.md](12-Deployment.md) (secciones
+CORS y Cabeceras de seguridad).
+
+- **Límite global** (`APP_GUARD`, [ADR-012](adr/ADR-012-guardia-global-de-rate-limiting-con-tracker-por-usuario.md)):
+  100 peticiones por minuto por defecto, por usuario autenticado (`sub` del
+  JWT) o por IP para anónimos
+  (`apps/api/src/modules/throttling/throttling.module.ts`,
+  `apps/api/src/modules/throttling/user-aware-throttler.guard.ts`). Rutas
+  caras con límites propios: subida (5/min), anclaje (10/min,
+  `apps/api/src/modules/trust-records/trust-records.controller.ts`) y
+  verificación pública (§8).
+- **Límite por cuenta:** `POST /auth/login` y `POST /auth/forgot-password`
+  admiten 5 intentos por minuto por email, además del límite por IP
+  (`apps/api/src/modules/auth/auth-throttle.ts`,
+  `apps/api/src/modules/auth/auth.controller.ts`).
+- **IP real tras el proxy:** el servidor de Next reenvía la IP del cliente
+  en `x-client-ip` junto a `x-proxy-secret`; la API solo la acepta si el
+  secreto coincide con `TRUSTED_PROXY_SECRET`. Si no, usa la IP de conexión
+  (`apps/api/src/modules/throttling/client-ip.ts`).
+- **CORS:** lista de orígenes permitidos desde `CORS_ORIGINS`; el comodín
+  `*` se ignora (`apps/api/src/cors-origins.ts`, `apps/api/src/main.ts`).
+- **Cabeceras:** `helmet` con CSP en la API
+  (`apps/api/src/security-headers.ts`); CSP, `X-Frame-Options`, `nosniff`,
+  `Referrer-Policy` y `Permissions-Policy` en el web, con el origen del RPC
+  de la cadena (`NEXT_PUBLIC_CHAIN_RPC_URL`) en `connect-src`
+  (`apps/web/lib/security-headers.ts`, `apps/web/next.config.ts`).
+  Limitación conocida: la CSP del web necesita `script-src 'unsafe-inline'`
+  hasta que use nonces.
+
+## 11. Verificación e integridad
+
+- **Integridad del registro (B4, INV-22).** En la verificación por subida,
+  cuando el archivo coincide con el activo, el hash del DTR recalculado
+  desde la base de datos debe ser igual al `canonicalHash` fijado al
+  confirmar. Si difiere, el registro se alteró después de certificarse y el
+  veredicto es `INVALID_RECORD`, con un aviso en el log que solo lleva el id
+  (`apps/api/src/application/verification/verify-document.use-case.ts`).
+  El paquete de prueba aplica la misma regla y responde 409
+  (`apps/api/src/application/verification/get-proof-package.use-case.ts`).
+- **Cadena que niega el anclaje (C0).** Si la lectura de la cadena funciona
+  y el hash de un registro `CERTIFIED` no está anclado, el veredicto es
+  `INVALID_RECORD` en `GET` y `POST`. Si el RPC falla, se mantiene el
+  veredicto y se marca `chainReadUnavailable` (mismo archivo).
+- **Verificación independiente.** Para `dtr-2`, el navegador (`/verify/:id`)
+  y el CLI `ancrux-verify` recalculan `coreHash` y `anchorHash` desde el
+  archivo y el paquete de prueba, y leen el contrato por un RPC público, sin
+  confiar en el veredicto de Ancrux
+  (`packages/dtr-core/src/independent-verification.ts`,
+  `packages/dtr-core/src/proof-package.ts`,
+  [packages/verify-cli](../packages/verify-cli/README.md)). Qué demuestra
+  esa verificación y qué no: [15-Posicionamiento.md](15-Posicionamiento.md).

@@ -30,8 +30,8 @@ Out of scope: TFM slides (`apps/web/public/slides`), new features.
 ## Checklist
 
 - [x] D1 - Copy review (route: delegated writer)
-- [ ] D2 - Positioning document (route: research worker, then writer)
-- [ ] D3 - Security doc extension (route: delegated writer)
+- [x] D2 - Positioning document (route: research worker, then delegated writer)
+- [x] D3 - Security doc extension (route: delegated writer)
 
 ## Checks
 
@@ -43,7 +43,9 @@ Out of scope: TFM slides (`apps/web/public/slides`), new features.
 | Task | Commit | Review tier | Notes |
 |---|---|---|---|
 | D1 | (pending commit) | pending | 20 overclaim/inaccurate strings rewritten in 4 dictionaries (landing, verify, glossary, certify); honest-claims guard added to `dictionaries.test.ts` (RED 4 failing on old copy, GREEN after); web test 67 files/379 tests, typecheck and lint clean (1 pre-existing warning in generated `coverage/`) |
+| D2 | (pending commit) | pending | `docs/15-Posicionamiento.md` from the verified research report (S1-S19); hedges kept (partially verified, unverified, inference, assumption); overclaims fixed in `docs/01-Product-Vision.md` (blockchain "certifica" -> later changes detectable; old full-DTR anchoring -> dtr-2 `anchorHash`, existence no later than the block). Structural readback only (passive docs). |
+| D3 | (pending commit) | pending | `docs/13-Security.md` §7-§11: keys and secrets, upload security, organization isolation, rate limiting/proxy/CORS/headers, verification integrity; every cited path checked with `git ls-files`. Structural readback only (passive docs). |
 
 ## Next step
 
-D1 and D2 research in parallel.
+Open PR for phase D.

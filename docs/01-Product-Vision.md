@@ -37,7 +37,7 @@ aisladas.
 
 La IA comprende el contenido.
 
-La Blockchain certifica su integridad.
+La Blockchain hace detectable cualquier modificación posterior.
 
 La combinación de ambas crea un nuevo paradigma de confianza digital.
 
@@ -57,11 +57,15 @@ Cada activo genera un **Digital Trust Record (DTR)** compuesto por:
 El activo nunca se almacena en la blockchain; únicamente la evidencia
 criptográfica.
 
-**Qué se certifica**: en blockchain se ancla el **hash del DTR canónico
-completo** (que a su vez contiene el hash SHA-256 del activo). Una sola
-transacción certifica dos hechos: (1) el activo existía en esa fecha y
-(2) el análisis de IA sobre ese activo se produjo en esa fecha con ese
-contenido exacto. Ver ADR-001.
+**Qué se ancla**: en `dtr-2` se ancla `anchorHash`, que combina
+`schemaVersion`, `issuedAt`, `coreHash` (derivado del archivo) y
+`enrichmentHash` (análisis de IA y procedencia). Una sola transacción
+permite comprobar dos hechos: (1) el activo existía no más tarde que la
+fecha del bloque y (2) cualquier modificación posterior del activo o del
+análisis de IA es detectable. Ver ADR-015 (supersede a ADR-001).
+
+> Qué demuestra y qué no demuestra un DTR, con fuentes:
+> [15-Posicionamiento.md](15-Posicionamiento.md).
 
 # 7. Digital Trust Record
 
