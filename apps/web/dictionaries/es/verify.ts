@@ -142,7 +142,9 @@ export const verifyDictionary = {
     codes: {
       file_pdf: "Tu navegador leyó el archivo y calculó su SHA-256. Es un PDF.",
       file_not_pdf:
-        "El archivo no es un PDF (no empieza por %PDF-). Ancrux solo certifica PDF, así que la huella del contenido no coincidirá.",
+        "El archivo no es un PDF (no empieza por %PDF-). Ancrux solo certifica PDF, así que la huella del contenido no puede coincidir y la verificación se detiene aquí.",
+      file_too_large:
+        "El archivo supera los 10 MB, el tamaño máximo que Ancrux certifica, así que no se lee ni se verifica.",
       file_unreadable: "No se pudo leer el archivo en tu navegador.",
       proof_ok: "Se descargó la prueba pública y cumple el formato ancrux-proof-1.",
       proof_not_found: "No existe un registro con este identificador.",
@@ -152,6 +154,8 @@ export const verifyDictionary = {
         "Este registro todavía no tiene prueba pública (por ejemplo, aún no está anclado).",
       proof_invalid: "La prueba recibida no cumple el formato ancrux-proof-1, así que no se puede usar.",
       proof_fetch_error: "No se pudo descargar la prueba pública. Prueba de nuevo.",
+      proof_timeout:
+        "La API de Ancrux no respondió a tiempo, así que no se pudo descargar la prueba pública. Prueba de nuevo más tarde.",
       core_match: "La huella del contenido recalculada a partir de tu archivo coincide con la de la prueba.",
       core_mismatch: "La huella del contenido recalculada no coincide: el archivo no es el certificado.",
       core_invalid:

@@ -3,7 +3,6 @@ import {
   ProofPackageV1Schema,
   sha256Hex,
   verifyProofPackageAgainstFile,
-  type ProofPackageV1,
 } from "@trustai/dtr-core";
 import type { ProofFetchResult } from "../api/public-verify-client";
 
@@ -16,9 +15,11 @@ import type { ProofFetchResult } from "../api/public-verify-client";
  *
  * Pure orchestration: no React, no fetch, no chain client. The caller injects
  * `fetchProof` and a `ChainReader`. It never throws: every failure becomes a
- * step with `status: "failed"`, and the steps after a blocking failure are
- * `skipped`. Steps carry codes and raw facts, never copy (ADR-009: the web
- * dictionary owns the wording).
+ * step with `status: "failed"`, and every failure is blocking: the steps
+ * after it are `skipped`. That includes a non-PDF file (the coreHash commits
+ * to the mimeType, so it can never match) and a file over `MAX_FILE_BYTES`.
+ * Steps carry codes and raw facts, never copy (ADR-009: the web dictionary
+ * owns the wording).
  */
 
 export type StepId = "file" | "proof" | "coreHash" | "anchorHash" | "network" | "contract" | "anchored";
@@ -28,6 +29,7 @@ export type StepStatus = "ok" | "failed" | "skipped";
 export type StepCode =
   | "file_pdf"
   | "file_not_pdf"
+  | "file_too_large"
   | "file_unreadable"
   | "proof_ok"
   | "proof_not_found"
@@ -35,6 +37,7 @@ export type StepCode =
   | "proof_unavailable"
   | "proof_invalid"
   | "proof_fetch_error"
+  | "proof_timeout"
   | "core_match"
   | "core_mismatch"
   | "core_invalid"
@@ -88,8 +91,6 @@ export type VerificationOutcome = "verified" | "failed" | "legacy" | "not_found"
 export interface IndependentVerificationResult {
   outcome: VerificationOutcome;
   steps: VerificationStep[];
-  /** Present once the package parsed: lets the UI link the transaction. */
-  proof?: ProofPackageV1;
 }
 
 /** Read-only view of the AnchorRegistry contract on one RPC endpoint. */
@@ -107,9 +108,22 @@ export interface IndependentVerificationDeps {
 
 export interface IndependentVerificationInput {
   trustRecordId: string;
-  /** A `File`/`Blob`, or anything that yields the raw bytes. */
-  file: { arrayBuffer(): Promise<ArrayBuffer> };
+  /**
+   * A `File`/`Blob`, or anything that yields the raw bytes. `size`, when
+   * known, lets an oversized file be rejected before it is read into memory.
+   */
+  file: { size?: number; arrayBuffer(): Promise<ArrayBuffer> };
 }
+
+/**
+ * Largest file the check reads: the API's default upload cap
+ * (`DEFAULT_MAX_UPLOAD_BYTES` in apps/api/src/modules/uploads/upload-limits.ts),
+ * so nothing larger can have been certified.
+ */
+export const MAX_FILE_BYTES = 10 * 1024 * 1024;
+
+/** Name of the error a timed-out `fetchProof` rejects with (`ProofFetchTimeoutError`, `AbortSignal.timeout`). */
+const TIMEOUT_ERROR_NAME = "TimeoutError";
 
 const STEP_ORDER: readonly StepId[] = [
   "file",
@@ -140,16 +154,21 @@ function secondsToIso(seconds: bigint): string {
 }
 
 /** Finishes the run: the remaining steps are skipped. */
-function finish(
-  steps: VerificationStep[],
-  outcome: VerificationOutcome,
-  proof?: ProofPackageV1,
-): IndependentVerificationResult {
+function finish(steps: VerificationStep[], outcome: VerificationOutcome): IndependentVerificationResult {
   const done = new Set(steps.map((step) => step.id));
   const skipped = STEP_ORDER.filter((id) => !done.has(id)).map(
     (id): VerificationStep => ({ id, status: "skipped", code: "skipped", facts: [] }),
   );
-  return { outcome, steps: [...steps, ...skipped], ...(proof ? { proof } : {}) };
+  return { outcome, steps: [...steps, ...skipped] };
+}
+
+function tooLarge(sizeBytes: number): VerificationStep {
+  return {
+    id: "file",
+    status: "failed",
+    code: "file_too_large",
+    facts: [{ key: "sizeBytes", value: String(sizeBytes) }],
+  };
 }
 
 async function readFile(input: IndependentVerificationInput) {
@@ -163,12 +182,20 @@ export async function runIndependentVerification(
 ): Promise<IndependentVerificationResult> {
   const steps: VerificationStep[] = [];
 
-  // a. The file, read and hashed locally.
+  // a. The file, size-checked before it is read, then hashed locally.
+  if (input.file.size !== undefined && input.file.size > MAX_FILE_BYTES) {
+    steps.push(tooLarge(input.file.size));
+    return finish(steps, "failed");
+  }
   let file: Awaited<ReturnType<typeof readFile>>;
   try {
     file = await readFile(input);
   } catch {
     steps.push({ id: "file", status: "failed", code: "file_unreadable", facts: [] });
+    return finish(steps, "failed");
+  }
+  if (file.sizeBytes > MAX_FILE_BYTES) {
+    steps.push(tooLarge(file.sizeBytes));
     return finish(steps, "failed");
   }
   const isPdf = file.mimeType === PDF_MIME_TYPE;
@@ -182,13 +209,17 @@ export async function runIndependentVerification(
       { key: "sizeBytes", value: String(file.sizeBytes) },
     ],
   });
+  if (!isPdf) {
+    return finish(steps, "failed");
+  }
 
   // b. The public proof package, parsed with the strict dtr-core schema.
   let fetched: ProofFetchResult;
   try {
     fetched = await deps.fetchProof(input.trustRecordId);
-  } catch {
-    steps.push({ id: "proof", status: "failed", code: "proof_fetch_error", facts: [] });
+  } catch (error) {
+    const timedOut = (error as { name?: unknown } | null)?.name === TIMEOUT_ERROR_NAME;
+    steps.push({ id: "proof", status: "failed", code: timedOut ? "proof_timeout" : "proof_fetch_error", facts: [] });
     return finish(steps, "failed");
   }
   if (fetched.status === "legacy") {
@@ -224,7 +255,7 @@ export async function runIndependentVerification(
   const check = await verifyProofPackageAgainstFile(proof, file);
   if (check.status === "invalid_package") {
     steps.push({ id: "coreHash", status: "failed", code: "core_invalid", facts: [] });
-    return finish(steps, "failed", proof);
+    return finish(steps, "failed");
   }
   if (check.status === "core_mismatch") {
     steps.push({
@@ -233,7 +264,7 @@ export async function runIndependentVerification(
       code: "core_mismatch",
       facts: [mono("expectedCoreHash", check.expectedCoreHash), mono("actualCoreHash", check.actualCoreHash)],
     });
-    return finish(steps, "failed", proof);
+    return finish(steps, "failed");
   }
   const coreHash = check.status === "verified" ? check.coreHash : proof.dtr.coreHash;
   steps.push({ id: "coreHash", status: "ok", code: "core_match", facts: [mono("coreHash", coreHash)] });
@@ -247,7 +278,7 @@ export async function runIndependentVerification(
         mono("computedAnchorHash", check.computedAnchorHash),
       ],
     });
-    return finish(steps, "failed", proof);
+    return finish(steps, "failed");
   }
   steps.push({
     id: "anchorHash",
@@ -263,7 +294,7 @@ export async function runIndependentVerification(
     rpcChainId = await deps.chain.getChainId();
   } catch {
     steps.push({ id: "network", status: "failed", code: "rpc_error", facts: [{ key: "proofChainId", value: proofChainId }] });
-    return finish(steps, "failed", proof);
+    return finish(steps, "failed");
   }
   const networkFacts: StepFact[] = [
     { key: "rpcChainId", value: String(rpcChainId) },
@@ -271,7 +302,7 @@ export async function runIndependentVerification(
   ];
   if (rpcChainId !== proof.anchor.chainId) {
     steps.push({ id: "network", status: "failed", code: "network_mismatch", facts: networkFacts });
-    return finish(steps, "failed", proof);
+    return finish(steps, "failed");
   }
   steps.push({ id: "network", status: "ok", code: "network_match", facts: networkFacts });
 
@@ -283,7 +314,7 @@ export async function runIndependentVerification(
   ];
   if (!known || known.address.toLowerCase() !== contractAddress.toLowerCase()) {
     steps.push({ id: "contract", status: "failed", code: "contract_unknown", facts: contractFacts });
-    return finish(steps, "failed", proof);
+    return finish(steps, "failed");
   }
   steps.push({ id: "contract", status: "ok", code: "contract_known", facts: contractFacts });
 
@@ -297,11 +328,11 @@ export async function runIndependentVerification(
     ]);
   } catch {
     steps.push({ id: "anchored", status: "failed", code: "rpc_error", facts: [mono("anchorHash", check.anchorHash)] });
-    return finish(steps, "failed", proof);
+    return finish(steps, "failed");
   }
   if (!anchored) {
     steps.push({ id: "anchored", status: "failed", code: "not_anchored", facts: [mono("anchorHash", check.anchorHash)] });
-    return finish(steps, "failed", proof);
+    return finish(steps, "failed");
   }
 
   const anchoredAt = secondsToIso(anchoredAtSeconds);
@@ -321,5 +352,5 @@ export async function runIndependentVerification(
 
   // e. Verified independently only when every step passed.
   const allOk = steps.every((step) => step.status === "ok");
-  return finish(steps, allOk ? "verified" : "failed", proof);
+  return finish(steps, allOk ? "verified" : "failed");
 }

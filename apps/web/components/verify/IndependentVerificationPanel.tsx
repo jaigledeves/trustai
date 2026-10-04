@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Download, Minus, TriangleAlert, X, type LucideIcon } from "lucide-react";
-import { useId, useState, type ChangeEvent } from "react";
+import { useId, useRef, useState, type ChangeEvent } from "react";
 import { verifyDictionary } from "../../dictionaries/es/verify";
 import { getProofPackage, proofPackageDownloadUrl } from "../../lib/api/public-verify-client";
 import { config } from "../../lib/config";
@@ -55,15 +55,22 @@ export function IndependentVerificationPanel({ id }: IndependentVerificationPane
   const [result, setResult] = useState<IndependentVerificationResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState(false);
+  // Only the latest run may publish its outcome: picking another file
+  // invalidates a run still in flight, so its result never shows for the new file.
+  const runToken = useRef(0);
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    runToken.current += 1;
     setFile(event.target.files?.[0] ?? null);
     setResult(null);
     setError(false);
+    setIsRunning(false);
   }
 
   async function handleRun() {
     if (!file) return;
+    const token = ++runToken.current;
+    const isCurrent = () => token === runToken.current;
     setIsRunning(true);
     setResult(null);
     setError(false);
@@ -73,12 +80,12 @@ export function IndependentVerificationPanel({ id }: IndependentVerificationPane
         { trustRecordId: id, file },
         { fetchProof: getProofPackage, chain: createViemChainReader(config.chainRpcUrl) },
       );
-      setResult(outcome);
+      if (isCurrent()) setResult(outcome);
     } catch {
       // The orchestrator never throws; this covers a failed lazy chunk load.
-      setError(true);
+      if (isCurrent()) setError(true);
     } finally {
-      setIsRunning(false);
+      if (isCurrent()) setIsRunning(false);
     }
   }
 
@@ -95,6 +102,7 @@ export function IndependentVerificationPanel({ id }: IndependentVerificationPane
           id={inputId}
           type="file"
           onChange={handleFileChange}
+          disabled={isRunning}
           className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary"
         />
       </div>

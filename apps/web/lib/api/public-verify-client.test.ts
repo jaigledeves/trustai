@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { server } from "../../test/msw/server";
 import { ApiError } from "./errors";
 import {
@@ -7,6 +7,8 @@ import {
   getVerifyHash,
   NotFoundError,
   postVerifyUpload,
+  PROOF_FETCH_TIMEOUT_MS,
+  ProofFetchTimeoutError,
   proofPackageDownloadUrl,
 } from "./public-verify-client";
 
@@ -192,6 +194,32 @@ describe("getProofPackage (ADR-016: GET /public/verify/:id/proof)", () => {
 
     expect(error).toBeInstanceOf(ApiError);
     expect((error as ApiError).status).toBe(500);
+  });
+
+  it("gives up after PROOF_FETCH_TIMEOUT_MS with a TimeoutError instead of hanging", async () => {
+    const controller = new AbortController();
+    const timeoutSpy = vi.spyOn(AbortSignal, "timeout").mockReturnValue(controller.signal);
+    // A server that never answers: the request only settles when its signal aborts.
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(
+      (_input, init) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+        }),
+    );
+
+    try {
+      const pending = getProofPackage("slow").catch((caught: unknown) => caught);
+      controller.abort(new DOMException("The operation timed out.", "TimeoutError"));
+      const error = await pending;
+
+      expect(timeoutSpy).toHaveBeenCalledWith(PROOF_FETCH_TIMEOUT_MS);
+      expect(PROOF_FETCH_TIMEOUT_MS).toBe(10_000);
+      expect(error).toBeInstanceOf(ProofFetchTimeoutError);
+      expect((error as Error).name).toBe("TimeoutError");
+    } finally {
+      timeoutSpy.mockRestore();
+      fetchSpy.mockRestore();
+    }
   });
 
   it("builds the download URL with download=1", () => {

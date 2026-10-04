@@ -8,6 +8,7 @@ import {
 import { describe, expect, it, vi } from "vitest";
 import type { ProofFetchResult } from "../api/public-verify-client";
 import {
+  MAX_FILE_BYTES,
   runIndependentVerification,
   type ChainReader,
   type IndependentVerificationResult,
@@ -261,16 +262,59 @@ describe("runIndependentVerification", () => {
     expect(step(result, "proof")).toMatchObject({ status: "failed", code: "proof_fetch_error" });
   });
 
-  it("explains a non-PDF file and lets coreHash show the mismatch", async () => {
+  it("fails the proof step with a timeout code when the API does not answer in time", async () => {
+    const result = await run({
+      proof: async () => {
+        throw new DOMException("The operation timed out.", "TimeoutError");
+      },
+    });
+
+    expect(result.outcome).toBe("failed");
+    expect(step(result, "proof")).toMatchObject({ status: "failed", code: "proof_timeout" });
+    expect(statuses(result)).toMatchObject({ coreHash: "skipped", anchored: "skipped" });
+  });
+
+  it("stops at a non-PDF file: the coreHash can never match, so the rest is skipped", async () => {
     const bytes = new TextEncoder().encode("plain text, not a pdf");
-    const result = await run({ bytes });
+    const fetchProof = vi.fn(async (): Promise<ProofFetchResult> => ({ status: "ok", body: await buildProof() }));
+    const result = await run({ bytes, proof: fetchProof });
 
     expect(result.outcome).toBe("failed");
     expect(step(result, "file")).toMatchObject({ status: "failed", code: "file_not_pdf" });
     expect(step(result, "file").facts).toEqual(
       expect.arrayContaining([{ key: "mimeType", value: "application/octet-stream" }]),
     );
-    expect(step(result, "coreHash")).toMatchObject({ status: "failed", code: "core_mismatch" });
+    expect(result.steps.slice(1).every((s) => s.status === "skipped")).toBe(true);
+    expect(fetchProof).not.toHaveBeenCalled();
+  });
+
+  it("rejects a file above the 10 MB cap before reading it into memory", async () => {
+    const arrayBuffer = vi.fn(async () => PDF_BYTES.slice().buffer);
+    const fetchProof = vi.fn(async (): Promise<ProofFetchResult> => ({ status: "not_found" }));
+    const result = await runIndependentVerification(
+      { trustRecordId: "rec-1", file: { size: MAX_FILE_BYTES + 1, arrayBuffer } },
+      { fetchProof, chain: fakeChain() },
+    );
+
+    expect(result.outcome).toBe("failed");
+    expect(step(result, "file")).toMatchObject({
+      status: "failed",
+      code: "file_too_large",
+      facts: [{ key: "sizeBytes", value: String(MAX_FILE_BYTES + 1) }],
+    });
+    expect(result.steps.slice(1).every((s) => s.status === "skipped")).toBe(true);
+    expect(arrayBuffer).not.toHaveBeenCalled();
+    expect(fetchProof).not.toHaveBeenCalled();
+  });
+
+  it("accepts a file exactly at the 10 MB cap", async () => {
+    expect(MAX_FILE_BYTES).toBe(10 * 1024 * 1024);
+    const result = await runIndependentVerification(
+      { trustRecordId: "rec-1", file: { size: MAX_FILE_BYTES, ...blobOf(PDF_BYTES) } },
+      { fetchProof: async () => ({ status: "ok", body: await buildProof() }), chain: fakeChain() },
+    );
+
+    expect(step(result, "file")).toMatchObject({ status: "ok", code: "file_pdf" });
   });
 
   it("fails the file step when the file cannot be read", async () => {

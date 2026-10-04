@@ -93,13 +93,41 @@ export function proofPackageDownloadUrl(id: string): string {
   return `${proofPackageUrl(id)}?download=1`;
 }
 
+/** Same budget as the chain reads (`chain-reader.ts`): a silent API never hangs the check. */
+export const PROOF_FETCH_TIMEOUT_MS = 10_000;
+
+/**
+ * Thrown by `getProofPackage` when the API does not answer within
+ * `PROOF_FETCH_TIMEOUT_MS`. Named `TimeoutError` (like the DOMException
+ * `AbortSignal.timeout` produces) so callers can recognise it by name.
+ */
+export class ProofFetchTimeoutError extends Error {
+  constructor(message = "The proof package request timed out") {
+    super(message);
+    this.name = "TimeoutError";
+  }
+}
+
 /**
  * Fetches the public proof package. 404 and 409 resolve to typed results;
- * any other non-2xx throws an `ApiError`, and a network failure rejects with
- * fetch's own error.
+ * any other non-2xx throws an `ApiError`, a timeout throws a
+ * `ProofFetchTimeoutError`, and a network failure rejects with fetch's own
+ * error.
  */
 export async function getProofPackage(id: string): Promise<ProofFetchResult> {
-  const response = await fetch(proofPackageUrl(id), { cache: "no-store" });
+  const signal = AbortSignal.timeout(PROOF_FETCH_TIMEOUT_MS);
+  try {
+    return await requestProofPackage(id, signal);
+  } catch (error) {
+    if (signal.aborted) {
+      throw new ProofFetchTimeoutError();
+    }
+    throw error;
+  }
+}
+
+async function requestProofPackage(id: string, signal: AbortSignal): Promise<ProofFetchResult> {
+  const response = await fetch(proofPackageUrl(id), { cache: "no-store", signal });
 
   if (response.status === 404) {
     return { status: "not_found" };

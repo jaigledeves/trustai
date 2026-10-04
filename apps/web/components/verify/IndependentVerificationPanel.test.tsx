@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { verifyDictionary } from "../../dictionaries/es/verify";
@@ -147,6 +147,38 @@ describe("IndependentVerificationPanel", () => {
       t.outcomes.legacy.message,
     );
     expect(screen.getByText(t.codes.proof_legacy)).toBeInTheDocument();
+  });
+
+  it("never shows a stale outcome for a file picked while a run was in flight", async () => {
+    let resolveRun: (result: IndependentVerificationResult) => void = () => {};
+    runMock.mockImplementationOnce(
+      () =>
+        new Promise<IndependentVerificationResult>((resolve) => {
+          resolveRun = resolve;
+        }),
+    );
+
+    await pickAndRun();
+
+    const input = screen.getByLabelText(t.fileLabel);
+    await waitFor(() => expect(runMock).toHaveBeenCalledTimes(1));
+    expect(input).toBeDisabled();
+
+    // The input is disabled, but the guard must hold even if a change slips through.
+    fireEvent.change(input, {
+      target: { files: [new File(["%PDF-1.7 other"], "other.pdf", { type: "application/pdf" })] },
+    });
+    await act(async () => {
+      resolveRun({
+        outcome: "verified",
+        steps: [{ id: "file", status: "ok", code: "file_pdf", facts: [] }],
+      });
+    });
+
+    expect(screen.queryByRole("list", { name: t.stepsLabel })).not.toBeInTheDocument();
+    expect(screen.queryByText(t.outcomes.verified.title)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: t.submitLabel })).toBeEnabled();
+    expect(input).toBeEnabled();
   });
 
   it("shows a generic error if the run rejects unexpectedly", async () => {
