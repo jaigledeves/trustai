@@ -1,4 +1,5 @@
 import {
+  MAX_FILE_BYTES,
   ProofPackageV1Schema,
   runIndependentVerification,
   type ChainReader,
@@ -8,10 +9,13 @@ import { USAGE, parseCliArgs } from "./args.js";
 import { EXIT_CODES, exitCodeFor, formatJson, formatText, type ProofExtras } from "./format.js";
 import { fetchProofFromApi } from "./proof-source.js";
 
+/** A proof package is a few hundred bytes; anything this large is the wrong file. */
+export const MAX_PROOF_BYTES = 1024 * 1024;
+
 /** Everything the CLI touches outside the process, injected so tests stay offline. */
 export interface CliDeps {
-  /** Size in bytes, read before the file itself so an oversized file is never loaded. */
-  statFile(path: string): Promise<number>;
+  /** Size and kind, read before the file itself so an oversized file is never loaded. */
+  statFile(path: string): Promise<{ size: number; isFile: boolean }>;
   readFile(path: string): Promise<Uint8Array>;
   fetch: typeof fetch;
   createChainReader(rpcUrl: string): ChainReader;
@@ -48,9 +52,23 @@ export async function runCli(argv: readonly string[], deps: CliDeps): Promise<nu
 
   let size: number;
   try {
-    size = await deps.statFile(options.file);
+    const stats = await deps.statFile(options.file);
+    if (!stats.isFile) return ioError(`${options.file} is not a regular file`);
+    size = stats.size;
   } catch (error) {
     return ioError(`cannot read ${options.file} (${describeError(error)})`);
+  }
+
+  // Read the file here, not inside the orchestrator, so a read failure is an
+  // IO error (exit 2) rather than a failed verification step (exit 1). An
+  // oversized file is never read: the orchestrator rejects it by size alone.
+  let fileBytes: Uint8Array | undefined;
+  if (size <= MAX_FILE_BYTES) {
+    try {
+      fileBytes = await deps.readFile(options.file);
+    } catch (error) {
+      return ioError(`cannot read ${options.file} (${describeError(error)})`);
+    }
   }
 
   let trustRecordId: string;
@@ -59,6 +77,11 @@ export async function runCli(argv: readonly string[], deps: CliDeps): Promise<nu
     const proofPath = options.source.path;
     let body: unknown;
     try {
+      const stats = await deps.statFile(proofPath);
+      if (!stats.isFile) return ioError(`${proofPath} is not a regular file`);
+      if (stats.size > MAX_PROOF_BYTES) {
+        return ioError(`${proofPath} is larger than ${MAX_PROOF_BYTES} bytes; it is not a proof package`);
+      }
       const bytes = await deps.readFile(proofPath);
       body = JSON.parse(new TextDecoder().decode(bytes)) as unknown;
     } catch (error) {
@@ -67,6 +90,7 @@ export async function runCli(argv: readonly string[], deps: CliDeps): Promise<nu
         : ioError(`cannot read ${proofPath} (${describeError(error)})`);
     }
     const declaredId = (body as { trustRecordId?: unknown } | null)?.trustRecordId;
+    // Placeholder only: offline mode never uses the id to load the proof.
     trustRecordId = typeof declaredId === "string" ? declaredId : "local";
     loadProof = async () => ({ status: "ok", body });
   } else {
@@ -91,7 +115,7 @@ export async function runCli(argv: readonly string[], deps: CliDeps): Promise<nu
       trustRecordId,
       file: {
         size,
-        arrayBuffer: async () => new Uint8Array(await deps.readFile(options.file)).buffer,
+        arrayBuffer: async () => new Uint8Array(fileBytes ?? new Uint8Array()).buffer,
       },
     },
     { fetchProof, chain: deps.createChainReader(options.rpc) },

@@ -28,7 +28,7 @@ function harness(options: {
       statFile: async (path) => {
         const bytes = files[path];
         if (!bytes) throw missing(path);
-        return bytes.byteLength;
+        return { size: bytes.byteLength, isFile: true };
       },
       readFile: async (path) => {
         const bytes = files[path];
@@ -105,11 +105,46 @@ describe("runCli --proof (offline from Ancrux)", () => {
   it("rejects an oversized file before reading it, exit 1", async () => {
     const h = harness({ files: { "doc.pdf": PDF_BYTES, "proof.json": encode(await buildProof()) } });
     const readFile = vi.fn(h.deps.readFile);
-    const deps = { ...h.deps, statFile: async () => 10 * 1024 * 1024 + 1, readFile };
+    const statFile = async (path: string) =>
+      path === "doc.pdf" ? { size: 10 * 1024 * 1024 + 1, isFile: true } : h.deps.statFile(path);
+    const deps = { ...h.deps, statFile, readFile };
 
     expect(await runCli(["doc.pdf", "--proof", "proof.json"], deps)).toBe(1);
     expect(h.out()).toMatch(/\[failed\]\s+file/);
     expect(readFile).not.toHaveBeenCalledWith("doc.pdf");
+  });
+
+  it("exits 2 when the file path is not a regular file (e.g. a directory)", async () => {
+    const h = harness({ files: { "doc.pdf": PDF_BYTES, "proof.json": encode(await buildProof()) } });
+    const statFile = async (path: string) =>
+      path === "doc.pdf" ? { size: 0, isFile: false } : h.deps.statFile(path);
+
+    expect(await runCli(["doc.pdf", "--proof", "proof.json"], { ...h.deps, statFile })).toBe(2);
+    expect(h.err()).toContain("doc.pdf is not a regular file");
+    expect(h.out()).toBe("");
+  });
+
+  it("exits 2 when the file passes stat but cannot be read", async () => {
+    const h = harness({ files: { "doc.pdf": PDF_BYTES, "proof.json": encode(await buildProof()) } });
+    const readFile = async (path: string) => {
+      if (path === "doc.pdf") throw Object.assign(new Error("EACCES"), { code: "EACCES" });
+      return h.deps.readFile(path);
+    };
+
+    expect(await runCli(["doc.pdf", "--proof", "proof.json"], { ...h.deps, readFile })).toBe(2);
+    expect(h.err()).toContain("cannot read doc.pdf (EACCES)");
+    expect(h.out()).toBe("");
+  });
+
+  it("exits 2 on a proof file larger than the proof size limit, without reading it", async () => {
+    const h = harness({ files: { "doc.pdf": PDF_BYTES, "proof.json": encode(await buildProof()) } });
+    const readFile = vi.fn(h.deps.readFile);
+    const statFile = async (path: string) =>
+      path === "proof.json" ? { size: 1024 * 1024 + 1, isFile: true } : h.deps.statFile(path);
+
+    expect(await runCli(["doc.pdf", "--proof", "proof.json"], { ...h.deps, statFile, readFile })).toBe(2);
+    expect(h.err()).toContain("proof.json is larger than");
+    expect(readFile).not.toHaveBeenCalledWith("proof.json");
   });
 
   it.each([

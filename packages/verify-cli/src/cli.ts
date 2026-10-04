@@ -4,7 +4,10 @@ import { createViemChainReader } from "./chain-reader.js";
 import { runCli } from "./run.js";
 
 process.exitCode = await runCli(process.argv.slice(2), {
-  statFile: async (path) => (await stat(path)).size,
+  statFile: async (path) => {
+    const stats = await stat(path);
+    return { size: stats.size, isFile: stats.isFile() };
+  },
   readFile: async (path) => new Uint8Array(await readFile(path)),
   fetch: globalThis.fetch,
   createChainReader: createViemChainReader,
