@@ -52,7 +52,7 @@ changes (AnchorRegistry is immutable), migrating anchored `dtr-1` records.
 
 - [x] B1 - ADR-015 (route: inline, single document; ADR-001 marked superseded; docs index completed with ADR-012..015)
 - [x] B2 - dtr-2 in dtr-core (route: delegated (2+ non-trivial files); `enrichment.asset` always present with optional `filename`)
-- [ ] B3 - API emission, shared rebuild, verification of both versions (route: TBD)
+- [x] B3 - API emission, shared rebuild, verification of both versions (route: delegated (2+ non-trivial files); emission constant `EMITTED_DTR_SCHEMA_VERSION` in the Prisma asset repository)
 
 ## Acceptance criteria
 
@@ -72,8 +72,8 @@ changes (AnchorRegistry is immutable), migrating anchored `dtr-1` records.
 | Task | Commit | Review tier | Notes |
 |---|---|---|---|
 | B2 | d9a87c6 (golden), de62d50, (follow-up) | medium, granted, approved; follow-up makes verifyDtr2Proof total over untrusted input | dtr-1 golden test pinned and passing on unchanged code (hash `1ad1295b...25ce`, cross-checked with Python hashlib). RED: `build.test.ts`/`dtr2.test.ts` failed to load `../src/build.js`, `../src/dtr2-hash.js`. GREEN: 79/79 tests, coverage 100%. dtr-2 golden: coreHash `4e0e672d...4802`, enrichmentHash `b19f7fe9...c514`, anchorHash `9f8c2d77...e0c9`. API typecheck and 288 tests pass. |
+| B3 | (pending commit) | pending | RED: 5 unit tests failed on unchanged code (3 confirm-review dtr-2, 2 verify-document dtr-2). GREEN: API 294 passed / 1 skipped, typecheck clean; dtr-core build clean; e2e 68 passed / 1 failed (known flake S-DTR-18 "Timed out waiting for analyze-document") / 2 skipped; certification-flow 2/2 (dtr-2 anchors and verifies on Anvil); S-DTR-1 and S-PV-6 pin anchorHash. Web 355 tests, typecheck clean. Concern: POST verify does not compare the recomputed hash with the stored canonicalHash. |
 
 ## Next step
 
-B3: switch emission to `dtr-2` and replace both API rebuilds with
-`buildTrustRecordCandidate` + `parseAnyTrustRecord` + `computeAnchoredHash`.
+Open PR.

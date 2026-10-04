@@ -100,7 +100,8 @@ describe.skipIf(!dbAvailable || !storageAvailable)(
       });
       expect(trustRecordRow?.state).toBe("DRAFT");
       expect(trustRecordRow?.assetId).toBe(response.body.assetId);
-      expect(trustRecordRow?.schemaVersion).toBe("dtr-1");
+      // ADR-015: new records are emitted as dtr-2.
+      expect(trustRecordRow?.schemaVersion).toBe("dtr-2");
     });
 
     it("S-ASSET-2: non-PDF upload is rejected with 400", async () => {

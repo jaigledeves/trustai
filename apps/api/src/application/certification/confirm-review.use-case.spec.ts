@@ -1,5 +1,5 @@
 import { ConflictException, NotFoundException } from "@nestjs/common";
-import { computeCanonicalHash } from "@trustai/dtr-core";
+import { computeCanonicalHash, computeDtr2Hashes } from "@trustai/dtr-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AssetStatus, DigitalAsset } from "../../domain/digital-asset.entity";
 import { TrustRecord, TrustRecordState } from "../../domain/trust-record.entity";
@@ -10,7 +10,7 @@ import { ConfirmReviewUseCase } from "./confirm-review.use-case";
 function buildTrustRecord(overrides: Partial<TrustRecord> = {}): TrustRecord {
   const base = new TrustRecord(
     "trust-record-1",
-    "dtr-1",
+    "dtr-2", // schemaVersion — what the API emits for new records
     "asset-1",
     "sha-placeholder",
     null, // canonicalHash
@@ -158,17 +158,86 @@ describe("ConfirmReviewUseCase", () => {
   });
 
   describe("confirm", () => {
-    it("CRITICAL: canonicalHash matches dtr-core's own independent reference computation (INV-22)", async () => {
+    const PROVENANCE = {
+      provider: "stub",
+      model: "stub-deterministic",
+      modelVersion: "1.0.0",
+      promptVersion: "v1",
+      taxonomyVersion: "v1",
+      analyzedAt: "2026-07-05T18:30:00.000Z",
+    } as const;
+    const ANALYSIS = {
+      summary: "A reviewed summary of the document.",
+      classification: "contrato",
+      language: "es",
+    } as const;
+
+    it("CRITICAL: a dtr-2 record stores the anchorHash computed by dtr-core (INV-22, ADR-015)", async () => {
       const result = await useCase.confirm({
         organizationId: "org-1",
         trustRecordId: "trust-record-1",
       });
 
-      // Independently reconstructed by the TEST, using dtr-core's own
-      // computeCanonicalHash — not copied from the use case's internals.
-      // If these two ever diverge, a verifier reproducing the hash
-      // independently (the whole point of INV-22) would get a different
-      // answer than TrustAI did.
+      // Independently written dtr-2 record, hashed by dtr-core's own
+      // computeDtr2Hashes — not copied from the use case's internals. The
+      // anchored value for dtr-2 is anchorHash, not the hash of the whole
+      // record.
+      const reference = await computeDtr2Hashes({
+        schemaVersion: "dtr-2",
+        issuedAt: result.issuedAt,
+        core: {
+          asset: { sha256: "a".repeat(64), mimeType: "application/pdf", sizeBytes: 2048 },
+        },
+        enrichment: {
+          asset: { filename: "contract.pdf" },
+          analysis: ANALYSIS,
+          provenance: PROVENANCE,
+        },
+      });
+
+      expect(result.canonicalHash).toBe(reference.anchorHash);
+      expect(trustRecordRepository.confirmToReady).toHaveBeenCalledWith("trust-record-1", {
+        canonicalHash: reference.anchorHash,
+        issuedAt: result.issuedAt,
+      });
+    });
+
+    it("dtr-2 without filename hashes `enrichment.asset` as {} (single representation of no filename)", async () => {
+      digitalAssetRepository = buildDigitalAssetRepository({
+        findById: vi.fn().mockResolvedValue(buildDigitalAsset({ filename: null })),
+      });
+      useCase = new ConfirmReviewUseCase(trustRecordRepository, digitalAssetRepository);
+
+      const result = await useCase.confirm({
+        organizationId: "org-1",
+        trustRecordId: "trust-record-1",
+      });
+
+      const reference = await computeDtr2Hashes({
+        schemaVersion: "dtr-2",
+        issuedAt: result.issuedAt,
+        core: {
+          asset: { sha256: "a".repeat(64), mimeType: "application/pdf", sizeBytes: 2048 },
+        },
+        enrichment: { asset: {}, analysis: ANALYSIS, provenance: PROVENANCE },
+      });
+
+      expect(result.canonicalHash).toBe(reference.anchorHash);
+    });
+
+    it("a legacy dtr-1 record still in DRAFT keeps the dtr-1 canonical hash (ADR-001)", async () => {
+      trustRecordRepository = buildTrustRecordRepository({
+        findByIdForOrganization: vi
+          .fn()
+          .mockResolvedValue(buildTrustRecord({ schemaVersion: "dtr-1" })),
+      });
+      useCase = new ConfirmReviewUseCase(trustRecordRepository, digitalAssetRepository);
+
+      const result = await useCase.confirm({
+        organizationId: "org-1",
+        trustRecordId: "trust-record-1",
+      });
+
       const reference = await computeCanonicalHash({
         schemaVersion: "dtr-1",
         asset: {
@@ -177,26 +246,20 @@ describe("ConfirmReviewUseCase", () => {
           sizeBytes: 2048,
           filename: "contract.pdf",
         },
-        analysis: {
-          summary: "A reviewed summary of the document.",
-          classification: "contrato",
-          language: "es",
-        },
-        provenance: {
-          provider: "stub",
-          model: "stub-deterministic",
-          modelVersion: "1.0.0",
-          promptVersion: "v1",
-          taxonomyVersion: "v1",
-          analyzedAt: "2026-07-05T18:30:00.000Z",
-        },
+        analysis: ANALYSIS,
+        provenance: PROVENANCE,
         issuedAt: result.issuedAt,
       });
 
       expect(result.canonicalHash).toBe(reference);
     });
 
-    it("omits filename entirely (not null) when the asset has none — must match dtr-core's .optional() semantics", async () => {
+    it("dtr-1 omits filename entirely (not null) when the asset has none — must match dtr-core's .optional() semantics", async () => {
+      trustRecordRepository = buildTrustRecordRepository({
+        findByIdForOrganization: vi
+          .fn()
+          .mockResolvedValue(buildTrustRecord({ schemaVersion: "dtr-1" })),
+      });
       digitalAssetRepository = buildDigitalAssetRepository({
         findById: vi.fn().mockResolvedValue(buildDigitalAsset({ filename: null })),
       });
@@ -210,19 +273,26 @@ describe("ConfirmReviewUseCase", () => {
       const referenceWithoutFilename = await computeCanonicalHash({
         schemaVersion: "dtr-1",
         asset: { sha256: "a".repeat(64), mimeType: "application/pdf", sizeBytes: 2048 },
-        analysis: { summary: "A reviewed summary of the document.", classification: "contrato", language: "es" },
-        provenance: {
-          provider: "stub",
-          model: "stub-deterministic",
-          modelVersion: "1.0.0",
-          promptVersion: "v1",
-          taxonomyVersion: "v1",
-          analyzedAt: "2026-07-05T18:30:00.000Z",
-        },
+        analysis: ANALYSIS,
+        provenance: PROVENANCE,
         issuedAt: result.issuedAt,
       });
 
       expect(result.canonicalHash).toBe(referenceWithoutFilename);
+    });
+
+    it("rejects an unsupported schemaVersion instead of hashing it", async () => {
+      trustRecordRepository = buildTrustRecordRepository({
+        findByIdForOrganization: vi
+          .fn()
+          .mockResolvedValue(buildTrustRecord({ schemaVersion: "dtr-99" })),
+      });
+      useCase = new ConfirmReviewUseCase(trustRecordRepository, digitalAssetRepository);
+
+      await expect(
+        useCase.confirm({ organizationId: "org-1", trustRecordId: "trust-record-1" }),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(trustRecordRepository.confirmToReady).not.toHaveBeenCalled();
     });
 
     it("transitions the record to READY and persists canonicalHash + issuedAt", async () => {

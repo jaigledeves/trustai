@@ -57,8 +57,8 @@ migrar implicaría hacerlos dos veces.
 | # | Mejora | Estado |
 |---|---|---|
 | B1 | ADR que supersede a ADR-001: el hash anclado se compone de `coreHash` (campos deterministas reproducibles desde el archivo) y `enrichmentHash` (salida IA + procedencia) | hecho (ADR-015) |
-| B2 | Implementar `dtr-2` en `packages/dtr-core` manteniendo soporte de lectura y verificación de `dtr-1` | pendiente |
-| B3 | Migrar la emisión de nuevos DTR a `dtr-2`; los ya anclados permanecen en `dtr-1` | pendiente |
+| B2 | Implementar `dtr-2` en `packages/dtr-core` manteniendo soporte de lectura y verificación de `dtr-1` | hecho |
+| B3 | Migrar la emisión de nuevos DTR a `dtr-2`; los ya anclados permanecen en `dtr-1` | hecho |
 
 Motivación: hoy la salida de la IA (no determinista) forma parte del objeto
 hasheado, por lo que un tercero no puede reconstruir el DTR desde el archivo

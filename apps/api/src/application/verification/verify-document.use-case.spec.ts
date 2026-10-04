@@ -1,4 +1,4 @@
-import { sha256Hex } from "@trustai/dtr-core";
+import { computeCanonicalHash, computeDtr2Hashes, sha256Hex } from "@trustai/dtr-core";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { Anchor, AnchorStatus } from "../../domain/anchor.entity";
 import { AssetStatus, DigitalAsset } from "../../domain/digital-asset.entity";
@@ -18,6 +18,20 @@ const MISMATCHED_BYTES = new TextEncoder().encode("hello world - trustai fixture
 
 let MATCHING_SHA256: string;
 
+const DTR2_ANALYSIS = {
+  summary: "A reviewed summary of the document.",
+  classification: "contrato",
+  language: "es",
+} as const;
+const DTR2_PROVENANCE = {
+  provider: "stub",
+  model: "stub-deterministic",
+  modelVersion: "1.0.0",
+  promptVersion: "v1",
+  taxonomyVersion: "v1",
+  analyzedAt: "2026-07-05T18:30:00.000Z",
+} as const;
+
 beforeAll(async () => {
   MATCHING_SHA256 = await sha256Hex(MATCHING_BYTES);
 });
@@ -25,7 +39,7 @@ beforeAll(async () => {
 function buildTrustRecord(overrides: Partial<TrustRecord> = {}): TrustRecord {
   const base = new TrustRecord(
     "trust-record-1",
-    "dtr-1",
+    "dtr-1", // legacy default; dtr-2 cases override schemaVersion explicitly
     "asset-1",
     "sha-placeholder",
     "a".repeat(64), // canonicalHash — set at confirm time
@@ -374,6 +388,82 @@ describe("VerifyDocumentUseCase", () => {
         txHash: "0xtxhash",
         blockTimestamp: new Date("2026-07-06T00:00:00.000Z"),
         chainReadUnavailable: true,
+      });
+    });
+
+    it("legacy dtr-1 + matching bytes -> VALID, chain checked with the dtr-1 canonical hash", async () => {
+      const result = await useCase.verifyByUpload({
+        trustRecordId: "trust-record-1",
+        fileBytes: MATCHING_BYTES,
+        channel: "URL",
+      });
+
+      const reference = await computeCanonicalHash({
+        schemaVersion: "dtr-1",
+        asset: {
+          sha256: MATCHING_SHA256,
+          mimeType: "application/pdf",
+          sizeBytes: MATCHING_BYTES.length,
+          filename: "contract.pdf",
+        },
+        analysis: DTR2_ANALYSIS,
+        provenance: DTR2_PROVENANCE,
+        issuedAt: ISSUED_AT,
+      });
+
+      expect(result.verdict).toBe("VALID");
+      expect(anchorPort.isAnchored).toHaveBeenCalledWith(reference);
+    });
+
+    describe("dtr-2 record (ADR-015)", () => {
+      beforeEach(() => {
+        trustRecordRepository = buildTrustRecordRepository({
+          findByIdWithAssetAndAnchor: vi
+            .fn()
+            .mockResolvedValue(buildFound({ trustRecord: buildTrustRecord({ schemaVersion: "dtr-2" }) })),
+        });
+        useCase = new VerifyDocumentUseCase(trustRecordRepository, anchorPort, verificationAttemptRepository);
+      });
+
+      it("matching bytes -> VALID with analysis, chain checked with dtr-core's anchorHash", async () => {
+        const result = await useCase.verifyByUpload({
+          trustRecordId: "trust-record-1",
+          fileBytes: MATCHING_BYTES,
+          channel: "URL",
+        });
+
+        const reference = await computeDtr2Hashes({
+          schemaVersion: "dtr-2",
+          issuedAt: ISSUED_AT,
+          core: {
+            asset: {
+              sha256: MATCHING_SHA256,
+              mimeType: "application/pdf",
+              sizeBytes: MATCHING_BYTES.length,
+            },
+          },
+          enrichment: {
+            asset: { filename: "contract.pdf" },
+            analysis: DTR2_ANALYSIS,
+            provenance: DTR2_PROVENANCE,
+          },
+        });
+
+        expect(result.verdict).toBe("VALID");
+        expect(result.analysis).toEqual(DTR2_ANALYSIS);
+        expect(anchorPort.isAnchored).toHaveBeenCalledWith(reference.anchorHash);
+      });
+
+      it("different bytes -> ASSET_MISMATCH, analysis withheld", async () => {
+        const result = await useCase.verifyByUpload({
+          trustRecordId: "trust-record-1",
+          fileBytes: MISMATCHED_BYTES,
+          channel: "URL",
+        });
+
+        expect(result.verdict).toBe("ASSET_MISMATCH");
+        expect(result.analysis).toBeNull();
+        expect(anchorPort.isAnchored).not.toHaveBeenCalled();
       });
     });
 

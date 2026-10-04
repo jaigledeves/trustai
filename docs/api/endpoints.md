@@ -51,7 +51,7 @@ Documentación interactiva: Swagger/OpenAPI vía `@nestjs/swagger` en `main.ts`.
 | GET | `/trust-records?page=&pageSize=&search=&state=` | JWT | Lista paginada y filtrada (RNF-004, escopado en la query, nunca post-filtrado). Filtros opcionales validados por `ListTrustRecordsQueryDto`: `search` (nombre de fichero, *contains* case-insensitive) y `state` (estado del ciclo de vida, valor exacto). Un `state` inválido devuelve **400**, nunca 500 (ADR-008). `page` default 1; `pageSize` default 20, clamp a 100. Org sin coincidencias devuelve `{ items: [], total: 0 }`, nunca 404. |
 | GET | `/trust-records/:id` | JWT | Detalle completo: estado, `canonicalHash`, campos IA, anchor (txHash/blockTimestamp/status) si existe, y `analysisFailureReason` si el job `analyze-document` falló. |
 | PATCH | `/trust-records/:id/review` | JWT | Edita campos IA (`summary`/`classification`/`language`) mientras el registro está en `DRAFT`. 409 fuera de `DRAFT` (INV-21). Patch parcial. |
-| POST | `/trust-records/:id/confirm` | JWT | Ensambla y canonicaliza el DTR (RFC 8785 + SHA-256 vía `dtr-core`), fija `canonicalHash` una única vez (INV-22/24). `DRAFT -> READY`. 409 si no está en `DRAFT`, ya confirmado, o falta análisis/procedencia (RF-025/INV-26). |
+| POST | `/trust-records/:id/confirm` | JWT | Ensambla el DTR con `dtr-core` según su `schemaVersion` (`dtr-2` para registros nuevos) y calcula el valor anclado (RFC 8785 + SHA-256): `anchorHash` en `dtr-2`, hash del registro completo en `dtr-1` (ADR-015). Lo fija en `canonicalHash` una única vez (INV-22/24). `DRAFT -> READY`. 409 si no está en `DRAFT`, ya confirmado, o falta análisis/procedencia (RF-025/INV-26). |
 | POST | `/trust-records/:id/discard` | JWT | `DRAFT -> DISCARDED`. 409 desde cualquier otro estado. |
 | POST | `/trust-records/:id/anchor` | JWT | `READY -> ANCHORING`. Encola el job `anchor-dtr` y responde de inmediato (no bloqueante, RF-032/RNF-022): la tx on-chain se envía en background. 409 si no está `READY` o falta `canonicalHash`. |
 
@@ -103,7 +103,7 @@ sequenceDiagram
 
     U->>W: Confirma (ConfirmButton)
     W->>API: POST /trust-records/:id/confirm
-    API->>API: dtr-core: canonicaliza (RFC 8785) + SHA-256 -> canonicalHash
+    API->>API: dtr-core: canonicaliza (RFC 8785) + SHA-256 -> canonicalHash (anchorHash en dtr-2)
     API->>DB: TrustRecord DRAFT -> READY (canonicalHash fijado, INV-22/24)
     API-->>W: 200 ConfirmTrustRecordResponseDto
 
