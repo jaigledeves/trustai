@@ -147,6 +147,13 @@ model Anchor {
   txHash         String?
   merkleRoot     String?
   blockTimestamp DateTime?
+  /// Phase C (C1): EIP-155 chain id, block and AnchorRegistry address of the
+  /// anchor. Nullable so rows anchored before these columns existed stay valid.
+  chainId         Int?
+  /// BigInt: a block number is a uint64 on-chain. Null when the hash was
+  /// already anchored before our submission (no transaction of ours).
+  blockNumber     BigInt?
+  contractAddress String?
   status         AnchorStatus @default(PENDING)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt

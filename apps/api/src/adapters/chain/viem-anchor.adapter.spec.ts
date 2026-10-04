@@ -13,9 +13,11 @@ import { ViemAnchorAdapter } from "./viem-anchor.adapter";
 const CONTRACT_ADDRESS = "0x1234567890123456789012345678901234567890" as const;
 const HASH = "a".repeat(64);
 const HASH_0X = `0x${HASH}` as const;
+const CHAIN_ID = 84532;
 
 function buildFakePublicClient(overrides: Partial<PublicClient> = {}): PublicClient {
   return {
+    chain: { id: CHAIN_ID },
     simulateContract: vi.fn(),
     ...overrides,
   } as unknown as PublicClient;
@@ -76,6 +78,8 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
       txHash: "0xtxhash123",
       alreadyAnchored: false,
       anchoredAtBlockTimestamp: null,
+      chainId: CHAIN_ID,
+      contractAddress: CONTRACT_ADDRESS,
     });
   });
 
@@ -101,6 +105,8 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
       txHash: null,
       alreadyAnchored: true,
       anchoredAtBlockTimestamp: new Date(Number(anchoredAtSeconds) * 1000),
+      chainId: CHAIN_ID,
+      contractAddress: CONTRACT_ADDRESS,
     });
     expect(walletClient.writeContract).not.toHaveBeenCalled();
   });
@@ -143,7 +149,7 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
   });
 
   describe("getConfirmationStatus", () => {
-    it("returns the confirmation count and block timestamp for a mined tx", async () => {
+    it("returns the confirmation count, block number, block timestamp and deployment for a mined tx", async () => {
       const blockTimestampSeconds = 1_800_000_100n;
       const publicClient = buildFakePublicClient({
         getTransactionReceipt: vi.fn().mockResolvedValue({ blockNumber: 100n }),
@@ -158,6 +164,9 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
       expect(status).toEqual({
         confirmations: 3,
         blockTimestamp: new Date(Number(blockTimestampSeconds) * 1000),
+        blockNumber: 100n,
+        chainId: CHAIN_ID,
+        contractAddress: CONTRACT_ADDRESS,
       });
     });
 
@@ -172,7 +181,13 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
 
       const status = await adapter.getConfirmationStatus("0xsome-tx-hash");
 
-      expect(status).toEqual({ confirmations: 0, blockTimestamp: null });
+      expect(status).toEqual({
+        confirmations: 0,
+        blockTimestamp: null,
+        blockNumber: null,
+        chainId: CHAIN_ID,
+        contractAddress: CONTRACT_ADDRESS,
+      });
     });
 
     it("propagates a genuine RPC/network error (not swallowed as '0 confirmations')", async () => {
@@ -185,6 +200,21 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
       await expect(adapter.getConfirmationStatus("0xsome-tx-hash")).rejects.toThrow(
         "RPC connection refused",
       );
+    });
+
+    it("reports a null chainId when the public client has no chain configured", async () => {
+      const publicClient = buildFakePublicClient({
+        chain: undefined,
+        getTransactionReceipt: vi.fn().mockResolvedValue({ blockNumber: 7n }),
+        getBlockNumber: vi.fn().mockResolvedValue(8n),
+        getBlock: vi.fn().mockResolvedValue({ timestamp: 1_800_000_000n }),
+      });
+      const adapter = new ViemAnchorAdapter({ publicClient, contractAddress: CONTRACT_ADDRESS });
+
+      const status = await adapter.getConfirmationStatus("0xsome-tx-hash");
+
+      expect(status.chainId).toBeNull();
+      expect(status.blockNumber).toBe(7n);
     });
   });
 

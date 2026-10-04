@@ -42,3 +42,9 @@ export {
   type VerificationResult,
   type Dtr2ProofResult,
 } from "./verify.js";
+export {
+  ANCHOR_REGISTRY_ABI,
+  ANCHOR_REGISTRY_DEPLOYMENTS,
+  BASE_SEPOLIA_ANCHOR_REGISTRY,
+  type AnchorRegistryDeployment,
+} from "./anchor-registry.js";

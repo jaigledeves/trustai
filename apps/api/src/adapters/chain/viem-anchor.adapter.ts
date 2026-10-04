@@ -8,6 +8,7 @@ import {
   type WalletClient,
 } from "viem";
 import type {
+  AnchorDeployment,
   AnchorExistenceStatus,
   AnchorPort,
   AnchorSubmitResult,
@@ -63,7 +64,7 @@ export class ViemAnchorAdapter implements AnchorPort {
       });
 
       const txHash = await walletClient.writeContract(request);
-      return { txHash, alreadyAnchored: false, anchoredAtBlockTimestamp: null };
+      return { txHash, alreadyAnchored: false, anchoredAtBlockTimestamp: null, ...this.deployment() };
     } catch (err) {
       if (this.isAlreadyAnchoredRevert(err)) {
         const anchoredAtSeconds = await this.config.publicClient.readContract({
@@ -78,7 +79,7 @@ export class ViemAnchorAdapter implements AnchorPort {
         this.logger.log(
           `Hash already anchored on-chain, treating as success (no tx submitted): ${canonicalHash}`,
         );
-        return { txHash: null, alreadyAnchored: true, anchoredAtBlockTimestamp };
+        return { txHash: null, alreadyAnchored: true, anchoredAtBlockTimestamp, ...this.deployment() };
       }
       throw err;
     }
@@ -92,13 +93,18 @@ export class ViemAnchorAdapter implements AnchorPort {
       const currentBlock = await this.config.publicClient.getBlockNumber();
       const confirmations = Number(currentBlock - receipt.blockNumber + 1n);
       const block = await this.config.publicClient.getBlock({ blockNumber: receipt.blockNumber });
-      return { confirmations, blockTimestamp: new Date(Number(block.timestamp) * 1000) };
+      return {
+        confirmations,
+        blockTimestamp: new Date(Number(block.timestamp) * 1000),
+        blockNumber: receipt.blockNumber,
+        ...this.deployment(),
+      };
     } catch (err) {
       // Not mined yet (or the RPC hasn't caught up) — this is a normal,
       // expected state while polling, not a failure. The caller's own
       // timeout logic decides when to give up waiting.
       if (err instanceof TransactionReceiptNotFoundError) {
-        return { confirmations: 0, blockTimestamp: null };
+        return { confirmations: 0, blockTimestamp: null, blockNumber: null, ...this.deployment() };
       }
       throw err;
     }
@@ -128,6 +134,17 @@ export class ViemAnchorAdapter implements AnchorPort {
       anchoredAtSeconds > 0n ? new Date(Number(anchoredAtSeconds) * 1000) : null;
 
     return { anchored: true, blockTimestamp };
+  }
+
+  /**
+   * The chain id comes from the configured viem `Chain` (worker.module.ts
+   * builds it from `CHAIN_ID`), so no RPC round-trip is needed.
+   */
+  private deployment(): AnchorDeployment {
+    return {
+      chainId: this.config.publicClient.chain?.id ?? null,
+      contractAddress: this.config.contractAddress,
+    };
   }
 
   private isAlreadyAnchoredRevert(err: unknown): boolean {

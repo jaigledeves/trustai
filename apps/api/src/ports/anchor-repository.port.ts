@@ -2,6 +2,15 @@ import type { Anchor, AnchorStatus } from "../domain/anchor.entity";
 
 export const ANCHOR_REPOSITORY_PORT = Symbol("AnchorRepositoryPort");
 
+export interface AnchorSubmissionFields {
+  txHash: string | null;
+  status: AnchorStatus;
+  blockTimestamp?: Date | null;
+  chainId?: number | null;
+  blockNumber?: bigint | null;
+  contractAddress?: string | null;
+}
+
 export interface AnchorRepositoryPort {
   /**
    * Creates a new PENDING anchor row. Deliberately a plain, single-table
@@ -22,9 +31,9 @@ export interface AnchorRepositoryPort {
    * once known: immediately for `AlreadyAnchored` (read from
    * `AnchorRegistry.anchoredAt()`), or once `ConfirmAnchorHandler`
    * observes >=2 confirmations (INV-32) for a freshly-submitted tx.
+   *
+   * `chainId`, `contractAddress` and `blockNumber` (phase C, C1) follow the
+   * same rule as `blockTimestamp`: `undefined` leaves the column untouched.
    */
-  updateSubmissionResult(
-    id: string,
-    fields: { txHash: string | null; status: AnchorStatus; blockTimestamp?: Date | null },
-  ): Promise<void>;
+  updateSubmissionResult(id: string, fields: AnchorSubmissionFields): Promise<void>;
 }

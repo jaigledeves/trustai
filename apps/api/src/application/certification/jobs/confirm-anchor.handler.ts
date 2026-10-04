@@ -10,7 +10,7 @@ import {
   ANCHOR_REPOSITORY_PORT,
   type AnchorRepositoryPort,
 } from "../../../ports/anchor-repository.port";
-import { ANCHOR_PORT, type AnchorPort } from "../../../ports/anchor.port";
+import { ANCHOR_PORT, type AnchorPort, type ConfirmationStatus } from "../../../ports/anchor.port";
 import { QUEUE_PORT, type QueuePort } from "../../../ports/queue.port";
 import {
   TRUST_RECORD_REPOSITORY_PORT,
@@ -42,8 +42,8 @@ export interface ConfirmAnchorJobPayload {
 /**
  * pg-boss `confirm-anchor` job handler. Self-requeues via `sendAfter`
  * until either:
- * - `>= REQUIRED_CONFIRMATIONS` (INV-32): persists `txHash`+`blockTimestamp`
- *   on the `Anchor` row (CONFIRMED) and transitions ANCHORING->CERTIFIED
+ * - `>= REQUIRED_CONFIRMATIONS` (INV-32): persists `txHash`, `blockTimestamp`,
+ *   `blockNumber`, `chainId` and `contractAddress` on the `Anchor` row (CONFIRMED) and transitions ANCHORING->CERTIFIED
  *   (blockchain-anchoring spec: "Transaction confirmed").
  * - the timeout window elapses: ANCHORING->FAILED (visible — "Failure
  *   state is visible throughout") then immediately FAILED->ANCHORING
@@ -90,7 +90,7 @@ export class ConfirmAnchorHandler {
     const status = await this.anchorPort.getConfirmationStatus(payload.txHash);
 
     if (status.confirmations >= REQUIRED_CONFIRMATIONS) {
-      await this.certify(payload, status.blockTimestamp);
+      await this.certify(payload, status);
       return;
     }
 
@@ -110,11 +110,14 @@ export class ConfirmAnchorHandler {
     );
   }
 
-  private async certify(payload: ConfirmAnchorJobPayload, blockTimestamp: Date | null): Promise<void> {
+  private async certify(payload: ConfirmAnchorJobPayload, status: ConfirmationStatus): Promise<void> {
     await this.anchorRepository.updateSubmissionResult(payload.anchorId, {
       txHash: payload.txHash,
       status: AnchorStatus.CONFIRMED,
-      blockTimestamp,
+      blockTimestamp: status.blockTimestamp,
+      blockNumber: status.blockNumber,
+      chainId: status.chainId,
+      contractAddress: status.contractAddress,
     });
 
     const trustRecord = await this.trustRecordRepository.findById(payload.trustRecordId);

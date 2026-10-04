@@ -112,6 +112,8 @@ Objetivo de cobertura: 100%. Con 15 líneas efectivas no hay excusa.
 | Wallet del worker | Clave en secreto de entorno (RNF-005); wallet dedicada solo para anclar, sin fondos más allá del gas necesario |
 | Confirmaciones | El worker espera 2 confirmaciones antes de marcar `CERTIFIED` (INV-32) |
 | Reintentos | `AlreadyAnchored` ⇒ éxito; timeout/nonce ⇒ reintento con backoff (RF-033) |
+| Datos del anclaje | La fila `Anchor` guarda `chainId`, `contractAddress` y `blockNumber` al confirmarse (fase C, C1). Con `AlreadyAnchored` no hay transacción propia: se guardan cadena y contrato, y `blockNumber` queda vacío |
+| Constantes compartidas | El ABI y el despliegue conocido (`chainId` 84532 y la dirección de la fila «Registro») viven en `@trustai/dtr-core` (`packages/dtr-core/src/anchor-registry.ts`); la API los reexporta para tener una sola fuente de verdad |
 
 ## Decisiones
 

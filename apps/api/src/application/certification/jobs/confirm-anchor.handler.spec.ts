@@ -77,7 +77,13 @@ function buildAnchorPort(overrides: Partial<AnchorPort> = {}): AnchorPort {
     submitAnchor: vi.fn(),
     getConfirmationStatus: vi
       .fn()
-      .mockResolvedValue({ confirmations: 0, blockTimestamp: null } satisfies ConfirmationStatus),
+      .mockResolvedValue({
+        confirmations: 0,
+        blockTimestamp: null,
+        blockNumber: null,
+        chainId: 84532,
+        contractAddress: "0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22",
+      } satisfies ConfirmationStatus),
     isAnchored: vi.fn(),
     ...overrides,
   };
@@ -128,10 +134,16 @@ describe("ConfirmAnchorHandler", () => {
     );
   });
 
-  it("CRITICAL: certifies the record once 2 confirmations are observed (INV-32) — persists txHash+blockTimestamp", async () => {
+  it("CRITICAL: certifies the record once 2 confirmations are observed (INV-32) — persists txHash, block and deployment", async () => {
     const blockTimestamp = new Date("2026-06-01T12:00:00.000Z");
     anchorPort = buildAnchorPort({
-      getConfirmationStatus: vi.fn().mockResolvedValue({ confirmations: 2, blockTimestamp }),
+      getConfirmationStatus: vi.fn().mockResolvedValue({
+        confirmations: 2,
+        blockTimestamp,
+        blockNumber: 12_345_678n,
+        chainId: 84532,
+        contractAddress: "0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22",
+      }),
     });
     handler = new ConfirmAnchorHandler(anchorPort, trustRecordRepository, anchorRepository, queue, configService);
 
@@ -141,6 +153,9 @@ describe("ConfirmAnchorHandler", () => {
       txHash: "0xtxhash",
       status: AnchorStatus.CONFIRMED,
       blockTimestamp,
+      blockNumber: 12_345_678n,
+      chainId: 84532,
+      contractAddress: "0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22",
     });
     expect(trustRecordRepository.certify).toHaveBeenCalledWith("trust-record-1");
     expect(queue.sendAfter).not.toHaveBeenCalled();

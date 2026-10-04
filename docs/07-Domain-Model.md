@@ -61,6 +61,9 @@ classDiagram
         +txHash
         +merkleRoot
         +blockTimestamp
+        +chainId
+        +blockNumber
+        +contractAddress
         +status
     }
     class VerificationAttempt {
@@ -145,6 +148,12 @@ Fuera de alcance: diseño físico de base de datos (08), contratos de API
 | INV-31 | Si N>1, cada DTR almacena su Merkle proof para verificación individual. |
 | INV-32 | `txHash` y `blockTimestamp` solo se fijan cuando la transacción está confirmada. |
 | INV-33 | Un DTR pertenece como máximo a un Anchor confirmado. |
+
+Cada Anchor confirmado guarda también dónde vive el anclaje (fase C, C1):
+`chainId` (EIP-155), `contractAddress` (el AnchorRegistry usado) y
+`blockNumber` (bloque de la transacción). Las tres columnas son opcionales:
+los anclajes anteriores a la fase C quedan sin ellas, y `blockNumber` queda
+vacío cuando el hash ya estaba anclado y no hubo transacción propia.
 
 ### VerificationAttempt (raíz: Verification)
 

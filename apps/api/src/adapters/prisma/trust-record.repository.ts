@@ -325,6 +325,9 @@ export class PrismaTrustRecordRepository implements TrustRecordRepositoryPort {
       this.anchorToDomainStatus(record.status),
       record.createdAt,
       record.updatedAt,
+      record.chainId,
+      record.blockNumber,
+      record.contractAddress,
     );
   }
 

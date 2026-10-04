@@ -66,10 +66,14 @@ function buildAnchorRepository(overrides: Partial<AnchorRepositoryPort> = {}): A
   };
 }
 
+const CONTRACT_ADDRESS = "0xe6738fb0aF94822a3831c8e0a65b5C6d20607C22";
+
 const VALID_SUBMIT_RESULT: AnchorSubmitResult = {
   txHash: "0xtxhash",
   alreadyAnchored: false,
   anchoredAtBlockTimestamp: null,
+  chainId: 84532,
+  contractAddress: CONTRACT_ADDRESS,
 };
 
 function buildAnchorPort(overrides: Partial<AnchorPort> = {}): AnchorPort {
@@ -133,16 +137,23 @@ describe("AnchorDtrHandler", () => {
         txHash: null,
         alreadyAnchored: true,
         anchoredAtBlockTimestamp: new Date("2026-01-01T00:00:00.000Z"),
+        chainId: 84532,
+        contractAddress: CONTRACT_ADDRESS,
       }),
     });
     handler = new AnchorDtrHandler(anchorPort, trustRecordRepository, anchorRepository, queue);
 
     await expect(handler.handle(payload)).resolves.toBeUndefined();
 
+    // No transaction of ours exists, so there is no block number to record;
+    // chain id and contract address are still known from the adapter.
     expect(anchorRepository.updateSubmissionResult).toHaveBeenCalledWith("anchor-1", {
       txHash: null,
       status: AnchorStatus.CONFIRMED,
       blockTimestamp: new Date("2026-01-01T00:00:00.000Z"),
+      chainId: 84532,
+      contractAddress: CONTRACT_ADDRESS,
+      blockNumber: null,
     });
     expect(trustRecordRepository.certify).toHaveBeenCalledWith("trust-record-1");
     expect(queue.send).not.toHaveBeenCalled();
