@@ -58,6 +58,7 @@ con una ADR nueva.
 | [ADR-013](adr/ADR-013-cluster-de-autenticacion-compartido-en-el-header-publico.md) | Cluster de autenticación compartido (`HeaderAuthActions`) sin variantes por superficie |
 | [ADR-014](adr/ADR-014-clasificador-de-severidad-de-veredicto-y-token-warning.md) | Clasificador de severidad de veredicto compartido y token semántico `--warning` |
 | [ADR-015](adr/ADR-015-dtr-2-nucleo-y-enriquecimiento-separados.md) | Esquema `dtr-2` con núcleo verificable y enriquecimiento IA separados |
+| [ADR-016](adr/ADR-016-paquete-de-prueba-publico.md) | Paquete de prueba público `ancrux-proof-1` para registros `dtr-2` |
 
 ## Índice maestro / estado
 

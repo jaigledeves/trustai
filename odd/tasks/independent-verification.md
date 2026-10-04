@@ -38,7 +38,7 @@ the AnchorRegistry contract on Base Sepolia, in the browser or from a CLI.
 
 - [x] C0 - Server verdict when the chain denies the anchor (route: delegated, with C1)
 - [x] C1 - Full anchor data + shared contract constants (route: delegated)
-- [ ] C3 - Proof package endpoint and format (route: TBD)
+- [x] C3 - Proof package endpoint and format (route: delegated; 2+ non-trivial files across dtr-core, API and docs)
 - [ ] C2/C4 - Browser verification and diagnosis view (route: TBD)
 - [ ] C5 - CLI verifier (route: TBD)
 
@@ -54,12 +54,14 @@ the AnchorRegistry contract on Base Sepolia, in the browser or from a CLI.
 |---|---|---|---|
 | C0 | 337c02b | medium, granted, approved (slice with C1) | Chain read ok + hash not anchored -> INVALID_RECORD (GET and POST), attempt logged, warn with record id only; RPC failure keeps VALID + chainReadUnavailable. RED 2 failing -> GREEN 30/30 in verify-document spec. |
 | C1 | c36ec63 | medium, granted, approved (slice with C0) | dtr-core exports AnchorRegistry ABI + Base Sepolia deployment (API re-exports it). Anchor gets nullable chainId, blockNumber (BigInt), contractAddress via db push; confirm-anchor persists all three, AlreadyAnchored persists chain + contract with null blockNumber. RED 7 failing -> GREEN; e2e certification-flow asserts the new columns. |
+| C3 | (pending commit) | pending | dtr-core `ProofPackageV1Schema` (`ancrux-proof-1`, strict) + `verifyProofPackageAgainstFile`; `GET /public/verify/:id/proof` via `GetProofPackageUseCase` (dtr-2 CERTIFIED only; dtr-1/not anchored/tampered/unknown network -> 409; unknown -> 404; `download=1` attachment). RED 17 (dtr-core) + 15 (use case, missing module) + 6 (controller) -> GREEN; e2e S-PV-PROOF verifies the package against the file and `isAnchored` on Anvil. ADR-016. |
 
 ## Notes for later steps
 
-- C3 must serialize `Anchor.blockNumber` (Prisma BigInt) as a string; today no response exposes it.
+- C3 serializes `Anchor.blockNumber` (Prisma BigInt) as a decimal string in the proof package (done).
+- C2/C5 should consume `ProofPackageV1Schema` and `verifyProofPackageAgainstFile` from dtr-core, then read `isAnchored(anchorHash)` on `anchor.contractAddress` at `anchor.chainId`.
 - Known limitation: the chain-denial verdict (C0) reads the contract configured in the API, not the `contractAddress` stored with each anchor. AnchorRegistry is immutable and no migration is planned (ADR-003); if the contract ever changes, verification must use the stored address and chainId.
 
 ## Next step
 
-Open PR for C0+C1, then C3.
+Open PR for C3, then C2/C4.
