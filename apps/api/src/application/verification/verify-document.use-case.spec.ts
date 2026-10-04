@@ -505,6 +505,39 @@ describe("VerifyDocumentUseCase", () => {
         expect(result.analysis).toBeNull();
         expect(anchorPort.isAnchored).not.toHaveBeenCalled();
       });
+
+      it.each([null, ""])(
+        "asset without a filename (%j) -> chain checked with the anchorHash of an empty enrichment.asset",
+        async (filename) => {
+          trustRecordRepository = buildTrustRecordRepository({
+            findByIdWithAssetAndAnchor: vi.fn().mockResolvedValue(
+              buildFound({
+                trustRecord: buildTrustRecord({ schemaVersion: "dtr-2" }),
+                asset: buildDigitalAsset({ filename }),
+              }),
+            ),
+          });
+          useCase = new VerifyDocumentUseCase(trustRecordRepository, anchorPort, verificationAttemptRepository);
+
+          const result = await useCase.verifyByUpload({
+            trustRecordId: "trust-record-1",
+            fileBytes: MATCHING_BYTES,
+            channel: "URL",
+          });
+
+          const reference = await computeDtr2Hashes({
+            schemaVersion: "dtr-2",
+            issuedAt: ISSUED_AT,
+            core: {
+              asset: { sha256: MATCHING_SHA256, mimeType: "application/pdf", sizeBytes: MATCHING_BYTES.length },
+            },
+            enrichment: { asset: {}, analysis: DTR2_ANALYSIS, provenance: DTR2_PROVENANCE },
+          });
+
+          expect(result.verdict).toBe("VALID");
+          expect(anchorPort.isAnchored).toHaveBeenCalledWith(reference.anchorHash);
+        },
+      );
     });
 
     it("includes the eIDAS disclaimer and a plain-language explanation on every verdict", async () => {
