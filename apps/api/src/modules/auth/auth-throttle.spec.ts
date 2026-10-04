@@ -77,13 +77,13 @@ describe("resolveAuthThrottleLimit", () => {
 });
 
 describe("AuthController per-account throttle", () => {
-  it.each(["login", "forgotPassword"] as const)("%s is marked for the account throttler", (method) => {
+  it.each(["login", "forgotPassword", "register"] as const)("%s is marked for the account throttler", (method) => {
     const handler = AuthController.prototype[method];
     expect(Reflect.getMetadata(ACCOUNT_THROTTLE_KEY, handler)).toBe(true);
     expect(isAccountThrottled(contextFor(handler))).toBe(true);
   });
 
-  it.each(["login", "forgotPassword"] as const)(
+  it.each(["login", "forgotPassword", "register"] as const)(
     "%s keeps the global per-IP tracker (no global tracker override)",
     (method) => {
       const handler = AuthController.prototype[method];
@@ -91,7 +91,7 @@ describe("AuthController per-account throttle", () => {
     },
   );
 
-  it.each(["register", "resetPassword"] as const)("%s is not marked for the account throttler", (method) => {
+  it.each(["resetPassword"] as const)("%s is not marked for the account throttler", (method) => {
     const handler = AuthController.prototype[method];
     expect(Reflect.getMetadata(ACCOUNT_THROTTLE_KEY, handler)).toBeUndefined();
     expect(isAccountThrottled(contextFor(handler))).toBe(false);

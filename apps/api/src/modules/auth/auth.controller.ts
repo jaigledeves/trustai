@@ -37,6 +37,9 @@ export class AuthController {
   ) {}
 
   @Post("register")
+  // Per-email limit: the duplicate-email branch notifies the existing owner,
+  // so repeated registrations must not become an unbounded notice stream.
+  @AccountThrottle()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: "Register a new organization admin user",
