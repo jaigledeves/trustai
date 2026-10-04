@@ -115,7 +115,12 @@ export async function runCli(argv: readonly string[], deps: CliDeps): Promise<nu
       trustRecordId,
       file: {
         size,
-        arrayBuffer: async () => new Uint8Array(fileBytes ?? new Uint8Array()).buffer,
+        arrayBuffer: async () => {
+          // Only an oversized file is left unread, and the orchestrator rejects
+          // it by size before asking for its bytes; fail loudly if that changes.
+          if (!fileBytes) throw new Error(`${options.file} was not read`);
+          return new Uint8Array(fileBytes).buffer;
+        },
       },
     },
     { fetchProof, chain: deps.createChainReader(options.rpc) },

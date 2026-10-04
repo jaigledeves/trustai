@@ -1,7 +1,7 @@
-import type { ChainReader } from "@trustai/dtr-core";
+import { MAX_FILE_BYTES, type ChainReader } from "@trustai/dtr-core";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_API_URL, DEFAULT_RPC_URL } from "../src/args.js";
-import { runCli, type CliDeps } from "../src/run.js";
+import { MAX_PROOF_BYTES, runCli, type CliDeps } from "../src/run.js";
 import { GOLDEN_TRUST_RECORD_ID, PDF_BYTES, buildProof, fakeChain } from "./fixtures.js";
 
 interface Harness {
@@ -106,7 +106,7 @@ describe("runCli --proof (offline from Ancrux)", () => {
     const h = harness({ files: { "doc.pdf": PDF_BYTES, "proof.json": encode(await buildProof()) } });
     const readFile = vi.fn(h.deps.readFile);
     const statFile = async (path: string) =>
-      path === "doc.pdf" ? { size: 10 * 1024 * 1024 + 1, isFile: true } : h.deps.statFile(path);
+      path === "doc.pdf" ? { size: MAX_FILE_BYTES + 1, isFile: true } : h.deps.statFile(path);
     const deps = { ...h.deps, statFile, readFile };
 
     expect(await runCli(["doc.pdf", "--proof", "proof.json"], deps)).toBe(1);
@@ -140,7 +140,7 @@ describe("runCli --proof (offline from Ancrux)", () => {
     const h = harness({ files: { "doc.pdf": PDF_BYTES, "proof.json": encode(await buildProof()) } });
     const readFile = vi.fn(h.deps.readFile);
     const statFile = async (path: string) =>
-      path === "proof.json" ? { size: 1024 * 1024 + 1, isFile: true } : h.deps.statFile(path);
+      path === "proof.json" ? { size: MAX_PROOF_BYTES + 1, isFile: true } : h.deps.statFile(path);
 
     expect(await runCli(["doc.pdf", "--proof", "proof.json"], { ...h.deps, statFile, readFile })).toBe(2);
     expect(h.err()).toContain("proof.json is larger than");
