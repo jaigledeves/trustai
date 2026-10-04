@@ -20,9 +20,9 @@ export const ACCOUNT_THROTTLER_NAME = "account";
 /**
  * Registers the app-wide `APP_GUARD` (ADR-012, spec "Global Default
  * Throttle Coverage"). Named throttler `"global"` — deliberately NOT
- * `"default"`, so it can never collide with `public-verification`'s own
- * module-local `"default"` throttler (that module is exempted from this
- * guard entirely via `@SkipThrottle({ global: true })`).
+ * `"default"`. Public-verification routes are NOT exempt: they pin their own
+ * limits on this same throttler with per-route `@Throttle({ global: ... })`
+ * overrides (see public-verification.controller.ts).
  *
  * Imports `AuthModule` (not just `JwtModule` directly) per ADR-012's
  * decision — `AuthModule` re-exports `JwtModule`, making `JwtService`
