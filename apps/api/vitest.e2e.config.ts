@@ -13,8 +13,8 @@ export default defineConfig({
   test: {
     // JWT_SECRET has no fallback (requireJwtSecret); tests need a fixed one.
     // AUTH_THROTTLE_LIMIT is raised so suites that log in repeatedly as one
-    // account are not throttled. No e2e spec covers the per-account 429 yet;
-    // one that does must lower it for its own app instance.
+    // account are not throttled. test/auth-throttle.e2e-spec.ts lowers it for
+    // its own app instance to prove the per-account 429.
     env: { JWT_SECRET: "test-jwt-secret", AUTH_THROTTLE_LIMIT: "1000" },
     include: ["test/**/*.e2e-spec.ts"],
     hookTimeout: 30_000,
