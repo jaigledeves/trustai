@@ -14,10 +14,12 @@ vi.mock("next/headers", () => ({
 
 const { POST } = await import("./route");
 
+const SAME_ORIGIN = "http://localhost:3001";
+
 function loginRequest(email: string, password: string) {
   return new NextRequest("http://localhost:3001/api/auth/login", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", origin: SAME_ORIGIN },
     body: JSON.stringify({ email, password }),
   });
 }
@@ -64,7 +66,7 @@ describe("POST /api/auth/login (spec: Login and Session Establishment)", () => {
 
     const request = new NextRequest("http://localhost:3001/api/auth/login", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", origin: SAME_ORIGIN },
       body: "this-is-not-json{",
     });
 
@@ -91,7 +93,7 @@ describe("POST /api/auth/login (spec: Login and Session Establishment)", () => {
 
       const request = new NextRequest("http://localhost:3001/api/auth/login", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", origin: SAME_ORIGIN },
         body: rawBody,
       });
 
@@ -118,5 +120,70 @@ describe("POST /api/auth/login (spec: Login and Session Establishment)", () => {
     expect(response.status).toBe(403);
     expect(body.message).toBe("Verifica tu email antes de iniciar sesión.");
     expect(mockCookieStore.set).not.toHaveBeenCalled();
+  });
+
+  describe("login CSRF guard (no cross-site login into an attacker's account)", () => {
+    function rawLogin(headers: Record<string, string>, body = '{"email":"attacker@example.com","password":"attackerpass1"}') {
+      return new NextRequest("http://localhost:3001/api/auth/login", {
+        method: "POST",
+        headers,
+        body,
+      });
+    }
+
+    async function expectRejected(request: NextRequest) {
+      mockCookieStore.set.mockClear();
+      let backendCalled = false;
+      server.use(
+        http.post("http://localhost:3000/auth/login", () => {
+          backendCalled = true;
+          return HttpResponse.json({ accessToken: "attacker-jwt" });
+        }),
+      );
+
+      const response = await POST(request);
+      const body = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(body).toEqual({ status: 403, message: expect.any(String) });
+      expect(backendCalled).toBe(false);
+      expect(mockCookieStore.set).not.toHaveBeenCalled();
+    }
+
+    it("rejects a cross-origin JSON POST", async () => {
+      await expectRejected(
+        rawLogin({ "content-type": "application/json", origin: "https://evil.example.com" }),
+      );
+    });
+
+    it("rejects a text/plain POST even from the same origin (<form enctype=text/plain> body)", async () => {
+      await expectRejected(rawLogin({ "content-type": "text/plain", origin: SAME_ORIGIN }));
+    });
+
+    it("rejects a cross-site <form enctype=text/plain> POST", async () => {
+      await expectRejected(
+        rawLogin({ "content-type": "text/plain", origin: "https://evil.example.com" }),
+      );
+    });
+
+    it("rejects a POST with no Origin and no Sec-Fetch-Site", async () => {
+      await expectRejected(rawLogin({ "content-type": "application/json" }));
+    });
+
+    it("accepts a same-origin JSON POST identified only by Sec-Fetch-Site", async () => {
+      mockCookieStore.set.mockClear();
+      server.use(
+        http.post("http://localhost:3000/auth/login", () =>
+          HttpResponse.json({ accessToken: "jwt-abc" }),
+        ),
+      );
+
+      const response = await POST(
+        rawLogin({ "content-type": "application/json; charset=utf-8", "sec-fetch-site": "same-origin" }),
+      );
+
+      expect(response.status).toBe(200);
+      expect(mockCookieStore.set).toHaveBeenCalled();
+    });
   });
 });
