@@ -52,8 +52,13 @@ the AnchorRegistry contract on Base Sepolia, in the browser or from a CLI.
 
 | Task | Commit | Review tier | Notes |
 |---|---|---|---|
-| C0 | (pending commit) | pending | Chain read ok + hash not anchored -> INVALID_RECORD (GET and POST), attempt logged, warn with record id only; RPC failure keeps VALID + chainReadUnavailable. RED 2 failing -> GREEN 30/30 in verify-document spec. |
-| C1 | (pending commit) | pending | dtr-core exports AnchorRegistry ABI + Base Sepolia deployment (API re-exports it). Anchor gets nullable chainId, blockNumber (BigInt), contractAddress via db push; confirm-anchor persists all three, AlreadyAnchored persists chain + contract with null blockNumber. RED 7 failing -> GREEN; e2e certification-flow asserts the new columns. |
+| C0 | 337c02b | medium, granted, approved (slice with C1) | Chain read ok + hash not anchored -> INVALID_RECORD (GET and POST), attempt logged, warn with record id only; RPC failure keeps VALID + chainReadUnavailable. RED 2 failing -> GREEN 30/30 in verify-document spec. |
+| C1 | c36ec63 | medium, granted, approved (slice with C0) | dtr-core exports AnchorRegistry ABI + Base Sepolia deployment (API re-exports it). Anchor gets nullable chainId, blockNumber (BigInt), contractAddress via db push; confirm-anchor persists all three, AlreadyAnchored persists chain + contract with null blockNumber. RED 7 failing -> GREEN; e2e certification-flow asserts the new columns. |
+
+## Notes for later steps
+
+- C3 must serialize `Anchor.blockNumber` (Prisma BigInt) as a string; today no response exposes it.
+- Known limitation: the chain-denial verdict (C0) reads the contract configured in the API, not the `contractAddress` stored with each anchor. AnchorRegistry is immutable and no migration is planned (ADR-003); if the contract ever changes, verification must use the stored address and chainId.
 
 ## Next step
 
