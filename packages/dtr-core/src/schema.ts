@@ -30,12 +30,12 @@ export const DOCUMENT_TAXONOMY_V1 = [
 
 export type DocumentClass = (typeof DOCUMENT_TAXONOMY_V1)[number];
 
-const sha256HexSchema = z
+export const sha256HexSchema = z
   .string()
   .regex(/^[0-9a-f]{64}$/, "must be a lowercase 64-char hex SHA-256 digest");
 
 /** ISO 8601 UTC instant, e.g. 2026-07-05T18:30:00Z */
-const isoUtcInstantSchema = z
+export const isoUtcInstantSchema = z
   .string()
   .regex(
     /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/,
