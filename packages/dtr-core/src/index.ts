@@ -43,6 +43,13 @@ export {
   type Dtr2ProofResult,
 } from "./verify.js";
 export {
+  PROOF_PACKAGE_FORMAT_V1,
+  ProofPackageV1Schema,
+  verifyProofPackageAgainstFile,
+  type ProofPackageV1,
+  type ProofPackageCheckResult,
+} from "./proof-package.js";
+export {
   ANCHOR_REGISTRY_ABI,
   ANCHOR_REGISTRY_DEPLOYMENTS,
   BASE_SEPOLIA_ANCHOR_REGISTRY,
