@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { buildTrustRecordCandidate, sha256Hex, verifyAssetAgainstRecord } from "@trustai/dtr-core";
 import { AnchorStatus, type Anchor } from "../../domain/anchor.entity";
 import { TrustRecordState, type TrustRecord } from "../../domain/trust-record.entity";
@@ -87,9 +87,17 @@ const EXPLANATIONS: Record<VerifyVerdict, string> = {
  * does, for both dtr-1 and dtr-2 records — this is what makes the
  * verdict independently reproducible (spec: "Independent
  * Reproducibility").
+ *
+ * Integrity check (INV-22, ADR-015): once the upload matches the asset, the
+ * hash recomputed from the DB columns must equal the `canonicalHash` stored
+ * at confirm time. A missing or different stored hash means the record was
+ * altered after certification, so the upload yields INVALID_RECORD without
+ * reading the chain or releasing the analysis.
  */
 @Injectable()
 export class VerifyDocumentUseCase {
+  private readonly logger = new Logger(VerifyDocumentUseCase.name);
+
   constructor(
     @Inject(TRUST_RECORD_REPOSITORY_PORT)
     private readonly trustRecordRepository: TrustRecordRepositoryPort,
@@ -192,7 +200,22 @@ export class VerifyDocumentUseCase {
       });
     }
 
-    // asset_verified
+    // asset_verified — the rebuilt record must still be the one certified:
+    // its recomputed hash must equal the canonicalHash fixed at confirm time
+    // (INV-22, ADR-015). Otherwise a DB column changed after certification
+    // and neither the analysis nor any chain state can be vouched for.
+    if (found.trustRecord.canonicalHash !== verification.canonicalHash) {
+      this.logger.warn(
+        `Trust record ${found.trustRecord.id} no longer matches its certified canonicalHash; returning INVALID_RECORD`,
+      );
+      return this.finish(found.trustRecord.id, "FULL", params.channel, {
+        resolved: true,
+        verdict: "INVALID_RECORD",
+        chainAnchor: null,
+        analysis: null,
+      });
+    }
+
     const analysis = this.buildAnalysis(found.trustRecord);
 
     if (bucket === "PENDING") {
@@ -204,7 +227,7 @@ export class VerifyDocumentUseCase {
       });
     }
 
-    // CERTIFIED
+    // CERTIFIED — the chain is read with the (now proven equal) certified hash.
     const chainAnchor = await this.resolveChainAnchor(verification.canonicalHash, found.anchor);
     return this.finish(found.trustRecord.id, "FULL", params.channel, {
       resolved: true,

@@ -1,5 +1,6 @@
+import { Logger } from "@nestjs/common";
 import { computeCanonicalHash, computeDtr2Hashes, sha256Hex } from "@trustai/dtr-core";
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { Anchor, AnchorStatus } from "../../domain/anchor.entity";
 import { AssetStatus, DigitalAsset } from "../../domain/digital-asset.entity";
 import { TrustRecord, TrustRecordState } from "../../domain/trust-record.entity";
@@ -32,8 +33,44 @@ const DTR2_PROVENANCE = {
   analyzedAt: "2026-07-05T18:30:00.000Z",
 } as const;
 
+/** Hashes dtr-core computes for the default fixtures, i.e. the values confirm would store (INV-22). */
+let DTR1_HASH: string;
+let DTR2_ANCHOR_HASH: string;
+let DTR2_ANCHOR_HASH_WITHOUT_FILENAME: string;
+
 beforeAll(async () => {
   MATCHING_SHA256 = await sha256Hex(MATCHING_BYTES);
+  DTR1_HASH = await computeCanonicalHash({
+    schemaVersion: "dtr-1",
+    asset: {
+      sha256: MATCHING_SHA256,
+      mimeType: "application/pdf",
+      sizeBytes: MATCHING_BYTES.length,
+      filename: "contract.pdf",
+    },
+    analysis: DTR2_ANALYSIS,
+    provenance: DTR2_PROVENANCE,
+    issuedAt: ISSUED_AT,
+  });
+  const core = {
+    asset: { sha256: MATCHING_SHA256, mimeType: "application/pdf", sizeBytes: MATCHING_BYTES.length },
+  };
+  DTR2_ANCHOR_HASH = (
+    await computeDtr2Hashes({
+      schemaVersion: "dtr-2",
+      issuedAt: ISSUED_AT,
+      core,
+      enrichment: { asset: { filename: "contract.pdf" }, analysis: DTR2_ANALYSIS, provenance: DTR2_PROVENANCE },
+    })
+  ).anchorHash;
+  DTR2_ANCHOR_HASH_WITHOUT_FILENAME = (
+    await computeDtr2Hashes({
+      schemaVersion: "dtr-2",
+      issuedAt: ISSUED_AT,
+      core,
+      enrichment: { asset: {}, analysis: DTR2_ANALYSIS, provenance: DTR2_PROVENANCE },
+    })
+  ).anchorHash;
 });
 
 function buildTrustRecord(overrides: Partial<TrustRecord> = {}): TrustRecord {
@@ -264,6 +301,93 @@ describe("VerifyDocumentUseCase", () => {
   });
 
   describe("verifyByUpload", () => {
+    function useFound(found: TrustRecordWithAssetAndAnchor): void {
+      trustRecordRepository = buildTrustRecordRepository({
+        findByIdWithAssetAndAnchor: vi.fn().mockResolvedValue(found),
+      });
+      useCase = new VerifyDocumentUseCase(trustRecordRepository, anchorPort, verificationAttemptRepository);
+    }
+
+    beforeEach(() => {
+      // Default upload fixture: a dtr-1 record whose stored canonicalHash is
+      // the one dtr-core computes for its columns, as confirm stores it.
+      useFound(buildFound({ trustRecord: buildTrustRecord({ canonicalHash: DTR1_HASH }) }));
+    });
+
+    describe("integrity of the certified record (INV-22, ADR-015)", () => {
+      let warnSpy: ReturnType<typeof vi.spyOn>;
+
+      beforeEach(() => {
+        warnSpy = vi.spyOn(Logger.prototype, "warn").mockImplementation(() => undefined);
+      });
+
+      afterEach(() => {
+        warnSpy.mockRestore();
+      });
+
+      async function expectInvalidRecord(): Promise<void> {
+        const result = await useCase.verifyByUpload({
+          trustRecordId: "trust-record-1",
+          fileBytes: MATCHING_BYTES,
+          channel: "URL",
+        });
+
+        expect(result.resolved).toBe(true);
+        expect(result.verdict).toBe("INVALID_RECORD");
+        expect(result.analysis).toBeNull();
+        expect(result.chainAnchor).toBeNull();
+        expect(anchorPort.isAnchored).not.toHaveBeenCalled();
+        expect(verificationAttemptRepository.record).toHaveBeenCalledWith({
+          trustRecordId: "trust-record-1",
+          type: "FULL",
+          verdict: "INVALID_RECORD",
+          channel: "URL",
+        });
+        expect(warnSpy).toHaveBeenCalledTimes(1);
+        expect(String(warnSpy.mock.calls[0]?.[0])).toContain("trust-record-1");
+        expect(String(warnSpy.mock.calls[0]?.[0])).not.toContain("tampered");
+      }
+
+      it("CERTIFIED dtr-2 whose analysis changed after certification -> INVALID_RECORD, chain not read", async () => {
+        useFound(
+          buildFound({
+            trustRecord: buildTrustRecord({
+              schemaVersion: "dtr-2",
+              canonicalHash: DTR2_ANCHOR_HASH,
+              aiSummary: "A tampered summary.",
+            }),
+          }),
+        );
+
+        await expectInvalidRecord();
+      });
+
+      it("CERTIFIED legacy dtr-1 whose analysis changed after certification -> INVALID_RECORD, chain not read", async () => {
+        useFound(
+          buildFound({
+            trustRecord: buildTrustRecord({ canonicalHash: DTR1_HASH, aiSummary: "A tampered summary." }),
+          }),
+        );
+
+        await expectInvalidRecord();
+      });
+
+      it.each([TrustRecordState.READY, TrustRecordState.ANCHORING])(
+        "%s whose stored hash differs from the recomputed one -> INVALID_RECORD, not PENDING_ANCHOR",
+        async (state) => {
+          useFound(buildFound({ trustRecord: buildTrustRecord({ state, canonicalHash: "b".repeat(64) }) }));
+
+          await expectInvalidRecord();
+        },
+      );
+
+      it("CERTIFIED with no stored canonicalHash -> INVALID_RECORD, chain not read", async () => {
+        useFound(buildFound({ trustRecord: buildTrustRecord({ canonicalHash: null }) }));
+
+        await expectInvalidRecord();
+      });
+    });
+
     it("unknown id -> INVALID_RECORD, resolved=false, no attempt logged, no analysis", async () => {
       trustRecordRepository = buildTrustRecordRepository({
         findByIdWithAssetAndAnchor: vi.fn().mockResolvedValue(null),
@@ -351,7 +475,7 @@ describe("VerifyDocumentUseCase", () => {
         trustRecordRepository = buildTrustRecordRepository({
           findByIdWithAssetAndAnchor: vi
             .fn()
-            .mockResolvedValue(buildFound({ trustRecord: buildTrustRecord({ state, canonicalHash: null }) })),
+            .mockResolvedValue(buildFound({ trustRecord: buildTrustRecord({ state, canonicalHash: DTR1_HASH }) })),
         });
         useCase = new VerifyDocumentUseCase(trustRecordRepository, anchorPort, verificationAttemptRepository);
 
@@ -412,6 +536,9 @@ describe("VerifyDocumentUseCase", () => {
       });
 
       expect(result.verdict).toBe("VALID");
+      // The recomputed hash equals the one stored at confirm time (INV-22),
+      // and that proven-equal value is the one read on-chain.
+      expect(reference).toBe(DTR1_HASH);
       expect(anchorPort.isAnchored).toHaveBeenCalledWith(reference);
     });
 
@@ -426,6 +553,7 @@ describe("VerifyDocumentUseCase", () => {
           buildFound({
             trustRecord: buildTrustRecord({
               schemaVersion: "dtr-1",
+              canonicalHash: GOLDEN_DTR1_HASH,
               aiSummary:
                 "Contrato de arrendamiento de vivienda en Málaga; duración de 12 meses y fianza de 1.200 €.",
               aiClassification: "contrato",
@@ -460,7 +588,9 @@ describe("VerifyDocumentUseCase", () => {
         trustRecordRepository = buildTrustRecordRepository({
           findByIdWithAssetAndAnchor: vi
             .fn()
-            .mockResolvedValue(buildFound({ trustRecord: buildTrustRecord({ schemaVersion: "dtr-2" }) })),
+            .mockResolvedValue(
+              buildFound({ trustRecord: buildTrustRecord({ schemaVersion: "dtr-2", canonicalHash: DTR2_ANCHOR_HASH }) }),
+            ),
         });
         useCase = new VerifyDocumentUseCase(trustRecordRepository, anchorPort, verificationAttemptRepository);
       });
@@ -512,7 +642,10 @@ describe("VerifyDocumentUseCase", () => {
           trustRecordRepository = buildTrustRecordRepository({
             findByIdWithAssetAndAnchor: vi.fn().mockResolvedValue(
               buildFound({
-                trustRecord: buildTrustRecord({ schemaVersion: "dtr-2" }),
+                trustRecord: buildTrustRecord({
+                  schemaVersion: "dtr-2",
+                  canonicalHash: DTR2_ANCHOR_HASH_WITHOUT_FILENAME,
+                }),
                 asset: buildDigitalAsset({ filename }),
               }),
             ),

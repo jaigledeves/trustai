@@ -337,6 +337,28 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
       ).toBe(true);
     }, 30_000);
 
+    it("S-PV-2b: AI column altered after certification -> same file yields INVALID_RECORD, analysis and chain withheld (INV-22)", async () => {
+      const pdfBytes = buildMinimalPdf("BT /F1 24 Tf 50 100 Td (PV-ALTERED) Tj ET");
+      const trustRecordId = await certifyNewRecord("pv-altered", pdfBytes);
+
+      await prisma.trustRecord.update({
+        where: { id: trustRecordId },
+        data: { aiSummary: "Altered after certification." },
+      });
+
+      const postRes = await request(app.getHttpServer())
+        .post(`/public/verify/${trustRecordId}`)
+        .attach("file", pdfBytes, { filename: "doc.pdf", contentType: "application/pdf" });
+
+      expect(postRes.status).toBe(200);
+      expect(postRes.body.verdict).toBe("INVALID_RECORD");
+      expect(postRes.body.analysis).toBeNull();
+      expect(postRes.body.chainAnchor).toBeNull();
+
+      const attempts = await prisma.verificationAttempt.findMany({ where: { trustRecordId } });
+      expect(attempts.some((a) => a.type === "FULL" && a.verdict === "INVALID_RECORD")).toBe(true);
+    }, 30_000);
+
     it("S-PV-3: matching hash, not yet anchored (READY) -> PENDING_ANCHOR with analysis, no chain data confirmed", async () => {
       const pdfBytes = buildMinimalPdf("BT /F1 24 Tf 50 100 Td (PV-PENDING) Tj ET");
       const trustRecordId = await confirmWithoutAnchoring("pv-pending", pdfBytes);
