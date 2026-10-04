@@ -78,7 +78,13 @@ changes (AnchorRegistry is immutable), migrating anchored `dtr-1` records.
 
 ## Open concern
 
-Resolved in B4: upload verification returns INVALID_RECORD when the recomputed hash differs from the stored canonicalHash.
+Partly resolved in B4: upload verification returns INVALID_RECORD when the recomputed hash differs from the stored canonicalHash (record altered after certification).
+
+Still open, chain-side and pre-existing:
+- A CERTIFIED record whose certified hash is not found on-chain still gets verdict VALID; only `chainAnchor.anchored` is false.
+- When the RPC read fails, `chainAnchor` falls back to the DB Anchor status, flagged with `chainReadUnavailable`.
+
+Both belong to phase C (verification independent of the provider), where the browser reads the chain directly.
 
 ## Next step
 
