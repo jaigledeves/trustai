@@ -2,11 +2,6 @@
 
 import { Check, Download, Minus, TriangleAlert, X, type LucideIcon } from "lucide-react";
 import { useId, useRef, useState, type ChangeEvent } from "react";
-import { verifyDictionary } from "../../dictionaries/es/verify";
-import { getProofPackage, proofPackageDownloadUrl } from "../../lib/api/public-verify-client";
-import { config } from "../../lib/config";
-import { truncateId } from "../../lib/format";
-import { cn } from "../../lib/utils";
 import {
   runIndependentVerification,
   type IndependentVerificationResult,
@@ -14,7 +9,12 @@ import {
   type StepStatus,
   type VerificationOutcome,
   type VerificationStep,
-} from "../../lib/verify/independent-verification";
+} from "@trustai/dtr-core";
+import { verifyDictionary } from "../../dictionaries/es/verify";
+import { getProofPackage, proofPackageDownloadUrl } from "../../lib/api/public-verify-client";
+import { config } from "../../lib/config";
+import { truncateId } from "../../lib/format";
+import { cn } from "../../lib/utils";
 import { VERDICT_SEVERITY_STYLES, type VerdictSeverity } from "../../lib/verify/verdict";
 import { Button } from "../ui/button";
 

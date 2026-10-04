@@ -55,3 +55,19 @@ export {
   BASE_SEPOLIA_ANCHOR_REGISTRY,
   type AnchorRegistryDeployment,
 } from "./anchor-registry.js";
+export {
+  MAX_FILE_BYTES,
+  runIndependentVerification,
+  type ChainReader,
+  type FactKey,
+  type IndependentVerificationDeps,
+  type IndependentVerificationInput,
+  type IndependentVerificationResult,
+  type ProofFetchResult,
+  type StepCode,
+  type StepFact,
+  type StepId,
+  type StepStatus,
+  type VerificationOutcome,
+  type VerificationStep,
+} from "./independent-verification.js";

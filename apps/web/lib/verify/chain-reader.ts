@@ -1,6 +1,5 @@
-import { ANCHOR_REGISTRY_ABI } from "@trustai/dtr-core";
+import { ANCHOR_REGISTRY_ABI, type ChainReader } from "@trustai/dtr-core";
 import { createPublicClient, http } from "viem";
-import type { ChainReader } from "./independent-verification";
 
 /**
  * `ChainReader` over viem and a public JSON-RPC endpoint

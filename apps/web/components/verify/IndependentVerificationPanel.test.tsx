@@ -2,13 +2,11 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { verifyDictionary } from "../../dictionaries/es/verify";
-import type {
-  IndependentVerificationResult,
-  VerificationStep,
-} from "../../lib/verify/independent-verification";
+import type { IndependentVerificationResult, VerificationStep } from "@trustai/dtr-core";
 
 const runMock = vi.fn<(...args: unknown[]) => Promise<IndependentVerificationResult>>();
-vi.mock("../../lib/verify/independent-verification", () => ({
+vi.mock("@trustai/dtr-core", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@trustai/dtr-core")>()),
   runIndependentVerification: (...args: unknown[]) => runMock(...args),
 }));
 vi.mock("../../lib/verify/chain-reader", () => ({

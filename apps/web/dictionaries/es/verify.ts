@@ -112,7 +112,8 @@ export const verifyDictionary = {
   },
   /**
    * Independent verification (roadmap C2/C4, ADR-016): copy for the step
-   * codes, facts and outcomes produced by `lib/verify/independent-verification.ts`.
+   * codes, facts and outcomes produced by `independent-verification.ts` in
+   * `@trustai/dtr-core` (shared with the `ancrux-verify` CLI).
    * Every `StepCode`, `FactKey`, `StepId` and outcome must have an entry here.
    */
   independent: {
