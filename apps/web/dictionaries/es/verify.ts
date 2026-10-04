@@ -110,6 +110,113 @@ export const verifyDictionary = {
     error:
       "No pudimos calcular la huella en tu navegador. Es posible que el cálculo criptográfico no esté disponible en este contexto (por ejemplo, fuera de una conexión segura).",
   },
+  /**
+   * Independent verification (roadmap C2/C4, ADR-016): copy for the step
+   * codes, facts and outcomes produced by `lib/verify/independent-verification.ts`.
+   * Every `StepCode`, `FactKey`, `StepId` and outcome must have an entry here.
+   */
+  independent: {
+    panelTitle: "Verificación independiente",
+    panelDescription:
+      "Esta comprobación no depende de Ancrux: tu navegador recalcula las huellas y consulta la blockchain directamente.",
+    fileLabel: "Elige el archivo original",
+    submitLabel: "Verificar sin depender de Ancrux",
+    runningLabel: "Verificando…",
+    downloadProofLabel: "Descargar prueba (JSON)",
+    stepsLabel: "Pasos de la verificación independiente",
+    errorGeneric: "No pudimos completar la verificación independiente. Prueba de nuevo.",
+    status: {
+      ok: "Correcto",
+      failed: "Fallido",
+      skipped: "Omitido",
+    },
+    steps: {
+      file: "Lectura del archivo",
+      proof: "Prueba pública",
+      coreHash: "Huella del contenido (coreHash)",
+      anchorHash: "Huella anclada (anchorHash)",
+      network: "Red de la blockchain",
+      contract: "Contrato AnchorRegistry",
+      anchored: "Anclaje en la blockchain",
+    },
+    codes: {
+      file_pdf: "Tu navegador leyó el archivo y calculó su SHA-256. Es un PDF.",
+      file_not_pdf:
+        "El archivo no es un PDF (no empieza por %PDF-). Ancrux solo certifica PDF, así que la huella del contenido no coincidirá.",
+      file_unreadable: "No se pudo leer el archivo en tu navegador.",
+      proof_ok: "Se descargó la prueba pública y cumple el formato ancrux-proof-1.",
+      proof_not_found: "No existe un registro con este identificador.",
+      proof_legacy:
+        "Es un registro heredado (dtr-1): solo lo verifica el servidor de Ancrux, con la verificación de arriba.",
+      proof_unavailable:
+        "Este registro todavía no tiene prueba pública (por ejemplo, aún no está anclado).",
+      proof_invalid: "La prueba recibida no cumple el formato ancrux-proof-1, así que no se puede usar.",
+      proof_fetch_error: "No se pudo descargar la prueba pública. Prueba de nuevo.",
+      core_match: "La huella del contenido recalculada a partir de tu archivo coincide con la de la prueba.",
+      core_mismatch: "La huella del contenido recalculada no coincide: el archivo no es el certificado.",
+      core_invalid:
+        "No se pudo calcular la huella del contenido con los datos del archivo (por ejemplo, si está vacío).",
+      anchor_hash_match:
+        "La huella anclada recalculada con los datos de la prueba coincide con la declarada.",
+      anchor_hash_mismatch:
+        "La huella anclada recalculada no coincide con la declarada: la prueba es incoherente.",
+      network_match: "El nodo RPC público responde desde la misma red que indica la prueba.",
+      network_mismatch: "El nodo RPC responde desde una red distinta a la de la prueba.",
+      contract_known: "La prueba apunta al contrato AnchorRegistry conocido de esta red.",
+      contract_unknown:
+        "Atención: la prueba apunta a un contrato desconocido. No se consulta, porque un contrato ajeno podría responder cualquier cosa.",
+      anchored: "El contrato confirma que la huella anclada está registrada en la blockchain.",
+      not_anchored: "El contrato indica que esta huella no está anclada.",
+      rpc_error: "No se pudo consultar la red. Revisa tu conexión y prueba de nuevo.",
+      skipped: "No se ejecutó porque un paso anterior no se completó.",
+    },
+    facts: {
+      sha256: "SHA-256 del archivo",
+      sizeBytes: "Tamaño (bytes)",
+      mimeType: "Tipo detectado",
+      coreHash: "coreHash",
+      expectedCoreHash: "coreHash de la prueba",
+      actualCoreHash: "coreHash recalculado",
+      anchorHash: "anchorHash",
+      declaredAnchorHash: "anchorHash declarado",
+      computedAnchorHash: "anchorHash recalculado",
+      rpcChainId: "Red del nodo RPC (chainId)",
+      proofChainId: "Red de la prueba (chainId)",
+      contractAddress: "Contrato de la prueba",
+      knownContractAddress: "Contrato conocido",
+      anchoredAt: "Anclado según la blockchain",
+      proofBlockTimestamp: "Fecha del bloque según la prueba",
+      txHash: "Transacción",
+    },
+    warnings: {
+      timestamp_mismatch:
+        "La fecha de anclaje en la blockchain no coincide con la que indica la prueba. El anclaje es válido; la fecha que cuenta es la de la blockchain.",
+    },
+    outcomes: {
+      verified: {
+        title: "Verificado de forma independiente",
+        message:
+          "Tu archivo coincide con la prueba y su huella está anclada en la blockchain. Lo comprobó tu navegador, sin depender del veredicto de Ancrux.",
+      },
+      failed: {
+        title: "No verificado",
+        message: "Al menos un paso falló. Revisa el detalle de cada paso.",
+      },
+      legacy: {
+        title: "Registro heredado",
+        message:
+          "Los registros dtr-1 no admiten verificación independiente: solo los verifica el servidor de Ancrux.",
+      },
+      not_found: {
+        title: "Registro no encontrado",
+        message: "No encontramos un registro para este enlace de verificación.",
+      },
+      unavailable: {
+        title: "Prueba no disponible",
+        message: "Este registro todavía no tiene prueba pública. Prueba más tarde.",
+      },
+    },
+  },
   /** Link-specific "broken/expired" copy for `/verify/[id]`, replacing the generic `shellDictionary.errors.notFound`. */
   notFound: {
     title: "No encontramos este registro de verificación.",

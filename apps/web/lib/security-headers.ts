@@ -4,7 +4,10 @@
  *
  * What the browser loads from other origins (surveyed): nothing except the
  * NestJS API, which the public `/verify` page calls directly through
- * `NEXT_PUBLIC_API_BASE_URL` (`lib/api/public-verify-client.ts`). Fonts come
+ * `NEXT_PUBLIC_API_BASE_URL` (`lib/api/public-verify-client.ts`), and the
+ * public chain RPC (`NEXT_PUBLIC_CHAIN_RPC_URL`), which the same page reads
+ * the AnchorRegistry contract from for independent verification
+ * (`lib/verify/chain-reader.ts`). Fonts come
  * from `next/font/google`, which self-hosts them at build time; all other API
  * calls go through same-origin route handlers (`/api/...`); no page embeds an
  * iframe, so `frame-src` is `'none'`.
@@ -19,6 +22,8 @@
 export interface SecurityHeadersOptions {
   /** `NEXT_PUBLIC_API_BASE_URL`, read at build time. */
   publicApiBaseUrl: string;
+  /** `NEXT_PUBLIC_CHAIN_RPC_URL` (or its default), read at build time. */
+  chainRpcUrl: string;
   isDevelopment: boolean;
 }
 
@@ -62,8 +67,24 @@ export function apiOriginWarning(options: {
   return "NEXT_PUBLIC_API_BASE_URL is missing or invalid in a production build; the CSP will block browser calls to the API (public /verify).";
 }
 
+/**
+ * Build-time check for the CSP `connect-src` RPC origin. Unset is fine (the
+ * Base Sepolia default applies); a set but invalid value would leave the RPC
+ * out of `connect-src` and the browser verification could not read the chain.
+ */
+export function rpcOriginWarning(options: {
+  rawChainRpcUrl: string | undefined;
+  isProduction: boolean;
+}): string | undefined {
+  if (!options.isProduction || !options.rawChainRpcUrl) return undefined;
+  if (originOf(options.rawChainRpcUrl)) return undefined;
+  return "NEXT_PUBLIC_CHAIN_RPC_URL is not a valid URL in a production build; the CSP will block the browser's chain reads (independent verification on /verify).";
+}
+
 function buildContentSecurityPolicy(options: SecurityHeadersOptions): string {
-  const apiOrigin = originOf(options.publicApiBaseUrl);
+  const connectOrigins = [originOf(options.publicApiBaseUrl), originOf(options.chainRpcUrl)].filter(
+    (origin): origin is string => origin !== undefined,
+  );
   const scriptSrc = ["'self'", "'unsafe-inline'"];
   if (options.isDevelopment) scriptSrc.push("'unsafe-eval'");
 
@@ -73,7 +94,7 @@ function buildContentSecurityPolicy(options: SecurityHeadersOptions): string {
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": ["'self'", "data:", "blob:"],
     "font-src": ["'self'", "data:"],
-    "connect-src": apiOrigin ? ["'self'", apiOrigin] : ["'self'"],
+    "connect-src": ["'self'", ...new Set(connectOrigins)],
     "frame-src": ["'none'"],
     "frame-ancestors": ["'none'"],
     "object-src": ["'none'"],

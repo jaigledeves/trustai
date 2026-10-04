@@ -39,7 +39,7 @@ the AnchorRegistry contract on Base Sepolia, in the browser or from a CLI.
 - [x] C0 - Server verdict when the chain denies the anchor (route: delegated, with C1)
 - [x] C1 - Full anchor data + shared contract constants (route: delegated)
 - [x] C3 - Proof package endpoint and format (route: delegated; 2+ non-trivial files across dtr-core, API and docs)
-- [ ] C2/C4 - Browser verification and diagnosis view (route: TBD)
+- [x] C2/C4 - Browser verification and diagnosis view (route: delegated; 2+ non-trivial files across lib, components, CSP and docs)
 - [ ] C5 - CLI verifier (route: TBD)
 
 ## Checks
@@ -55,6 +55,7 @@ the AnchorRegistry contract on Base Sepolia, in the browser or from a CLI.
 | C0 | 337c02b | medium, granted, approved (slice with C1) | Chain read ok + hash not anchored -> INVALID_RECORD (GET and POST), attempt logged, warn with record id only; RPC failure keeps VALID + chainReadUnavailable. RED 2 failing -> GREEN 30/30 in verify-document spec. |
 | C1 | c36ec63 | medium, granted, approved (slice with C0) | dtr-core exports AnchorRegistry ABI + Base Sepolia deployment (API re-exports it). Anchor gets nullable chainId, blockNumber (BigInt), contractAddress via db push; confirm-anchor persists all three, AlreadyAnchored persists chain + contract with null blockNumber. RED 7 failing -> GREEN; e2e certification-flow asserts the new columns. |
 | C3 | (pending commit) | pending | dtr-core `ProofPackageV1Schema` (`ancrux-proof-1`, strict) + `verifyProofPackageAgainstFile`; `GET /public/verify/:id/proof` via `GetProofPackageUseCase` (dtr-2 CERTIFIED only; dtr-1/not anchored/tampered/unknown network -> 409; unknown -> 404; `download=1` attachment). RED 17 (dtr-core) + 15 (use case, missing module) + 6 (controller) -> GREEN; e2e S-PV-PROOF verifies the package against the file and `isAnchored` on Anvil. ADR-016. |
+| C2/C4 | (pending commit) | pending | Pure orchestrator `lib/verify/independent-verification.ts` (steps file, proof, coreHash, anchorHash, network, contract, anchored; never throws; outcomes verified/failed/legacy/not_found/unavailable) + viem `chain-reader.ts` (lazy-loaded) + `getProofPackage` (409 dtr-1 -> legacy) + `IndependentVerificationPanel` on `/verify/[id]`; `NEXT_PUBLIC_CHAIN_RPC_URL` origin in CSP `connect-src`. RED: orchestrator suite (missing module) + 6 client + 3 CSP + component suite -> GREEN 387/387 web tests; live smoke vs sepolia.base.org: chainId 84532, random hash not anchored. |
 
 ## Notes for later steps
 
@@ -64,4 +65,4 @@ the AnchorRegistry contract on Base Sepolia, in the browser or from a CLI.
 
 ## Next step
 
-Open PR for C3, then C2/C4.
+Open PR for C2/C4, then C5.

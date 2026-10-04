@@ -2,7 +2,13 @@ import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "../../test/msw/server";
 import { ApiError } from "./errors";
-import { getVerifyHash, NotFoundError, postVerifyUpload } from "./public-verify-client";
+import {
+  getProofPackage,
+  getVerifyHash,
+  NotFoundError,
+  postVerifyUpload,
+  proofPackageDownloadUrl,
+} from "./public-verify-client";
 
 const BASE_URL = "http://localhost:3000";
 
@@ -91,5 +97,80 @@ describe("public-verify-client (spec: GET/POST existence asymmetry, no-auth)", (
     await postVerifyUpload("rec-1", new File(["pdf bytes"], "sample.pdf"));
 
     expect(receivedContentType).toContain("multipart/form-data");
+  });
+});
+
+describe("getProofPackage (ADR-016: GET /public/verify/:id/proof)", () => {
+  it("returns the raw body on 200 without validating it (the caller parses it with dtr-core)", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/rec-1/proof`, () =>
+        HttpResponse.json({ format: "ancrux-proof-1" }),
+      ),
+    );
+
+    await expect(getProofPackage("rec-1")).resolves.toEqual({
+      status: "ok",
+      body: { format: "ancrux-proof-1" },
+    });
+  });
+
+  it("maps 404 to not_found", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/unknown/proof`, () =>
+        HttpResponse.json({ message: "Trust record not found" }, { status: 404 }),
+      ),
+    );
+
+    await expect(getProofPackage("unknown")).resolves.toEqual({ status: "not_found" });
+  });
+
+  it("maps the dtr-1 409 to legacy", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/old/proof`, () =>
+        HttpResponse.json(
+          {
+            statusCode: 409,
+            message:
+              "This is a legacy (dtr-1) record: it is verified by the server only and has no public proof package",
+            error: "Conflict",
+          },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    await expect(getProofPackage("old")).resolves.toEqual({ status: "legacy" });
+  });
+
+  it("maps any other 409 to unavailable", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/pending/proof`, () =>
+        HttpResponse.json(
+          { statusCode: 409, message: "This record is not yet anchored, so it has no proof package" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    await expect(getProofPackage("pending")).resolves.toEqual({ status: "unavailable" });
+  });
+
+  it("throws an ApiError on any other non-2xx", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/rec-1/proof`, () =>
+        HttpResponse.json({ message: "boom" }, { status: 500 }),
+      ),
+    );
+
+    const error = await getProofPackage("rec-1").catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).status).toBe(500);
+  });
+
+  it("builds the download URL with download=1", () => {
+    expect(proofPackageDownloadUrl("rec 1")).toBe(
+      `${BASE_URL}/public/verify/rec%201/proof?download=1`,
+    );
   });
 });

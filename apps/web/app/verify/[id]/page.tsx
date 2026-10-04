@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Footer } from "../../../components/landing/Footer";
 import { HashOnlyCard } from "../../../components/verify/HashOnlyCard";
+import { IndependentVerificationPanel } from "../../../components/verify/IndependentVerificationPanel";
 import { UploadVerdictPanel } from "../../../components/verify/UploadVerdictPanel";
 import { Button } from "../../../components/ui/button";
 import { verifyDictionary } from "../../../dictionaries/es/verify";
@@ -68,6 +69,11 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
               </div>
               <div className="mt-8">
                 <UploadVerdictPanel id={id} />
+              </div>
+              {/* Roadmap C2/C4: the same check without trusting the server's
+                  verdict (dtr-2 only; dtr-1 shows a legacy message). */}
+              <div className="mt-8">
+                <IndependentVerificationPanel id={id} />
               </div>
 
               {/* Single conversion point (spec: web-public-verify — No-Auth

@@ -8,6 +8,9 @@ vi.mock("../../../components/verify/HashOnlyCard", () => ({
 vi.mock("../../../components/verify/UploadVerdictPanel", () => ({
   UploadVerdictPanel: () => <div>UPLOAD_VERDICT_PANEL</div>,
 }));
+vi.mock("../../../components/verify/IndependentVerificationPanel", () => ({
+  IndependentVerificationPanel: () => <div>INDEPENDENT_VERIFICATION_PANEL</div>,
+}));
 
 describe("VerifyPage (spec: web-public-verify — No-Auth Access)", () => {
   beforeEach(() => {
@@ -27,6 +30,7 @@ describe("VerifyPage (spec: web-public-verify — No-Auth Access)", () => {
 
     expect(screen.getByText("HASH_ONLY_CARD")).toBeInTheDocument();
     expect(screen.getByText("UPLOAD_VERDICT_PANEL")).toBeInTheDocument();
+    expect(screen.getByText("INDEPENDENT_VERIFICATION_PANEL")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /iniciar sesión/i })).not.toBeInTheDocument();
   });
 
@@ -43,5 +47,6 @@ describe("VerifyPage (spec: web-public-verify — No-Auth Access)", () => {
     ).toHaveAttribute("href", "/");
     expect(screen.queryByText("HASH_ONLY_CARD")).not.toBeInTheDocument();
     expect(screen.queryByText("UPLOAD_VERDICT_PANEL")).not.toBeInTheDocument();
+    expect(screen.queryByText("INDEPENDENT_VERIFICATION_PANEL")).not.toBeInTheDocument();
   });
 });
