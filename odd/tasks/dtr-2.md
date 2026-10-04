@@ -51,7 +51,7 @@ changes (AnchorRegistry is immutable), migrating anchored `dtr-1` records.
 ## Checklist
 
 - [x] B1 - ADR-015 (route: inline, single document; ADR-001 marked superseded; docs index completed with ADR-012..015)
-- [ ] B2 - dtr-2 in dtr-core (route: TBD)
+- [x] B2 - dtr-2 in dtr-core (route: delegated (2+ non-trivial files); `enrichment.asset` always present with optional `filename`)
 - [ ] B3 - API emission, shared rebuild, verification of both versions (route: TBD)
 
 ## Acceptance criteria
@@ -71,7 +71,9 @@ changes (AnchorRegistry is immutable), migrating anchored `dtr-1` records.
 
 | Task | Commit | Review tier | Notes |
 |---|---|---|---|
+| B2 | (pending commit) | pending | dtr-1 golden test pinned and passing on unchanged code (hash `1ad1295b...25ce`, cross-checked with Python hashlib). RED: `build.test.ts`/`dtr2.test.ts` failed to load `../src/build.js`, `../src/dtr2-hash.js`. GREEN: 79/79 tests, coverage 100%. dtr-2 golden: coreHash `4e0e672d...4802`, enrichmentHash `b19f7fe9...c514`, anchorHash `9f8c2d77...e0c9`. API typecheck and 288 tests pass. |
 
 ## Next step
 
-B2.
+B3: switch emission to `dtr-2` and replace both API rebuilds with
+`buildTrustRecordCandidate` + `parseAnyTrustRecord` + `computeAnchoredHash`.

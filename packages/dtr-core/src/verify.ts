@@ -7,21 +7,31 @@
  * a browser, the API or a CLI hitting any public RPC node (RNF-032).
  */
 
-import { computeCanonicalHash } from "./hash.js";
-import { parseTrustRecord, type TrustRecordV1 } from "./schema.js";
+import { computeAnchoredHash, computeDtr2AnchorHash, computeDtr2CoreHash } from "./dtr2-hash.js";
+import {
+  DTR_SCHEMA_VERSION_V2,
+  Dtr2CoreAssetSchema,
+  Dtr2ProofSchema,
+  formatIssues,
+  parseAnyTrustRecord,
+  type TrustRecord,
+} from "./schema.js";
 
 export type VerificationResult =
   /** Record well-formed and the asset matches. Anchor check pending on caller. */
   | {
       status: "asset_verified";
-      record: TrustRecordV1;
-      /** The hash to look up on-chain (leaf or Merkle root member). */
+      record: TrustRecord;
+      /**
+       * The hash to look up on-chain: the dtr-1 canonical hash, or the
+       * dtr-2 anchorHash (ADR-015).
+       */
       canonicalHash: string;
     }
   /** The supplied document is NOT the one this DTR describes (or was altered). */
   | {
       status: "asset_mismatch";
-      record: TrustRecordV1;
+      record: TrustRecord;
       expectedSha256: string;
       actualSha256: string;
     }
@@ -29,7 +39,8 @@ export type VerificationResult =
   | { status: "invalid_record"; issues: string[] };
 
 /**
- * Verifies an asset against a Trust Record.
+ * Verifies an asset against a Trust Record of any supported version
+ * (dtr-1 reads `asset.sha256`, dtr-2 reads `core.asset.sha256`).
  *
  * @param record        Untrusted DTR (parsed JSON).
  * @param assetSha256   Lowercase hex SHA-256 of the document being checked.
@@ -38,17 +49,21 @@ export async function verifyAssetAgainstRecord(
   record: unknown,
   assetSha256: string,
 ): Promise<VerificationResult> {
-  const parsed = parseTrustRecord(record);
+  const parsed = parseAnyTrustRecord(record);
   if (!parsed.ok) {
     return { status: "invalid_record", issues: parsed.issues };
   }
 
+  const expectedSha256 =
+    parsed.record.schemaVersion === DTR_SCHEMA_VERSION_V2
+      ? parsed.record.core.asset.sha256
+      : parsed.record.asset.sha256;
   const normalized = assetSha256.toLowerCase();
-  if (parsed.record.asset.sha256 !== normalized) {
+  if (expectedSha256 !== normalized) {
     return {
       status: "asset_mismatch",
       record: parsed.record,
-      expectedSha256: parsed.record.asset.sha256,
+      expectedSha256,
       actualSha256: normalized,
     };
   }
@@ -56,6 +71,47 @@ export async function verifyAssetAgainstRecord(
   return {
     status: "asset_verified",
     record: parsed.record,
-    canonicalHash: await computeCanonicalHash(parsed.record),
+    canonicalHash: await computeAnchoredHash(parsed.record),
   };
+}
+
+export type Dtr2ProofResult =
+  /** The file matches the proof's core. Look `anchorHash` up on-chain. */
+  | { status: "core_verified"; coreHash: string; anchorHash: string }
+  /** The file is not the one the proof describes. */
+  | { status: "core_mismatch"; expectedCoreHash: string; actualCoreHash: string }
+  /** The proof or the file facts are malformed. */
+  | { status: "invalid_proof"; issues: string[] };
+
+/**
+ * Minimal dtr-2 proof check (ADR-015): recomputes coreHash from the file
+ * facts and anchorHash from the proof, without the AI enrichment.
+ *
+ * @param proof  Untrusted `{ schemaVersion, issuedAt, coreHash, enrichmentHash }`.
+ * @param file   Facts computed locally from the file: sha256, mimeType, sizeBytes.
+ */
+export async function verifyDtr2Proof(
+  proof: unknown,
+  file: { sha256: string; mimeType: string; sizeBytes: number },
+): Promise<Dtr2ProofResult> {
+  const parsedProof = Dtr2ProofSchema.safeParse(proof);
+  const parsedFile = Dtr2CoreAssetSchema.safeParse({ ...file, sha256: file.sha256.toLowerCase() });
+  if (!parsedProof.success || !parsedFile.success) {
+    const issues = [
+      ...(parsedProof.success ? [] : formatIssues(parsedProof.error).map((i) => `proof.${i}`)),
+      ...(parsedFile.success ? [] : formatIssues(parsedFile.error).map((i) => `file.${i}`)),
+    ];
+    return { status: "invalid_proof", issues };
+  }
+
+  const coreHash = await computeDtr2CoreHash(parsedFile.data);
+  if (coreHash !== parsedProof.data.coreHash) {
+    return {
+      status: "core_mismatch",
+      expectedCoreHash: parsedProof.data.coreHash,
+      actualCoreHash: coreHash,
+    };
+  }
+
+  return { status: "core_verified", coreHash, anchorHash: await computeDtr2AnchorHash(parsedProof.data) };
 }
