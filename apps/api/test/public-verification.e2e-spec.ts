@@ -1,7 +1,12 @@
 import type { INestApplication } from "@nestjs/common";
 import { ValidationPipe } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { buildTrustRecordCandidate, sha256Hex, verifyAssetAgainstRecord } from "@trustai/dtr-core";
+import {
+  buildTrustRecordCandidate,
+  sha256Hex,
+  verifyAssetAgainstRecord,
+  verifyProofPackageAgainstFile,
+} from "@trustai/dtr-core";
 import {
   createPublicClient,
   createWalletClient,
@@ -379,6 +384,57 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
       const attempts = await prisma.verificationAttempt.findMany({ where: { trustRecordId } });
       expect(attempts.some((a) => a.type === "HASH_ONLY" && a.verdict === "PENDING_ANCHOR")).toBe(true);
       expect(attempts.some((a) => a.type === "FULL" && a.verdict === "PENDING_ANCHOR")).toBe(true);
+    }, 30_000);
+
+    it("S-PV-PROOF: proof package of a certified dtr-2 record verifies against the file and the chain (C3)", async () => {
+      const pdfBytes = buildMinimalPdf("BT /F1 24 Tf 50 100 Td (PV-PROOF) Tj ET");
+      const trustRecordId = await certifyNewRecord("pv-proof", pdfBytes);
+
+      const proofRes = await request(app.getHttpServer())
+        .get(`/public/verify/${trustRecordId}/proof`)
+        .query({ download: "1" })
+        .send();
+      expect(proofRes.status).toBe(200);
+      expect(proofRes.headers["content-disposition"]).toBe(
+        `attachment; filename="ancrux-proof-${trustRecordId}.json"`,
+      );
+      const proof = proofRes.body as Record<string, unknown>;
+      // INV-41: hashes and anchor coordinates only, never the analysis or the filename.
+      expect(Object.keys(proof).sort()).toEqual(["algorithms", "anchor", "dtr", "format", "trustRecordId"]);
+      expect(JSON.stringify(proof)).not.toContain("pv-proof.pdf");
+
+      const check = await verifyProofPackageAgainstFile(proof, {
+        sha256: await sha256Hex(pdfBytes),
+        mimeType: "application/pdf",
+        sizeBytes: pdfBytes.length,
+      });
+      expect(check.status).toBe("verified");
+      if (check.status !== "verified") return;
+      expect(check.anchor.chainId).toBe(ANVIL_CHAIN_ID);
+      expect(check.anchor.contractAddress.toLowerCase()).toBe(contractAddress.toLowerCase());
+      expect(check.anchor.txHash).toMatch(/^0x[0-9a-f]{64}$/);
+      expect(check.anchor.blockNumber).toMatch(/^\d+$/);
+
+      const stored = await prisma.trustRecord.findUniqueOrThrow({ where: { id: trustRecordId } });
+      expect(stored.canonicalHash).toBe(check.anchorHash);
+
+      // Independent of the API: ask the contract the package points to.
+      const anchoredOnChain = await publicClient.readContract({
+        address: check.anchor.contractAddress as Address,
+        abi: ANCHOR_REGISTRY_ABI,
+        functionName: "isAnchored",
+        args: [`0x${check.anchorHash}`],
+      });
+      expect(anchoredOnChain).toBe(true);
+
+      const plainRes = await request(app.getHttpServer()).get(`/public/verify/${trustRecordId}/proof`).send();
+      expect(plainRes.status).toBe(200);
+      expect(plainRes.headers["content-disposition"]).toBeUndefined();
+
+      const unknownRes = await request(app.getHttpServer())
+        .get("/public/verify/00000000-0000-0000-0000-000000000000/proof")
+        .send();
+      expect(unknownRes.status).toBe(404);
     }, 30_000);
 
     it("S-PV-4: unknown id -> GET 404, POST 200 INVALID_RECORD, no attempt rows persisted", async () => {

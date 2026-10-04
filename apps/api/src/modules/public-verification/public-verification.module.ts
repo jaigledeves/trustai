@@ -6,6 +6,7 @@ import { ViemAnchorAdapter } from "../../adapters/chain/viem-anchor.adapter";
 import { PrismaService } from "../../adapters/prisma/prisma.service";
 import { PrismaTrustRecordRepository } from "../../adapters/prisma/trust-record.repository";
 import { PrismaVerificationAttemptRepository } from "../../adapters/prisma/verification-attempt.repository";
+import { GetProofPackageUseCase } from "../../application/verification/get-proof-package.use-case";
 import { VerifyDocumentUseCase } from "../../application/verification/verify-document.use-case";
 import { ANCHOR_PORT, type AnchorPort } from "../../ports/anchor.port";
 import { TRUST_RECORD_REPOSITORY_PORT } from "../../ports/trust-record-repository.port";
@@ -27,6 +28,7 @@ import { PublicVerificationController } from "./public-verification.controller";
   providers: [
     PrismaService,
     VerifyDocumentUseCase,
+    GetProofPackageUseCase,
     { provide: TRUST_RECORD_REPOSITORY_PORT, useClass: PrismaTrustRecordRepository },
     { provide: VERIFICATION_ATTEMPT_REPOSITORY_PORT, useClass: PrismaVerificationAttemptRepository },
     // design.md "ViemAnchorAdapterConfig.walletClient" decision: this

@@ -1,12 +1,11 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { buildTrustRecordCandidate, sha256Hex, verifyAssetAgainstRecord } from "@trustai/dtr-core";
+import { sha256Hex, verifyAssetAgainstRecord } from "@trustai/dtr-core";
 import { AnchorStatus, type Anchor } from "../../domain/anchor.entity";
 import { TrustRecordState, type TrustRecord } from "../../domain/trust-record.entity";
 import { ANCHOR_PORT, type AnchorExistenceStatus, type AnchorPort } from "../../ports/anchor.port";
 import {
   TRUST_RECORD_REPOSITORY_PORT,
   type TrustRecordRepositoryPort,
-  type TrustRecordWithAssetAndAnchor,
 } from "../../ports/trust-record-repository.port";
 import {
   VERIFICATION_ATTEMPT_REPOSITORY_PORT,
@@ -16,6 +15,7 @@ import {
   type VerificationAttemptVerdict,
 } from "../../ports/verification-attempt-repository.port";
 import { EIDAS_DISCLAIMER } from "./eidas-disclaimer";
+import { buildStoredRecordCandidate } from "./stored-record-candidate";
 
 export type VerifyVerdict = VerificationAttemptVerdict;
 
@@ -82,9 +82,8 @@ const EXPLANATIONS: Record<VerifyVerdict, string> = {
  * full — `analysis` populated only when the upload's hash matches).
  *
  * Reuses `verifyAssetAgainstRecord` from `@trustai/dtr-core` as-is for the
- * upload path, rebuilding the candidate with dtr-core's
- * `buildTrustRecordCandidate` exactly as `ConfirmReviewUseCase.confirm`
- * does, for both dtr-1 and dtr-2 records — this is what makes the
+ * upload path, rebuilding the candidate with `buildStoredRecordCandidate`
+ * (dtr-core's builder, exactly as `ConfirmReviewUseCase.confirm` does), for both dtr-1 and dtr-2 records — this is what makes the
  * verdict independently reproducible (spec: "Independent
  * Reproducibility").
  *
@@ -179,7 +178,7 @@ export class VerifyDocumentUseCase {
     }
 
     const uploadSha256 = await sha256Hex(params.fileBytes);
-    const candidate = this.buildCandidate(found);
+    const candidate = buildStoredRecordCandidate(found);
     const verification = await verifyAssetAgainstRecord(candidate, uploadSha256);
 
     if (verification.status === "invalid_record") {
@@ -254,34 +253,6 @@ export class VerifyDocumentUseCase {
         // DRAFT, FAILED, DISCARDED
         return "NOT_CERTIFIABLE";
     }
-  }
-
-  private buildCandidate(found: TrustRecordWithAssetAndAnchor): unknown {
-    const trustRecord = found.trustRecord;
-    return buildTrustRecordCandidate(trustRecord.schemaVersion, {
-      // A missing issuedAt (impossible for READY+) fails parsing and yields
-      // INVALID_RECORD, exactly as before; it is never defaulted to a value.
-      issuedAt: found.issuedAt ?? "",
-      asset: {
-        sha256: found.asset.sha256,
-        mimeType: found.asset.mimeType,
-        sizeBytes: found.asset.sizeBytes,
-        filename: found.asset.filename,
-      },
-      analysis: {
-        summary: trustRecord.aiSummary,
-        classification: trustRecord.aiClassification,
-        language: trustRecord.aiLanguage,
-      },
-      provenance: {
-        provider: trustRecord.aiProvider,
-        model: trustRecord.aiModel,
-        modelVersion: trustRecord.aiModelVersion,
-        promptVersion: trustRecord.aiPromptVersion,
-        taxonomyVersion: trustRecord.aiTaxonomyVersion,
-        analyzedAt: trustRecord.aiAnalyzedAt?.toISOString(),
-      },
-    });
   }
 
   private buildAnalysis(trustRecord: TrustRecord): VerifyAnalysis {

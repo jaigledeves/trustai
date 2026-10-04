@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Controller,
   Get,
   HttpCode,
@@ -8,13 +9,20 @@ import {
   Param,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { ApiConsumes, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiConsumes, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
+import type { ProofPackageV1 } from "@trustai/dtr-core";
+import type { Response } from "express";
+import {
+  GetProofPackageUseCase,
+  type ProofPackageResult,
+} from "../../application/verification/get-proof-package.use-case";
 import type {
   VerifyChainAnchor,
   VerifyResult,
@@ -23,6 +31,7 @@ import type {
 import { VerifyDocumentUseCase } from "../../application/verification/verify-document.use-case";
 import type { VerificationAttemptChannel } from "../../ports/verification-attempt-repository.port";
 import { uploadMulterOptions } from "../uploads/upload-limits";
+import { ProofPackageResponseDto } from "./dto/proof-package-response.dto";
 import { ChainAnchorResponseDto, VerifyHashResponseDto } from "./dto/verify-hash-response.dto";
 import { VerifyUploadResponseDto } from "./dto/verify-upload-response.dto";
 
@@ -35,6 +44,14 @@ const DEFAULT_GET_THROTTLE_LIMIT = 60;
 const DEFAULT_POST_THROTTLE_LIMIT = 20;
 
 const DEFAULT_EXPLORER_BASE_URL = "https://sepolia.basescan.org";
+
+/** 409 messages for a record that exists but gets no proof package (ADR-016). */
+const PROOF_REFUSALS: Record<Exclude<ProofPackageResult["status"], "ok" | "not_found">, string> = {
+  legacy_record:
+    "This is a legacy (dtr-1) record: it is verified by the server only and has no public proof package",
+  not_anchored: "This record is not yet anchored, so it has no proof package",
+  unavailable: "A proof package cannot be produced for this record",
+};
 
 /**
  * `@Throttle`'s `limit` accepts a `Resolvable<number>` (a plain number or
@@ -75,7 +92,45 @@ export class PublicVerificationController {
   constructor(
     private readonly verifyDocumentUseCase: VerifyDocumentUseCase,
     private readonly configService: ConfigService,
+    private readonly getProofPackageUseCase: GetProofPackageUseCase,
   ) {}
+
+  // Declared before `@Get(":id")` for readability; the extra path segment
+  // keeps the two routes distinct regardless of order.
+  @Get(":id/proof")
+  @Throttle({ global: { limit: resolveGetThrottleLimit, ttl: GET_THROTTLE_TTL_MS } })
+  @ApiQuery({ name: "download", required: false, enum: ["1"] })
+  @ApiOkResponse({ type: ProofPackageResponseDto })
+  @ApiOperation({
+    summary: "Public proof package for a certified dtr-2 record (no auth)",
+    description:
+      "GET /public/verify/:id/proof — the `ancrux-proof-1` JSON (ADR-016): dtr-2 hashes, algorithms " +
+      "and anchor coordinates, enough to verify the anchor with the original file and any RPC node. " +
+      "Never includes the AI analysis or the filename (INV-41). Unknown id -> 404; dtr-1, " +
+      "not yet anchored, or a record that no longer matches its certified hash -> 409. " +
+      "`download=1` adds an attachment Content-Disposition.",
+  })
+  async getProofPackage(
+    @Param("id") id: string,
+    @Query("download") download: string | undefined,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<ProofPackageV1> {
+    const result = await this.getProofPackageUseCase.execute(id);
+    if (result.status === "not_found") {
+      throw new NotFoundException("Trust record not found");
+    }
+    if (result.status !== "ok") {
+      throw new ConflictException(PROOF_REFUSALS[result.status]);
+    }
+    if (download === "1") {
+      // trustRecordId comes from the stored row (a UUID), not from the raw path parameter.
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="ancrux-proof-${result.proof.trustRecordId}.json"`,
+      );
+    }
+    return result.proof;
+  }
 
   @Get(":id")
   @Throttle({ global: { limit: resolveGetThrottleLimit, ttl: GET_THROTTLE_TTL_MS } })
