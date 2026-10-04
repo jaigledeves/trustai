@@ -1,0 +1,29 @@
+{
+  "name": "@trustai/verify-cli",
+  "version": "0.1.0",
+  "description": "Ancrux independent verifier: checks a dtr-2 record from the file, its public proof package and a public RPC node, without trusting Ancrux.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "ancrux-verify": "./dist/cli.js"
+  },
+  "files": ["dist"],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@trustai/dtr-core": "workspace:*",
+    "viem": "^2.54.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}

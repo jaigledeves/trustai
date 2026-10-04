@@ -28,10 +28,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # dtr-core is consumed by api and web via its built dist/ (main + types),
-      # so it must be compiled before typechecking or testing the consumers.
+      # dtr-core is consumed by api, web and verify-cli via its built dist/
+      # (main + types), so it must be compiled before typechecking or testing
+      # the consumers. verify-cli is built after it to check the bin compiles.
       - name: Build workspace libraries
-        run: pnpm --filter @trustai/dtr-core build
+        run: |
+          pnpm --filter @trustai/dtr-core build
+          pnpm --filter @trustai/verify-cli build
 
       # Prisma 6 no longer generates the client on install. The api's model
       # types (TrustRecord, DigitalAsset, Anchor, ...) come from this step.
