@@ -40,13 +40,14 @@ the AnchorRegistry contract on Base Sepolia, in the browser or from a CLI.
 - [x] C1 - Full anchor data + shared contract constants (route: delegated)
 - [x] C3 - Proof package endpoint and format (route: delegated; 2+ non-trivial files across dtr-core, API and docs)
 - [x] C2/C4 - Browser verification and diagnosis view (route: delegated; 2+ non-trivial files across lib, components, CSP and docs)
-- [ ] C5 - CLI verifier (route: TBD)
+- [x] C5 - CLI verifier (route: delegated; 2+ non-trivial files across dtr-core, web, new package, CI and docs)
 
 ## Checks
 
 - `pnpm --filter @trustai/dtr-core test`, `build`
 - apps/api: unit tests, typecheck, e2e (Docker + Anvil)
 - apps/web: tests, typecheck, lint, build
+- packages/verify-cli: build, typecheck, test; live smoke against https://sepolia.base.org
 
 ## Progress
 
@@ -57,6 +58,8 @@ the AnchorRegistry contract on Base Sepolia, in the browser or from a CLI.
 | C3 | 52e28ff, a065c74, 8b9697e (PR #47, merged) | medium, granted, approved | dtr-core `ProofPackageV1Schema` (`ancrux-proof-1`, strict) + `verifyProofPackageAgainstFile`; `GET /public/verify/:id/proof` via `GetProofPackageUseCase` (dtr-2 CERTIFIED only; dtr-1/not anchored/tampered/unknown network -> 409; unknown -> 404; `download=1` attachment). RED 17 (dtr-core) + 15 (use case, missing module) + 6 (controller) -> GREEN; e2e S-PV-PROOF verifies the package against the file and `isAnchored` on Anvil. ADR-016. |
 | C2/C4 | 7da6f36, 6cc9bf8 (409 reason), 15111e8 (review hardening) | high, granted, approved; hardening under budget | Pure orchestrator `lib/verify/independent-verification.ts` (steps file, proof, coreHash, anchorHash, network, contract, anchored; never throws; outcomes verified/failed/legacy/not_found/unavailable) + viem `chain-reader.ts` (lazy-loaded) + `getProofPackage` (409 dtr-1 -> legacy) + `IndependentVerificationPanel` on `/verify/[id]`; `NEXT_PUBLIC_CHAIN_RPC_URL` origin in CSP `connect-src`. RED: orchestrator suite (missing module) + 6 client + 3 CSP + component suite -> GREEN 387/387 web tests; live smoke vs sepolia.base.org: chainId 84532, random hash not anchored. |
 
+| C5 | (pending commit) | pending | Orchestrator moved from `apps/web/lib/verify/independent-verification.ts` to `packages/dtr-core/src/independent-verification.ts` (exported from the index, `ProofFetchResult` type included; web imports it from `@trustai/dtr-core`, keeps its viem `chain-reader.ts`, API client and dictionary). New `@trustai/verify-cli` (`ancrux-verify`, node:util parseArgs, viem reader, `--proof` offline / `--id` via API with 409 `reason` and 10 s timeout, `--json`; exit codes 0/1/2/3). RED: dtr-core suite 19/19 failing (missing export) and 3 CLI suites (missing modules) -> GREEN 124 dtr-core + 35 CLI; web suite green. Live smoke: random self-consistent proof vs sepolia.base.org reaches the chain, `not_anchored`, exit 1. CI builds verify-cli after dtr-core. |
+
 ## Notes for later steps
 
 - C3 serializes `Anchor.blockNumber` (Prisma BigInt) as a decimal string in the proof package (done).
@@ -65,4 +68,4 @@ the AnchorRegistry contract on Base Sepolia, in the browser or from a CLI.
 
 ## Next step
 
-Open PR for C2/C4, then C5.
+Open PR for C5; phase C complete.

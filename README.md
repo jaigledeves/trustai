@@ -82,6 +82,7 @@ Topología de despliegue y mapa de variables de entorno por servicio:
 
 ```
 packages/dtr-core/   # Núcleo de canonicalización, hashing y verificación (sin framework)
+packages/verify-cli/ # CLI `ancrux-verify`: verificación independiente de registros dtr-2
 apps/api/            # API NestJS + worker de anclaje pg-boss (hexagonal)
 apps/web/            # App web Next.js (auth, wizard de certificación, historial, verificación pública)
 smart-contracts/     # AnchorRegistry (Solidity + Foundry)
