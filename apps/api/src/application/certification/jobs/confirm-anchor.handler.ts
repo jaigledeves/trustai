@@ -160,6 +160,10 @@ export class ConfirmAnchorHandler {
 
     const existence = await this.anchorPort.isAnchored(trustRecord.canonicalHash);
     if (!existence.anchored) {
+      // Idempotent on redelivery: an earlier delivery already marked it FAILED.
+      if (trustRecord.state === TrustRecordState.FAILED) {
+        return;
+      }
       try {
         TrustRecordStateMachine.transition(trustRecord.state, TrustRecordState.FAILED);
       } catch (err) {

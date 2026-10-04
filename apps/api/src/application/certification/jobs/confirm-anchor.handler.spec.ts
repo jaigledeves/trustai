@@ -268,6 +268,22 @@ describe("ConfirmAnchorHandler", () => {
       expect(queue.send).not.toHaveBeenCalled();
       expect(queue.sendAfter).not.toHaveBeenCalled();
     });
+
+    it("is idempotent on redelivery: a record already FAILED is left as is without throwing", async () => {
+      trustRecordRepository = buildTrustRecordRepository({
+        findById: vi.fn().mockResolvedValue(buildTrustRecord({ state: TrustRecordState.FAILED })),
+      });
+      anchorPort = buildAnchorPort({
+        getConfirmationStatus: vi.fn().mockResolvedValue(revertedStatus),
+        isAnchored: vi.fn().mockResolvedValue({ anchored: false, blockTimestamp: null }),
+      });
+      handler = new ConfirmAnchorHandler(anchorPort, trustRecordRepository, anchorRepository, queue, configService);
+
+      await expect(handler.handle(basePayload)).resolves.toBeUndefined();
+      expect(trustRecordRepository.markAnchoringFailed).not.toHaveBeenCalled();
+      expect(trustRecordRepository.certify).not.toHaveBeenCalled();
+      expect(queue.send).not.toHaveBeenCalled();
+    });
   });
 
   it("throws when the TrustRecord no longer exists", async () => {
