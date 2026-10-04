@@ -142,6 +142,32 @@ describe("getProofPackage (ADR-016: GET /public/verify/:id/proof)", () => {
     await expect(getProofPackage("old")).resolves.toEqual({ status: "legacy" });
   });
 
+  it("maps a 409 with reason legacy_record to legacy, whatever the message says", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/old2/proof`, () =>
+        HttpResponse.json(
+          { statusCode: 409, message: "Registro anterior", reason: "legacy_record" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    await expect(getProofPackage("old2")).resolves.toEqual({ status: "legacy" });
+  });
+
+  it("maps a 409 with any other reason to unavailable, even if the message mentions dtr-1", async () => {
+    server.use(
+      http.get(`${BASE_URL}/public/verify/pending2/proof`, () =>
+        HttpResponse.json(
+          { statusCode: 409, message: "dtr-1 note", reason: "not_anchored" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    await expect(getProofPackage("pending2")).resolves.toEqual({ status: "unavailable" });
+  });
+
   it("maps any other 409 to unavailable", async () => {
     server.use(
       http.get(`${BASE_URL}/public/verify/pending/proof`, () =>

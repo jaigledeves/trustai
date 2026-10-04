@@ -81,6 +81,8 @@ describe("PublicVerificationController GET /public/verify/:id/proof", () => {
 
     expect(error).toBeInstanceOf(ConflictException);
     expect((error as ConflictException).message).toMatch(message);
+    // Machine-readable reason so clients never parse the message text.
+    expect((error as ConflictException).getResponse()).toMatchObject({ statusCode: 409, reason: status });
     expect(res.setHeader).not.toHaveBeenCalled();
   });
 });

@@ -76,10 +76,12 @@ export type ProofFetchResult =
   | { status: "unavailable" };
 
 /**
- * The API's 409 body does not carry a machine-readable reason, only the
- * NestJS `message`. The dtr-1 refusal is the only one that names "dtr-1"
- * (`PROOF_REFUSALS.legacy_record` in the public-verification controller).
+ * The API's 409 body carries a machine-readable `reason`
+ * (`legacy_record` | `not_anchored` | `unavailable`). An API deployed before
+ * that field existed only sent `message`, where the dtr-1 refusal is the one
+ * naming "dtr-1"; that is kept as a fallback while web and API roll out.
  */
+const LEGACY_REFUSAL_REASON = "legacy_record";
 const LEGACY_REFUSAL_MARKER = "dtr-1";
 
 export function proofPackageUrl(id: string): string {
@@ -103,7 +105,12 @@ export async function getProofPackage(id: string): Promise<ProofFetchResult> {
     return { status: "not_found" };
   }
   if (response.status === 409) {
-    const body = (await response.json().catch(() => null)) as { message?: unknown } | null;
+    const body = (await response.json().catch(() => null)) as
+      | { message?: unknown; reason?: unknown }
+      | null;
+    if (typeof body?.reason === "string") {
+      return body.reason === LEGACY_REFUSAL_REASON ? { status: "legacy" } : { status: "unavailable" };
+    }
     const message = typeof body?.message === "string" ? body.message : "";
     return message.includes(LEGACY_REFUSAL_MARKER) ? { status: "legacy" } : { status: "unavailable" };
   }
