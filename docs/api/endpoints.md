@@ -51,7 +51,7 @@ Documentación interactiva: Swagger/OpenAPI vía `@nestjs/swagger` en `main.ts`.
 | GET | `/trust-records?page=&pageSize=&search=&state=` | JWT | Lista paginada y filtrada (RNF-004, escopado en la query, nunca post-filtrado). Filtros opcionales validados por `ListTrustRecordsQueryDto`: `search` (nombre de fichero, *contains* case-insensitive) y `state` (estado del ciclo de vida, valor exacto). Un `state` inválido devuelve **400**, nunca 500 (ADR-008). `page` default 1; `pageSize` default 20, clamp a 100. Org sin coincidencias devuelve `{ items: [], total: 0 }`, nunca 404. |
 | GET | `/trust-records/:id` | JWT | Detalle completo: estado, `canonicalHash`, campos IA, anchor (txHash/blockTimestamp/status) si existe, y `analysisFailureReason` si el job `analyze-document` falló. |
 | PATCH | `/trust-records/:id/review` | JWT | Edita campos IA (`summary`/`classification`/`language`) mientras el registro está en `DRAFT`. 409 fuera de `DRAFT` (INV-21). Patch parcial. |
-| POST | `/trust-records/:id/confirm` | JWT | Ensambla y canonicaliza el DTR (RFC 8785 + SHA-256 vía `dtr-core`), fija `canonicalHash` una única vez (INV-22/24). `DRAFT -> READY`. 409 si no está en `DRAFT`, ya confirmado, o falta análisis/procedencia (RF-025/INV-26). |
+| POST | `/trust-records/:id/confirm` | JWT | Ensambla el DTR con `dtr-core` según su `schemaVersion` (`dtr-2` para registros nuevos) y calcula el valor anclado (RFC 8785 + SHA-256): `anchorHash` en `dtr-2`, hash del registro completo en `dtr-1` (ADR-015). Lo fija en `canonicalHash` una única vez (INV-22/24). `DRAFT -> READY`. 409 si no está en `DRAFT`, ya confirmado, o falta análisis/procedencia (RF-025/INV-26). |
 | POST | `/trust-records/:id/discard` | JWT | `DRAFT -> DISCARDED`. 409 desde cualquier otro estado. |
 | POST | `/trust-records/:id/anchor` | JWT | `READY -> ANCHORING`. Encola el job `anchor-dtr` y responde de inmediato (no bloqueante, RF-032/RNF-022): la tx on-chain se envía en background. 409 si no está `READY` o falta `canonicalHash`. |
 
@@ -64,7 +64,7 @@ global, para no limitar rutas autenticadas).
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
 | GET | `/public/verify/:id?channel=QR\|URL\|HASH` | No (throttled, límite configurable por `PUBLIC_VERIFY_GET_THROTTLE_LIMIT`, default 60/min) | Verificación solo por hash: existencia, estado y veredicto de anclaje. Nunca devuelve análisis IA ni contenido (INV-41). `id` desconocido -> **404**. |
-| POST | `/public/verify/:id?channel=QR\|URL\|HASH` | No (throttled, límite configurable por `PUBLIC_VERIFY_POST_THROTTLE_LIMIT`, default 20/min) | Verificación completa subiendo el documento (`multipart/form-data`, campo `file`). Recalcula SHA-256 y compara contra el asset certificado; corrobora on-chain. `analysis` solo si el veredicto es `VALID`/`PENDING_ANCHOR`. `id` desconocido -> **200 `INVALID_RECORD`**, nunca 404 (asimetría deliberada GET vs POST). Un archivo mayor que `MAX_UPLOAD_BYTES` (default 10 MB) -> **413**; no se exige la firma PDF, porque cualquier archivo recibe su veredicto normal. |
+| POST | `/public/verify/:id?channel=QR\|URL\|HASH` | No (throttled, límite configurable por `PUBLIC_VERIFY_POST_THROTTLE_LIMIT`, default 20/min) | Verificación completa subiendo el documento (`multipart/form-data`, campo `file`). Recalcula SHA-256 y compara contra el asset certificado; corrobora on-chain. Si el hash recalculado del registro ya no coincide con el `canonicalHash` fijado al confirmar (INV-22, ADR-015), devuelve `INVALID_RECORD` sin `analysis` ni `chainAnchor`. `analysis` solo si el veredicto es `VALID`/`PENDING_ANCHOR`. `id` desconocido -> **200 `INVALID_RECORD`**, nunca 404 (asimetría deliberada GET vs POST). Un archivo mayor que `MAX_UPLOAD_BYTES` (default 10 MB) -> **413**; no se exige la firma PDF, porque cualquier archivo recibe su veredicto normal. |
 
 Veredictos posibles (`VerificationAttemptVerdict`): `VALID`,
 `ASSET_MISMATCH`, `PENDING_ANCHOR`, `INVALID_RECORD`.
@@ -103,7 +103,7 @@ sequenceDiagram
 
     U->>W: Confirma (ConfirmButton)
     W->>API: POST /trust-records/:id/confirm
-    API->>API: dtr-core: canonicaliza (RFC 8785) + SHA-256 -> canonicalHash
+    API->>API: dtr-core: canonicaliza (RFC 8785) + SHA-256 -> canonicalHash (anchorHash en dtr-2)
     API->>DB: TrustRecord DRAFT -> READY (canonicalHash fijado, INV-22/24)
     API-->>W: 200 ConfirmTrustRecordResponseDto
 

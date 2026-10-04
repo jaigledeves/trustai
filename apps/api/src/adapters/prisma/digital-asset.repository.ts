@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { DigitalAsset as PrismaDigitalAsset } from "@prisma/client";
-import { DTR_SCHEMA_VERSION } from "@trustai/dtr-core";
+import { DTR_SCHEMA_VERSION_V2 } from "@trustai/dtr-core";
 import { AssetStatus, DigitalAsset } from "../../domain/digital-asset.entity";
 import type {
   AssetWithDraftRecord,
@@ -8,6 +8,12 @@ import type {
 } from "../../ports/digital-asset-repository.port";
 import type { TransactionHandle } from "../../ports/queue.port";
 import { PrismaService } from "./prisma.service";
+
+/**
+ * Schema version stamped on every NEW Trust Record (ADR-015). Existing rows
+ * keep their stored schemaVersion and are rebuilt and verified as such.
+ */
+export const EMITTED_DTR_SCHEMA_VERSION = DTR_SCHEMA_VERSION_V2;
 
 @Injectable()
 export class PrismaDigitalAssetRepository implements DigitalAssetRepositoryPort {
@@ -75,7 +81,7 @@ export class PrismaDigitalAssetRepository implements DigitalAssetRepositoryPort 
 
       const draftTrustRecord = await tx.trustRecord.create({
         data: {
-          schemaVersion: DTR_SCHEMA_VERSION,
+          schemaVersion: EMITTED_DTR_SCHEMA_VERSION,
           assetId: asset.id,
           assetHash: params.sha256,
           state: "DRAFT",

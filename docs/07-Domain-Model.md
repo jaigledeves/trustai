@@ -131,9 +131,9 @@ Fuera de alcance: diseño físico de base de datos (08), contratos de API
 |---|---|
 | INV-20 | El DTR referencia exactamente un activo e incluye su `assetHash`. |
 | INV-21 | El `AIAnalysis` es inmutable una vez el DTR sale de `DRAFT`: la revisión humana (RF-024) ocurre en `DRAFT` y queda registrada (`reviewedBy`). |
-| INV-22 | `canonicalHash` = SHA-256 de la serialización canónica (ADR-001); se calcula al pasar a `READY` y nunca se recalcula. |
+| INV-22 | `canonicalHash` es el valor anclado (ADR-015): en `dtr-2`, el `anchorHash` = SHA-256 de la serialización canónica de `{ schemaVersion, issuedAt, coreHash, enrichmentHash }`; en `dtr-1`, el SHA-256 de la serialización canónica del registro completo (ADR-001). Se calcula al pasar a `READY` y nunca se recalcula. |
 | INV-23 | Tras `CERTIFIED`, el DTR es inmutable por completo. Cualquier cambio = nueva versión (nuevo DTR). |
-| INV-24 | `schemaVersion` es obligatorio desde el primer DTR emitido (consecuencia 4 del ADR-001). |
+| INV-24 | `schemaVersion` es obligatorio desde el primer DTR emitido (consecuencia 4 del ADR-001, mantenida por ADR-015). Los DTR nuevos se emiten en `dtr-2`; los existentes conservan su versión. |
 | INV-25 | La cadena de versiones (`previousDtrId`) no tiene ciclos y no cruza organizaciones. |
 | INV-26 | El provenance IA (`provider`, `model`, `modelVersion`) es obligatorio (RF-025). |
 

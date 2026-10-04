@@ -86,7 +86,7 @@ export const landingDictionary = {
     technicalDetailLabel: "Ver el detalle técnico",
     technicalDetail: {
       intro:
-        "Cada certificación produce un DTR: un registro estructurado y versionado (esquema dtr-1).",
+        "Cada certificación produce un DTR: un registro estructurado y versionado (esquema dtr-2).",
       items: [
         {
           term: "Cifrado en reposo",

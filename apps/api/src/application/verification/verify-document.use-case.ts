@@ -1,5 +1,5 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { sha256Hex, verifyAssetAgainstRecord } from "@trustai/dtr-core";
+import { Inject, Injectable, Logger } from "@nestjs/common";
+import { buildTrustRecordCandidate, sha256Hex, verifyAssetAgainstRecord } from "@trustai/dtr-core";
 import { AnchorStatus, type Anchor } from "../../domain/anchor.entity";
 import { TrustRecordState, type TrustRecord } from "../../domain/trust-record.entity";
 import { ANCHOR_PORT, type AnchorPort } from "../../ports/anchor.port";
@@ -82,13 +82,22 @@ const EXPLANATIONS: Record<VerifyVerdict, string> = {
  * full — `analysis` populated only when the upload's hash matches).
  *
  * Reuses `verifyAssetAgainstRecord` from `@trustai/dtr-core` as-is for the
- * upload path, rebuilding the exact `TrustRecordV1` candidate JSON the
- * same way `ConfirmReviewUseCase.confirm` does — this is what makes the
+ * upload path, rebuilding the candidate with dtr-core's
+ * `buildTrustRecordCandidate` exactly as `ConfirmReviewUseCase.confirm`
+ * does, for both dtr-1 and dtr-2 records — this is what makes the
  * verdict independently reproducible (spec: "Independent
  * Reproducibility").
+ *
+ * Integrity check (INV-22, ADR-015): once the upload matches the asset, the
+ * hash recomputed from the DB columns must equal the `canonicalHash` stored
+ * at confirm time. A missing or different stored hash means the record was
+ * altered after certification, so the upload yields INVALID_RECORD without
+ * reading the chain or releasing the analysis.
  */
 @Injectable()
 export class VerifyDocumentUseCase {
+  private readonly logger = new Logger(VerifyDocumentUseCase.name);
+
   constructor(
     @Inject(TRUST_RECORD_REPOSITORY_PORT)
     private readonly trustRecordRepository: TrustRecordRepositoryPort,
@@ -191,7 +200,22 @@ export class VerifyDocumentUseCase {
       });
     }
 
-    // asset_verified
+    // asset_verified — the rebuilt record must still be the one certified:
+    // its recomputed hash must equal the canonicalHash fixed at confirm time
+    // (INV-22, ADR-015). Otherwise a DB column changed after certification
+    // and neither the analysis nor any chain state can be vouched for.
+    if (found.trustRecord.canonicalHash !== verification.canonicalHash) {
+      this.logger.warn(
+        `Trust record ${found.trustRecord.id} no longer matches its certified canonicalHash; returning INVALID_RECORD`,
+      );
+      return this.finish(found.trustRecord.id, "FULL", params.channel, {
+        resolved: true,
+        verdict: "INVALID_RECORD",
+        chainAnchor: null,
+        analysis: null,
+      });
+    }
+
     const analysis = this.buildAnalysis(found.trustRecord);
 
     if (bucket === "PENDING") {
@@ -203,7 +227,7 @@ export class VerifyDocumentUseCase {
       });
     }
 
-    // CERTIFIED
+    // CERTIFIED — the chain is read with the (now proven equal) certified hash.
     const chainAnchor = await this.resolveChainAnchor(verification.canonicalHash, found.anchor);
     return this.finish(found.trustRecord.id, "FULL", params.channel, {
       resolved: true,
@@ -228,13 +252,15 @@ export class VerifyDocumentUseCase {
 
   private buildCandidate(found: TrustRecordWithAssetAndAnchor): unknown {
     const trustRecord = found.trustRecord;
-    return {
-      schemaVersion: trustRecord.schemaVersion,
+    return buildTrustRecordCandidate(trustRecord.schemaVersion, {
+      // A missing issuedAt (impossible for READY+) fails parsing and yields
+      // INVALID_RECORD, exactly as before; it is never defaulted to a value.
+      issuedAt: found.issuedAt ?? "",
       asset: {
         sha256: found.asset.sha256,
         mimeType: found.asset.mimeType,
         sizeBytes: found.asset.sizeBytes,
-        ...(found.asset.filename ? { filename: found.asset.filename } : {}),
+        filename: found.asset.filename,
       },
       analysis: {
         summary: trustRecord.aiSummary,
@@ -249,8 +275,7 @@ export class VerifyDocumentUseCase {
         taxonomyVersion: trustRecord.aiTaxonomyVersion,
         analyzedAt: trustRecord.aiAnalyzedAt?.toISOString(),
       },
-      issuedAt: found.issuedAt,
-    };
+    });
   }
 
   private buildAnalysis(trustRecord: TrustRecord): VerifyAnalysis {

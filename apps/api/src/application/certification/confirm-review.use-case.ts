@@ -1,5 +1,9 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { computeCanonicalHash, parseTrustRecord } from "@trustai/dtr-core";
+import {
+  buildTrustRecordCandidate,
+  computeAnchoredHash,
+  parseAnyTrustRecord,
+} from "@trustai/dtr-core";
 import {
   ImmutableFieldError,
   InvalidTransitionError,
@@ -31,8 +35,9 @@ export interface ConfirmParams {
 
 export interface ConfirmResult {
   trustRecordId: string;
+  /** The anchored hash: dtr-1 canonical hash, or dtr-2 anchorHash (ADR-015). */
   canonicalHash: string;
-  /** ISO 8601 UTC instant — matches dtr-core's TrustRecordV1.issuedAt. */
+  /** ISO 8601 UTC instant — matches dtr-core's TrustRecord.issuedAt. */
   issuedAt: string;
 }
 
@@ -132,18 +137,18 @@ export class ConfirmReviewUseCase {
 
     const issuedAt = new Date().toISOString();
 
-    // RF-030/031, INV-22/24: assemble the exact canonical JSON dtr-core
-    // will hash — parseTrustRecord() both validates AND normalizes the
-    // shape (drops nothing extra, matches .optional()/.strict() exactly),
-    // so what gets hashed here is byte-for-byte what any independent
-    // verifier reconstructing this DTR from its public fields would hash.
-    const candidate: unknown = {
-      schemaVersion: trustRecord.schemaVersion,
+    // RF-030/031, INV-22/24: dtr-core assembles the record for the stored
+    // schemaVersion (dtr-2 for new records, dtr-1 for legacy DRAFTs) and
+    // parseAnyTrustRecord() validates AND normalizes it, so what gets hashed
+    // here is byte-for-byte what any independent verifier rebuilding this
+    // DTR from its public fields would hash.
+    const candidate = buildTrustRecordCandidate(trustRecord.schemaVersion, {
+      issuedAt,
       asset: {
         sha256: asset.sha256,
         mimeType: asset.mimeType,
         sizeBytes: asset.sizeBytes,
-        ...(asset.filename ? { filename: asset.filename } : {}),
+        filename: asset.filename,
       },
       analysis: {
         summary: trustRecord.aiSummary,
@@ -158,21 +163,21 @@ export class ConfirmReviewUseCase {
         taxonomyVersion: trustRecord.aiTaxonomyVersion,
         analyzedAt: trustRecord.aiAnalyzedAt?.toISOString(),
       },
-      issuedAt,
-    };
+    });
 
     // RF-025/INV-26: a record must not reach READY without complete,
     // schema-valid provenance+analysis — this is the checkpoint. If
     // analyze-document never ran (or failed), this rejects clearly
     // instead of hashing garbage.
-    const parsed = parseTrustRecord(candidate);
+    const parsed = parseAnyTrustRecord(candidate);
     if (!parsed.ok) {
       throw new ConflictException(
         `Cannot confirm: analysis is incomplete or invalid (${parsed.issues.join("; ")})`,
       );
     }
 
-    const canonicalHash = await computeCanonicalHash(parsed.record);
+    // ADR-015: the stored canonicalHash is the value anchored on-chain.
+    const canonicalHash = await computeAnchoredHash(parsed.record);
 
     await this.trustRecordRepository.confirmToReady(params.trustRecordId, {
       canonicalHash,

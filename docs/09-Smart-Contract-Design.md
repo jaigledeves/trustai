@@ -60,11 +60,17 @@ Eso es TODO el contrato. Cada línea que no está aquí es una decisión
 | **Sin estado mutable** | Un hash escrito jamás cambia (solo escritura 0→timestamp) | Invariante verificable con tests de invariantes Foundry |
 | **Barato** | 1 SSTORE + 1 evento ≈ 48-50K gas | Céntimos o menos en L2 (04 §1.2) |
 
-## Qué se ancla (recordatorio ADR-001/003)
+## Qué se ancla (recordatorio ADR-015/003)
+
+El valor anclado de un DTR es su `canonicalHash` almacenado: en `dtr-2`
+(esquema emitido desde ADR-015) es el `anchorHash` =
+SHA-256(JCS(`{ schemaVersion, issuedAt, coreHash, enrichmentHash }`)); en
+los DTR `dtr-1` ya existentes es el SHA-256 del registro canónico completo
+(ADR-001). El contrato no cambia: un `bytes32` por ancla.
 
 | Estrategia | Qué contiene el `bytes32` | Verificación |
 |---|---|---|
-| Individual (MVP) | `canonicalHash` del DTR | `anchoredAt[hash] > 0` |
+| Individual (MVP) | `canonicalHash` del DTR (`anchorHash` en `dtr-2`) | `anchoredAt[hash] > 0` |
 | Batching Merkle (producción) | Merkle root de N `canonicalHash` | Merkle proof (en el DTR) hasta el root + `anchoredAt[root] > 0` |
 
 La verificación de Merkle proofs vive en `dtr-core` (off-chain), no en
@@ -75,7 +81,9 @@ el contrato: verificar en cadena costaría gas sin añadir garantías.
 Un verificador sin relación con Ancrux puede:
 
 1. Canonicalizar el DTR (spec pública, `dtr-core` open source) y
-   calcular su SHA-256.
+   calcular el valor anclado: en `dtr-2`, `coreHash` (reproducible
+   desde el archivo), `enrichmentHash` y `anchorHash`; en `dtr-1`, el
+   SHA-256 del registro completo.
 2. Llamar `anchoredAt(hash)` en cualquier nodo RPC público de la red, o
    buscar el evento `Anchored` en el explorador.
 3. Comparar el timestamp del bloque con la fecha declarada.

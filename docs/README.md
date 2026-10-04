@@ -43,7 +43,7 @@ con una ADR nueva.
 
 | ADR | Título |
 |---|---|
-| [ADR-001](adr/ADR-001-anclaje-hash-dtr-canonico.md) | Anclaje del hash del DTR canónico |
+| [ADR-001](adr/ADR-001-anclaje-hash-dtr-canonico.md) | Anclaje del hash del DTR canónico (supersedida por ADR-015) |
 | [ADR-002](adr/ADR-002-stack-full-typescript.md) | Stack full TypeScript |
 | [ADR-003](adr/ADR-003-contrato-minimo-anchor-registry.md) | Contrato mínimo `AnchorRegistry` |
 | [ADR-004](adr/ADR-004-doble-adaptador-ia.md) | Doble adaptador IA (enmendado a 1 real + stub en el MVP) |
@@ -54,6 +54,10 @@ con una ADR nueva.
 | [ADR-009](adr/ADR-009-web-dueno-del-copy-de-veredictos-y-aviso-eidas.md) | La web es dueña del copy de veredictos y del aviso eIDAS |
 | [ADR-010](adr/ADR-010-verbo-canonico-anclar-vs-registrar.md) | Verbo canónico on-chain: "anclar" sobre "registrar" (incl. stepper de certify) |
 | [ADR-011](adr/ADR-011-cookie-server-component-theming-sobre-next-themes.md) | Theming con cookie + Server Component en vez de `next-themes` (SSR sin FOUC) |
+| [ADR-012](adr/ADR-012-guardia-global-de-rate-limiting-con-tracker-por-usuario.md) | Guardia global de rate limiting (`APP_GUARD`) con tracker por usuario |
+| [ADR-013](adr/ADR-013-cluster-de-autenticacion-compartido-en-el-header-publico.md) | Cluster de autenticación compartido (`HeaderAuthActions`) sin variantes por superficie |
+| [ADR-014](adr/ADR-014-clasificador-de-severidad-de-veredicto-y-token-warning.md) | Clasificador de severidad de veredicto compartido y token semántico `--warning` |
+| [ADR-015](adr/ADR-015-dtr-2-nucleo-y-enriquecimiento-separados.md) | Esquema `dtr-2` con núcleo verificable y enriquecimiento IA separados |
 
 ## Índice maestro / estado
 

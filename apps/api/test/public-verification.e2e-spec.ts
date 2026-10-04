@@ -1,7 +1,7 @@
 import type { INestApplication } from "@nestjs/common";
 import { ValidationPipe } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { sha256Hex, verifyAssetAgainstRecord } from "@trustai/dtr-core";
+import { buildTrustRecordCandidate, sha256Hex, verifyAssetAgainstRecord } from "@trustai/dtr-core";
 import {
   createPublicClient,
   createWalletClient,
@@ -337,6 +337,28 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
       ).toBe(true);
     }, 30_000);
 
+    it("S-PV-2b: AI column altered after certification -> same file yields INVALID_RECORD, analysis and chain withheld (INV-22)", async () => {
+      const pdfBytes = buildMinimalPdf("BT /F1 24 Tf 50 100 Td (PV-ALTERED) Tj ET");
+      const trustRecordId = await certifyNewRecord("pv-altered", pdfBytes);
+
+      await prisma.trustRecord.update({
+        where: { id: trustRecordId },
+        data: { aiSummary: "Altered after certification." },
+      });
+
+      const postRes = await request(app.getHttpServer())
+        .post(`/public/verify/${trustRecordId}`)
+        .attach("file", pdfBytes, { filename: "doc.pdf", contentType: "application/pdf" });
+
+      expect(postRes.status).toBe(200);
+      expect(postRes.body.verdict).toBe("INVALID_RECORD");
+      expect(postRes.body.analysis).toBeNull();
+      expect(postRes.body.chainAnchor).toBeNull();
+
+      const attempts = await prisma.verificationAttempt.findMany({ where: { trustRecordId } });
+      expect(attempts.some((a) => a.type === "FULL" && a.verdict === "INVALID_RECORD")).toBe(true);
+    }, 30_000);
+
     it("S-PV-3: matching hash, not yet anchored (READY) -> PENDING_ANCHOR with analysis, no chain data confirmed", async () => {
       const pdfBytes = buildMinimalPdf("BT /F1 24 Tf 50 100 Td (PV-PENDING) Tj ET");
       const trustRecordId = await confirmWithoutAnchoring("pv-pending", pdfBytes);
@@ -441,8 +463,8 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
         // have — publishing that DTR JSON to a verifier is UC-05, out of
         // scope here; what's under test is whether the ALGORITHM + ON-CHAIN
         // STATE are independently reproducible, not the transport). Rebuilds
-        // the TrustRecordV1 candidate and calls dtr-core's OWN exported
-        // `verifyAssetAgainstRecord`/`sha256Hex` — the exact same public
+        // the candidate with dtr-core's OWN exported `buildTrustRecordCandidate`
+        // (dtr-2 for new records) and calls `verifyAssetAgainstRecord`/`sha256Hex` — the exact same public
         // functions any third-party verifier (or the CLI in
         // smart-contracts/README.md) would call — never TrustAI's own
         // `VerifyDocumentUseCase` code.
@@ -450,13 +472,14 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
           where: { id: trustRecordId },
           include: { asset: true },
         });
-        const independentCandidate = {
-          schemaVersion: dbRecord.schemaVersion,
+        expect(dbRecord.schemaVersion).toBe("dtr-2");
+        const independentCandidate = buildTrustRecordCandidate(dbRecord.schemaVersion, {
+          issuedAt: dbRecord.issuedAt!.toISOString(),
           asset: {
             sha256: dbRecord.asset.sha256,
             mimeType: dbRecord.asset.mimeType,
             sizeBytes: dbRecord.asset.sizeBytes,
-            ...(dbRecord.asset.filename ? { filename: dbRecord.asset.filename } : {}),
+            filename: dbRecord.asset.filename,
           },
           analysis: {
             summary: dbRecord.aiSummary,
@@ -471,8 +494,7 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
             taxonomyVersion: dbRecord.aiTaxonomyVersion,
             analyzedAt: dbRecord.aiAnalyzedAt?.toISOString(),
           },
-          issuedAt: dbRecord.issuedAt?.toISOString(),
-        };
+        });
         const independentUploadSha256 = await sha256Hex(pdfBytes);
         const verification = await verifyAssetAgainstRecord(independentCandidate, independentUploadSha256);
         expect(verification.status).toBe("asset_verified");

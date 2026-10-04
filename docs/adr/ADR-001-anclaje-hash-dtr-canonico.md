@@ -1,6 +1,6 @@
 # ADR-001: Anclar en blockchain el hash del DTR canónico completo
 
-**Estado:** Aceptada
+**Estado:** Supersedida por [ADR-015](ADR-015-dtr-2-nucleo-y-enriquecimiento-separados.md) (04/10/2026)
 **Fecha:** 05/07/2026
 **Decisores:** Jose (Product Owner), agente IA (arquitectura)
 

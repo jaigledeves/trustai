@@ -1,7 +1,7 @@
 import type { INestApplication } from "@nestjs/common";
 import { ValidationPipe } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { computeCanonicalHash } from "@trustai/dtr-core";
+import { computeDtr2Hashes, parseAnyTrustRecord } from "@trustai/dtr-core";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { PrismaService } from "../src/adapters/prisma/prisma.service";
@@ -195,30 +195,37 @@ describe.skipIf(!dbAvailable || !storageAvailable)(
       const asset = await prisma.digitalAsset.findUnique({
         where: { id: afterConfirm!.assetId },
       });
-      const reference = await computeCanonicalHash({
-        schemaVersion: afterConfirm!.schemaVersion,
-        asset: {
-          sha256: asset!.sha256,
-          mimeType: asset!.mimeType,
-          sizeBytes: asset!.sizeBytes,
-          ...(asset!.filename ? { filename: asset!.filename } : {}),
-        },
-        analysis: {
-          summary: afterConfirm!.aiSummary,
-          classification: afterConfirm!.aiClassification,
-          language: afterConfirm!.aiLanguage,
-        },
-        provenance: {
-          provider: afterConfirm!.aiProvider,
-          model: afterConfirm!.aiModel,
-          modelVersion: afterConfirm!.aiModelVersion,
-          promptVersion: afterConfirm!.aiPromptVersion,
-          taxonomyVersion: afterConfirm!.aiTaxonomyVersion,
-          analyzedAt: afterConfirm!.aiAnalyzedAt!.toISOString(),
-        },
+      // New records are dtr-2 (ADR-015): the stored and anchored value is
+      // the anchorHash over { schemaVersion, issuedAt, coreHash, enrichmentHash }.
+      expect(afterConfirm!.schemaVersion).toBe("dtr-2");
+      const parsedReference = parseAnyTrustRecord({
+        schemaVersion: "dtr-2",
         issuedAt: afterConfirm!.issuedAt!.toISOString(),
+        core: {
+          asset: { sha256: asset!.sha256, mimeType: asset!.mimeType, sizeBytes: asset!.sizeBytes },
+        },
+        enrichment: {
+          asset: asset!.filename ? { filename: asset!.filename } : {},
+          analysis: {
+            summary: afterConfirm!.aiSummary,
+            classification: afterConfirm!.aiClassification,
+            language: afterConfirm!.aiLanguage,
+          },
+          provenance: {
+            provider: afterConfirm!.aiProvider,
+            model: afterConfirm!.aiModel,
+            modelVersion: afterConfirm!.aiModelVersion,
+            promptVersion: afterConfirm!.aiPromptVersion,
+            taxonomyVersion: afterConfirm!.aiTaxonomyVersion,
+            analyzedAt: afterConfirm!.aiAnalyzedAt!.toISOString(),
+          },
+        },
       });
-      expect(confirmRes.body.canonicalHash).toBe(reference);
+      if (!parsedReference.ok || parsedReference.record.schemaVersion !== "dtr-2") {
+        throw new Error(`reference record did not parse as dtr-2: ${JSON.stringify(parsedReference)}`);
+      }
+      const reference = await computeDtr2Hashes(parsedReference.record);
+      expect(confirmRes.body.canonicalHash).toBe(reference.anchorHash);
     });
 
     it("S-DTR-2: confirming an already-READY record is rejected (INV-24: hash never recomputed)", async () => {
