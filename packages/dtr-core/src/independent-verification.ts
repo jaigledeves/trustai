@@ -1,25 +1,22 @@
-import {
-  ANCHOR_REGISTRY_DEPLOYMENTS,
-  ProofPackageV1Schema,
-  sha256Hex,
-  verifyProofPackageAgainstFile,
-} from "@trustai/dtr-core";
-import type { ProofFetchResult } from "../api/public-verify-client";
+import { ANCHOR_REGISTRY_DEPLOYMENTS } from "./anchor-registry.js";
+import { sha256Hex } from "./hash.js";
+import { ProofPackageV1Schema, verifyProofPackageAgainstFile } from "./proof-package.js";
 
 /**
- * Independent verification of a dtr-2 record (roadmap C2/C4, ADR-016): the
- * browser recomputes the hashes from the visitor's file and the public proof
- * package, then reads the AnchorRegistry contract over a public RPC. Nothing
- * here trusts an Ancrux verdict; the API only serves the proof, which the
- * chain then confirms or denies.
+ * Independent verification of a dtr-2 record (roadmap C2/C4/C5, ADR-016):
+ * the caller (the browser or the CLI) recomputes the hashes from the user's
+ * file and the public proof package, then reads the AnchorRegistry contract
+ * over a public RPC. Both run these exact steps. Nothing here trusts an
+ * Ancrux verdict; the API only serves the proof, which the chain then
+ * confirms or denies.
  *
- * Pure orchestration: no React, no fetch, no chain client. The caller injects
- * `fetchProof` and a `ChainReader`. It never throws: every failure becomes a
- * step with `status: "failed"`, and every failure is blocking: the steps
- * after it are `skipped`. That includes a non-PDF file (the coreHash commits
- * to the mimeType, so it can never match) and a file over `MAX_FILE_BYTES`.
- * Steps carry codes and raw facts, never copy (ADR-009: the web dictionary
- * owns the wording).
+ * Pure orchestration, browser-safe: no React, no fetch, no Node API, no chain
+ * client. The caller injects `fetchProof` and a `ChainReader`. It never
+ * throws: every failure becomes a step with `status: "failed"`, and every
+ * failure is blocking: the steps after it are `skipped`. That includes a
+ * non-PDF file (the coreHash commits to the mimeType, so it can never match)
+ * and a file over `MAX_FILE_BYTES`. Steps carry codes and raw facts, never
+ * copy (ADR-009): the web dictionary and the CLI own the wording.
  */
 
 export type StepId = "file" | "proof" | "coreHash" | "anchorHash" | "network" | "contract" | "anchored";
@@ -100,6 +97,19 @@ export interface ChainReader {
   /** Block timestamp (seconds) of the anchor, 0 when not anchored. */
   anchoredAt(contract: `0x${string}`, hash: `0x${string}`): Promise<bigint>;
 }
+
+/**
+ * Outcome of fetching the public proof package (`GET /public/verify/:id/proof`,
+ * ADR-016), or of loading it from disk. The body stays unvalidated on purpose:
+ * the orchestrator parses it with the strict `ProofPackageV1Schema`.
+ */
+export type ProofFetchResult =
+  | { status: "ok"; body: unknown }
+  | { status: "not_found" }
+  /** 409 for a dtr-1 record: verified by the server only, no proof package. */
+  | { status: "legacy" }
+  /** Any other 409: not anchored yet, or no package can be produced. */
+  | { status: "unavailable" };
 
 export interface IndependentVerificationDeps {
   fetchProof(trustRecordId: string): Promise<ProofFetchResult>;

@@ -1,19 +1,17 @@
+import { describe, expect, it, vi } from "vitest";
 import {
   BASE_SEPOLIA_ANCHOR_REGISTRY,
+  MAX_FILE_BYTES,
   computeDtr2AnchorHash,
   computeDtr2CoreHash,
-  sha256Hex,
-  type ProofPackageV1,
-} from "@trustai/dtr-core";
-import { describe, expect, it, vi } from "vitest";
-import type { ProofFetchResult } from "../api/public-verify-client";
-import {
-  MAX_FILE_BYTES,
   runIndependentVerification,
+  sha256Hex,
   type ChainReader,
   type IndependentVerificationResult,
+  type ProofFetchResult,
+  type ProofPackageV1,
   type StepId,
-} from "./independent-verification";
+} from "../src/index.js";
 
 const PDF_BYTES = new TextEncoder().encode("%PDF-1.7\nindependent verification fixture\n");
 const ISSUED_AT = "2026-10-04T12:00:00.000Z";
@@ -304,6 +302,18 @@ describe("runIndependentVerification", () => {
     });
     expect(result.steps.slice(1).every((s) => s.status === "skipped")).toBe(true);
     expect(arrayBuffer).not.toHaveBeenCalled();
+    expect(fetchProof).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized file after reading it when its size was not known up front", async () => {
+    const bytes = new Uint8Array(MAX_FILE_BYTES + 1);
+    const fetchProof = vi.fn(async (): Promise<ProofFetchResult> => ({ status: "not_found" }));
+    const result = await runIndependentVerification(
+      { trustRecordId: "rec-1", file: blobOf(bytes) },
+      { fetchProof, chain: fakeChain() },
+    );
+
+    expect(step(result, "file")).toMatchObject({ status: "failed", code: "file_too_large" });
     expect(fetchProof).not.toHaveBeenCalled();
   });
 

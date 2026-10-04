@@ -36,6 +36,10 @@ previstas del TDD maestro.
 - [diagrams/c4/](diagrams/c4/) — fuentes `.mmd` de los diagramas C4 (contexto y contenedores), embebidos en [08-Architecture.md](08-Architecture.md).
 - [diagrams/sequence/](diagrams/sequence/) — fuentes `.mmd` de los diagramas de secuencia de certificación y verificación, embebidos en [api/endpoints.md](api/endpoints.md).
 
+## Herramientas
+
+- [packages/verify-cli](../packages/verify-cli/README.md) — CLI `ancrux-verify`: verifica un registro `dtr-2` desde el archivo, el paquete de prueba `ancrux-proof-1` (ADR-016) y un nodo RPC público, sin confiar en Ancrux.
+
 ## Architecture Decision Records
 
 Las ADR son inmutables una vez aceptadas — nunca se editan, se supersede
