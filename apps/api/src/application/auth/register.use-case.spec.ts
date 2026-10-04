@@ -1,4 +1,3 @@
-import { ConflictException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Organization } from "../../domain/organization.entity";
 import { User, UserRole } from "../../domain/user.entity";
@@ -53,6 +52,7 @@ function buildNotificationPort(
   return {
     sendVerificationEmail: vi.fn().mockResolvedValue(undefined),
     sendPasswordResetEmail: vi.fn().mockResolvedValue(undefined),
+    sendAccountExistsNotice: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
@@ -73,7 +73,9 @@ describe("RegisterUseCase", () => {
   it("registers a new organization admin and dispatches a verification email", async () => {
     const result = await useCase.execute("user@example.com", "password123");
 
-    expect(result).toEqual({ userId: "user-1", organizationId: "org-1" });
+    // Neutral body: never echoes ids, so it is identical for a new and an
+    // already-registered email (no account enumeration).
+    expect(result).toEqual({ ok: true });
     expect(userRepository.createOrgWithAdmin).toHaveBeenCalledTimes(1);
     expect(notificationPort.sendVerificationEmail).toHaveBeenCalledTimes(1);
     expect(notificationPort.sendVerificationEmail).toHaveBeenCalledWith(
@@ -104,16 +106,43 @@ describe("RegisterUseCase", () => {
     expect(createArgs.verificationTokenHash).toMatch(/^[a-f0-9]{64}$/);
   });
 
-  it("throws ConflictException for a duplicate email and does not create anything", async () => {
-    userRepository = buildUserRepository({
-      existsByEmail: vi.fn().mockResolvedValue(true),
+  describe("already-registered email (no account enumeration)", () => {
+    beforeEach(() => {
+      userRepository = buildUserRepository({
+        existsByEmail: vi.fn().mockResolvedValue(true),
+      });
+      useCase = new RegisterUseCase(userRepository, passwordHasher, notificationPort);
     });
-    useCase = new RegisterUseCase(userRepository, passwordHasher, notificationPort);
 
-    await expect(useCase.execute("user@example.com", "password123")).rejects.toThrow(
-      ConflictException,
-    );
-    expect(userRepository.createOrgWithAdmin).not.toHaveBeenCalled();
-    expect(notificationPort.sendVerificationEmail).not.toHaveBeenCalled();
+    it("returns exactly the same response as a new registration", async () => {
+      const duplicate = await useCase.execute("user@example.com", "password123");
+
+      const fresh = await new RegisterUseCase(
+        buildUserRepository(),
+        buildPasswordHasher(),
+        buildNotificationPort(),
+      ).execute("new@example.com", "password123");
+
+      expect(duplicate).toEqual(fresh);
+    });
+
+    it("creates nothing and sends no verification email", async () => {
+      await useCase.execute("user@example.com", "password123");
+
+      expect(userRepository.createOrgWithAdmin).not.toHaveBeenCalled();
+      expect(notificationPort.sendVerificationEmail).not.toHaveBeenCalled();
+    });
+
+    it("notifies the existing owner that someone tried to register with their email", async () => {
+      await useCase.execute("user@example.com", "password123");
+
+      expect(notificationPort.sendAccountExistsNotice).toHaveBeenCalledWith("user@example.com");
+    });
+
+    it("still hashes the submitted password so both branches do the expensive work", async () => {
+      await useCase.execute("user@example.com", "password123");
+
+      expect(passwordHasher.hash).toHaveBeenCalledWith("password123");
+    });
   });
 });

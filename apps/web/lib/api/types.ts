@@ -8,10 +8,13 @@ export interface LoginResponse {
   accessToken: string;
 }
 
-/** Mirrors `RegisterResult` (apps/api/src/application/auth/register.use-case.ts). No token — no auto-login. */
+/**
+ * Mirrors `RegisterResult` (apps/api/src/application/auth/register.use-case.ts).
+ * Neutral on purpose: identical for new and already-registered emails (no
+ * account enumeration). No token — no auto-login.
+ */
 export interface RegisterResponse {
-  userId: string;
-  organizationId: string;
+  ok: true;
 }
 
 export type TrustRecordState = "DRAFT" | "READY" | "ANCHORING" | "CERTIFIED" | "FAILED" | "DISCARDED";

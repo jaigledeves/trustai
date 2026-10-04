@@ -27,6 +27,7 @@ function buildNotificationPort(
   return {
     sendVerificationEmail: vi.fn(),
     sendPasswordResetEmail: vi.fn().mockResolvedValue(undefined),
+    sendAccountExistsNotice: vi.fn(),
     ...overrides,
   };
 }

@@ -113,7 +113,7 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
       const email = uniqueEmail(label);
       const password = "Password123";
 
-      const registerRes = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .post("/auth/register")
         .send({ email, password });
 
@@ -124,10 +124,13 @@ describe.skipIf(!dbAvailable || !storageAvailable || !anvilAvailable || !artifac
         .post("/auth/login")
         .send({ email, password });
 
-      return {
-        accessToken: loginRes.body.accessToken as string,
-        organizationId: registerRes.body.organizationId as string,
+      // The register body is neutral (no ids): the org id comes from the JWT.
+      const accessToken = loginRes.body.accessToken as string;
+      const [, payloadB64] = accessToken.split(".");
+      const payload = JSON.parse(Buffer.from(payloadB64 ?? "", "base64url").toString("utf8")) as {
+        organizationId: string;
       };
+      return { accessToken, organizationId: payload.organizationId };
     }
 
     /** Uploads a real, text-extractable PDF and polls the (Phase 7) detail endpoint until AI analysis lands. */

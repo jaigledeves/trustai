@@ -22,4 +22,10 @@ export class StubNotificationAdapter implements NotificationPort {
       `[STUB NotificationPort] Password reset email for ${email}: token=${rawToken}`,
     );
   }
+
+  async sendAccountExistsNotice(email: string): Promise<void> {
+    this.logger.log(
+      `[STUB NotificationPort] Account-exists notice for ${email}: someone tried to register with this email`,
+    );
+  }
 }

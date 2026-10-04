@@ -12,7 +12,7 @@ describe("RegisterForm (spec: web-auth-flow Registration)", () => {
     server.use(
       http.post("http://localhost:3000/api/backend/auth/register", () => {
         requestMade = true;
-        return HttpResponse.json({ userId: "u1", organizationId: "o1" });
+        return HttpResponse.json({ ok: true }, { status: 201 });
       }),
     );
 
@@ -37,7 +37,7 @@ describe("RegisterForm (spec: web-auth-flow Registration)", () => {
     const user = userEvent.setup();
     server.use(
       http.post("http://localhost:3000/api/backend/auth/register", () =>
-        HttpResponse.json({ userId: "u1", organizationId: "o1" }, { status: 201 }),
+        HttpResponse.json({ ok: true }, { status: 201 }),
       ),
     );
 
@@ -69,7 +69,7 @@ describe("RegisterForm (spec: web-auth-flow Registration)", () => {
     server.use(
       http.post("http://localhost:3000/api/backend/auth/register", async () => {
         await pending;
-        return HttpResponse.json({ userId: "u1", organizationId: "o1" });
+        return HttpResponse.json({ ok: true }, { status: 201 });
       }),
     );
 
@@ -98,11 +98,11 @@ describe("RegisterForm (spec: web-auth-flow Registration)", () => {
     );
   });
 
-  it("maps a 409 duplicate-email response to the exact spec copy", async () => {
+  it("never tells the user an email is already registered, even on a stray 409 (no account enumeration)", async () => {
     const user = userEvent.setup();
     server.use(
       http.post("http://localhost:3000/api/backend/auth/register", () =>
-        HttpResponse.json({ status: 409, message: "Email is already registered" }, { status: 409 }),
+        HttpResponse.json({ status: 409, message: "Conflict" }, { status: 409 }),
       ),
     );
 
@@ -116,8 +116,11 @@ describe("RegisterForm (spec: web-auth-flow Registration)", () => {
     await user.click(screen.getByRole("button", { name: "Registrarme" }));
 
     expect(
-      await screen.findByText("Este email ya está registrado."),
+      await screen.findByText(
+        "Ocurrió un error inesperado. Prueba de nuevo en unos minutos.",
+      ),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/ya está registrado/i)).not.toBeInTheDocument();
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Registrarme" })).not.toBeDisabled(),
     );
@@ -129,7 +132,7 @@ describe("RegisterForm (spec: web-auth-flow Registration)", () => {
     server.use(
       http.post("http://localhost:3000/api/backend/auth/register", () => {
         requestMade = true;
-        return HttpResponse.json({ userId: "u1", organizationId: "o1" });
+        return HttpResponse.json({ ok: true }, { status: 201 });
       }),
     );
 

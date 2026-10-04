@@ -4,7 +4,7 @@ import { certifyDictionary } from "../../dictionaries/es/certify";
 import { verifyDictionary } from "../../dictionaries/es/verify";
 import { ApiError, mapApiError } from "./errors";
 
-describe("mapApiError (pure — spec: no enumeration on login, distinct unverified/duplicate copy)", () => {
+describe("mapApiError (pure — spec: no enumeration on login or register, distinct unverified copy)", () => {
   it("maps 401 in the login context to the generic no-enumeration message", () => {
     expect(mapApiError(401, "login")).toBe(
       authDictionary.login.errorInvalidCredentials,
@@ -17,9 +17,9 @@ describe("mapApiError (pure — spec: no enumeration on login, distinct unverifi
     );
   });
 
-  it("maps 409 in the register context to the duplicate-email message", () => {
+  it("never maps a register 409 to an 'already registered' message (no account enumeration)", () => {
     expect(mapApiError(409, "register")).toBe(
-      authDictionary.register.errorDuplicateEmail,
+      "Ocurrió un error inesperado. Prueba de nuevo en unos minutos.",
     );
   });
 
