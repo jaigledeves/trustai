@@ -9,6 +9,9 @@ import { isDatabaseAvailable } from "./utils/db-availability";
 const dbAvailable = await isDatabaseAvailable();
 
 const WRONG_PASSWORD = { password: "not-the-password" };
+const ACCOUNT_LIMIT = 3;
+const IP_LIMIT = 2;
+const PROXY_SECRET = "e2e-proxy-secret";
 
 function uniqueEmail(label: string): string {
   return `${label}-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
@@ -25,7 +28,12 @@ async function bootApp(env: Record<string, string>): Promise<INestApplication> {
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
   const app = moduleRef.createNestApplication();
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  await app.init();
+  try {
+    await app.init();
+  } catch (error) {
+    await app.close();
+    throw error;
+  }
   return app;
 }
 
@@ -44,16 +52,18 @@ describe.skipIf(!dbAvailable)("Auth throttling E2E (A5)", () => {
   });
 
   it("S-AUTH-19: login is limited per account; another account keeps its own bucket", async () => {
-    app = await bootApp({ AUTH_THROTTLE_LIMIT: "3", THROTTLE_LIMIT: "1000" });
+    app = await bootApp({ AUTH_THROTTLE_LIMIT: String(ACCOUNT_LIMIT), THROTTLE_LIMIT: "1000" });
     const victim = uniqueEmail("throttle-victim");
 
-    for (let attempt = 1; attempt <= 3; attempt++) {
+    for (let attempt = 1; attempt <= ACCOUNT_LIMIT; attempt++) {
       const res = await request(app.getHttpServer())
         .post("/auth/login")
         .send({ email: victim, ...WRONG_PASSWORD });
       expect(res.status).toBe(401);
     }
 
+    // Upper-cased on purpose: the account key is normalized, so this still
+    // hits the victim's bucket.
     const blocked = await request(app.getHttpServer())
       .post("/auth/login")
       .send({ email: victim.toUpperCase(), ...WRONG_PASSWORD });
@@ -68,8 +78,8 @@ describe.skipIf(!dbAvailable)("Auth throttling E2E (A5)", () => {
   it("S-AUTH-20: the global per-IP limit uses the forwarded client IP only with the trusted proxy secret", async () => {
     app = await bootApp({
       AUTH_THROTTLE_LIMIT: "1000",
-      THROTTLE_LIMIT: "2",
-      TRUSTED_PROXY_SECRET: "e2e-proxy-secret",
+      THROTTLE_LIMIT: String(IP_LIMIT),
+      TRUSTED_PROXY_SECRET: PROXY_SECRET,
     });
     const login = (clientIp: string, secret: string) =>
       request(app!.getHttpServer())
@@ -78,15 +88,20 @@ describe.skipIf(!dbAvailable)("Auth throttling E2E (A5)", () => {
         .set("x-client-ip", clientIp)
         .send({ email: uniqueEmail("throttle-ip"), ...WRONG_PASSWORD });
 
-    expect((await login("203.0.113.10", "e2e-proxy-secret")).status).toBe(401);
-    expect((await login("203.0.113.10", "e2e-proxy-secret")).status).toBe(401);
-    expect((await login("203.0.113.10", "e2e-proxy-secret")).status).toBe(429);
+    for (let attempt = 1; attempt <= IP_LIMIT; attempt++) {
+      expect((await login("203.0.113.10", PROXY_SECRET)).status).toBe(401);
+    }
+    expect((await login("203.0.113.10", PROXY_SECRET)).status).toBe(429);
 
     // A different forwarded client IP has its own bucket.
-    expect((await login("203.0.113.20", "e2e-proxy-secret")).status).toBe(401);
+    expect((await login("203.0.113.20", PROXY_SECRET)).status).toBe(401);
 
-    // A wrong secret is ignored: the request is keyed by the connection IP,
-    // whose bucket is still empty in this app instance.
-    expect((await login("203.0.113.10", "wrong-secret")).status).toBe(401);
+    // With a wrong secret the forwarded IP is ignored and requests share the
+    // connection IP's bucket: the exhausted 203.0.113.10 bucket does not
+    // apply, but the connection bucket fills up after IP_LIMIT requests.
+    for (let attempt = 1; attempt <= IP_LIMIT; attempt++) {
+      expect((await login("203.0.113.10", "wrong-secret")).status).toBe(401);
+    }
+    expect((await login("203.0.113.99", "wrong-secret")).status).toBe(429);
   });
 });
