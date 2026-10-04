@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { createHash } from "node:crypto";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -40,6 +40,8 @@ export class RegisterUseCase {
     private readonly notificationPort: NotificationPort,
   ) {}
 
+  private readonly logger = new Logger(RegisterUseCase.name);
+
   async execute(email: string, password: string): Promise<RegisterResult> {
     const alreadyExists = await this.userRepository.existsByEmail(email);
 
@@ -50,7 +52,13 @@ export class RegisterUseCase {
     if (alreadyExists) {
       // Create nothing and reveal nothing: the caller gets the same 201 body;
       // only the real owner learns about the attempt, by email.
-      await this.notificationPort.sendAccountExistsNotice(email);
+      // A failing notifier must not turn into a 500: that would reveal the
+      // account exists. Log without the email and answer the same.
+      try {
+        await this.notificationPort.sendAccountExistsNotice(email);
+      } catch {
+        this.logger.warn("Account-exists notice could not be sent");
+      }
       return { ...REGISTER_RESULT };
     }
 

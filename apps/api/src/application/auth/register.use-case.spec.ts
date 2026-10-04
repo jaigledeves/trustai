@@ -144,5 +144,23 @@ describe("RegisterUseCase", () => {
 
       expect(passwordHasher.hash).toHaveBeenCalledWith("password123");
     });
+
+    it("keeps the same response when the owner notice fails (a 500 would reveal the account)", async () => {
+      const failingNotifier = {
+        ...buildNotificationPort(),
+        sendAccountExistsNotice: vi.fn().mockRejectedValue(new Error("mail provider down")),
+      };
+      const result = await new RegisterUseCase(userRepository, passwordHasher, failingNotifier).execute(
+        "user@example.com",
+        "password123",
+      );
+
+      const fresh = await new RegisterUseCase(
+        buildUserRepository(),
+        buildPasswordHasher(),
+        buildNotificationPort(),
+      ).execute("new@example.com", "password123");
+      expect(result).toEqual(fresh);
+    });
   });
 });

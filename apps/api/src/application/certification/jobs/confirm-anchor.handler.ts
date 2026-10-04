@@ -50,7 +50,9 @@ export interface ConfirmAnchorJobPayload {
  *   permissionless): the reverted tx is never certified. If the hash IS
  *   anchored on-chain, the record is certified like `AnchorDtrHandler`'s
  *   "already anchored" path (no txHash, timestamp from `anchoredAt`);
- *   otherwise it follows the same FAILED + re-enqueue path as a timeout.
+ *   otherwise it is marked FAILED and NOT re-enqueued: the tx was simulated
+ *   before sending, so the revert is not transient and an automatic retry
+ *   would spend gas on every attempt.
  * - the timeout window elapses: ANCHORING->FAILED (visible — "Failure
  *   state is visible throughout") then immediately FAILED->ANCHORING
  *   again with a fresh `anchor-dtr` job re-enqueued atomically (RF-033
