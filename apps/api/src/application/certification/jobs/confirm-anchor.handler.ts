@@ -141,7 +141,10 @@ export class ConfirmAnchorHandler {
    * A mined-but-reverted tx anchored nothing itself. Re-reads the registry:
    * if the hash is anchored anyway (someone else got there first), certify
    * exactly like `AnchorDtrHandler`'s "already anchored" branch — never
-   * publishing the reverted txHash; otherwise retry like a timeout.
+   * publishing the reverted txHash. Otherwise mark it FAILED and stop: the
+   * tx was simulated before sending, so an on-chain revert that anchored
+   * nothing is not transient, and retrying automatically would spend gas on
+   * every attempt with no bound.
    */
   private async handleRevertedTransaction(
     payload: ConfirmAnchorJobPayload,
@@ -157,9 +160,17 @@ export class ConfirmAnchorHandler {
 
     const existence = await this.anchorPort.isAnchored(trustRecord.canonicalHash);
     if (!existence.anchored) {
-      await this.retryAnchoring(payload, "anchor tx reverted");
-      this.logger.warn(
-        `TrustRecord ${payload.trustRecordId} anchor tx ${payload.txHash} reverted and the hash is not anchored — retrying`,
+      try {
+        TrustRecordStateMachine.transition(trustRecord.state, TrustRecordState.FAILED);
+      } catch (err) {
+        if (err instanceof InvalidTransitionError) {
+          throw new Error(`Cannot mark TrustRecord ${payload.trustRecordId} FAILED: ${err.message}`);
+        }
+        throw err;
+      }
+      await this.trustRecordRepository.markAnchoringFailed(payload.trustRecordId);
+      this.logger.error(
+        `TrustRecord ${payload.trustRecordId} anchor tx ${payload.txHash} reverted and the hash is not anchored — marked FAILED, not retried automatically`,
       );
       return;
     }
@@ -204,8 +215,8 @@ export class ConfirmAnchorHandler {
   }
 
   /**
-   * ANCHORING -> FAILED -> ANCHORING with a fresh `anchor-dtr` job (RF-033).
-   * Shared by the timeout and the reverted-and-not-anchored outcomes.
+   * ANCHORING -> FAILED -> ANCHORING with a fresh `anchor-dtr` job (RF-033),
+   * used when confirmation times out.
    */
   private async retryAnchoring(payload: ConfirmAnchorJobPayload, reason: string): Promise<void> {
     const trustRecord = await this.trustRecordRepository.findById(payload.trustRecordId);

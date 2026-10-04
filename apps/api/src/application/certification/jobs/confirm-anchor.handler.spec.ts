@@ -252,7 +252,7 @@ describe("ConfirmAnchorHandler", () => {
       expect(queue.sendAfter).not.toHaveBeenCalled();
     });
 
-    it("does NOT certify when the hash is not anchored: marks FAILED and re-enqueues anchor-dtr", async () => {
+    it("does NOT certify when the hash is not anchored: marks FAILED and does not re-enqueue (no gas loop)", async () => {
       anchorPort = buildAnchorPort({
         getConfirmationStatus: vi.fn().mockResolvedValue(revertedStatus),
         isAnchored: vi.fn().mockResolvedValue({ anchored: false, blockTimestamp: null }),
@@ -264,11 +264,8 @@ describe("ConfirmAnchorHandler", () => {
       expect(trustRecordRepository.certify).not.toHaveBeenCalled();
       expect(anchorRepository.updateSubmissionResult).not.toHaveBeenCalled();
       expect(trustRecordRepository.markAnchoringFailed).toHaveBeenCalledWith("trust-record-1");
-      expect(queue.send).toHaveBeenCalledWith(
-        ANCHOR_DTR_QUEUE,
-        { trustRecordId: "trust-record-1", canonicalHash: "a".repeat(64) },
-        expect.anything(),
-      );
+      expect(trustRecordRepository.retryAnchoring).not.toHaveBeenCalled();
+      expect(queue.send).not.toHaveBeenCalled();
       expect(queue.sendAfter).not.toHaveBeenCalled();
     });
   });
