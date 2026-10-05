@@ -1,7 +1,8 @@
 /**
  * Spanish strings for register/verify-email/login (web-auth-flow). Copy
  * here is grounded directly in spec #257's scenarios — do not paraphrase
- * the 401/403/409 messages, they are asserted verbatim by tests.
+ * the 401/403 messages, they are asserted verbatim by tests. Register has
+ * no "email already registered" copy on purpose (no account enumeration).
  */
 export const authDictionary = {
   register: {
@@ -15,7 +16,6 @@ export const authDictionary = {
     successTitle: "¡Ya casi está!",
     successMessage:
       "Revisa tu email para verificar tu cuenta antes de iniciar sesión.",
-    errorDuplicateEmail: "Este email ya está registrado.",
     errorInvalidEmail: "Ingresa un email válido.",
     errorPasswordPolicy:
       "La contraseña debe tener al menos 8 caracteres, con una letra y un número.",

@@ -40,9 +40,9 @@ export function mapApiError(status: number, context: ApiErrorContext): string {
     if (status === 403) return authDictionary.login.errorUnverifiedEmail;
   }
 
-  if (context === "register") {
-    if (status === 409) return authDictionary.register.errorDuplicateEmail;
-  }
+  // "register" deliberately has no 409 copy: the API answers an
+  // already-registered email with the same 201 as a new one (no account
+  // enumeration), so the UI never says an email is taken.
 
   // INV-21: reviewing after DRAFT is a state conflict, not a validation
   // error — the caller must refresh, never show the edit as applied.

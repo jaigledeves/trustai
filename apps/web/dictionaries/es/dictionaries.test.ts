@@ -60,9 +60,8 @@ describe("dictionaries/es", () => {
     expect(authDictionary.login.errorUnverifiedEmail).toBe(
       "Verifica tu email antes de iniciar sesión.",
     );
-    expect(authDictionary.register.errorDuplicateEmail).toBe(
-      "Este email ya está registrado.",
-    );
+    // Register never reveals that an email is already in use (no enumeration).
+    expect(authDictionary.register).not.toHaveProperty("errorDuplicateEmail");
   });
 
   it("certify give-up copy says auto-update STOPPED and to reload — never implies it keeps updating on its own (matches the cap returning `false`)", () => {

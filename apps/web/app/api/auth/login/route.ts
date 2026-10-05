@@ -3,6 +3,7 @@ import { ApiError, mapApiError } from "../../../../lib/api/errors";
 import { serverFetch } from "../../../../lib/api/server-client";
 import { trustedProxyHeaders } from "../../../../lib/api/trusted-proxy-headers";
 import type { LoginResponse } from "../../../../lib/api/types";
+import { rejectCrossOriginJson } from "../../../../lib/security/same-origin";
 import { setSessionCookie } from "../../../../lib/session";
 
 interface LoginRequestBody {
@@ -18,6 +19,12 @@ interface LoginRequestBody {
  * unverified email) is chosen by `mapApiError`.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  // Login CSRF guard: only a same-origin JSON request may establish a session.
+  const rejected = rejectCrossOriginJson(request);
+  if (rejected) {
+    return rejected;
+  }
+
   let body: unknown;
   try {
     body = await request.json();

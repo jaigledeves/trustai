@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { config } from "../../../../lib/config";
 import { getSession } from "../../../../lib/session";
 import { trustedProxyHeaders } from "../../../../lib/api/trusted-proxy-headers";
+import { rejectCrossOrigin } from "../../../../lib/security/same-origin";
 
 interface RouteContext {
   params: Promise<{ path: string[] }>;
@@ -23,6 +24,17 @@ async function proxyRequest(
   request: NextRequest,
   context: RouteContext,
 ): Promise<NextResponse> {
+  const hasBody = request.method !== "GET" && request.method !== "HEAD";
+
+  // CSRF guard for writes: SameSite=Lax alone is not the control. Only the
+  // Origin is checked (not Content-Type) so multipart uploads keep working.
+  if (hasBody) {
+    const rejected = rejectCrossOrigin(request);
+    if (rejected) {
+      return rejected;
+    }
+  }
+
   const { path } = await context.params;
 
   const apiBaseUrl = config.apiBaseUrl();
@@ -55,7 +67,6 @@ async function proxyRequest(
     headers.set(name, value);
   }
 
-  const hasBody = request.method !== "GET" && request.method !== "HEAD";
   const body = hasBody ? await request.arrayBuffer() : undefined;
 
   let response: Response;

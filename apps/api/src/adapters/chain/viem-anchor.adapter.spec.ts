@@ -152,7 +152,7 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
     it("returns the confirmation count, block number, block timestamp and deployment for a mined tx", async () => {
       const blockTimestampSeconds = 1_800_000_100n;
       const publicClient = buildFakePublicClient({
-        getTransactionReceipt: vi.fn().mockResolvedValue({ blockNumber: 100n }),
+        getTransactionReceipt: vi.fn().mockResolvedValue({ blockNumber: 100n, status: "success" }),
         getBlockNumber: vi.fn().mockResolvedValue(102n), // 100 -> 102 = 3 confirmations
         getBlock: vi.fn().mockResolvedValue({ timestamp: blockTimestampSeconds }),
       });
@@ -163,11 +163,30 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
 
       expect(status).toEqual({
         confirmations: 3,
+        status: "success",
         blockTimestamp: new Date(Number(blockTimestampSeconds) * 1000),
         blockNumber: 100n,
         chainId: CHAIN_ID,
         contractAddress: CONTRACT_ADDRESS,
       });
+    });
+
+    it("reports a reverted receipt so the caller never certifies a failed tx", async () => {
+      const publicClient = buildFakePublicClient({
+        getTransactionReceipt: vi.fn().mockResolvedValue({ blockNumber: 100n, status: "reverted" }),
+        getBlockNumber: vi.fn().mockResolvedValue(101n),
+        getBlock: vi.fn().mockResolvedValue({ timestamp: 1_800_000_000n }),
+      });
+      const adapter = new ViemAnchorAdapter({
+        publicClient,
+        walletClient: buildFakeWalletClient(),
+        contractAddress: CONTRACT_ADDRESS,
+      });
+
+      const status = await adapter.getConfirmationStatus("0xsome-tx-hash");
+
+      expect(status.status).toBe("reverted");
+      expect(status.confirmations).toBe(2);
     });
 
     it("returns 0 confirmations (not an error) when the tx isn't mined yet", async () => {
@@ -183,6 +202,7 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
 
       expect(status).toEqual({
         confirmations: 0,
+        status: null,
         blockTimestamp: null,
         blockNumber: null,
         chainId: CHAIN_ID,
@@ -205,7 +225,7 @@ describe("ViemAnchorAdapter (AnchorPort)", () => {
     it("reports a null chainId when the public client has no chain configured", async () => {
       const publicClient = buildFakePublicClient({
         chain: undefined,
-        getTransactionReceipt: vi.fn().mockResolvedValue({ blockNumber: 7n }),
+        getTransactionReceipt: vi.fn().mockResolvedValue({ blockNumber: 7n, status: "success" }),
         getBlockNumber: vi.fn().mockResolvedValue(8n),
         getBlock: vi.fn().mockResolvedValue({ timestamp: 1_800_000_000n }),
       });

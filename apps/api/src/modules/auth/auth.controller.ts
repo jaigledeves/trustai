@@ -37,11 +37,16 @@ export class AuthController {
   ) {}
 
   @Post("register")
+  // Per-email limit: the duplicate-email branch notifies the existing owner,
+  // so repeated registrations must not become an unbounded notice stream.
+  @AccountThrottle()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: "Register a new organization admin user",
     description:
-      "Creates a new Organization and an admin User, then dispatches a verification email (stubbed).",
+      "Creates a new Organization and an admin User, then dispatches a verification email (stubbed). " +
+      "Answers the same neutral 201 body for an already-registered email (no account enumeration); " +
+      "the existing owner is notified instead.",
   })
   async register(@Body() dto: RegisterDto): Promise<RegisterResult> {
     return this.registerUseCase.execute(dto.email, dto.password);

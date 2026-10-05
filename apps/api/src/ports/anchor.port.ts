@@ -37,6 +37,13 @@ export interface AnchorSubmitResult extends AnchorDeployment {
 export interface ConfirmationStatus extends AnchorDeployment {
   /** 0 while the tx isn't mined yet (or the receipt can't be found yet). */
   confirmations: number;
+  /**
+   * The mined receipt's execution status — `null` until the tx is mined.
+   * A mined tx can still be `"reverted"` (e.g. `AlreadyAnchored` because a
+   * third party or a duplicate job anchored the same hash first): callers
+   * must never certify a reverted tx as if it had anchored the hash.
+   */
+  status: "success" | "reverted" | null;
   /** The tx's block timestamp — `null` until it has at least 1 confirmation. */
   blockTimestamp: Date | null;
   /** The block that includes the tx — `null` until it has at least 1 confirmation. */

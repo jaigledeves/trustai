@@ -13,7 +13,9 @@ vi.mock("next/headers", () => ({
 
 // Imported AFTER the mock so the route module's `getSession()` call
 // resolves the mocked `next/headers`.
-const { GET, POST, PATCH } = await import("./route");
+const { GET, POST, PATCH, PUT, DELETE } = await import("./route");
+
+const SAME_ORIGIN = "http://localhost:3001";
 
 function context(path: string[]) {
   return { params: Promise.resolve({ path }) };
@@ -62,7 +64,7 @@ describe("app/api/backend/[...path] proxy (spec: Proxy call attaches Bearer head
       "http://localhost:3001/api/backend/assets?page=2",
       {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", origin: SAME_ORIGIN },
         body: JSON.stringify({ filename: "doc.pdf" }),
       },
     );
@@ -93,7 +95,7 @@ describe("app/api/backend/[...path] proxy (spec: Proxy call attaches Bearer head
       "http://localhost:3001/api/backend/trust-records/1/review",
       {
         method: "PATCH",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", origin: SAME_ORIGIN },
         body: JSON.stringify({ summary: "edited" }),
       },
     );
@@ -161,5 +163,96 @@ describe("app/api/backend/[...path] proxy (spec: Proxy call attaches Bearer head
 
     expect(response.status).toBe(401);
     expect(body).toEqual({ status: 401, message: "Unauthorized" });
+  });
+
+  describe("CSRF guard on write methods (SameSite=Lax alone is not the control)", () => {
+    const writeMethods = [
+      ["POST", POST],
+      ["PATCH", PATCH],
+      ["PUT", PUT],
+      ["DELETE", DELETE],
+    ] as const;
+
+    it.each(writeMethods)(
+      "rejects a cross-origin %s with 403 and never reaches the backend",
+      async (method, handler) => {
+        let backendCalled = false;
+        server.use(
+          http.all("http://localhost:3000/trust-records/1", () => {
+            backendCalled = true;
+            return HttpResponse.json({ ok: true });
+          }),
+        );
+
+        const request = new NextRequest("http://localhost:3001/api/backend/trust-records/1", {
+          method,
+          headers: { "content-type": "application/json", origin: "https://evil.example.com" },
+          ...(method === "DELETE" ? {} : { body: JSON.stringify({ summary: "x" }) }),
+        });
+        const response = await handler(request, context(["trust-records", "1"]));
+        const body = await response.json();
+
+        expect(response.status).toBe(403);
+        expect(body).toEqual({ status: 403, message: expect.any(String) });
+        expect(backendCalled).toBe(false);
+      },
+    );
+
+    it("rejects a write with no Origin and no Sec-Fetch-Site", async () => {
+      const request = new NextRequest("http://localhost:3001/api/backend/assets", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      });
+      const response = await POST(request, context(["assets"]));
+
+      expect(response.status).toBe(403);
+    });
+
+    it("still forwards a same-origin multipart upload (Content-Type is not the control here)", async () => {
+      let receivedContentType: string | null = null;
+      server.use(
+        http.post("http://localhost:3000/assets", ({ request }) => {
+          receivedContentType = request.headers.get("content-type");
+          return HttpResponse.json({ assetId: "a1" }, { status: 201 });
+        }),
+      );
+
+      const boundary = "----trustai-test-boundary";
+      const multipartBody = [
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="file"; filename="doc.pdf"',
+        "Content-Type: application/pdf",
+        "",
+        "%PDF-1.4",
+        `--${boundary}--`,
+        "",
+      ].join("\r\n");
+      const request = new NextRequest("http://localhost:3001/api/backend/assets", {
+        method: "POST",
+        headers: {
+          "content-type": `multipart/form-data; boundary=${boundary}`,
+          origin: SAME_ORIGIN,
+        },
+        body: multipartBody,
+      });
+      const response = await POST(request, context(["assets"]));
+
+      expect(response.status).toBe(201);
+      expect(receivedContentType).toMatch(/^multipart\/form-data; boundary=/);
+    });
+
+    it("does not require an Origin on GET (cross-origin reads are not CSRF)", async () => {
+      server.use(
+        http.get("http://localhost:3000/trust-records/9", () => HttpResponse.json({ id: "9" })),
+      );
+
+      const request = new NextRequest("http://localhost:3001/api/backend/trust-records/9", {
+        headers: { origin: "https://evil.example.com" },
+      });
+      const response = await GET(request, context(["trust-records", "9"]));
+
+      expect(response.status).toBe(200);
+    });
   });
 });

@@ -20,6 +20,7 @@ describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..18 + GET /auth/me)", () => {
   let prisma: PrismaService;
   const sentEmails = new Map<string, string>();
   const sentResetTokens = new Map<string, string>();
+  const accountExistsNotices: string[] = [];
 
   function uniqueEmail(label: string): string {
     return `${label}-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
@@ -36,6 +37,9 @@ describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..18 + GET /auth/me)", () => {
         }),
         sendPasswordResetEmail: vi.fn(async (email: string, rawToken: string) => {
           sentResetTokens.set(email, rawToken);
+        }),
+        sendAccountExistsNotice: vi.fn(async (email: string) => {
+          accountExistsNotices.push(email);
         }),
       })
       .compile();
@@ -62,24 +66,26 @@ describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..18 + GET /auth/me)", () => {
       .send({ email, password: "password123" });
 
     expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty("userId");
-    expect(response.body).toHaveProperty("organizationId");
+    expect(response.body).toEqual({ ok: true });
     expect(response.body).not.toHaveProperty("password");
     expect(response.body).not.toHaveProperty("passwordHash");
     expect(sentEmails.has(email)).toBe(true);
   });
 
-  it("S-AUTH-2: duplicate email is rejected with 409", async () => {
+  it("S-AUTH-2: a duplicate email gets the same 201 as a new one (no enumeration) and creates nothing", async () => {
     const email = uniqueEmail("duplicate");
-    await request(app.getHttpServer())
+    const first = await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password: "password123" });
 
     const response = await request(app.getHttpServer())
       .post("/auth/register")
-      .send({ email, password: "password123" });
+      .send({ email, password: "otherpass456" });
 
-    expect(response.status).toBe(409);
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual(first.body);
+    expect(await prisma.user.count({ where: { email } })).toBe(1);
+    expect(accountExistsNotices).toContain(email);
   });
 
   it("S-AUTH-3: malformed email is rejected with 400", async () => {
@@ -138,7 +144,7 @@ describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..18 + GET /auth/me)", () => {
 
   it("S-AUTH-8: successful login returns a JWT containing organizationId", async () => {
     const email = uniqueEmail("login-ok");
-    const registerResponse = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post("/auth/register")
       .send({ email, password: "password123" });
 
@@ -155,7 +161,9 @@ describe.skipIf(!dbAvailable)("Auth E2E (S-AUTH-1..18 + GET /auth/me)", () => {
 
     const [, payloadB64] = response.body.accessToken.split(".");
     const payload = JSON.parse(Buffer.from(payloadB64, "base64").toString("utf8"));
-    expect(payload.organizationId).toBe(registerResponse.body.organizationId);
+    // The register body is neutral (no ids, no enumeration): read the org from the DB.
+    const user = await prisma.user.findUnique({ where: { email } });
+    expect(payload.organizationId).toBe(user?.organizationId);
   });
 
   it("S-AUTH-9: wrong password returns 401", async () => {
