@@ -391,7 +391,7 @@ intentó refutar cada candidato.
 
 | Hallazgo | Estado | Siguiente paso |
 |---|---|---|
-| `enrichmentHash` sin sal: el nombre de archivo se puede adivinar sin conexión con el archivo y la prueba | confirmado, baja | Esquema `dtr-3` con sal (ver `14-Roadmap.md`, sección 5) |
+| `enrichmentHash` sin sal: quien tenga el archivo y la prueba puede adivinar el nombre de archivo por fuerza bruta en su equipo, sin consultar a Ancrux | confirmado, baja | Esquema `dtr-3` con sal (ver `14-Roadmap.md`, sección 5) |
 | Tokens de verificación y restablecimiento escritos en los logs por el notificador provisional | a validar | Confirmar quién tiene acceso a los logs de Railway; sustituir el notificador por un servicio real o dejar de registrar los tokens |
 | Extracción de PDF y llamada a la IA sin límites de páginas, caracteres ni tiempo | a validar | Prueba local con un PDF de alta compresión; limitar páginas y texto y fijar `max_completion_tokens` |
 | Origen de la IP del cliente para los límites por IP | a validar | Confirmar el comportamiento de `X-Forwarded-For` en Vercel y la dirección que Railway entrega a la API |
