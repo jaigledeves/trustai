@@ -372,3 +372,26 @@ CORS y Cabeceras de seguridad).
   `packages/dtr-core/src/proof-package.ts`,
   [packages/verify-cli](../packages/verify-cli/README.md)). Qué demuestra
   esa verificación y qué no: [15-Posicionamiento.md](15-Posicionamiento.md).
+
+## 12. Hallazgos de la revisión de seguridad (2026-10-04)
+
+Revisión de código enfocada en las fases A a D, sin pruebas contra
+producción: tres revisores por área y un verificador independiente que
+intentó refutar cada candidato.
+
+### Corregidos (PR #51)
+
+| Hallazgo | Severidad | Corrección |
+|---|---|---|
+| CSRF en el login del web: un formulario de otro sitio podía iniciar sesión en la cuenta del atacante | media | Login, logout y las escrituras del proxy exigen el mismo origen; el login exige `application/json` (`apps/web/lib/security/same-origin.ts`) |
+| Una transacción de anclaje revertida quedaba como certificada | baja | Se revisa el estado del recibo; si revirtió, se consulta la cadena antes de certificar y, si el hash no está anclado, el registro pasa a `FAILED` sin reintento automático (`apps/api/src/application/certification/jobs/confirm-anchor.handler.ts`) |
+| El registro revelaba si un email ya existía | baja | Misma respuesta 201 en ambos casos, aviso al titular y límite por cuenta (`apps/api/src/application/auth/register.use-case.ts`) |
+
+### Abiertos
+
+| Hallazgo | Estado | Siguiente paso |
+|---|---|---|
+| `enrichmentHash` sin sal: el nombre de archivo se puede adivinar sin conexión con el archivo y la prueba | confirmado, baja | Esquema `dtr-3` con sal (ver `14-Roadmap.md`, sección 5) |
+| Tokens de verificación y restablecimiento escritos en los logs por el notificador provisional | a validar | Confirmar quién tiene acceso a los logs de Railway; sustituir el notificador por un servicio real o dejar de registrar los tokens |
+| Extracción de PDF y llamada a la IA sin límites de páginas, caracteres ni tiempo | a validar | Prueba local con un PDF de alta compresión; limitar páginas y texto y fijar `max_completion_tokens` |
+| Origen de la IP del cliente para los límites por IP | a validar | Confirmar el comportamiento de `X-Forwarded-For` en Vercel y la dirección que Railway entrega a la API |
