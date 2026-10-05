@@ -12,7 +12,7 @@ export const glossaryDictionary = {
   blockchain: {
     title: "¿Qué es una blockchain?",
     definition:
-      "Un registro público y compartido donde la información, una vez escrita, no se puede alterar ni borrar. Nadie es su dueño, así que cualquiera puede consultarlo.",
+      "Un registro público y compartido por muchos equipos: lo que se escribe en él queda a la vista de todos y cualquier intento posterior de alterarlo es detectable. Nadie es su dueño, así que cualquiera puede consultarlo.",
   },
   huella: {
     title: "¿Qué es la huella?",
@@ -22,7 +22,7 @@ export const glossaryDictionary = {
   anclar: {
     title: "¿Qué significa anclar?",
     definition:
-      "Se guarda la huella digital de tu documento en la blockchain, junto con la fecha. Así cualquiera puede comprobar más tarde que el documento no fue modificado. El contenido del documento no se guarda en la blockchain.",
+      "Se guarda la huella digital de tu documento en la blockchain, en un bloque con fecha. Así cualquiera puede comprobar más tarde que el documento no fue modificado y que existía, como muy tarde, en esa fecha. El contenido del documento no se guarda en la blockchain.",
   },
   redDePrueba: {
     title: "¿Qué es una red de prueba?",

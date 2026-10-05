@@ -78,9 +78,9 @@ sin confiar en el DTR que entrega Ancrux.
 
 | # | Mejora | Estado |
 |---|---|---|
-| D1 | Revisar el copy de la landing: sustituir "imposible de falsificar", "permanente" y "para siempre" por "cualquier modificación posterior es criptográficamente detectable"; distinguir timestamp de bloque de hora certificada | pendiente |
-| D2 | Documento de posicionamiento: qué demuestra y qué no demuestra un DTR; comparación con RFC 3161, PKI/FEA, OpenTimestamps, Blockcerts/VC, C2PA y eIDAS 2.0 | pendiente |
-| D3 | Ampliar `13-Security.md` con gestión de claves, seguridad de upload y aislamiento entre organizaciones (controles ya implementados) | pendiente |
+| D1 | Revisar el copy de la landing: sustituir "imposible de falsificar", "permanente" y "para siempre" por "cualquier modificación posterior es criptográficamente detectable"; distinguir timestamp de bloque de hora certificada | hecho |
+| D2 | Documento de posicionamiento: qué demuestra y qué no demuestra un DTR; comparación con RFC 3161, PKI/FEA, OpenTimestamps, Blockcerts/VC, C2PA y eIDAS 2.0 | hecho: [15-Posicionamiento.md](15-Posicionamiento.md) |
+| D3 | Ampliar `13-Security.md` con gestión de claves, seguridad de upload y aislamiento entre organizaciones (controles ya implementados) | hecho: §7-§11 de [13-Security.md](13-Security.md) |
 
 ## 5. Siguiente etapa (documentado, no planificado)
 

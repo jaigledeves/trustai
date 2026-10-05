@@ -17,7 +17,7 @@ export const verifyDictionary = {
     title: "Verificación pública de documento",
     badge: "Verificación pública · Cualquiera puede comprobarlo",
     subtitle:
-      "Nadie tiene que confiar. Se comprueba. Este es el resultado registrado en la blockchain para este documento — y abajo puedes comprobar tu propia copia.",
+      "Se comprueba, no se supone. Este es el estado del anclaje de este documento en la blockchain según Ancrux — abajo puedes comprobar tu propia copia y, si el registro es reciente, verificarla sin depender de Ancrux.",
     disabled: {
       message: "La verificación pública no está habilitada en este momento.",
       homeLinkLabel: "Volver al inicio",
@@ -51,7 +51,7 @@ export const verifyDictionary = {
     // Default"). The full legal text below moves behind a `<details>`
     // disclosure triggered by `disclaimerFullLabel`.
     disclaimerSummary:
-      "Esto comprueba que el documento no fue alterado y desde cuándo existe. No es una firma electrónica con validez legal por sí sola.",
+      "Esto comprueba que el documento no fue alterado y que existía, como muy tarde, en la fecha del bloque en que se ancló. No es una firma electrónica con validez legal por sí sola.",
     disclaimerFullLabel: "Ver nota legal completa",
     // PENDING legal sign-off before mainnet/production — see ADR-009
     disclaimer:
@@ -106,7 +106,7 @@ export const verifyDictionary = {
     hashLabel: "Huella del archivo subido",
     caveatLabel: "¿Qué comprueba este cálculo?",
     caveat:
-      "Esto demuestra el cálculo independiente de la huella del archivo en tu navegador — no reconstruye ni verifica la huella canónica anclada en la blockchain. Para una verificación completa y reproducible, consulta la documentación de dtr-core.",
+      "Esto demuestra el cálculo independiente de la huella del archivo en tu navegador — no reconstruye ni verifica la huella canónica anclada en la blockchain. Si el registro es reciente (dtr-2), la verificación independiente de esta página sí comprueba el anclaje, y también puedes usar la herramienta de línea de comandos ancrux-verify.",
     error:
       "No pudimos calcular la huella en tu navegador. Es posible que el cálculo criptográfico no esté disponible en este contexto (por ejemplo, fuera de una conexión segura).",
   },

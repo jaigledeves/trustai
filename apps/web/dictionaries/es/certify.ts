@@ -64,7 +64,7 @@ export const certifyDictionary = {
     frozenHashLabel: "Huella del registro",
     frozenHashDisclosureLabel: "¿Qué es esta huella?",
     frozenHashDisclosure:
-      "Es el hash SHA-256 de la serialización canónica (RFC 8785) del Registro Digital de Confianza. Queda anclado en la blockchain y sirve como evidencia irrefutable de que el contenido no fue alterado.",
+      "Es el hash SHA-256, con serialización canónica (RFC 8785), que combina las huellas del contenido y del análisis de tu Registro Digital de Confianza. Queda anclado en la blockchain y permite detectar criptográficamente cualquier modificación posterior del contenido.",
     errorGeneric:
       "Todavía no se puede certificar: falta completar el análisis o el estado no lo permite.",
   },

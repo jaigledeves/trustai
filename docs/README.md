@@ -6,7 +6,7 @@ actualízalo en cada pasada de documentación en vez de duplicar contenido.
 
 ## Cómo está organizada
 
-La documentación numerada (`00`–`12`) es el TDD modular del proyecto — ver
+La documentación numerada (`00`–`15`) es el TDD modular del proyecto — ver
 [TDD-Index.md](TDD-Index.md) para el mapeo completo a las 23 secciones
 previstas del TDD maestro.
 
@@ -27,8 +27,9 @@ previstas del TDD maestro.
 | 10 | [AI Architecture](10-AI-Architecture.md) | Arquitectura de la capa IA |
 | 11 | [MVP Definition](11-MVP-Definition.md) | Alcance del MVP + estado real de implementación |
 | 12 | [Deployment](12-Deployment.md) | Runbook de despliegue (Vercel + Railway + R2) |
-| 13 | [Security](13-Security.md) | Autenticación y modelo de sesión |
+| 13 | [Security](13-Security.md) | Autenticación, sesión, claves, subida, aislamiento entre organizaciones e integridad |
 | 14 | [Roadmap](14-Roadmap.md) | Backlog post-TFM priorizado a partir del feedback recibido |
+| 15 | [Posicionamiento](15-Posicionamiento.md) | Qué demuestra y qué no un DTR; comparación con RFC 3161, eIDAS, OpenTimestamps, VC y C2PA |
 
 ## API y diagramas
 

@@ -33,7 +33,7 @@ export const landingDictionary = {
   hero: {
     eyebrow:
       "Hoy, probar que un documento no fue alterado depende de que crean en tu palabra.",
-    badge: "Protección permanente y verificable por cualquiera · Gratis durante el piloto",
+    badge: "Integridad verificable por cualquiera · Gratis durante el piloto",
     title: "Nadie tiene que creerte. Pueden comprobarlo.",
     subtitle:
       "Ancrux certifica tus documentos para que cualquiera confirme, por su cuenta, que no fueron alterados. Sin depender de tu palabra ni de la nuestra.",
@@ -60,7 +60,7 @@ export const landingDictionary = {
   },
   how: {
     title: "Del archivo a la evidencia, en cuatro pasos",
-    subtitle: "Simple para ti. Imposible de falsificar para cualquiera.",
+    subtitle: "Simple para ti. Cualquier modificación posterior, detectable por cualquiera.",
     steps: [
       {
         title: "Subes tu documento",
@@ -80,7 +80,7 @@ export const landingDictionary = {
       {
         title: "Se ancla en blockchain",
         description:
-          "Esa huella queda guardada para siempre y ya nadie puede modificarla, en una blockchain pública.",
+          "Esa huella queda anclada en un bloque con fecha de una blockchain pública. Cualquier modificación posterior del documento es detectable criptográficamente.",
       },
     ],
     technicalDetailLabel: "Ver el detalle técnico",
@@ -102,15 +102,15 @@ export const landingDictionary = {
         },
         {
           term: "Hash SHA-256",
-          desc: "se calcula sobre esa serialización canónica. Ese es el hash del DTR.",
+          desc: "se calcula sobre esa serialización canónica: uno para el núcleo (los datos del documento) y otro para el enriquecimiento (análisis y procedencia), que se combinan en el hash que se ancla.",
         },
         {
           term: "Anclaje on-chain",
-          desc: "ese hash se escribe como bytes32 en el contrato AnchorRegistry (permissionless, inmutable, sin owner) en Base Sepolia, que registra su timestamp de bloque.",
+          desc: "ese hash se escribe como bytes32 en el contrato AnchorRegistry (permissionless, inmutable, sin owner) en Base Sepolia. El timestamp del bloque prueba que el registro existía, como muy tarde, en esa fecha; no es un sello de tiempo cualificado.",
         },
         {
           term: "Verificable de forma independiente",
-          desc: "dtr-core es una librería abierta (MIT), sin framework. Cualquiera puede recalcular el hash canónico y consultar su anclaje en cualquier nodo RPC, sin confiar en nosotros.",
+          desc: "dtr-core es una librería abierta (MIT), sin framework. En un registro reciente (dtr-2), cualquiera puede recalcular los hashes en su navegador o con la herramienta de línea de comandos ancrux-verify y consultar el anclaje directamente en el contrato, sin confiar en nosotros.",
         },
       ],
       contractLinkLabel: "Ver contrato en Basescan",
@@ -121,13 +121,13 @@ export const landingDictionary = {
     badge: "No hace falta confiar. Se comprueba.",
     title: "Cualquiera puede comprobarlo en segundos.",
     description:
-      "Compartes un enlace. Quien lo recibe sube el archivo y Ancrux responde con un veredicto claro sobre su integridad y su anclaje en la blockchain.",
+      "Compartes un enlace. Quien lo recibe sube el archivo y Ancrux responde con un veredicto claro sobre su integridad y su anclaje en la blockchain. En los registros recientes, también puede comprobarlo por su cuenta, sin depender de Ancrux.",
     verdictGroupLabel: "Selecciona un veredicto de ejemplo",
     recompute: {
       statement:
         "Además, tu propio navegador recalcula la huella (SHA-256) del archivo de forma independiente del servidor.",
       caveat:
-        "Esto demuestra el cálculo independiente de la huella del archivo — no reconstruye ni verifica la huella canónica anclada en la blockchain.",
+        "Esto demuestra el cálculo independiente de la huella del archivo — no reconstruye ni verifica la huella canónica anclada en la blockchain. En los registros recientes, la verificación independiente sí comprueba ese anclaje.",
     },
   },
   useCases: {
@@ -153,12 +153,12 @@ export const landingDictionary = {
       {
         title: "Obra creativa y documentación",
         description:
-          "Deja constancia con fecha de que un archivo existía tal cual en el momento de registrarlo.",
+          "Deja constancia de que un archivo existía tal cual, como muy tarde, en la fecha del bloque en que se ancló.",
       },
       {
         title: "Evidencia legal y auditorías",
         description:
-          "Sella informes y pruebas para demostrar que no fueron manipulados después.",
+          "Ancla la huella de informes y pruebas para que cualquier manipulación posterior sea detectable.",
       },
       {
         title: "Informes y entregables",
@@ -173,12 +173,12 @@ export const landingDictionary = {
       {
         title: "Verificación independiente",
         description:
-          "El veredicto se apoya en una huella anclada en una blockchain pública y en un estándar abierto que cualquiera puede revisar. No tienes que confiar en Ancrux: puedes comprobarlo por tu cuenta.",
+          "El veredicto se apoya en una huella anclada en una blockchain pública y en un estándar abierto que cualquiera puede revisar. En los registros recientes no tienes que confiar en Ancrux: tu navegador recalcula las huellas y consulta el contrato directamente, y también hay una herramienta de línea de comandos.",
       },
       {
-        title: "Imposible de falsificar",
+        title: "Cualquier cambio es detectable",
         description:
-          "Si cambia una sola letra, su huella cambia y la verificación falla al instante. No hay forma de falsificarlo.",
+          "Si cambia una sola letra, su huella cambia y la verificación falla al instante. Cualquier modificación posterior es detectable criptográficamente.",
       },
       {
         title: "Inteligencia real",
@@ -209,7 +209,7 @@ export const landingDictionary = {
       {
         question: "¿Tiene validez legal?",
         answer:
-          "Ancrux aporta evidencia técnica de integridad y de la fecha de registro. Su peso legal depende de la jurisdicción y del caso; es un respaldo, no un reemplazo del asesoramiento legal.",
+          "Ancrux aporta evidencia técnica de integridad y de que el documento existía, como muy tarde, en la fecha del bloque en que se ancló. No es una firma electrónica ni un sello de tiempo cualificados según eIDAS. Su peso legal depende de la jurisdicción y del caso; es un respaldo, no un reemplazo del asesoramiento legal.",
       },
       {
         question: "¿Por qué usan Base Sepolia?",

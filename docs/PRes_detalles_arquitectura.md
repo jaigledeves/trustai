@@ -20,8 +20,9 @@
 > sin necesidad de confiar en Ancrux.**
 
 La frase clave —y el alma técnica del proyecto— es *sin necesidad de confiar en
-Ancrux*: cualquier tercero puede recalcular el hash del documento y comprobarlo
-contra la blockchain por su cuenta. La plataforma no es el árbitro de la verdad;
+Ancrux*: en los registros recientes (`dtr-2`), cualquier tercero con el archivo y
+el paquete de prueba público puede recalcular los hashes y comprobarlos contra
+la blockchain por su cuenta. La plataforma no es el árbitro de la verdad;
 la matemática y la cadena lo son.
 
 ---
@@ -70,6 +71,16 @@ re-analizar genera una **nueva versión**. Esto no es un defecto: es trazabilida
 si cambiara la forma de serializar, se rompería la verificación de DTRs
 históricos.
 
+> **Evolución (ADR-015, supersede a ADR-001):** en `dtr-1` el hash anclado
+> incluía la salida de la IA, así que un tercero necesitaba el texto exacto del
+> análisis para comprobarlo. Los registros nuevos son **`dtr-2`**: separan un
+> **núcleo** derivable del archivo (`coreHash`) y un **enriquecimiento** con el
+> análisis IA (`enrichmentHash`), y anclan en una sola transacción el sobre
+> `anchorHash = sha256(JCS({schemaVersion, issuedAt, coreHash, enrichmentHash}))`.
+> El análisis sigue protegido, pero verificar el anclaje ya no exige conocerlo.
+> Los `dtr-1` existentes se siguen verificando con su hash original, en el
+> servidor.
+
 ---
 
 ## 3. El corazón verificable — `dtr-core`
@@ -80,6 +91,8 @@ paquete TypeScript **puro** (sin framework) que implementa:
 - **Canonicalización** determinista (RFC 8785 / JSON Canonicalization Scheme).
 - **Hashing** SHA-256.
 - **Verificación** de integridad.
+- **Paquete de prueba** público `ancrux-proof-1` (ADR-016) y el orquestador de
+  verificación independiente que comparten el navegador y el CLI `ancrux-verify`.
 
 ¿Por qué importa tanto? Porque la **misma lógica** corre en tres lugares:
 - en el **navegador** (la página pública recalcula el hash en el cliente),
@@ -87,8 +100,8 @@ paquete TypeScript **puro** (sin framework) que implementa:
 - y como **librería open source** para que cualquiera verifique fuera de la
   plataforma.
 
-Al ser una única implementación compartida, **es imposible que diverjan**. La
-reproducibilidad —"verificá sin confiar en nosotros"— deja de ser una promesa y
+Al ser una única implementación compartida, **no hay dos copias que puedan
+divergir**. La reproducibilidad —"verifica sin confiar en nosotros"— deja de ser una promesa y
 pasa a ser código ejecutable. Por eso lleva la cobertura de tests más exigente
 del proyecto.
 
@@ -193,8 +206,9 @@ ADR-002 fijó Next.js; ADR-005 baja al detalle:
   sensible).
 
 Beneficio que cierra el círculo con ADR-001: la página pública **recomputa el
-hash con `dtr-core` en el navegador** → la reproducibilidad sin confiar en
-Ancrux se demuestra en vivo, en el cliente.
+hash con `dtr-core` en el navegador** y, en registros `dtr-2`, lee el contrato
+con un RPC público → la reproducibilidad sin confiar en Ancrux se demuestra en
+vivo, en el cliente.
 
 ---
 
@@ -278,8 +292,10 @@ criterio de aceptación del MVP:
 3. **Un tercero, sin cuenta**, abre el enlace público / escanea el QR y obtiene
    veredicto **Válido**, con enlace a la transacción on-chain.
 4. El mismo PDF con **un byte cambiado** → veredicto **No corresponde / alterado**.
-5. La verificación es **reproducible sin Ancrux**: `dtr-core` permite comprobar
-   el hash contra el contrato directamente.
+5. La verificación es **reproducible sin Ancrux**: en un registro `dtr-2`, la
+   verificación independiente (en el navegador o con el CLI `ancrux-verify`)
+   recalcula `coreHash` y `anchorHash` con el paquete de prueba y lee el
+   contrato directamente.
 
 Los pasos 3–5 son el momento fuerte: certificar en vivo, verificar en vivo,
 romper un documento en vivo.
@@ -308,16 +324,18 @@ el alcance está bien trazado.
 ## 13. Cómo lo presento a cualquier persona interesada
 
 **A alguien no técnico (30 segundos):**
-> "¿Sabés cómo un sello notarial certifica que un documento existía en una fecha?
-> Ancrux hace eso, pero automático y verificable por cualquiera: la inteligencia
-> artificial lee y resume el documento, y la blockchain le pone un sello
-> inmutable. Lo bueno es que no tenés que confiar en nosotros: cualquiera puede
-> comprobar por su cuenta que el documento es auténtico, escaneando un código QR."
+> "¿Sabes cómo un sello notarial certifica que un documento existía en una fecha?
+> Ancrux hace algo parecido, automático y verificable por cualquiera: la
+> inteligencia artificial lee y resume el documento, y la blockchain deja
+> constancia de su huella con la fecha del bloque. Lo bueno es que no tienes que
+> confiar en nosotros: cualquiera puede comprobar por su cuenta que el documento
+> está íntegro, escaneando un código QR."
 
 **A alguien técnico (2 minutos):**
 > "Es una plataforma full-TypeScript, hexagonal. El núcleo es un paquete puro,
-> `dtr-core`, que canonicaliza un _Digital Trust Record_ (documento + análisis de
-> IA) con RFC 8785 y lo hashea con SHA-256. Ese hash se ancla en un contrato
+> `dtr-core`, que canonicaliza un _Digital Trust Record_ `dtr-2` con RFC 8785:
+> un núcleo derivable del archivo y un enriquecimiento con el análisis de IA,
+> cada uno con su SHA-256, combinados en un `anchorHash`. Ese hash se ancla en un contrato
 > mínimo en Base Sepolia (L2), que también soporta Merkle roots para batching
 > futuro sin cambiar el contrato. La IA y la blockchain están detrás de puertos,
 > así que son intercambiables. El worker de anclaje corre sobre pg-boss (cola en
@@ -360,10 +378,11 @@ el volumen lo pida (umbral documentado: >10.000 jobs/día), el worker se separa
 **sin reescribir el dominio**.
 
 **¿Qué pasa si Ancrux desaparece mañana?**
-La evidencia **sobrevive**. El hash está en Base (pública), el algoritmo de
-verificación es `dtr-core` (corre en el navegador y puede publicarse open
-source), y el usuario conserva su documento y su DTR (JSON). Cualquiera verifica
-sin la plataforma. Ese es, literalmente, el criterio de diseño de ADR-001.
+El anclaje sigue en Base (pública) y el algoritmo de verificación es `dtr-core`
+(corre en el navegador y en el CLI `ancrux-verify`). Con su documento y el
+paquete de prueba `ancrux-proof-1` descargado, cualquiera verifica un registro
+`dtr-2` sin la plataforma (ADR-015 y ADR-016). Los registros `dtr-1` heredados
+solo los verifica el servidor de Ancrux.
 
 **¿La IA no es solo un "chatbot pegado"? ¿Y encima corre un stub?**
 La IA no es el envoltorio: su salida (resumen, clasificación) **se congela dentro
@@ -403,7 +422,7 @@ servicio Python detrás de un puerto.
 **El LLM no es determinista. ¿No rompe eso la reproducibilidad?**
 No, porque lo que se verifica **no** es "volver a generar el mismo análisis", sino
 que **el análisis que se hizo no ha cambiado**. La salida de la IA se congela en
-el DTR y se hashea junto al resto. Re-ejecutar con otro modelo produce otro
+el DTR y se hashea en `enrichmentHash`, que forma parte del `anchorHash` anclado. Re-ejecutar con otro modelo produce otro
 DTR/versión — eso es **trazabilidad, no un fallo**. La reproducibilidad aplica a
 la verificación del hash, que sí es 100% determinista.
 
@@ -433,11 +452,17 @@ proofs.
 
 | ADR | Decisión | Sección |
 |---|---|---|
-| [ADR-001](adr/ADR-001-anclaje-hash-dtr-canonico.md) | Anclar el hash del DTR canónico (activo + IA en una tx) | §2 |
+| [ADR-001](adr/ADR-001-anclaje-hash-dtr-canonico.md) | Anclar el hash del DTR canónico (activo + IA en una tx). Supersedida por ADR-015 | §2 |
 | [ADR-002](adr/ADR-002-stack-full-typescript.md) | Stack full TypeScript (Next.js + NestJS + Prisma) | §4 |
 | [ADR-003](adr/ADR-003-contrato-minimo-anchor-registry.md) | Contrato mínimo `AnchorRegistry` en L2 | §5 |
 | [ADR-004](adr/ADR-004-doble-adaptador-ia.md) | IA detrás de un puerto (OpenAI + Mistral; stub en MVP) | §6 |
 | [ADR-005](adr/ADR-005-frontend-app-router-tailwind-tanstack.md) | Frontend: App Router + Tailwind/shadcn + TanStack + cookie httpOnly | §7 |
 | [ADR-006](adr/ADR-006-stack-de-despliegue-mvp.md) | Despliegue: Vercel + Railway + R2 | §9 |
+| [ADR-015](adr/ADR-015-dtr-2-nucleo-y-enriquecimiento-separados.md) | `dtr-2`: núcleo y enriquecimiento separados, un solo `anchorHash` | §2 |
+| [ADR-016](adr/ADR-016-paquete-de-prueba-publico.md) | Paquete de prueba público `ancrux-proof-1` | §3, §11 |
+
+> Hay 16 ADRs en total; ADR-007 a ADR-014 cubren decisiones de implementación
+> (repositorios, DTOs, copy, theming, rate limiting, componentes de la web) y
+> están en [`docs/adr/`](adr/).
 
 > Documentación completa: [`docs/TDD-Index.md`](TDD-Index.md).
