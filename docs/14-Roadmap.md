@@ -96,6 +96,8 @@ completar la visión; no se implementarán sin esa necesidad.
 | Producto | Linaje de versiones (`parent` / `supersedes`); identidad del emisor (firma del DTR, DID o X.509) |
 | Escala | Merkle batching (mencionado en ADR-003, sin implementar); migración a Base Mainnet con política de longevidad |
 | Madurez | CodeQL, Dependabot, secret scanning y SBOM en CI; `security.txt` (RFC 9116); verificación del código fuente del contrato en Basescan |
+| Seguridad (revisión 2026-10-04) | Esquema `dtr-3` con sal aleatoria en el enriquecimiento: hoy `enrichmentHash` no lleva sal y quien tiene el archivo y la prueba puede adivinar el nombre de archivo por fuerza bruta en su equipo, sin consultar a Ancrux; requiere nuevo ADR y nuevo formato de prueba |
+| Seguridad (revisión 2026-10-04) | Validar fuera del código: (1) el notificador provisional escribe en los logs los tokens de verificación y de restablecimiento, así que quien lea los logs de la API podría tomar cuentas; (2) la extracción de texto del PDF y la llamada a la IA no limitan páginas, caracteres ni tiempo, y el worker corre en el mismo proceso que la API; (3) el límite por IP depende de que Vercel sobrescriba `X-Forwarded-For` y de la dirección que Railway entrega a la API |
 
 ## 6. Descartado
 
